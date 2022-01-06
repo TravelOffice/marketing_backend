@@ -1,0 +1,11 @@
+version: 0.2
+phases:
+  pre_build:
+    commands:
+      - chmod +x ./scripts/execute_terraform.sh
+      - ./scripts/execute_terraform.sh $BUILD_ENV init -backend-config "bucket=$TF_VAR_TF_BUCKET"
+      - ./scripts/execute_terraform.sh $BUILD_ENV validate
+  
+  build:
+    commands:
+      - ./scripts/execute_terraform.sh $BUILD_ENV plan -var-file="s3://root-infra-output/dev/root_infra_output.tfvars"
