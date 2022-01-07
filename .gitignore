@@ -7,5 +7,14 @@
 
 # lock file
 *.lock*
-environments/dev/main.tf
-environments/dev/output.tf
+environments/**/main.tf
+environments/**/output.tf
+
+# build file
+**/deploy/*
+**/builds/*
+
+**/base_infra_output*
+
+# node mddule
+**/node_modules/*

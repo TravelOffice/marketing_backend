@@ -1,5 +1,14 @@
 version: 0.2
 phases:
+  install:
+    commands:
+      # install terraform binary
+      - curl -s -qL -o terraform_install.zip https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip
+      - unzip terraform_install.zip -d /usr/bin/
+      - chmod +x /usr/bin/terraform
+    finally:
+      - terraform --version
+
   pre_build:
     commands:
       - chmod +x ./scripts/execute_terraform.sh
@@ -8,5 +17,4 @@ phases:
   
   build:
     commands:
-      - ls -la
-      - ./scripts/execute_terraform.sh $BUILD_ENV plan -var-file="root_infra_output.tfvars"
+      - ./scripts/execute_terraform.sh $BUILD_ENV plan -var-file="base_infra_output.tfvars"

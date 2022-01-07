@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 if [ "$#" -lt 2 ]; then
   echo "Usage: $0 ENVIRONMENTNAME[ 'dev' | 'prod' ] [TERRA_FORM_COMMAND]" >&2
   exit 1
@@ -14,11 +14,11 @@ if [ "${ENV}" != "dev" ] && [ "${ENV}" != "prod" ]; then
   exit 1
 fi
 
-if ! command -v terraform &> /dev/null
-then
-  echo "terraform command could not be found. Please activate it!"
-  exit
-fi
+# if ! command -v terraform &> /dev/null
+# then
+#   echo "terraform command could not be found. Please activate it!"
+#   exit
+# fi
 
 cd ./environments/${ENV}
 ln -sf ../../main.tf .

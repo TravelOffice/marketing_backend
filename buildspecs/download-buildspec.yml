@@ -3,7 +3,7 @@ phases:
 
   build:
     commands:
-      - aws s3 sync s3://root-infra-output/$BUILD_ENV environments/$BUILD_ENV
+      - aws s3 sync s3://$TF_BUCKET/output-vars/$BUILD_ENV environments/$BUILD_ENV
 
 artifacts:
   files:
