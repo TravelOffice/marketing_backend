@@ -19,13 +19,6 @@ resource "aws_security_group" "lambda_sg" {
   }
 }
 
-data "archive_file" "lambda_zip" {
-  for_each = var.LAMBDA_LAYERS
-  type        = "zip"
-  source_dir  = format("%s/../../../%s", path.module, each.value.path)
-  output_path = format("%s/../../../%s", path.module, "deploy/${each.key}_layer.zip")
-}
-
 module "lambda_function" {
   for_each = var.LAMBDA_FUNCTIONS
   source = "terraform-aws-modules/lambda/aws"

@@ -3,6 +3,9 @@ variable lambda_arns {}
 variable API_ENDPOINTS {}
 variable AWS_REGION {}
 variable FEATURE_NAME {}
+variable DOMAIN_NAME {}
+variable HOSTED_ZONE_ID {}
+variable DOMAIN_CERTIFICATE_ARN {}
 
 # Get current aws account information
 data "aws_caller_identity" "current" {}
@@ -62,4 +65,33 @@ resource "aws_api_gateway_stage" "api_gateway_stage" {
   deployment_id = aws_api_gateway_deployment.deployment.id
   rest_api_id   = aws_api_gateway_rest_api.rest_api.id
   stage_name    = var.ENV
+}
+
+resource "aws_api_gateway_domain_name" "domain_name" {
+  domain_name              = lower("${var.ENV}-${var.FEATURE_NAME}.${var.DOMAIN_NAME}")
+  regional_certificate_arn = var.DOMAIN_CERTIFICATE_ARN
+
+  endpoint_configuration {
+    types = ["REGIONAL"]
+  }
+}
+
+# DNS record using Route53.
+# Route53 is not specifically required; any DNS host can be used.
+resource "aws_route53_record" "route53_record" {
+  name    = aws_api_gateway_domain_name.domain_name.domain_name
+  type    = "A"
+  zone_id = var.HOSTED_ZONE_ID
+
+  alias {
+    evaluate_target_health = true
+    name                   = aws_api_gateway_domain_name.domain_name.regional_domain_name
+    zone_id                = aws_api_gateway_domain_name.domain_name.regional_zone_id
+  }
+}
+
+resource "aws_api_gateway_base_path_mapping" "path_mapping" {
+  api_id      = aws_api_gateway_rest_api.rest_api.id
+  stage_name  = aws_api_gateway_stage.api_gateway_stage.stage_name
+  domain_name = aws_api_gateway_domain_name.domain_name.domain_name
 }

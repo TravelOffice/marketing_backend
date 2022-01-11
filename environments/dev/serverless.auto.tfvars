@@ -15,22 +15,6 @@ LAMBDA_FUNCTIONS = {
   "lambda_hello2" = {
     path = "src/modules/hello-world"
     layers = ["common", "common_test"]
-  },
-  "lambda_hello3" = {
-    path = "src/modules/hello-world"
-    layers = ["common", "common_test"]
-  },
-  "lambda_hello4" = {
-    path = "src/modules/hello-world"
-    layers = ["common", "common_test"]
-  },
-  "lambda_hello5" = {
-    path = "src/modules/hello-world"
-    layers = ["common", "common_test"]
-  },
-  "lambda_hello6" = {
-    path = "src/modules/hello-world"
-    layers = ["common", "common_test"]
   }
 }
 
