@@ -1,52 +1,65 @@
 variable ENV {}
 variable lambda_arns {}
 variable API_ENDPOINTS {}
+variable AWS_REGION {}
+variable FEATURE_NAME {}
 
-module "API_GATEWAY" {
-  source = "terraform-aws-modules/apigateway-v2/aws"
-  version = "~> 1.5.1"
+# Get current aws account information
+data "aws_caller_identity" "current" {}
 
-  name          = "${var.ENV}-http"
-  description   = "My awesome REST API Gateway"
-  protocol_type = "HTTP"
-
-  cors_configuration = {
-    allow_headers = ["*"]
-    allow_methods = ["*"]
-    allow_origins = ["*"]
-  }
-
-  # Custom domain
-  create_api_domain_name        = false  # to control creation of API Gateway Domain Name
-  # domain_name                 = "terraform-aws-modules.modules.tf"
-  # domain_name_certificate_arn = "arn:aws:acm:eu-west-1:052235179155:certificate/2b3a7ed9-05e1-4f9e-952b-27744ba06da6"
-
-  # Access logs
-  # default_stage_access_log_destination_arn = "arn:aws:logs:eu-west-1:835367859851:log-group:debug-apigateway"
-  # default_stage_access_log_format          = "$context.identity.sourceIp - - [$context.requestTime] \"$context.httpMethod $context.routeKey $context.protocol\" $context.status $context.responseLength $context.requestId $context.integrationErrorMessage"
-
-  # Routes and integrations
-  integrations = {
-    for key, value in var.API_ENDPOINTS : "${value.method} ${value.path}" => {
-        lambda_arn             = var.lambda_arns[value.lambda_name]
-        payload_format_version = "2.0"
-        timeout_milliseconds   = 12000
+resource "aws_api_gateway_rest_api" "rest_api" {
+  body = jsonencode({
+    openapi = "3.0.1"
+    info = {
+      title   = "${var.ENV}-${var.FEATURE_NAME}"
+      version = "1.0"
+    }
+    paths = {
+      for key, value in var.API_ENDPOINTS : key => {
+        lower(value.method) = {
+          x-amazon-apigateway-integration = {
+            httpMethod           = "POST"
+            payloadFormatVersion = "1.0"
+            type                 = "AWS_PROXY"
+            uri                  = "arn:aws:apigateway:${var.AWS_REGION}:lambda:path/2015-03-31/functions/${var.lambda_arns[value.lambda_name]}/invocations"
+          }
+        }
       }
-  }
-  # # Routes and integrations
-  # integrations = {
-  #   "POST /" = {
-  #     lambda_arn             = "arn:aws:lambda:eu-west-1:052235179155:function:my-function"
-  #     payload_format_version = "2.0"
-  #     timeout_milliseconds   = 12000
-  #   }
+    }
+  })
 
-  #   "$default" = {
-  #     lambda_arn = "arn:aws:lambda:eu-west-1:052235179155:function:my-default-function"
-  #   }
-  # }
+  name = lower("${var.ENV}-${var.FEATURE_NAME}")
 
-  tags = {
-    Name = "http-apigateway"
+  endpoint_configuration {
+    types = ["REGIONAL"]
   }
+}
+
+resource "aws_api_gateway_deployment" "deployment" {
+  rest_api_id = aws_api_gateway_rest_api.rest_api.id
+
+  triggers = {
+    redeployment = sha1(jsonencode(aws_api_gateway_rest_api.rest_api.body))
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_lambda_permission" "api_gatewway_invoke_lambda_permission" {
+  for_each = var.API_ENDPOINTS
+  statement_id  = "AllowExecutionFromAPIGateway"
+  action        = "lambda:InvokeFunction"
+  function_name = "${var.ENV}-${each.value.lambda_name}"
+  principal     = "apigateway.amazonaws.com"
+
+  # More: http://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-control-access-using-iam-policies-to-invoke-api.html
+  source_arn = "arn:aws:execute-api:${var.AWS_REGION}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.rest_api.id}/*/${each.value.method}${each.key}"
+}
+
+resource "aws_api_gateway_stage" "api_gateway_stage" {
+  deployment_id = aws_api_gateway_deployment.deployment.id
+  rest_api_id   = aws_api_gateway_rest_api.rest_api.id
+  stage_name    = var.ENV
 }

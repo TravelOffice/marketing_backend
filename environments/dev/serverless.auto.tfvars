@@ -15,17 +15,31 @@ LAMBDA_FUNCTIONS = {
   "lambda_hello2" = {
     path = "src/modules/hello-world"
     layers = ["common", "common_test"]
+  },
+  "lambda_hello3" = {
+    path = "src/modules/hello-world"
+    layers = ["common", "common_test"]
+  },
+  "lambda_hello4" = {
+    path = "src/modules/hello-world"
+    layers = ["common", "common_test"]
+  },
+  "lambda_hello5" = {
+    path = "src/modules/hello-world"
+    layers = ["common", "common_test"]
+  },
+  "lambda_hello6" = {
+    path = "src/modules/hello-world"
+    layers = ["common", "common_test"]
   }
 }
 
 API_ENDPOINTS = {
-  "hello" = {
-    path = "/hello"
-    method ="POST"
+  "/hello1" = {
+    method ="GET"
     lambda_name = "lambda_hello"
   },
-  "hello2" = {
-    path = "/hello2"
+  "/hello2" = {
     method ="GET"
     lambda_name = "lambda_hello2"
   }
