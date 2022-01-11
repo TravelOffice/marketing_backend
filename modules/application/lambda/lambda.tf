@@ -25,8 +25,10 @@ module "lambda_function" {
 
   function_name = "${var.ENV}-${each.key}"
   description   = "Sample lambda function"
-  handler       = "index.handler"
-  runtime       = "nodejs14.x"
+  handler       = each.value.handler
+  runtime       = each.value.runtime
+  cloudwatch_logs_retention_in_days = 7
+  memory_size   = each.value.memory_size
 
   source_path = format("%s/../../../%s", path.module, each.value.path)
   hash_extra  = each.key
