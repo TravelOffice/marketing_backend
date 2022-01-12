@@ -18,3 +18,6 @@ environments/**/output.tf
 
 # node mddule
 **/node_modules/*
+
+# vscode config file
+.vscode
