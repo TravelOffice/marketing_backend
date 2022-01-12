@@ -9,18 +9,18 @@ LAMBDA_LAYERS = {
 
 LAMBDA_FUNCTIONS = {
   "lambda_hello" = {
-    path = "src/modules/hello-world"
+    path        = "src/modules/hello-world"
     memory_size = 128
-    handler = "index.handler"
-    runtime = "nodejs14.x"
-    layers = ["common", "common_test"]
+    handler     = "index.handler"
+    runtime     = "nodejs14.x"
+    layers      = ["common", "common_test"]
   },
   "lambda_hello2" = {
-    path = "src/modules/hello-world"
+    path        = "src/modules/hello-world"
     memory_size = 128
-    handler = "index.handler"
-    runtime = "nodejs14.x"
-    layers = ["common", "common_test"]
+    handler     = "index.handler"
+    runtime     = "nodejs14.x"
+    layers      = ["common", "common_test"]
   }
 }
 

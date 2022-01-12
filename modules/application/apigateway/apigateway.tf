@@ -1,11 +1,11 @@
-variable ENV {}
-variable lambda_arns {}
-variable API_ENDPOINTS {}
-variable AWS_REGION {}
-variable FEATURE_NAME {}
-variable DOMAIN_NAME {}
-variable HOSTED_ZONE_ID {}
-variable DOMAIN_CERTIFICATE_ARN {}
+variable "ENV" {}
+variable "LAMBDA_ARNS" {}
+variable "API_ENDPOINTS" {}
+variable "AWS_REGION" {}
+variable "FEATURE_NAME" {}
+variable "DOMAIN_NAME" {}
+variable "HOSTED_ZONE_ID" {}
+variable "DOMAIN_CERTIFICATE_ARN" {}
 
 # Get current aws account information
 data "aws_caller_identity" "current" {}
@@ -24,7 +24,7 @@ resource "aws_api_gateway_rest_api" "rest_api" {
             httpMethod           = "POST"
             payloadFormatVersion = "1.0"
             type                 = "AWS_PROXY"
-            uri                  = "arn:aws:apigateway:${var.AWS_REGION}:lambda:path/2015-03-31/functions/${var.lambda_arns[methodValue.lambda_name]}/invocations"
+            uri                  = "arn:aws:apigateway:${var.AWS_REGION}:lambda:path/2015-03-31/functions/${var.LAMBDA_ARNS[methodValue.lambda_name]}/invocations"
           }
         }
       }
@@ -52,10 +52,10 @@ resource "aws_api_gateway_deployment" "deployment" {
 
 locals {
   mapping_method_lambda_name = flatten([
-    for path in keys(var.API_ENDPOINTS): [
-      for key, value in var.API_ENDPOINTS[path]: {
-        path = path
-        method = key
+    for path in keys(var.API_ENDPOINTS) : [
+      for key, value in var.API_ENDPOINTS[path] : {
+        path        = path
+        method      = key
         lambda_name = value.lambda_name
       }
     ]
