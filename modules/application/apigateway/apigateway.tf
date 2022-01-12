@@ -18,13 +18,13 @@ resource "aws_api_gateway_rest_api" "rest_api" {
       version = "1.0"
     }
     paths = {
-      for key, value in var.API_ENDPOINTS : key => {
-        lower(value.method) = {
+      for pathKey, pathValue in var.API_ENDPOINTS : pathKey => {
+        for methodKey, methodValue in pathValue : lower(methodKey) => {
           x-amazon-apigateway-integration = {
             httpMethod           = "POST"
             payloadFormatVersion = "1.0"
             type                 = "AWS_PROXY"
-            uri                  = "arn:aws:apigateway:${var.AWS_REGION}:lambda:path/2015-03-31/functions/${var.lambda_arns[value.lambda_name]}/invocations"
+            uri                  = "arn:aws:apigateway:${var.AWS_REGION}:lambda:path/2015-03-31/functions/${var.lambda_arns[methodValue.lambda_name]}/invocations"
           }
         }
       }

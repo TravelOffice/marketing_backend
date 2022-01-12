@@ -25,12 +25,20 @@ LAMBDA_FUNCTIONS = {
 }
 
 API_ENDPOINTS = {
-  "/hello1" = {
-    method ="GET"
-    lambda_name = "lambda_hello"
+  "/sample-1" = {
+    "GET" = {
+      lambda_name = "lambda_hello"
+    },
+    "POST" = {
+      lambda_name = "lambda_hello2"
+    }
   },
-  "/hello2" = {
-    method ="GET"
-    lambda_name = "lambda_hello2"
+  "/sample-2/tier-2/{id}" = {
+    "PUT" = {
+      lambda_name = "lambda_hello"
+    },
+    "DELETE" = {
+      lambda_name = "lambda_hello2"
+    }
   }
 }
