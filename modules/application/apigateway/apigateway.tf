@@ -50,15 +50,27 @@ resource "aws_api_gateway_deployment" "deployment" {
   }
 }
 
+locals {
+  mapping_method_lambda_name = flatten([
+    for path in keys(var.API_ENDPOINTS): [
+      for key, value in var.API_ENDPOINTS[path]: {
+        path = path
+        method = key
+        lambda_name = value.lambda_name
+      }
+    ]
+  ])
+}
+
 resource "aws_lambda_permission" "api_gatewway_invoke_lambda_permission" {
-  for_each = var.API_ENDPOINTS
-  statement_id  = "AllowExecutionFromAPIGateway"
+  for_each      = { for api in local.mapping_method_lambda_name : lower("${api.path}_${api.method}") => api }
+  statement_id  = "${var.ENV}-AllowExecutionFromAPIGateway-${each.value.lambda_name}-${each.value.method}"
   action        = "lambda:InvokeFunction"
   function_name = "${var.ENV}-${each.value.lambda_name}"
   principal     = "apigateway.amazonaws.com"
 
   # More: http://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-control-access-using-iam-policies-to-invoke-api.html
-  source_arn = "arn:aws:execute-api:${var.AWS_REGION}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.rest_api.id}/*/${each.value.method}${each.key}"
+  source_arn = "arn:aws:execute-api:${var.AWS_REGION}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.rest_api.id}/*/${each.value.method}${each.value.path}"
 }
 
 resource "aws_api_gateway_stage" "api_gateway_stage" {
