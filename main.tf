@@ -14,7 +14,7 @@ module "LAMBDA_LAYER" {
 module "LAMBDA_FUNCTION" {
   source                    = "../../modules/application/lambda"
   LAMBDA_FUNCTIONS          = var.LAMBDA_FUNCTIONS
-  lambda_layer_arns         = module.LAMBDA_LAYER.lambda_layer_arns
+  LAMBDA_LAYER_ARNS         = module.LAMBDA_LAYER.lambda_layer_arns
   MARKETING_VPC_ID          = var.MARKETING_VPC_ID
   MARKETING_PRIVATE_SUBNETS = var.MARKETING_PRIVATE_SUBNETS
   ENV                       = var.ENV
@@ -22,12 +22,12 @@ module "LAMBDA_FUNCTION" {
 
 module "API_GATEWAY" {
   source                 = "../../modules/application/apigateway"
-  lambda_arns            = module.LAMBDA_FUNCTION.lambda_arns
+  LAMBDA_ARNS            = module.LAMBDA_FUNCTION.lambda_arns
   API_ENDPOINTS          = var.API_ENDPOINTS
-  ENV                    = var.ENV
   AWS_REGION             = var.AWS_REGION
   FEATURE_NAME           = var.FEATURE_NAME
   DOMAIN_NAME            = var.DOMAIN_NAME
   HOSTED_ZONE_ID         = var.HOSTED_ZONE_ID
   DOMAIN_CERTIFICATE_ARN = var.DOMAIN_CERTIFICATE_ARN
+  ENV                    = var.ENV
 }
