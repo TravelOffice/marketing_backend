@@ -1,5 +1,6 @@
 variable "LAMBDA_LAYERS" {}
 variable "ENV" {}
+variable "FEATURE_NAME" {}
 
 data "archive_file" "lambda_layer_zip" {
   for_each    = var.LAMBDA_LAYERS
@@ -12,7 +13,7 @@ resource "aws_lambda_layer_version" "layer" {
   for_each         = var.LAMBDA_LAYERS
   filename         = format("%s/../../../%s", path.module, "deploy/${each.key}_layer.zip")
   source_code_hash = data.archive_file.lambda_layer_zip[each.key].output_base64sha256
-  layer_name       = "${var.ENV}_${each.key}_layer"
+  layer_name       = "${var.ENV}-${var.FEATURE_NAME}-${each.key}-layer"
 
   compatible_runtimes      = ["nodejs14.x"]
   compatible_architectures = ["arm64"]

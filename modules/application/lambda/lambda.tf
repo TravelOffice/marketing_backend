@@ -4,7 +4,17 @@ variable "MARKETING_VPC_ID" {}
 variable "LAMBDA_LAYER_ARNS" {}
 variable "LAMBDA_FUNCTIONS" {}
 variable "ENV" {}
-
+variable "FEATURE_NAME" {}
+locals {
+  lambda_default_config = {
+    handler                           = "index.handler"
+    memory_size                       = 128
+    runtime                           = "nodejs14.x"
+    timeout                           = 3
+    architectures                     = "arm64"
+    log_retention                     = 7
+  }
+}
 resource "aws_security_group" "lambda_sg" {
   name_prefix = "lambda_sg"
   description = "Allow all outbound traffic"
@@ -23,12 +33,14 @@ module "lambda_function" {
   for_each = var.LAMBDA_FUNCTIONS
   source   = "terraform-aws-modules/lambda/aws"
 
-  function_name                     = "${var.ENV}-${each.key}"
-  description                       = "Sample lambda function"
-  handler                           = each.value.handler
-  runtime                           = each.value.runtime
-  cloudwatch_logs_retention_in_days = 7
-  memory_size                       = each.value.memory_size
+  function_name = "${var.ENV}-${var.FEATURE_NAME}-${each.key}"
+
+  handler                           = try(each.value.handler, local.lambda_default_config.handler)
+  runtime                           = try(each.value.runtime, local.lambda_default_config.runtime)
+  architectures                     = try([each.value.architectures], local.lambda_default_config.architectures)
+  memory_size                       = try(each.value.memory_size, local.lambda_default_config.memory_size)
+  timeout                           = try(each.value.timeout, local.lambda_default_config.timeout)
+  cloudwatch_logs_retention_in_days = try(each.value.log_retention, local.lambda_default_config.cloudwatch_logs_retention_in_days)
 
   source_path             = format("%s/../../../%s", path.module, each.value.path)
   hash_extra              = each.key

@@ -4,11 +4,13 @@ variable "MARKETING_VPC_ID" {}
 variable "LAMBDA_LAYERS" {}
 variable "LAMBDA_FUNCTIONS" {}
 variable "API_ENDPOINTS" {}
+variable "FEATURE_NAME" {}
 
 module "LAMBDA_LAYER" {
   source        = "../../modules/application/lambda_layer"
   LAMBDA_LAYERS = var.LAMBDA_LAYERS
   ENV           = var.ENV
+  FEATURE_NAME  = var.FEATURE_NAME
 }
 
 module "LAMBDA_FUNCTION" {
@@ -18,6 +20,7 @@ module "LAMBDA_FUNCTION" {
   MARKETING_VPC_ID          = var.MARKETING_VPC_ID
   MARKETING_PRIVATE_SUBNETS = var.MARKETING_PRIVATE_SUBNETS
   ENV                       = var.ENV
+  FEATURE_NAME              = var.FEATURE_NAME
 }
 
 module "API_GATEWAY" {
