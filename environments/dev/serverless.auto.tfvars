@@ -7,19 +7,25 @@ LAMBDA_LAYERS = {
   }
 }
 
+/*
+  LAMBDA_FUNCTIONS
+  Name	        | Type	       |  Default       |Required
+  path          | string       |                |  Yes
+  layers        | list(string) |                |  Yes
+  handler       | string       |  index.handler |  No
+  memory_size   | number       |      128       |  No
+  runtime       | string       |   nodejs14.x   |  No
+  timeout       | number       |       3        |  No
+  architectures | string       |    "arm64"     |  No
+  log_retention | number       |       7        |  No
+*/
 LAMBDA_FUNCTIONS = {
   "lambda_hello" = {
     path        = "src/modules/hello-world"
-    memory_size = 128
-    handler     = "index.handler"
-    runtime     = "nodejs14.x"
     layers      = ["common", "common_test"]
   },
   "lambda_hello2" = {
     path        = "src/modules/hello-world"
-    memory_size = 128
-    handler     = "index.handler"
-    runtime     = "nodejs14.x"
     layers      = ["common", "common_test"]
   }
 }
