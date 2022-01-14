@@ -5,14 +5,6 @@ variable "ENV" {
 variable "BRANCH_NAME" {
   default = "master"
 }
-variable "PREFIX" {
-  default = "root"
-}
-
-variable "AWS_REGION" {
-  default = "ap-southeast-1"
-}
-
 variable "VPC_CIDR" {
   default = "10.10.0.0/24"
 }

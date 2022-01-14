@@ -16,7 +16,7 @@ LAMBDA_LAYERS = {
   memory_size   | number       |      128       |  No
   runtime       | string       |   nodejs14.x   |  No
   timeout       | number       |       3        |  No
-  architectures | string       |    "arm64"     |  No
+  architecture  | string       |    "arm64"     |  No
   log_retention | number       |       7        |  No
 */
 LAMBDA_FUNCTIONS = {

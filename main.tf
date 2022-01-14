@@ -4,7 +4,7 @@ variable "MARKETING_VPC_ID" {}
 variable "LAMBDA_LAYERS" {}
 variable "LAMBDA_FUNCTIONS" {}
 variable "API_ENDPOINTS" {}
-variable "FEATURE_NAME" {}
+variable "AWS_REGION" {}
 
 module "LAMBDA_LAYER" {
   source        = "../../modules/application/lambda_layer"

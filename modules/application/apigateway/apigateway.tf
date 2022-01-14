@@ -64,9 +64,9 @@ locals {
 
 resource "aws_lambda_permission" "api_gatewway_invoke_lambda_permission" {
   for_each      = { for api in local.mapping_method_lambda_name : lower("${api.path}_${api.method}") => api }
-  statement_id  = "${var.ENV}-AllowExecutionFromAPIGateway-${each.value.lambda_name}-${each.value.method}"
+  statement_id  = "${var.ENV}-${var.FEATURE_NAME}-${each.value.lambda_name}-${each.value.method}-AllowExecutionFromAPIGateway"
   action        = "lambda:InvokeFunction"
-  function_name = "${var.ENV}-${each.value.lambda_name}"
+  function_name = "${var.ENV}-${var.FEATURE_NAME}-${each.value.lambda_name}"
   principal     = "apigateway.amazonaws.com"
 
   # More: http://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-control-access-using-iam-policies-to-invoke-api.html

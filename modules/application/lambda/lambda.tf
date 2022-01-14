@@ -11,7 +11,7 @@ locals {
     memory_size                       = 128
     runtime                           = "nodejs14.x"
     timeout                           = 3
-    architectures                     = "arm64"
+    architecture                      = "arm64"
     log_retention                     = 7
   }
 }
@@ -37,10 +37,10 @@ module "lambda_function" {
 
   handler                           = try(each.value.handler, local.lambda_default_config.handler)
   runtime                           = try(each.value.runtime, local.lambda_default_config.runtime)
-  architectures                     = try([each.value.architectures], local.lambda_default_config.architectures)
+  architectures                     = [try(each.value.architecture, local.lambda_default_config.architecture)]
   memory_size                       = try(each.value.memory_size, local.lambda_default_config.memory_size)
   timeout                           = try(each.value.timeout, local.lambda_default_config.timeout)
-  cloudwatch_logs_retention_in_days = try(each.value.log_retention, local.lambda_default_config.cloudwatch_logs_retention_in_days)
+  cloudwatch_logs_retention_in_days = try(each.value.log_retention, local.lambda_default_config.log_retention)
 
   source_path             = format("%s/../../../%s", path.module, each.value.path)
   hash_extra              = each.key
