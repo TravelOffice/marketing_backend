@@ -1,53 +1,37 @@
 LAMBDA_LAYERS = {
-  "common" = {
-    path = "src/libs/common"
-  },
-  "common_test" = {
-    path = "src/libs/common"
+  "tour-service" = {
+    path = "src/layers/tour-service"
   }
 }
 
 /*
   LAMBDA_FUNCTIONS
-  Name	        | Type	       |  Default       |Required
-  path          | string       |                |  Yes
-  layers        | list(string) |                |  Yes
-  handler       | string       |  index.handler |  No
-  memory_size   | number       |      128       |  No
-  runtime       | string       |   nodejs14.x   |  No
-  timeout       | number       |       3        |  No
-  architecture  | string       |    "arm64"     |  No
-  log_retention | number       |       7        |  No
+  Name	        | Type	       |  Default               |Required
+  path          | string       |                        |  Yes
+  layers        | list(string) |                        |  Yes
+  handler       | string       |  index.handler         |  No
+  memory_size   | number       |  128                   |  No
+  runtime       | string       |  nodejs14.x            |  No
+  timeout       | number       |  3                     |  No
+  architecture  | string       |  "arm64"               |  No
+  log_retention | number       |  7                     |  No
+  iam_role      | string       |  standard_lambda_role  |  No
 */
 LAMBDA_FUNCTIONS = {
-  "lambda_hello" = {
-    path     = "src/modules/hello-world"
-    layers   = ["common", "common_test"]
-    iam_role = "standard_lambda_role"
-  },
-  "lambda_hello2" = {
-    path     = "src/modules/hello-world"
-    layers   = ["common", "common_test"]
-    iam_role = "standard_lambda_role"
-
+  "lambda_tour_service" = {
+    path        = "src/modules/tour-service/dist",
+    memory_size = 128
+    handler     = "lambda.handler"
+    runtime     = "nodejs14.x"
+    layers      = ["tour-service"]
+    iam_role    = "standard_lambda_role"
   }
 }
 
 API_ENDPOINTS = {
-  "/sample-1" = {
+  "/tours" = {
     "GET" = {
-      lambda_name = "lambda_hello"
-    },
-    "POST" = {
-      lambda_name = "lambda_hello2"
-    }
-  },
-  "/sample-2/tier-2/{id}" = {
-    "PUT" = {
-      lambda_name = "lambda_hello"
-    },
-    "DELETE" = {
-      lambda_name = "lambda_hello2"
+      lambda_name = "lambda_tour_service"
     }
   }
 }

@@ -14,7 +14,9 @@ phases:
       - chmod +x ./scripts/execute_terraform.sh
       - ./scripts/execute_terraform.sh $BUILD_ENV init -backend-config "bucket=$TF_BUCKET"
       - ./scripts/execute_terraform.sh $BUILD_ENV validate
+      - chmod +x ./scrips/zip.sh
   
   build:
     commands:
+      - ./scripts/build_serverless.sh dev
       - ./scripts/execute_terraform.sh $BUILD_ENV plan -var-file="base_infra_output.tfvars"

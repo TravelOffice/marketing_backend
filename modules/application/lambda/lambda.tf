@@ -14,6 +14,7 @@ locals {
     timeout       = 3
     architecture  = "arm64"
     log_retention = 30
+    iam_role      = "standard_lambda_role"
   }
 }
 resource "aws_security_group" "lambda_sg" {
@@ -46,7 +47,7 @@ resource "aws_lambda_function" "lambda" {
   for_each         = var.LAMBDA_FUNCTIONS
   filename         = format("%s/../../../%s", path.module, "deploy/${each.key}.zip")
   function_name    = "${var.ENV}-${var.FEATURE_NAME}-${each.key}"
-  role             = var.IAM_ROLES[each.value.iam_role]
+  role             = var.IAM_ROLES[try(each.value.iam_role, local.lambda_default_config.iam_role)]
   memory_size      = try(each.value.memory_size, local.lambda_default_config.memory_size)
   handler          = try(each.value.handler, local.lambda_default_config.handler)
   source_code_hash = filebase64sha256(format("%s/../../../%s", path.module, "deploy/${each.key}.zip"))
