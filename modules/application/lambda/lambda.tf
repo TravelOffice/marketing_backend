@@ -5,14 +5,15 @@ variable "LAMBDA_LAYER_ARNS" {}
 variable "LAMBDA_FUNCTIONS" {}
 variable "ENV" {}
 variable "FEATURE_NAME" {}
+variable "IAM_ROLES" {}
 locals {
   lambda_default_config = {
-    handler                           = "index.handler"
-    memory_size                       = 128
-    runtime                           = "nodejs14.x"
-    timeout                           = 3
-    architecture                      = "arm64"
-    log_retention                     = 7
+    handler       = "index.handler"
+    memory_size   = 128
+    runtime       = "nodejs14.x"
+    timeout       = 3
+    architecture  = "arm64"
+    log_retention = 30
   }
 }
 resource "aws_security_group" "lambda_sg" {
@@ -29,32 +30,73 @@ resource "aws_security_group" "lambda_sg" {
   }
 }
 
-module "lambda_function" {
-  for_each = var.LAMBDA_FUNCTIONS
-  source   = "terraform-aws-modules/lambda/aws"
+data "archive_file" "lambda_zip" {
+  for_each    = var.LAMBDA_FUNCTIONS
+  type        = "zip"
+  source_dir  = format("%s/../../../%s", path.module, each.value.path)
+  output_path = format("%s/../../../%s", path.module, "deploy/${each.key}.zip")
+}
 
-  function_name = "${var.ENV}-${var.FEATURE_NAME}-${each.key}"
-
-  handler                           = try(each.value.handler, local.lambda_default_config.handler)
-  runtime                           = try(each.value.runtime, local.lambda_default_config.runtime)
-  architectures                     = [try(each.value.architecture, local.lambda_default_config.architecture)]
-  memory_size                       = try(each.value.memory_size, local.lambda_default_config.memory_size)
-  timeout                           = try(each.value.timeout, local.lambda_default_config.timeout)
-  cloudwatch_logs_retention_in_days = try(each.value.log_retention, local.lambda_default_config.log_retention)
-
-  source_path             = format("%s/../../../%s", path.module, each.value.path)
-  hash_extra              = each.key
-  ignore_source_code_hash = true
-
+resource "aws_cloudwatch_log_group" "lambda_log_group" {
+  for_each          = var.LAMBDA_FUNCTIONS
+  name              = "/aws/lambda/${var.ENV}-${var.FEATURE_NAME}-${each.key}"
+  retention_in_days = try(each.value.log_retention, local.lambda_default_config.log_retention)
+}
+resource "aws_lambda_function" "lambda" {
+  for_each         = var.LAMBDA_FUNCTIONS
+  filename         = format("%s/../../../%s", path.module, "deploy/${each.key}.zip")
+  function_name    = "${var.ENV}-${var.FEATURE_NAME}-${each.key}"
+  role             = var.IAM_ROLES[each.value.iam_role]
+  memory_size      = try(each.value.memory_size, local.lambda_default_config.memory_size)
+  handler          = try(each.value.handler, local.lambda_default_config.handler)
+  source_code_hash = filebase64sha256(format("%s/../../../%s", path.module, "deploy/${each.key}.zip"))
+  architectures    = [try(each.value.architecture, local.lambda_default_config.architecture)]
+  runtime          = try(each.value.runtime, local.lambda_default_config.runtime)
+  timeout          = try(each.value.timeout, local.lambda_default_config.timeout)
+  depends_on = [
+    aws_cloudwatch_log_group.lambda_log_group
+  ]
+  vpc_config {
+    # Every subnet should be able to reach an EFS mount target in the same Availability Zone. Cross-AZ mounts are not permitted.
+    subnet_ids         = var.MARKETING_PRIVATE_SUBNETS
+    security_group_ids = [aws_security_group.lambda_sg.id]
+  }
   layers = [
     for layer in each.value.layers : var.LAMBDA_LAYER_ARNS[layer]
   ]
-
-  vpc_subnet_ids         = var.MARKETING_PRIVATE_SUBNETS
-  vpc_security_group_ids = [aws_security_group.lambda_sg.id]
-  attach_network_policy  = true
+  environment {
+    variables = {
+      Env = var.ENV
+    }
+  }
 }
 
+# module "lambda_function" {
+#   for_each = var.LAMBDA_FUNCTIONS
+#   source   = "terraform-aws-modules/lambda/aws"
+
+#   function_name = "${var.ENV}-${var.FEATURE_NAME}-${each.key}"
+
+#   handler                           = try(each.value.handler, local.lambda_default_config.handler)
+#   runtime                           = try(each.value.runtime, local.lambda_default_config.runtime)
+#   architectures                     = [try(each.value.architecture, local.lambda_default_config.architecture)]
+#   memory_size                       = try(each.value.memory_size, local.lambda_default_config.memory_size)
+#   timeout                           = try(each.value.timeout, local.lambda_default_config.timeout)
+#   cloudwatch_logs_retention_in_days = try(each.value.log_retention, local.lambda_default_config.log_retention)
+
+#   source_path             = format("%s/../../../%s", path.module, each.value.path)
+#   hash_extra              = each.key
+#   ignore_source_code_hash = true
+
+#   layers = [
+#     for layer in each.value.layers : var.LAMBDA_LAYER_ARNS[layer]
+#   ]
+
+#   vpc_subnet_ids         = var.MARKETING_PRIVATE_SUBNETS
+#   vpc_security_group_ids = [aws_security_group.lambda_sg.id]
+#   attach_network_policy  = true
+# }
+
 output "lambda_arns" {
-  value = { for key, value in var.LAMBDA_FUNCTIONS : key => module.lambda_function[key].lambda_function_arn }
+  value = { for key, value in var.LAMBDA_FUNCTIONS : key => aws_lambda_function.lambda[key].arn }
 }

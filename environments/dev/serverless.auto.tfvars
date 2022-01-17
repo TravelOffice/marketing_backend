@@ -21,12 +21,15 @@ LAMBDA_LAYERS = {
 */
 LAMBDA_FUNCTIONS = {
   "lambda_hello" = {
-    path        = "src/modules/hello-world"
-    layers      = ["common", "common_test"]
+    path     = "src/modules/hello-world"
+    layers   = ["common", "common_test"]
+    iam_role = "standard_lambda_role"
   },
   "lambda_hello2" = {
-    path        = "src/modules/hello-world"
-    layers      = ["common", "common_test"]
+    path     = "src/modules/hello-world"
+    layers   = ["common", "common_test"]
+    iam_role = "standard_lambda_role"
+
   }
 }
 
