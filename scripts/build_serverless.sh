@@ -12,6 +12,9 @@ if [ "${ENV}" != "dev" ] && [ "${ENV}" != "prod" ]; then
   exit 1
 fi
 
+# Clean up
+rm -rf ${CUR_DIR}/deploy
+
 # Build dependencies
 echo "Building dependencies"
 cd ${CUR_DIR}
@@ -38,7 +41,8 @@ build_service() {
   LAYER_DIR=${CUR_DIR}/src/layers/${SERVICENAME}/nodejs
   mkdir -p ${LAYER_DIR}
   cd ${LAYER_DIR}
-  ln -sf ${SERVICE_DIR}/node_modules .
+  rm -rf *
+  ln -sf ../../../modules/${SERVICENAME}/node_modules .
   cd $CUR_DIR
 }
 
