@@ -5,18 +5,28 @@ variable "S3_BUCKET" {
   default = "codepipeline-artifacts20220108172710412300000001"
 }
 
+locals {
+  root_path = format("%s/../../../..", path.module)
+}
+
 data "external" "worker_zip" {
   for_each = var.LAMBDA_LAYERS
-  program  = [format("%s/../../../%s", path.module, "scripts/zip.sh"), format("%s/../../../%s", path.module, "deploy/${each.key}_layer.zip"), format("%s/../../../%s", path.module, each.value.path)]
+  program = [
+    format("%s/%s", local.root_path, "scripts/zip.sh"),
+    format("%s/%s", local.root_path, "deploy/${each.key}_layer.zip"),
+    format("%s/%s", local.root_path, each.value.path)
+  ]
 }
 
 resource "aws_s3_bucket_object" "layer_object" {
-  for_each = var.LAMBDA_LAYERS
-  bucket   = var.S3_BUCKET
-  key      = "execution/${var.ENV}-${var.FEATURE_NAME}-${each.key}-layer"
-  source   = format("%s/../../../%s", path.module, "deploy/${each.key}_layer.zip")
-  etag     = data.external.worker_zip[each.key].result.md5
+  for_each     = var.LAMBDA_LAYERS
+  bucket       = var.S3_BUCKET
+  key          = "execution/${var.ENV}-${var.FEATURE_NAME}-${each.key}-layer"
+  source       = data.external.worker_zip[each.key].result.path
+  etag         = data.external.worker_zip[each.key].result.md5
+  content_type = "application/zip"
 }
+
 resource "aws_lambda_layer_version" "layer" {
   for_each          = var.LAMBDA_LAYERS
   layer_name        = "${var.ENV}-${var.FEATURE_NAME}-${each.key}-layer"

@@ -16,6 +16,7 @@ locals {
     log_retention = 30
     iam_role      = "standard_lambda_role"
   }
+  root_path = format("%s/../../../..", path.module)
 }
 resource "aws_security_group" "lambda_sg" {
   name_prefix = "lambda_sg"
@@ -34,8 +35,8 @@ resource "aws_security_group" "lambda_sg" {
 data "archive_file" "lambda_zip" {
   for_each    = var.LAMBDA_FUNCTIONS
   type        = "zip"
-  source_dir  = format("%s/../../../%s", path.module, each.value.path)
-  output_path = format("%s/../../../%s", path.module, "deploy/${each.key}.zip")
+  source_dir  = format("%s/%s", local.root_path, each.value.path)
+  output_path = format("%s/%s", local.root_path, "deploy/${each.key}.zip")
 }
 
 resource "aws_cloudwatch_log_group" "lambda_log_group" {
@@ -45,12 +46,12 @@ resource "aws_cloudwatch_log_group" "lambda_log_group" {
 }
 resource "aws_lambda_function" "lambda" {
   for_each         = var.LAMBDA_FUNCTIONS
-  filename         = format("%s/../../../%s", path.module, "deploy/${each.key}.zip")
+  filename         = format("%s/%s", local.root_path, "deploy/${each.key}.zip")
   function_name    = "${var.ENV}-${var.FEATURE_NAME}-${each.key}"
   role             = var.IAM_ROLES[try(each.value.iam_role, local.lambda_default_config.iam_role)]
   memory_size      = try(each.value.memory_size, local.lambda_default_config.memory_size)
   handler          = try(each.value.handler, local.lambda_default_config.handler)
-  source_code_hash = filebase64sha256(format("%s/../../../%s", path.module, "deploy/${each.key}.zip"))
+  source_code_hash = filebase64sha256(format("%s/%s", local.root_path, "deploy/${each.key}.zip"))
   architectures    = [try(each.value.architecture, local.lambda_default_config.architecture)]
   runtime          = try(each.value.runtime, local.lambda_default_config.runtime)
   timeout          = try(each.value.timeout, local.lambda_default_config.timeout)
@@ -85,7 +86,7 @@ resource "aws_lambda_function" "lambda" {
 #   timeout                           = try(each.value.timeout, local.lambda_default_config.timeout)
 #   cloudwatch_logs_retention_in_days = try(each.value.log_retention, local.lambda_default_config.log_retention)
 
-#   source_path             = format("%s/../../../%s", path.module, each.value.path)
+#   source_path             = format("%s/%s", local.root_path, each.value.path)
 #   hash_extra              = each.key
 #   ignore_source_code_hash = true
 
