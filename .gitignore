@@ -7,8 +7,9 @@
 
 # lock file
 *.lock*
-environments/**/main.tf
-environments/**/output.tf
+infrastructures/environments/**/main.tf
+infrastructures/environments/**/output.tf
+infrastructures/environments/**/serverless.auto.tfvars
 
 # build file
 **/deploy/*

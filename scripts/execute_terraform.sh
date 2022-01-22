@@ -20,10 +20,11 @@ fi
 #   exit
 # fi
 
-cd ./environments/${ENV}
+cd ./infrastructures/environments/${ENV}
 ln -sf ../../main.tf .
 ln -sf ../../output.tf .
+ln -sf ../../serverless.conf serverless.auto.tfvars
 cd ${CUR_DIR}
 
-echo "Running terraform -chdir=./environments/${ENV} ${TF_COMAND}"
-terraform -chdir="./environments/${ENV}" ${TF_COMAND}
+echo "Running terraform -chdir=./infrastructures/environments/${ENV} ${TF_COMAND}"
+terraform -chdir="./infrastructures/environments/${ENV}" ${TF_COMAND}
