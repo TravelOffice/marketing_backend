@@ -21,3 +21,5 @@ environments/**/output.tf
 
 # vscode config file
 .vscode
+
+**/dist/*
