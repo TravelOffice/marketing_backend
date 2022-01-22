@@ -13,7 +13,7 @@ phases:
 
   pre_build:
     commands:
-      - chmod +x ./scripts/execute_terraform.sh
+      - chmod +x ./scripts/*.sh
       - ./scripts/execute_terraform.sh $BUILD_ENV init -backend-config "bucket=$TF_BUCKET"
   build:
     commands:
