@@ -9,28 +9,36 @@ locals {
   root_path = format("%s/../../../..", path.module)
 }
 
-data "external" "worker_zip" {
+data "external" "layer_zip" {
   for_each = var.LAMBDA_LAYERS
   program = [
-    format("%s/%s", local.root_path, "scripts/zip.sh"),
-    format("%s/%s", local.root_path, "deploy/${each.key}_layer.zip"),
-    format("%s/%s", local.root_path, each.value.path)
+    "bash", "-c",
+    format("%s/%s %s/%s %s/%s",
+      local.root_path, "scripts/zip.sh",
+      local.root_path, "deploy/${each.key}_layer.zip",
+      local.root_path, each.value.path
+    ),
   ]
 }
 
-resource "aws_s3_bucket_object" "layer_object" {
-  for_each = var.LAMBDA_LAYERS
-  bucket   = var.S3_BUCKET
-  key      = "execution/${var.ENV}-${var.FEATURE_NAME}-${each.key}-layer"
-  source   = format("%s/%s", local.root_path, "deploy/${each.key}_layer.zip")
-  etag     = data.external.worker_zip[each.key].result.md5
-}
+## TODO: Temporary disable cause by codebuild upload error
+# resource "aws_s3_bucket_object" "layer_object" {
+#   for_each    = var.LAMBDA_LAYERS
+#   bucket      = var.S3_BUCKET
+#   key         = "execution/${var.ENV}-${var.FEATURE_NAME}-${each.key}-layer"
+#   source      = data.external.layer_zip[each.key].result.path
+#   source_hash = data.external.layer_zip[each.key].result.hash
+# }
+
 resource "aws_lambda_layer_version" "layer" {
-  for_each          = var.LAMBDA_LAYERS
-  layer_name        = "${var.ENV}-${var.FEATURE_NAME}-${each.key}-layer"
-  s3_bucket         = var.S3_BUCKET
-  s3_key            = aws_s3_bucket_object.layer_object[each.key].id
-  s3_object_version = aws_s3_bucket_object.layer_object[each.key].version_id
+  for_each   = var.LAMBDA_LAYERS
+  layer_name = "${var.ENV}-${var.FEATURE_NAME}-${each.key}-layer"
+  filename   = data.external.layer_zip[each.key].result.path
+
+  ## TODO: Temporary disable cause by codebuild upload error
+  # s3_bucket         = var.S3_BUCKET
+  # s3_key            = aws_s3_bucket_object.layer_object[each.key].id
+  # s3_object_version = aws_s3_bucket_object.layer_object[each.key].version_id
 
   compatible_runtimes      = ["nodejs14.x"]
   compatible_architectures = ["arm64"]
