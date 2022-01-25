@@ -6,6 +6,7 @@ variable "LAMBDA_FUNCTIONS" {}
 variable "ENV" {}
 variable "FEATURE_NAME" {}
 variable "IAM_ROLES" {}
+variable "TAGS" {}
 locals {
   lambda_default_config = {
     handler       = "index.handler"
@@ -30,6 +31,8 @@ resource "aws_security_group" "lambda_sg" {
     cidr_blocks      = ["0.0.0.0/0"]
     ipv6_cidr_blocks = ["::/0"]
   }
+  tags = var.TAGS
+
 }
 
 data "archive_file" "lambda_zip" {
@@ -43,6 +46,8 @@ resource "aws_cloudwatch_log_group" "lambda_log_group" {
   for_each          = var.LAMBDA_FUNCTIONS
   name              = "/aws/lambda/${var.ENV}-${var.FEATURE_NAME}-${each.key}"
   retention_in_days = try(each.value.log_retention, local.lambda_default_config.log_retention)
+  tags              = var.TAGS
+
 }
 resource "aws_lambda_function" "lambda" {
   for_each         = var.LAMBDA_FUNCTIONS
@@ -71,33 +76,10 @@ resource "aws_lambda_function" "lambda" {
       Env = var.ENV
     }
   }
+
+  tags = var.TAGS
+
 }
-
-# module "lambda_function" {
-#   for_each = var.LAMBDA_FUNCTIONS
-#   source   = "terraform-aws-modules/lambda/aws"
-
-#   function_name = "${var.ENV}-${var.FEATURE_NAME}-${each.key}"
-
-#   handler                           = try(each.value.handler, local.lambda_default_config.handler)
-#   runtime                           = try(each.value.runtime, local.lambda_default_config.runtime)
-#   architectures                     = [try(each.value.architecture, local.lambda_default_config.architecture)]
-#   memory_size                       = try(each.value.memory_size, local.lambda_default_config.memory_size)
-#   timeout                           = try(each.value.timeout, local.lambda_default_config.timeout)
-#   cloudwatch_logs_retention_in_days = try(each.value.log_retention, local.lambda_default_config.log_retention)
-
-#   source_path             = format("%s/%s", local.root_path, each.value.path)
-#   hash_extra              = each.key
-#   ignore_source_code_hash = true
-
-#   layers = [
-#     for layer in each.value.layers : var.LAMBDA_LAYER_ARNS[layer]
-#   ]
-
-#   vpc_subnet_ids         = var.MARKETING_PRIVATE_SUBNETS
-#   vpc_security_group_ids = [aws_security_group.lambda_sg.id]
-#   attach_network_policy  = true
-# }
 
 output "lambda_arns" {
   value = { for key, value in var.LAMBDA_FUNCTIONS : key => aws_lambda_function.lambda[key].arn }

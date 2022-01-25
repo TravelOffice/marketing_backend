@@ -6,6 +6,7 @@ variable "FEATURE_NAME" {}
 variable "DOMAIN_NAME" {}
 variable "HOSTED_ZONE_ID" {}
 variable "DOMAIN_CERTIFICATE_ARN" {}
+variable "TAGS" {}
 
 # Get current aws account information
 data "aws_caller_identity" "current" {}
@@ -36,6 +37,8 @@ resource "aws_api_gateway_rest_api" "rest_api" {
   endpoint_configuration {
     types = ["REGIONAL"]
   }
+
+  tags = var.TAGS
 }
 
 resource "aws_api_gateway_deployment" "deployment" {
@@ -77,6 +80,7 @@ resource "aws_api_gateway_stage" "api_gateway_stage" {
   deployment_id = aws_api_gateway_deployment.deployment.id
   rest_api_id   = aws_api_gateway_rest_api.rest_api.id
   stage_name    = var.ENV
+  tags          = var.TAGS
 }
 
 resource "aws_api_gateway_domain_name" "domain_name" {
@@ -86,6 +90,7 @@ resource "aws_api_gateway_domain_name" "domain_name" {
   endpoint_configuration {
     types = ["REGIONAL"]
   }
+  tags = var.TAGS
 }
 
 # DNS record using Route53.
