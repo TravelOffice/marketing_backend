@@ -22,23 +22,22 @@ data "external" "layer_zip" {
 }
 
 ## TODO: Temporary disable cause by codebuild upload error
-# resource "aws_s3_bucket_object" "layer_object" {
-#   for_each    = var.LAMBDA_LAYERS
-#   bucket      = var.S3_BUCKET
-#   key         = "execution/${var.ENV}-${var.FEATURE_NAME}-${each.key}-layer"
-#   source      = data.external.layer_zip[each.key].result.path
-#   source_hash = data.external.layer_zip[each.key].result.hash
-# }
+resource "aws_s3_bucket_object" "layer_object" {
+  for_each    = var.LAMBDA_LAYERS
+  bucket      = var.S3_BUCKET
+  key         = "execution/${var.ENV}-${var.FEATURE_NAME}-${each.key}-layer"
+  source      = data.external.layer_zip[each.key].result.path
+  source_hash = data.external.layer_zip[each.key].result.hash
+}
 
 resource "aws_lambda_layer_version" "layer" {
   for_each   = var.LAMBDA_LAYERS
   layer_name = "${var.ENV}-${var.FEATURE_NAME}-${each.key}-layer"
-  filename   = data.external.layer_zip[each.key].result.path
+  # filename   = data.external.layer_zip[each.key].result.path
 
   ## TODO: Temporary disable cause by codebuild upload error
-  # s3_bucket         = var.S3_BUCKET
-  # s3_key            = aws_s3_bucket_object.layer_object[each.key].id
-  # s3_object_version = aws_s3_bucket_object.layer_object[each.key].version_id
+  s3_bucket = var.S3_BUCKET
+  s3_key    = aws_s3_bucket_object.layer_object[each.key].id
 
   compatible_runtimes      = ["nodejs14.x"]
   compatible_architectures = ["arm64"]
