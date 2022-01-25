@@ -4,7 +4,7 @@ variable "FEATURE_NAME" {}
 variable "S3_BUCKET" {
   default = "codepipeline-artifacts20220108172710412300000001"
 }
-
+variable "TAGS" {}
 locals {
   root_path = format("%s/../../../..", path.module)
 }
