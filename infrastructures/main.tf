@@ -7,6 +7,7 @@ variable "API_ENDPOINTS" {}
 variable "AWS_REGION" {}
 variable "STANDARD_LAMBDA_IAM_ROLE" {}
 variable "LAMBDA_TRIGGERS" {}
+variable "LAMBDA_CRONS" {}
 locals {
   iam_roles = {
     standard_lambda_role = var.STANDARD_LAMBDA_IAM_ROLE
@@ -52,4 +53,13 @@ module "API_GATEWAY" {
   ENV                    = var.ENV
   TAGS                   = local.tags
 
+}
+
+module "LAMBDA_CRON" {
+  source       = "../../modules/event/lambda_cron"
+  FEATURE_NAME = var.FEATURE_NAME
+  LAMBDA_CRONS = var.LAMBDA_CRONS
+  LAMBDA_ARNS  = module.LAMBDA_FUNCTION.lambda_arns
+  ENV          = var.ENV
+  TAGS         = local.tags
 }
