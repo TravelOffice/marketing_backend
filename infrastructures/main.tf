@@ -53,13 +53,3 @@ module "API_GATEWAY" {
   TAGS                   = local.tags
 
 }
-
-module "COGNITO" {
-  source          = "../../modules/security/cognito"
-  ENV             = var.ENV
-  FEATURE_NAME    = var.FEATURE_NAME
-  LAMBDA_TRIGGERS = var.LAMBDA_TRIGGERS
-  LAMBDA_ARNS     = module.LAMBDA_FUNCTION.lambda_arns
-  TAGS            = local.tags
-
-}
