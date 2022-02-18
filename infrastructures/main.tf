@@ -1,16 +1,13 @@
-variable "MARKETING_PRIVATE_SUBNETS" {}
-
-variable "MARKETING_VPC_ID" {}
 variable "LAMBDA_LAYERS" {}
 variable "LAMBDA_FUNCTIONS" {}
 variable "API_ENDPOINTS" {}
-variable "AWS_REGION" {}
-variable "STANDARD_LAMBDA_IAM_ROLE" {}
 variable "LAMBDA_TRIGGERS" {}
 variable "LAMBDA_CRONS" {}
+variable "TF_BUCKET" {}
 locals {
+  remote_feature_name = "base_infrastructure"
   iam_roles = {
-    standard_lambda_role = var.STANDARD_LAMBDA_IAM_ROLE
+    standard_lambda_role = module.REMOTE_STATE.STATE.COMMON_CONFIG.iam.roles.standard_lambda_iam_role
   }
 
   tags = {
@@ -18,6 +15,14 @@ locals {
     Terraform = true
     Feature   = var.FEATURE_NAME
   }
+}
+
+module "REMOTE_STATE" {
+  source              = "../../modules/tf_remote_state"
+  ENV                 = var.ENV
+  REMOTE_TF_BUCKET    = var.TF_BUCKET
+  REMOTE_FEATURE_NAME = local.remote_feature_name
+  REMOTE_AWS_REGION   = var.AWS_REGION
 }
 
 module "LAMBDA_LAYER" {
@@ -32,8 +37,8 @@ module "LAMBDA_FUNCTION" {
   source                    = "../../modules/application/lambda"
   LAMBDA_FUNCTIONS          = var.LAMBDA_FUNCTIONS
   LAMBDA_LAYER_ARNS         = module.LAMBDA_LAYER.lambda_layer_arns
-  MARKETING_VPC_ID          = var.MARKETING_VPC_ID
-  MARKETING_PRIVATE_SUBNETS = var.MARKETING_PRIVATE_SUBNETS
+  MARKETING_VPC_ID          = module.REMOTE_STATE.STATE.MARKETING.backend.vpc.id
+  MARKETING_PRIVATE_SUBNETS = module.REMOTE_STATE.STATE.MARKETING.backend.vpc.private_subnets
   ENV                       = var.ENV
   FEATURE_NAME              = var.FEATURE_NAME
   IAM_ROLES                 = local.iam_roles
@@ -47,9 +52,9 @@ module "API_GATEWAY" {
   API_ENDPOINTS          = var.API_ENDPOINTS
   AWS_REGION             = var.AWS_REGION
   FEATURE_NAME           = var.FEATURE_NAME
-  DOMAIN_NAME            = var.DOMAIN_NAME
-  HOSTED_ZONE_ID         = var.HOSTED_ZONE_ID
-  DOMAIN_CERTIFICATE_ARN = var.DOMAIN_CERTIFICATE_ARN
+  DOMAIN_NAME            = module.REMOTE_STATE.STATE.COMMON_CONFIG.route53.hosted_zone.domain.name
+  HOSTED_ZONE_ID         = module.REMOTE_STATE.STATE.COMMON_CONFIG.route53.hosted_zone.id
+  DOMAIN_CERTIFICATE_ARN = module.REMOTE_STATE.STATE.COMMON_CONFIG.route53.hosted_zone.domain.certificate.arn
   ENV                    = var.ENV
   TAGS                   = local.tags
 
