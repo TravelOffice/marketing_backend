@@ -87,6 +87,6 @@ module "APPSYNC_CONFIGURATION" {
   FEATURE_NAME   = var.FEATURE_NAME
   APPSYNC_API_ID = module.REMOTE_STATE.STATE.MARKETING.backend.appsync.id
   APPSYNC_RESOLVERS = var.APPSYNC_RESOLVERS
-  LAMBDA_ARN     = module.LAMBDA_FUNCTION.lambda_arns["lambda_tour_service"] #TODO: Need update correct lambda resolver name
+  LAMBDA_ARN     = module.LAMBDA_FUNCTION.lambda_arns["chat_appsync_resolver_service"] #TODO: Need update correct lambda resolver name
   TAGS           = local.tags
 }
