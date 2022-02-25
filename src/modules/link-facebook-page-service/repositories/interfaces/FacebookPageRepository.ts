@@ -1,0 +1,7 @@
+import { FacebookPage } from '../../models/FacebookPage';
+
+export interface FacebookPageRepository {
+  exchangeUserAccessToken: (token: string) => Promise<string>,
+  getPageAccessToken: (pageId: string, userAccessToken: string) => Promise<FacebookPage>,
+  saveToDynamo: (tenantId: string, page: FacebookPage) => Promise<void>,
+}
