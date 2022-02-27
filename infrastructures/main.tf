@@ -4,10 +4,14 @@ variable "API_ENDPOINTS" {}
 variable "LAMBDA_TRIGGERS" {}
 variable "LAMBDA_CRONS" {}
 variable "TF_BUCKET" {}
+variable "APPSYNC_RESOLVERS" {}
 locals {
   remote_feature_name = "base_infrastructure"
   iam_roles = {
-    standard_lambda_role = module.REMOTE_STATE.STATE.COMMON_CONFIG.iam.roles.standard_lambda_iam_role
+    standard_lambda_role                 = module.REMOTE_STATE.STATE.COMMON_CONFIG.iam.roles.standard_lambda_role
+    execute_ecs_task_lambda_role         = module.REMOTE_STATE.STATE.COMMON_CONFIG.iam.roles.execute_ecs_task_lambda_role
+    provision_tenant_infra_ecs_task_role = module.REMOTE_STATE.STATE.COMMON_CONFIG.iam.roles.provision_tenant_infa_ecs_task_role
+    cognito_power_user_lambda_role       = module.REMOTE_STATE.STATE.COMMON_CONFIG.iam.roles.cognito_power_user_lambda_role
   }
 
   tags = {
@@ -67,4 +71,14 @@ module "LAMBDA_CRON" {
   LAMBDA_ARNS  = module.LAMBDA_FUNCTION.lambda_arns
   ENV          = var.ENV
   TAGS         = local.tags
+}
+
+module "APPSYNC_CONFIGURATION" {
+  source         = "../../modules/application/appsync"
+  ENV            = var.ENV
+  FEATURE_NAME   = var.FEATURE_NAME
+  APPSYNC_API_ID = module.REMOTE_STATE.STATE.MARKETING.backend.appsync.id
+  APPSYNC_RESOLVERS = var.APPSYNC_RESOLVERS
+  LAMBDA_ARN     = module.LAMBDA_FUNCTION.lambda_arns["lambda_tour_service"] #TODO: Need update correct lambda resolver name
+  TAGS           = local.tags
 }
