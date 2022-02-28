@@ -12,12 +12,20 @@ locals {
     execute_ecs_task_lambda_role         = module.REMOTE_STATE.STATE.COMMON_CONFIG.iam.roles.execute_ecs_task_lambda_role
     provision_tenant_infra_ecs_task_role = module.REMOTE_STATE.STATE.COMMON_CONFIG.iam.roles.provision_tenant_infa_ecs_task_role
     cognito_power_user_lambda_role       = module.REMOTE_STATE.STATE.COMMON_CONFIG.iam.roles.cognito_power_user_lambda_role
+    read_write_dynamodb_lambda_role      = module.REMOTE_STATE.STATE.COMMON_CONFIG.iam.roles.read_write_dynamodb_lambda_role
   }
 
   tags = {
     Env       = var.ENV
     Terraform = true
     Feature   = var.FEATURE_NAME
+  }
+
+  env_vars = {
+    standard_vars = {
+      NODE_ENV          = var.ENV
+      SECRET_MANAGER_ID = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
+    }
   }
 }
 
@@ -30,7 +38,7 @@ module "REMOTE_STATE" {
 }
 
 module "LAMBDA_LAYER" {
-  source        = "../../modules/application/lambda_layer"
+  source        = "TravelOffice/lambda-layer/aws"
   LAMBDA_LAYERS = var.LAMBDA_LAYERS
   ENV           = var.ENV
   FEATURE_NAME  = var.FEATURE_NAME
@@ -38,20 +46,20 @@ module "LAMBDA_LAYER" {
 }
 
 module "LAMBDA_FUNCTION" {
-  source                    = "../../modules/application/lambda"
-  LAMBDA_FUNCTIONS          = var.LAMBDA_FUNCTIONS
-  LAMBDA_LAYER_ARNS         = module.LAMBDA_LAYER.lambda_layer_arns
-  MARKETING_VPC_ID          = module.REMOTE_STATE.STATE.MARKETING.backend.vpc.id
-  MARKETING_PRIVATE_SUBNETS = module.REMOTE_STATE.STATE.MARKETING.backend.vpc.private_subnets
-  ENV                       = var.ENV
-  FEATURE_NAME              = var.FEATURE_NAME
-  IAM_ROLES                 = local.iam_roles
-  TAGS                      = local.tags
-
+  source            = "TravelOffice/lambda/aws"
+  LAMBDA_FUNCTIONS  = var.LAMBDA_FUNCTIONS
+  LAMBDA_LAYER_ARNS = module.LAMBDA_LAYER.lambda_layer_arns
+  VPC_ID            = module.REMOTE_STATE.STATE.BASE_INFRASTRUCTURE.backend.vpc.id
+  SUBNETS           = module.REMOTE_STATE.STATE.BASE_INFRASTRUCTURE.backend.vpc.private_subnets
+  ENV               = var.ENV
+  FEATURE_NAME      = var.FEATURE_NAME
+  IAM_ROLES         = local.iam_roles
+  ENV_VARS          = local.env_vars
+  TAGS              = local.tags
 }
 
 module "API_GATEWAY" {
-  source                 = "../../modules/application/apigateway"
+  source                 = "TravelOffice/apigateway/aws"
   LAMBDA_ARNS            = module.LAMBDA_FUNCTION.lambda_arns
   API_ENDPOINTS          = var.API_ENDPOINTS
   AWS_REGION             = var.AWS_REGION
