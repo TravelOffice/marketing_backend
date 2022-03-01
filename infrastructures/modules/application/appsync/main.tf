@@ -14,10 +14,10 @@ module "LAMBDA_DATA_SOURCE" {
 }
 
 module "LAMBDA_RESOLVER" {
-  source         = "./resolver"
-  ENV            = var.ENV
-  FEATURE_NAME   = var.FEATURE_NAME
-  APPSYNC_API_ID = var.APPSYNC_API_ID
-  DATA_SOURCE    = module.LAMBDA_DATA_SOURCE.name
+  source            = "./resolver"
+  ENV               = var.ENV
+  FEATURE_NAME      = var.FEATURE_NAME
+  APPSYNC_API_ID    = var.APPSYNC_API_ID
+  DATA_SOURCE       = module.LAMBDA_DATA_SOURCE.name
   APPSYNC_RESOLVERS = var.APPSYNC_RESOLVERS
 }

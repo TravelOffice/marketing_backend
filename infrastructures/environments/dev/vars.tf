@@ -11,5 +11,5 @@ variable "BRANCH_NAME" {
 }
 
 variable "FEATURE_NAME" {
-  default = "marketing-backed"
+  default = "marketing-backend"
 }

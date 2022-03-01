@@ -82,11 +82,11 @@ module "LAMBDA_CRON" {
 }
 
 module "APPSYNC_CONFIGURATION" {
-  source         = "../../modules/application/appsync"
-  ENV            = var.ENV
-  FEATURE_NAME   = var.FEATURE_NAME
-  APPSYNC_API_ID = module.REMOTE_STATE.STATE.MARKETING.backend.appsync.id
+  source            = "../../modules/application/appsync"
+  ENV               = var.ENV
+  FEATURE_NAME      = var.FEATURE_NAME
+  APPSYNC_API_ID    = module.REMOTE_STATE.STATE.MARKETING.backend.appsync.id
   APPSYNC_RESOLVERS = var.APPSYNC_RESOLVERS
-  LAMBDA_ARN     = module.LAMBDA_FUNCTION.lambda_arns["chat_appsync_resolver_service"] #TODO: Need update correct lambda resolver name
-  TAGS           = local.tags
+  LAMBDA_ARN        = module.LAMBDA_FUNCTION.lambda_arns["chat_appsync_resolver_service"] #TODO: Need update correct lambda resolver name
+  TAGS              = local.tags
 }
