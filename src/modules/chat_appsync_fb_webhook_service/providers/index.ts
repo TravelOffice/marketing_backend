@@ -6,7 +6,7 @@ interface Providers {
   dynamoProvider: DynamoProvider,
 }
 
-const providers : Providers = {
+const providers: Providers = {
   dynamoProvider: new DynamoProvider(),
 };
 

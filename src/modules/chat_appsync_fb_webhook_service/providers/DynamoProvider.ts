@@ -1,7 +1,8 @@
 import * as AWS from 'aws';
+import { getEnv } from 'get-env';
 
 // Create the DynamoDB service object
-const docClient = new AWS.DynamoDB.DocumentClient({region: 'ap-southeast-1'});
+const docClient = new AWS.DynamoDB.DocumentClient({ region: getEnv('AWS_REGION') });
 
 type GetItemParams = AWS.DynamoDB.DocumentClient.GetItemInput;
 export default class DynamoProvider {

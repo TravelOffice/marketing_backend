@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getAwsSecretValue } from 'get-env';
 import { AppSyncRepository } from './interfaces/AppSyncRepository';
 import { ReceiveMessageCommandArgs, receiveMessageQuery } from '../models';
 
@@ -7,9 +8,9 @@ export default class AppSyncRepositoryImpl implements AppSyncRepository {
     // Get message payload
     const message = webhookEvent.message;
 
-    // Identify customer id. If is_echo === true => message is sent by Facebook customer, otherwise message is sent by Page
+    // Identify customer id. If is_echo === true => message is sent by Facebook page, otherwise message is sent by customer
     // References https://developers.facebook.com/docs/messenger-platform/reference/webhook-events/message-echoes
-    const customerId = message.is_echo ? webhookEvent.sender.id : webhookEvent.recipient.id;
+    const customerId = message.is_echo ? webhookEvent.recipient.id : webhookEvent.sender.id;
 
     // Initialize AppSync arguments
     const args: ReceiveMessageCommandArgs = {
@@ -24,11 +25,13 @@ export default class AppSyncRepositoryImpl implements AppSyncRepository {
     }
 
     // Send command `receivedMessage` to AppSync graphql endpoint
+    const endpoint = await getAwsSecretValue('CHAT_APPSYNC_GRAPHQL_ENDPOINT');
+    const apiKey = await getAwsSecretValue('CHAT_APPSYNC_API_KEY');
     const response = await axios({
-      baseURL: 'https://dkpaitkq5fevxoqzgbgp5imjs4.appsync-api.ap-southeast-1.amazonaws.com/graphql', // AppSync endpoint
+      baseURL: endpoint,
       timeout: 5000,
       headers: {
-        'x-api-key': 'da2-ey3colbavzdydnqazsaaibpske'
+        'x-api-key': apiKey
       },
       method: 'POST',
       data: {
@@ -37,7 +40,7 @@ export default class AppSyncRepositoryImpl implements AppSyncRepository {
         operationName: 'ReceivedMessageMutation',
       },
     });
-    console.log('Fetched mutation data', response.data);
+    console.info('[AppSyncRepositoryImpl.sendReceivedMessageCommand] Fetched mutation data', response.data);
 
     // TODO: Update cached last message for page in DynamoDB table
     return response.data;
