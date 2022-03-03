@@ -1,6 +1,7 @@
 import cors from 'cors';
 import express, { Request, Response } from 'express';
 import compression from 'compression';
+import { getAwsSecretValue } from 'get-env';
 import { appSyncRepository } from './repositories';
 
 const app = express();
@@ -50,18 +51,18 @@ app.post('/chat-fb-webhook', async (req: Request, res: Response) => {
 app.get('/chat-fb-webhook', async (req: Request, res: Response) => {
   try {
     // Your verify token. Should be a random string.
-    let VERIFY_TOKEN = '1CDFFB13226C9AC1C58D2F59D8B65';
+    const verifyToken = await getAwsSecretValue('FB_MESSAGE_PLATFORM_VERIFY_TOKEN');
 
     // Parse the query params
-    let mode = req.query['hub.mode'];
-    let token = req.query['hub.verify_token'];
-    let challenge = req.query['hub.challenge'];
+    const mode = req.query['hub.mode'];
+    const token = req.query['hub.verify_token'];
+    const challenge = req.query['hub.challenge'];
 
     // Checks if a token and mode is in the query string of the request
     if (mode && token) {
 
       // Checks the mode and token sent is correct
-      if (mode === 'subscribe' && token === VERIFY_TOKEN) {
+      if (mode === 'subscribe' && token === verifyToken) {
 
         // Responds with the challenge token from the request
         console.log('[app.get] WEBHOOK_VERIFIED');

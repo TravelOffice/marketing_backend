@@ -7,7 +7,7 @@ interface Repositories {
   fbMessagePlatformRepository: FbMessagePlatformRepository,
 }
 
-const repositories : Repositories = {
+const repositories: Repositories = {
   fbMessagePlatformRepository: new FbMessagePlatformRepositoryImpl(),
 };
 
