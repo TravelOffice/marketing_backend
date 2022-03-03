@@ -14,7 +14,7 @@ export default class FbMessagePlatformRepositoryImpl implements FbMessagePlatfor
     const params = {
       TableName: saleChatTable,
       IndexName: 'PageIdIndex', // GSI created for pageid
-      KeyConditionExpression: 'id = :id AND begins_with(#sk, :sk_filter_value) ',
+      KeyConditionExpression: 'id = :id AND begins_with(#sk, :sk_filter_value)',
       ExpressionAttributeNames: { '#sk': 'sk' },
       ExpressionAttributeValues: {
         // Given page id
