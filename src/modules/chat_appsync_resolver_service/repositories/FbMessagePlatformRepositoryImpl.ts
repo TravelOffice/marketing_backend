@@ -25,13 +25,12 @@ export default class FbMessagePlatformRepositoryImpl implements FbMessagePlatfor
       },
       ProjectionExpression: 'sk,accessToken,id',
     };
-    const rs = await dynamoProvider.getItem(params);
-    if (!rs.Item) {
-      throw new Error(`Can not get token for Facebook page with id ${pageId}`);
+    const rs = await dynamoProvider.query(params);
+    if (rs.Items && rs.Items?.length > 0) {
+      console.info('[FbMessagePlatformRepositoryImpl._getFbMessagePlatformToken] DynamoDB item', rs.Items[0]);
+      return rs.Items[0].accessToken;
     }
-
-    console.info('[FbMessagePlatformRepositoryImpl._getFbMessagePlatformToken] DynamoDB item', rs.Item);
-    return rs.Item.accessToken;
+    throw new Error(`Can not get token for Facebook page with id ${pageId}`);
   }
 
   /**
