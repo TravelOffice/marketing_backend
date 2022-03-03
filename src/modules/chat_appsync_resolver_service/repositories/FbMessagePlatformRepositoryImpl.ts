@@ -13,14 +13,19 @@ export default class FbMessagePlatformRepositoryImpl implements FbMessagePlatfor
     const saleChatTable = await getAwsSecretValue('SALE_CHAT_TABLE');
     const params = {
       TableName: saleChatTable,
-      IndexName: 'PageIdIndex', // GSI created for pageid
-      KeyConditionExpression: 'id = :id AND begins_with(#sk, :sk_filter_value)',
-      ExpressionAttributeNames: { '#sk': 'sk' },
+      IndexName: 'PageIdIndex',
+      KeyConditionExpression: '#pageId = :id',
+      ExpressionAttributeNames: {
+        '#pageId': 'id',
+        '#sk': 'sk',
+      },
+      // Filter the item startwith `PAGE_fb_` to make sure the item is facebook token
+      // Prevent the same token with other providers such as Zalo, Telegram
+      FilterExpression: 'begins_with(#sk, :sk_filter_value)',
       ExpressionAttributeValues: {
         // Given page id
         ':id': pageId,
-        // Filter the item startwith `PAGE_fb_` to make sure the item is facebook token
-        // Prevent the same token with other providers such as Zalo, Telegram
+        // Prefix to Facebook item
         ':sk_filter_value': 'PAGE_fb_',
       },
       ProjectionExpression: 'sk,accessToken,id',
