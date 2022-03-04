@@ -1,2 +1,4 @@
 export * from './GqlCommands';
-export * from './ReceiveMessageCommandArgs.ts';
+export * from './ReceiveMessageCommandArgs';
+export * from './WebhookMessageEvent';
+export * from './ReceiveMessageCommandResponse';

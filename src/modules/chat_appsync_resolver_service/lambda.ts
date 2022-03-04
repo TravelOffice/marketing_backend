@@ -1,9 +1,5 @@
 import { fbMessagePlatformRepository } from './repositories';
-
-type AppSyncEvent = {
-  field: string,
-  arguments: any,
-}
+import { AppSyncEvent } from './models';
 
 // eslint-disable-next-line import/prefer-default-export
 export const handler = async (event: AppSyncEvent) => {
@@ -13,7 +9,7 @@ export const handler = async (event: AppSyncEvent) => {
   // Handle each case of resolver type
   switch (event.field) {
     case 'sendMessage': // TravelOffice user send message from Sales web application. Message will be received from AppSync and send to 3rd-party API
-      returnedData = await fbMessagePlatformRepository.sendMessage(args);
+      returnedData = await fbMessagePlatformRepository.sendMessage(event.arguments);
       resolverMessage = 'One message is created by Sales System';
       break;
 
@@ -25,18 +21,18 @@ export const handler = async (event: AppSyncEvent) => {
       break;
 
     case 'allConversations': // Fetch conversations information
-      returnedData = await fbMessagePlatformRepository.getConversations(args.pageId);
+      returnedData = await fbMessagePlatformRepository.getConversations(event.arguments.pageId);
       resolverMessage = 'The conversations has been fetched from third-party platform';
       console.log(returnedData);
       break;
 
     case 'allMessages': // Fetch messages when opening Sales Web or user scroll the chat box
-      returnedData = await fbMessagePlatformRepository.getMessages(args.pageId, args.conversationId, args.before);
+      returnedData = await fbMessagePlatformRepository.getMessages(event.arguments.pageId, event.arguments.conversationId, event.arguments.before);
       resolverMessage = 'The messages has been fetched from third-party platform';
       break;
 
     default:
-      throw new Error(`Unknown field, unable to resolve ${event.field}`);
+      throw new Error(`Unknown field, unable to resolve ${event['field']}`);
   }
   return {
     message: resolverMessage,
