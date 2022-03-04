@@ -1,4 +1,5 @@
+import { WebhookMessageEvent, ReceiveMessageCommandResponse } from '../../models';
 
 export interface AppSyncRepository {
-  sendReceivedMessageCommand: (webhookEvent: any) => Promise<any>
+  sendReceivedMessageCommand: (webhookEvent: WebhookMessageEvent) => Promise<ReceiveMessageCommandResponse>
 }

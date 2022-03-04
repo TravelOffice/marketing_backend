@@ -1,10 +1,15 @@
 import axios from 'axios';
 import { getAwsSecretValue } from 'get-env';
 import { AppSyncRepository } from './interfaces/AppSyncRepository';
-import { ReceiveMessageCommandArgs, receiveMessageQuery } from '../models';
+import {
+  receiveMessageQuery,
+  ReceiveMessageCommandArgs,
+  ReceiveMessageCommandResponse,
+  WebhookMessageEvent
+} from '../models';
 
 export default class AppSyncRepositoryImpl implements AppSyncRepository {
-  sendReceivedMessageCommand = async (webhookEvent: any): Promise<any> => {
+  sendReceivedMessageCommand = async (webhookEvent: WebhookMessageEvent): Promise<ReceiveMessageCommandResponse> => {
     // Get message payload
     const message = webhookEvent.message;
 
