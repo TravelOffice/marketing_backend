@@ -1,6 +1,6 @@
 import { Message } from './Message';
 
-type EventField = 'sendMessage' | 'receivedMessage' | 'allConversations' | 'allMessages';
+type EventField = 'sendMessage' | 'receivedMessage' | 'allFbConversations' | 'allFbMessages' | 'allZaloConversations' | 'allZaloMessages';
 type UnknownEventField<T> = T extends EventField ? never : T & EventField extends T ? never : T;
 
 type SendMessageEvent = {
@@ -12,19 +12,38 @@ type ReceivedMessageEvent = {
   field: 'receivedMessage',
   arguments: Message
 }
-type AllConversationsEvent = {
-  field: 'allConversations',
+
+// Facebook event
+type AllFbConversationsEvent = {
+  field: 'allFbConversations',
   arguments: {
     pageId: string
   }
 }
 
-type AllMessagesEvent = {
-  field: 'allMessages',
+type AllFbMessagesEvent = {
+  field: 'allFbMessages',
   arguments: {
     pageId: string,
     conversationId: string,
     before?: string
+  }
+}
+
+// Zalo event
+type AllZaloConversationsEvent = {
+  field: 'allZaloConversations',
+  arguments: {
+
+  }
+}
+
+type AllZaloMessageEvent = {
+  field: 'allZaloMessages',
+  arguments: {
+    conversationId: string,
+    offset: number,
+    limit?: number
   }
 }
 
@@ -33,4 +52,4 @@ type UnknownEvent = {
   arguments: any
 }
 
-export type AppSyncEvent = SendMessageEvent | ReceivedMessageEvent | AllConversationsEvent | AllMessagesEvent | UnknownEvent;
+export type AppSyncEvent = SendMessageEvent | ReceivedMessageEvent | AllFbConversationsEvent | AllFbMessagesEvent | AllZaloConversationsEvent | AllZaloMessageEvent | UnknownEvent;
