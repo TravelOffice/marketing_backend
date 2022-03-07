@@ -1,5 +1,6 @@
 import { fbMessagePlatformRepository } from './repositories';
-import { AppSyncEvent } from './models';
+import { AppSyncEvent, Message } from './models';
+import { ChatPlatform } from 'common-models';
 
 // eslint-disable-next-line import/prefer-default-export
 export const handler = async (event: AppSyncEvent) => {
@@ -9,7 +10,7 @@ export const handler = async (event: AppSyncEvent) => {
   // Handle each case of resolver type
   switch (event.field) {
     case 'sendMessage': // TravelOffice user send message from Sales web application. Message will be received from AppSync and send to 3rd-party API
-      returnedData = await fbMessagePlatformRepository.sendMessage(event.arguments);
+      returnedData = await sendMessage(event.arguments);
       resolverMessage = 'One message is created by Sales System';
       break;
 
@@ -20,13 +21,13 @@ export const handler = async (event: AppSyncEvent) => {
       returnedData = args;
       break;
 
-    case 'allConversations': // Fetch conversations information
+    case 'allFbConversations': // Fetch conversations information
       returnedData = await fbMessagePlatformRepository.getConversations(event.arguments.pageId);
       resolverMessage = 'The conversations has been fetched from third-party platform';
       console.log(returnedData);
       break;
 
-    case 'allMessages': // Fetch messages when opening Sales Web or user scroll the chat box
+    case 'allFbMessages': // Fetch messages when opening Sales Web or user scroll the chat box
       returnedData = await fbMessagePlatformRepository.getMessages(event.arguments.pageId, event.arguments.conversationId, event.arguments.before);
       resolverMessage = 'The messages has been fetched from third-party platform';
       break;
@@ -39,3 +40,12 @@ export const handler = async (event: AppSyncEvent) => {
     data: returnedData
   }
 };
+
+const sendMessage = async (message: Message) => {
+  switch (message.platform) {
+    case ChatPlatform.facebook:
+      return fbMessagePlatformRepository.sendMessage(message);
+    default:
+      throw new Error(`Chat platform ${message.platform} is not supported`);
+  }
+}

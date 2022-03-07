@@ -5,8 +5,9 @@ import {
   receiveMessageQuery,
   ReceiveMessageCommandArgs,
   ReceiveMessageCommandResponse,
-  WebhookMessageEvent
-} from '../models';
+  WebhookMessageEvent,
+  ChatPlatform
+} from 'common-models';
 
 export default class AppSyncRepositoryImpl implements AppSyncRepository {
   sendReceivedMessageCommand = async (webhookEvent: WebhookMessageEvent): Promise<ReceiveMessageCommandResponse> => {
@@ -27,6 +28,7 @@ export default class AppSyncRepositoryImpl implements AppSyncRepository {
       messageData: JSON.stringify({
         text: message.text
       }),
+      platform: ChatPlatform.facebook
     }
 
     // Send command `receivedMessage` to AppSync graphql endpoint

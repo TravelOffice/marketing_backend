@@ -1,3 +1,5 @@
+import { ChatPlatform } from "./ChatPlatformEnum";
+
 export interface ReceiveMessageCommandArgs {
   id: string,
   sender: string,

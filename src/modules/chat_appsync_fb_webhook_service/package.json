@@ -19,8 +19,7 @@
     "cors": "^2.8.5",
     "express": "^4.17.2",
     "get-env": "file:../../libs/get-env",
-    "graphql": "^16.3.0",
-    "graphql-tag": "^2.12.6",
+    "common-models": "file:../../libs/common-models",
     "object-assign": "^4.1.1",
     "reflect-metadata": "^0.1.13"
   },
