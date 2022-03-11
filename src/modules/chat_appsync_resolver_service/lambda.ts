@@ -1,4 +1,4 @@
-import { fbMessagePlatformRepository } from './repositories';
+import { fbMessagePlatformRepository, zaloMessagePlatformRepository } from './repositories';
 import { AppSyncEvent, Message } from './models';
 import { ChatPlatform } from 'common-models';
 
@@ -24,12 +24,21 @@ export const handler = async (event: AppSyncEvent) => {
     case 'allFbConversations': // Fetch conversations information
       returnedData = await fbMessagePlatformRepository.getConversations(event.arguments.pageId);
       resolverMessage = 'The conversations has been fetched from third-party platform';
-      console.log(returnedData);
       break;
 
     case 'allFbMessages': // Fetch messages when opening Sales Web or user scroll the chat box
       returnedData = await fbMessagePlatformRepository.getMessages(event.arguments.pageId, event.arguments.conversationId, event.arguments.before);
       resolverMessage = 'The messages has been fetched from third-party platform';
+      break;
+
+    case 'allZaloConversations':
+      returnedData = await zaloMessagePlatformRepository.getConversations(event.arguments.pageId, event.arguments.offset, event.arguments.count);
+      resolverMessage = 'The conversations has been fetched from Zalo platform';
+      break;
+
+    case 'allZaloMessages':
+      returnedData = await zaloMessagePlatformRepository.getMessages(event.arguments.pageId, event.arguments.userId, event.arguments.offset, event.arguments.count);
+      resolverMessage = 'The message has been fetched from Zalo platform';
       break;
 
     default:
@@ -42,10 +51,12 @@ export const handler = async (event: AppSyncEvent) => {
 };
 
 const sendMessage = async (message: Message) => {
-  switch (message.platform) {
+  switch (message.chatPlatform) {
     case ChatPlatform.facebook:
       return fbMessagePlatformRepository.sendMessage(message);
+    case ChatPlatform.zalo:
+      return zaloMessagePlatformRepository.sendMessage(message);
     default:
-      throw new Error(`Chat platform ${message.platform} is not supported`);
+      throw new Error(`Chat platform ${message.chatPlatform} is not supported`);
   }
 }

@@ -34,6 +34,7 @@ app.post('/chat-zalo-webhook', async (req: Request, res: Response) => {
 
     // Checks this is an event from a page subscription
     if (body.app_id === zaloAppId) {
+      console.info('[app.post] Received webhook event', body);
       // Check this is user sent message event
       if (userSendDataEvents.includes(body.event_name)) {
         await appSyncRepository.sendReceivedMessageCommand(body);

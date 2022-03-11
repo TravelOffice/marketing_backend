@@ -7,7 +7,7 @@ export interface Message {
   recipient: string,
   timestamp: number,
   messageData: any,
-  platform: ChatPlatform
+  chatPlatform: ChatPlatform
 }
 
 export const toSendFbMessagePayload = (message: Message): SendFacebookMessageRequestPayload => {

@@ -34,16 +34,19 @@ type AllFbMessagesEvent = {
 type AllZaloConversationsEvent = {
   field: 'allZaloConversations',
   arguments: {
-
+    pageId: string,
+    offset?: number,
+    count?: number
   }
 }
 
 type AllZaloMessageEvent = {
   field: 'allZaloMessages',
   arguments: {
-    conversationId: string,
+    pageId: string,
+    userId: string,
     offset: number,
-    limit?: number
+    count?: number
   }
 }
 
