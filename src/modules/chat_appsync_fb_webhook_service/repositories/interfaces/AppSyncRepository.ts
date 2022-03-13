@@ -1,5 +1,5 @@
-import { WebhookMessageEvent, ReceiveMessageCommandResponse } from 'common-models';
+import { FacebookWebhookMessageEvent, ReceiveMessageCommandResponse } from 'common-models';
 
 export interface AppSyncRepository {
-  sendReceivedMessageCommand: (webhookEvent: WebhookMessageEvent) => Promise<ReceiveMessageCommandResponse>
+  sendReceivedMessageCommand: (webhookEvent: FacebookWebhookMessageEvent) => Promise<ReceiveMessageCommandResponse>
 }

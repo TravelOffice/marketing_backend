@@ -1,4 +1,4 @@
-import { ChatPlatform } from "./ChatPlatformEnum"
+import { AppSyncMessageData } from 'standardized-platform-models';
 
 export interface ReceiveMessageCommandResponse {
   data: {
@@ -7,7 +7,7 @@ export interface ReceiveMessageCommandResponse {
     recipient: string,
     customerId: string,
     timestamp:number,
-    messageData: any,
+    messageData: AppSyncMessageData,
   }, // GraphQL model
   message: string // Query result as string
 }

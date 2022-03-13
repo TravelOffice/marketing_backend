@@ -1,4 +1,4 @@
-import { ChatPlatform } from "./ChatPlatformEnum";
+import { ChatPlatform } from './ChatPlatform';
 
 export interface ReceiveMessageCommandArgs {
   id: string,
@@ -6,5 +6,6 @@ export interface ReceiveMessageCommandArgs {
   recipient: string,
   customerId: string,
   timestamp: number,
-  messageData: string,
+  messageData: string, // AWS AppSync support AWSJSON type, JSON must be stringified before sending to AppSync
+  platform: ChatPlatform,
 }

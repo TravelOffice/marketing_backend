@@ -5,11 +5,13 @@ import {
   receiveMessageQuery,
   ReceiveMessageCommandArgs,
   ReceiveMessageCommandResponse,
-  WebhookMessageEvent,
+  FacebookWebhookMessageEvent,
+  ChatPlatform,
+  AppSyncMessageData
 } from 'common-models';
 
 export default class AppSyncRepositoryImpl implements AppSyncRepository {
-  sendReceivedMessageCommand = async (webhookEvent: WebhookMessageEvent): Promise<ReceiveMessageCommandResponse> => {
+  sendReceivedMessageCommand = async (webhookEvent: FacebookWebhookMessageEvent): Promise<ReceiveMessageCommandResponse> => {
     // Get message payload
     const message = webhookEvent.message;
 
@@ -18,15 +20,17 @@ export default class AppSyncRepositoryImpl implements AppSyncRepository {
     const customerId = message.is_echo ? webhookEvent.recipient.id : webhookEvent.sender.id;
 
     // Initialize AppSync arguments
+    const messageId = message.mid;
+    const messageData: AppSyncMessageData = Object.assign(message, {});
+    delete messageData.mid; // Delete mid attribute, mid will be appeared in ReceiveMessageCommandArgs
     const args: ReceiveMessageCommandArgs = {
-      id: message.mid,
+      id: messageId,
       sender: webhookEvent.sender.id,
       recipient: webhookEvent.recipient.id,
       customerId: customerId,
       timestamp: webhookEvent.timestamp,
-      messageData: JSON.stringify({
-        text: message.text
-      }),
+      messageData: JSON.stringify(messageData),
+      platform: ChatPlatform.facebook
     }
 
     // Send command `receivedMessage` to AppSync graphql endpoint
