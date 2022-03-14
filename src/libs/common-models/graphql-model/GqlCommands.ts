@@ -1,5 +1,5 @@
-import { gql } from 'graphql-tag';
 import { print } from 'graphql';
+import { gql } from 'graphql-tag';
 
 const receiveMessageGql = gql`
   mutation ReceivedMessageMutation($id: String!, $sender: String!, $recipient: String!, $customerId: String!, $timestamp: AWSTimestamp, $messageData: AWSJSON!) {

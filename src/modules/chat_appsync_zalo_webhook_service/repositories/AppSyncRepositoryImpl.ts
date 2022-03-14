@@ -1,28 +1,27 @@
 import axios from 'axios';
+import {
+  ChatPlatform, ReceiveMessageCommandArgs,
+  ReceiveMessageCommandResponse, receiveMessageQuery, ZaloWebhookMessageEvent
+} from 'common-models';
 import { getAwsSecretValue } from 'get-env';
 import { AppSyncRepository } from './interfaces/AppSyncRepository';
-import {
-  receiveMessageQuery,
-  ReceiveMessageCommandArgs,
-  ReceiveMessageCommandResponse,
-  WebhookMessageEvent
-} from 'common-models';
 
 export default class AppSyncRepositoryImpl implements AppSyncRepository {
-  sendReceivedMessageCommand = async (webhookEvent: WebhookMessageEvent): Promise<ReceiveMessageCommandResponse> => {
+  sendReceivedMessageCommand = async (webhookEvent: ZaloWebhookMessageEvent): Promise<ReceiveMessageCommandResponse> => {
     // Get message payload
     const message = webhookEvent.message;
 
     // Initialize AppSync arguments
+    const messageId = message.msg_id;
+    delete message.msg_id;
     const args: ReceiveMessageCommandArgs = {
-      id: message.msg_id,
+      id: messageId,
       sender: webhookEvent.sender.id,
       recipient: webhookEvent.recipient.id,
       customerId: webhookEvent.sender.id,
       timestamp: Number(webhookEvent.timestamp),
-      messageData: JSON.stringify({
-        text: message.text
-      }),
+      messageData: JSON.stringify(message),
+      platform: ChatPlatform.zalo
     }
 
     // Send command `receivedMessage` to AppSync graphql endpoint
