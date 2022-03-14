@@ -28,12 +28,37 @@ export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePla
         // Prefix to Zalo item
         ':sk_filter_value': 'PAGE_zalo_',
       },
-      ProjectionExpression: 'sk,accessToken,id',
+      ProjectionExpression: 'pk,sk,accessToken,refreshToken,id,expireIn',
     };
     const rs = await dynamoProvider.query(params);
     if (rs.Items && rs.Items?.length > 0) {
-      console.info('[ZaloMessagePlatformRepositoryImpl._getFbMessagePlatformToken] DynamoDB item', rs.Items[0]);
-      return rs.Items[0].accessToken;
+      console.info('[ZaloMessagePlatformRepositoryImpl._getZaloMessagePlatformToken] DynamoDB item', rs.Items[0]);
+      if (rs.Items[0].expireIn > Date.now()) {
+        return rs.Items[0].accessToken;
+      } else {
+        const refreshTokenResponse = await zaloMessagePlatformProvider.refreshToken(rs.Items[0].refreshToken);
+        if (refreshTokenResponse) {
+          const expireIn = new Date(Date.now() + refreshTokenResponse.expires_in * 1000);
+          const updateParams : AWS.DynamoDB.UpdateItemInput = {
+            TableName:saleChatTable,
+            Key: {
+                'pk': rs.Items[0].pk,
+                'sk': rs.Items[0].sk, 
+            },
+            UpdateExpression: 'set accessToken = :at, refreshToken= :rt, expireIn = :ei',
+            ExpressionAttributeValues: {
+                ':at': refreshTokenResponse.access_token,
+                ':rt': refreshTokenResponse.refresh_token,
+                ':ei': expireIn.getTime()
+            },
+            ReturnValues:'UPDATED_NEW'
+          };
+          const updatedRs = await dynamoProvider.update(updateParams);
+          if (updatedRs) {
+            return refreshTokenResponse.access_token;
+          }
+        }
+      }
     }
     throw new Error(`Can not get token for Zalo page with id ${pageId}`);
   }
@@ -66,7 +91,8 @@ export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePla
       const pageToken = await this._getZaloMessagePlatformToken(pageId);
       return zaloMessagePlatformProvider.getConversations(pageToken, offset, count);
     } catch (error) {
-      console.log(`[FbMessagePlatformRepositoryImpl.getConversations] Generated an error`, error);
+      console.log(`[ZaloMessagePlatformRepositoryImpl.getConversations] Generated an error`, error);
+      throw error;
     }
   };
 
@@ -83,7 +109,8 @@ export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePla
       const pageToken = await this._getZaloMessagePlatformToken(pageId);
       return zaloMessagePlatformProvider.getMessages(pageToken, userId, offset, count);
     } catch (error) {
-      console.log(`[FbMessagePlatformRepositoryImpl.getMessages] Generated an error`, error);
+      console.log(`[ZaloMessagePlatformRepositoryImpl.getMessages] Generated an error`, error);
+      throw error;
     }
   };
 }

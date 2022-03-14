@@ -6,8 +6,12 @@ const docClient = new AWS.DynamoDB.DocumentClient({ region: getEnv('AWS_REGION')
 
 type QueryInput = AWS.DynamoDB.DocumentClient.QueryInput;
 type QueryOutput = AWS.DynamoDB.DocumentClient.QueryOutput;
+type UpdateItemInput = AWS.DynamoDB.UpdateItemInput;
+type UpdateItemOutput = AWS.DynamoDB.UpdateItemOutput;
+
 export default class DynamoProvider {
 
   query = async (params: QueryInput): Promise<QueryOutput> => docClient.query(params).promise();
 
+  update = async (params: UpdateItemInput): Promise<UpdateItemOutput> => docClient.update(params).promise();
 }

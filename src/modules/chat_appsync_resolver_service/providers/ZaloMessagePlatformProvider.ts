@@ -7,8 +7,9 @@ import {
 } from '../models';
 
 export default class ZaloMessagePlatformProvider {
-  private _messagePlatformBaseUrl: string = 'https://openapi.zalo.me';
-  private _messagePlatformRequestTimeout: number = 60000
+  private _messagePlatformBaseUrl: string = 'https://openapi.zalo.me/v2.0';
+  private _oauthBaseUrl: string = 'https://oauth.zaloapp.com/v4';
+  private _messagePlatformRequestTimeout: number = 15000;
   private _axiosInstance: AxiosInstance;
 
   /**
@@ -16,30 +17,36 @@ export default class ZaloMessagePlatformProvider {
    */
   constructor() {
     this._axiosInstance = axios.create({
-      baseURL: this._messagePlatformBaseUrl,
       timeout: this._messagePlatformRequestTimeout, // Milliseconds
     });
   }
-
+  
   refreshToken = async (resfreshToken: string): Promise<ZaloRefreshTokenResponsePayload> => {
     const appSecretKey = await getAwsSecretValue('ZALO_MESSAGE_PLATFORM_SECRET_KEY');
-    const appId = Number(await getAwsSecretValue('ZALO_MESSAGE_PLAFORM_APP_ID'));
+    const appId = await getAwsSecretValue('ZALO_MESSAGE_PLATFORM_APP_ID');
+
     const response = await this._axiosInstance.post(
-      '/v4/oa/access_token',
-      `refresh_token="${resfreshToken}"&app_id=${appId}$grant_type="refresh_token"`,
+      `${this._oauthBaseUrl}/oa/access_token`,
+      null,
       {
-        'headers': {
+        headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
           'secret_key': appSecretKey
+        },
+        params: {
+          'app_id': appId,
+          'grant_type': 'refresh_token',
+          'refresh_token': resfreshToken
         }
       }
     );
-    console.info(
-      `[ZaloMessagePlatformProvider.refreshTOken] Refresh token successfully:`,
-      response.data
-    );
-
-    return response.data;
+    if (response.data.error) {
+      throw new Error(response.data.error_name);
+    } else {
+      console.info(
+        `[ZaloMessagePlatformProvider.refreshToken] Refresh token successfully:`, response.data);
+      return response.data;
+    }
   }
 
   /**
@@ -50,7 +57,7 @@ export default class ZaloMessagePlatformProvider {
    */
   sendMessage = async (pageToken: string, messagePayload: SendZaloMessageRequestPayload): Promise<void> => {
     const response = await this._axiosInstance.post(
-      '/v2.0/oa/messages',
+      `${this._messagePlatformBaseUrl}/oa/messages`,
       messagePayload,
       {
         'headers': {
@@ -59,10 +66,14 @@ export default class ZaloMessagePlatformProvider {
         }
       }
     );
-    console.info(
-      `[ZaloMessagePlatformProvider.sendMessage] The message from page ${pageToken} has been sent, response message from Message Platform`,
-      response.data
-    );
+    if (response.data.error === 0) {
+      console.info(
+        `[ZaloMessagePlatformProvider.sendMessage] The message from page ${pageToken} has been sent, response message from Message Platform`,
+        response.data
+      );  
+    } else {
+      throw new Error(response.data.message);
+    }
   }
 
   /**
@@ -74,18 +85,28 @@ export default class ZaloMessagePlatformProvider {
    */
   getConversations = async (pageToken: string, offset: number = 0, count: number = 10): Promise<ZaloMessageResponsePayload> => {
     const response = await this._axiosInstance.get(
-      `/v2.0/oa/listrecentchat?data={"offset": ${offset}, "count": ${count}}`,
+      `${this._messagePlatformBaseUrl}/oa/listrecentchat`,
       {
-        'headers': {
+        headers: {
           'access_token': pageToken
+        },
+        params: {
+          data: {
+            'offset': offset,
+            'count': count
+          }
         }
       }
     );
-    console.info(
-      `[ZaloMessagePlatformProvider.getConversations] Get conversations successfully:`,
-      response.data
-    );
-    return response.data;
+    if (response.data.error === 0) {
+      console.info(
+        `[ZaloMessagePlatformProvider.getConversations] Get conversations successfully:`,
+        response.data
+      );
+      return response.data;
+    } else {
+      throw new Error(response.data.message);
+    }
   };
 
   /**
@@ -97,17 +118,28 @@ export default class ZaloMessagePlatformProvider {
    */
   getMessages = async (pageToken: string, userId: string, offset: number = 0, count: number = 10): Promise<ZaloMessageResponsePayload> => {
     const response = await this._axiosInstance.get(
-      `/v2.0/oa/conversation?data={"user_id": ${userId}, "offset": ${offset}, "count": ${count}}`,
+      `${this._messagePlatformBaseUrl}/oa/conversation`,
       {
-        'headers': {
+        headers: {
           'access_token': pageToken
+        },
+        params: {
+          data: {
+            'user_id': userId,
+            'offset': offset,
+            'count': count
+          }
         }
       }
     );
-    console.info(
-      `[ZaloMessagePlatformProvider.getMessages] Return messages of user ${userId} with data`,
-      response.data
-    );
-    return response.data;
+    if (response.data.error === 0) {
+      console.info(
+        `[ZaloMessagePlatformProvider.getMessages] Return messages of user ${userId} with data`,
+        response.data
+      );
+      return response.data;  
+    } else {
+      throw new Error(response.data.message);
+    }
   };
 }
