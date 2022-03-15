@@ -1,4 +1,5 @@
 import { AppSyncMessageData } from 'standardized-platform-models';
+import { ChatPlatform } from './ChatPlatform';
 
 export interface ReceiveMessageCommandResponse {
   data: {
@@ -8,6 +9,7 @@ export interface ReceiveMessageCommandResponse {
     customerId: string,
     timestamp:number,
     messageData: AppSyncMessageData,
+    chatPlatform: ChatPlatform,
   }, // GraphQL model
   message: string // Query result as string
 }

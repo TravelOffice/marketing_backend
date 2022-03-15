@@ -39,19 +39,19 @@ export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePla
         const refreshTokenResponse = await zaloMessagePlatformProvider.refreshToken(rs.Items[0].refreshToken);
         if (refreshTokenResponse) {
           const expireIn = new Date(Date.now() + refreshTokenResponse.expires_in * 1000);
-          const updateParams : AWS.DynamoDB.UpdateItemInput = {
-            TableName:saleChatTable,
+          const updateParams: AWS.DynamoDB.UpdateItemInput = {
+            TableName: saleChatTable,
             Key: {
-                'pk': rs.Items[0].pk,
-                'sk': rs.Items[0].sk, 
+              'pk': rs.Items[0].pk,
+              'sk': rs.Items[0].sk,
             },
             UpdateExpression: 'set accessToken = :at, refreshToken= :rt, expireIn = :ei',
             ExpressionAttributeValues: {
-                ':at': refreshTokenResponse.access_token,
-                ':rt': refreshTokenResponse.refresh_token,
-                ':ei': expireIn.getTime()
+              ':at': refreshTokenResponse.access_token,
+              ':rt': refreshTokenResponse.refresh_token,
+              ':ei': expireIn.getTime()
             },
-            ReturnValues:'UPDATED_NEW'
+            ReturnValues: 'UPDATED_NEW'
           };
           const updatedRs = await dynamoProvider.update(updateParams);
           if (updatedRs) {
