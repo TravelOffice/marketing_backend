@@ -30,7 +30,7 @@ export default class AppSyncRepositoryImpl implements AppSyncRepository {
       customerId: customerId,
       timestamp: webhookEvent.timestamp,
       messageData: JSON.stringify(messageData),
-      platform: ChatPlatform.facebook
+      chatPlatform: ChatPlatform.facebook
     }
 
     // Send command `receivedMessage` to AppSync graphql endpoint

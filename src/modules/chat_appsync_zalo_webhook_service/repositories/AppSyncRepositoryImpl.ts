@@ -21,7 +21,7 @@ export default class AppSyncRepositoryImpl implements AppSyncRepository {
       customerId: webhookEvent.sender.id,
       timestamp: Number(webhookEvent.timestamp),
       messageData: JSON.stringify(message),
-      platform: ChatPlatform.zalo
+      chatPlatform: ChatPlatform.zalo
     }
 
     // Send command `receivedMessage` to AppSync graphql endpoint
