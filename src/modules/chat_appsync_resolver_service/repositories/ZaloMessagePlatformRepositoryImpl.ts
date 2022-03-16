@@ -1,3 +1,4 @@
+import * as AWS from 'aws';
 import { getAwsSecretValue } from 'get-env';
 import { Message, toSendZaloMessagePayload, ZaloMessageResponsePayload } from '../models';
 import { dynamoProvider, zaloMessagePlatformProvider } from '../providers';
@@ -46,11 +47,11 @@ export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePla
               'sk': rs.Items[0].sk,
             },
             UpdateExpression: 'set accessToken = :at, refreshToken= :rt, expireIn = :ei',
-            ExpressionAttributeValues: {
+            ExpressionAttributeValues: AWS.DynamoDB.Converter.marshall({
               ':at': refreshTokenResponse.access_token,
               ':rt': refreshTokenResponse.refresh_token,
               ':ei': expireIn.getTime()
-            },
+            }),
             ReturnValues: 'UPDATED_NEW'
           };
           const updatedRs = await dynamoProvider.update(updateParams);
