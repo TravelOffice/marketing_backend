@@ -6,8 +6,8 @@ const docClient = new AWS.DynamoDB.DocumentClient({ region: getEnv('AWS_REGION')
 
 type QueryInput = AWS.DynamoDB.DocumentClient.QueryInput;
 type QueryOutput = AWS.DynamoDB.DocumentClient.QueryOutput;
-type UpdateItemInput = AWS.DynamoDB.UpdateItemInput;
-type UpdateItemOutput = AWS.DynamoDB.UpdateItemOutput;
+type UpdateItemInput = AWS.DynamoDB.DocumentClient.UpdateItemInput;
+type UpdateItemOutput = AWS.DynamoDB.DocumentClient.UpdateItemOutput;
 
 export default class DynamoProvider {
 
