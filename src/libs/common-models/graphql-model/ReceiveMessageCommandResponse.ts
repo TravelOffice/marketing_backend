@@ -1,4 +1,4 @@
-import { AppSyncMessageData } from 'standardized-platform-models';
+import { AppSyncMessageData } from '../standardized-platform-models';
 import { ChatPlatform } from './ChatPlatform';
 
 export interface ReceiveMessageCommandResponse {
