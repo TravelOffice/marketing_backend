@@ -21,7 +21,7 @@ export interface ZaloWebhookMessageEvent {
   event_name: USER_SEND_EVENTS,
   timestamp: number,
   user_id_by_app: string,
-  message: ZaloMessageContent // Based on type of event
+  message: ZaloReceivedMessageContent // Based on type of event
 }
 
-export type ZaloMessageContent = ZaloReceivedTextMessage | ZaloReceivedAttachmentMessage;
+export type ZaloReceivedMessageContent = ZaloReceivedTextMessage | ZaloReceivedAttachmentMessage;

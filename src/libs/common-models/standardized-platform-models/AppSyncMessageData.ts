@@ -1,8 +1,10 @@
 import { FacebookMessageContent } from '../facebook-message-platform';
 import { Optional } from 'utility-types';
-import { ZaloMessageContent } from '../zalo-message-platform';
+import { ZaloReceivedMessageContent } from '../zalo-message-platform';
+import { ZaloSendMessageContent } from '../zalo-message-platform';
 
-export type AppsyncFacebookMessageData = Optional<FacebookMessageContent, 'mid'>;
-export type AppsyncZaloMessageData = Optional<ZaloMessageContent, 'msg_id'>;
+export type AppSyncFacebookMessageData = Optional<FacebookMessageContent, 'mid'>;
+export type AppSyncZaloReceivedMessageData = Optional<ZaloReceivedMessageContent, 'msg_id'>;
+export type AppsyncZaloSendMessageData = Optional<ZaloSendMessageContent>;
 
-export type AppSyncMessageData = AppsyncFacebookMessageData | AppsyncZaloMessageData;
+export type AppSyncMessageData = AppSyncFacebookMessageData | AppSyncZaloReceivedMessageData;

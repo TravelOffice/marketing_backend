@@ -1,7 +1,6 @@
 import axios from 'axios';
 import {
-  AppSyncMessageData,
-  AppsyncZaloMessageData,
+  AppSyncZaloReceivedMessageData,
   ChatPlatform, ReceiveMessageCommandArgs,
   ReceiveMessageCommandResponse, receiveMessageQuery, ZaloWebhookMessageEvent
 } from 'common-models';
@@ -15,7 +14,7 @@ export default class AppSyncRepositoryImpl implements AppSyncRepository {
 
     // Initialize AppSync arguments
     const messageId = message.msg_id;
-    const messageData: AppsyncZaloMessageData = Object.assign(message, {});
+    const messageData: AppSyncZaloReceivedMessageData = Object.assign(message, {});
     delete messageData.msg_id; // Delete mid attribute, mid will be appeared in ReceiveMessageCommandArgs
     const args: ReceiveMessageCommandArgs = {
       id: messageId,

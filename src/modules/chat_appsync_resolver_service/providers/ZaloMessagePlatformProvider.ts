@@ -57,7 +57,7 @@ export default class ZaloMessagePlatformProvider {
    */
   sendMessage = async (pageToken: string, messagePayload: SendZaloMessageRequestPayload): Promise<void> => {
     const response = await this._axiosInstance.post(
-      `${this._messagePlatformBaseUrl}/oa/messages`,
+      `${this._messagePlatformBaseUrl}/oa/message`,
       messagePayload,
       {
         'headers': {

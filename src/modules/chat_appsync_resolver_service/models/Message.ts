@@ -1,6 +1,8 @@
 import { SendFacebookMessageRequestPayload } from './facebook/SendFacebookMessageRequestPayload';
 import { SendZaloMessageRequestPayload } from './zalo/SendZaloMessageRequestPayload';
-import { ChatPlatform } from 'common-models';
+import { AppsyncZaloSendMessageData, ChatPlatform } from 'common-models';
+import { ZaloSendTextMessage } from 'common-models/zalo-message-platform/oa-send-message/ZaloSendTextMessage';
+import { ZaloSendImageMessage } from 'common-models/zalo-message-platform/oa-send-message/ZaloSendAttachmentsMessage';
 export interface Message {
   id: string,
   sender: string,
@@ -20,12 +22,11 @@ export const toSendFbMessagePayload = (message: Message): SendFacebookMessageReq
 };
 
 export const toSendZaloMessagePayload = (message: Message): SendZaloMessageRequestPayload => {
+  let messageContent: AppsyncZaloSendMessageData = Object.assign({}, message.messageData);
   return {
     recipient: {
       user_id: message.recipient
     },
-    message: {
-      text: message.messageData.text
-    }
+    message: messageContent
   }
 }

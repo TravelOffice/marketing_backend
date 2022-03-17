@@ -20,8 +20,8 @@ export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePla
         '#pageId': 'id',
         '#sk': 'sk',
       },
-      // Filter the item startwith `PAGE_fb_` to make sure the item is Zalo token
-      // Prevent the same token with other providers such as Zalo, Telegram
+      // Filter the item startwith `PAGE_zalo_` to make sure the item is Zalo token
+      // Prevent the same token with other providers such as Facebook, Telegram
       FilterExpression: 'begins_with(#sk, :sk_filter_value)',
       ExpressionAttributeValues: {
         // Given page id
@@ -33,25 +33,26 @@ export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePla
     };
     const rs = await dynamoProvider.query(params);
     if (rs.Items && rs.Items?.length > 0) {
-      console.info('[ZaloMessagePlatformRepositoryImpl._getZaloMessagePlatformToken] DynamoDB item', rs.Items[0]);
-      if (rs.Items[0].expireIn > Date.now()) {
-        return rs.Items[0].accessToken;
+      const dynamoItem = rs.Items[0];
+      console.info('[ZaloMessagePlatformRepositoryImpl._getZaloMessagePlatformToken] DynamoDB item', dynamoItem);
+      if (dynamoItem.expireIn > Date.now()) {
+        return dynamoItem.accessToken;
       } else {
-        const refreshTokenResponse = await zaloMessagePlatformProvider.refreshToken(rs.Items[0].refreshToken);
+        const refreshTokenResponse = await zaloMessagePlatformProvider.refreshToken(dynamoItem.refreshToken);
         if (refreshTokenResponse) {
           const expireIn = new Date(Date.now() + refreshTokenResponse.expires_in * 1000);
-          const updateParams: AWS.DynamoDB.UpdateItemInput = {
+          const updateParams: AWS.DynamoDB.DocumentClient.UpdateItemInput = {
             TableName: saleChatTable,
             Key: {
-              'pk': rs.Items[0].pk,
-              'sk': rs.Items[0].sk,
+              'pk': dynamoItem.pk, // pk and sk can be unmarshall
+              'sk': dynamoItem.sk,
             },
             UpdateExpression: 'set accessToken = :at, refreshToken= :rt, expireIn = :ei',
-            ExpressionAttributeValues: AWS.DynamoDB.Converter.marshall({
+            ExpressionAttributeValues: {
               ':at': refreshTokenResponse.access_token,
               ':rt': refreshTokenResponse.refresh_token,
               ':ei': expireIn.getTime()
-            }),
+            },
             ReturnValues: 'UPDATED_NEW'
           };
           const updatedRs = await dynamoProvider.update(updateParams);
