@@ -15,7 +15,9 @@ export const toSendFbMessagePayload = (message: Message): SendFacebookMessageReq
     recipient: { id: message.recipient },
     message: {
       text: message.messageData.text
-    }
+    },
+    messaging_type: 'MESSAGE_TAG',
+    tag: 'ACCOUNT_UPDATE'
   };
 };
 
