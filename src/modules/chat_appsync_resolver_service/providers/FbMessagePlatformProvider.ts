@@ -1,7 +1,7 @@
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import {
-  SendFacebookMessageRequestPayload,
   FacebookMessageResponsePayload,
+  SendFacebookMessageRequestPayload
 } from '../models';
 
 export default class FbMessagePlatformProvider {
@@ -54,16 +54,28 @@ export default class FbMessagePlatformProvider {
    * @param conversationId Conversation id
    * @param before Before token for paging
    */
-  getMessages = async (pageToken: string, conversationId: string, before?: string): Promise<FacebookMessageResponsePayload> => {
-    let requestPath = `${conversationId}/messages?access_token=${pageToken}&fields=message,id,created_time,to,from&limit=10`;
-    if (before) { // Get first page with limit 10 if before is null
-      requestPath += `&before=${before}`;
+  getMessages = async (pageToken: string, conversationId: string, after?: string, limit: number = 10): Promise<FacebookMessageResponsePayload> => {
+    const config: AxiosRequestConfig = {
+      params: {
+        data: {
+          access_token: pageToken,
+          fields: 'message,id,created_time,to,from',
+          limit: limit
+        }
+      }
     }
-    const response = await this._axiosInstance.get(requestPath);
+
+    if (after) { // Get first page if after token is null
+      config.params.data.after = after
+    }
+    const response = await this._axiosInstance.get(`${conversationId}/messages`, config);
     console.info(
       `[FbMessagePlatformProvider.getMessages] Return messages of conversation ${conversationId} with data`,
       response.data
     );
-    return response.data;
+
+    const messagesData = response.data;
+    delete messagesData.paging.next; // For security issue, next value should be removed from payload
+    return messagesData;
   };
 }

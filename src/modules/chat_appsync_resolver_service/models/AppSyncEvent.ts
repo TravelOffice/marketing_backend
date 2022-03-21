@@ -26,7 +26,8 @@ type AllFbMessagesEvent = {
   arguments: {
     pageId: string,
     conversationId: string,
-    before?: string
+    after?: string,
+    limit?: number
   }
 }
 
