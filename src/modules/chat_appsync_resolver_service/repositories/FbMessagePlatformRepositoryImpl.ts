@@ -75,13 +75,14 @@ export default class FbMessagePlatformRepositoryImpl implements FbMessagePlatfor
    * @param senderAsPageId Page id
    * @param conversationId Conversation id
    * @param before Before token for paging
+   * @param limit Number of items returned from fb api
    * @returns
    */
-  getMessages = async (senderAsPageId: string, conversationId: string, before?: string): Promise<FacebookMessageResponsePayload | undefined> => {
+  getMessages = async (senderAsPageId: string, conversationId: string, after?: string, limit?: number): Promise<FacebookMessageResponsePayload | undefined> => {
     try {
       // Get page token that stored in DynamoDB table by `pageIdAsSender`
       const pageToken = await this._getFbMessagePlatformToken(senderAsPageId);
-      return fbMessagePlatformProvider.getMessages(pageToken, conversationId, before);
+      return fbMessagePlatformProvider.getMessages(pageToken, conversationId, after, limit);
     } catch (error) {
       console.log(`[FbMessagePlatformRepositoryImpl.getMessages] Generated an error`, error);
     }

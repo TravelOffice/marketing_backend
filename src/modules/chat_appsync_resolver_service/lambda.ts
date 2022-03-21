@@ -27,7 +27,7 @@ export const handler = async (event: AppSyncEvent) => {
       break;
 
     case 'allFbMessages': // Fetch messages when opening Sales Web or user scroll the chat box
-      returnedData = await fbMessagePlatformRepository.getMessages(event.arguments.pageId, event.arguments.conversationId, event.arguments.before);
+      returnedData = await fbMessagePlatformRepository.getMessages(event.arguments.pageId, event.arguments.conversationId, event.arguments.after, event.arguments.limit);
       resolverMessage = 'The messages has been fetched from third-party platform';
       break;
 
