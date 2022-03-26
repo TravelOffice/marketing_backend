@@ -57,16 +57,14 @@ export default class FbMessagePlatformProvider {
   getMessages = async (pageToken: string, conversationId: string, after?: string, limit: number = 10): Promise<FacebookMessageResponsePayload> => {
     const config: AxiosRequestConfig = {
       params: {
-        data: {
-          access_token: pageToken,
-          fields: 'message,id,created_time,to,from',
-          limit: limit
-        }
+        access_token: pageToken,
+        fields: 'message,id,created_time,to,from',
+        limit: limit,
       }
     }
 
     if (after) { // Get first page if after token is null
-      config.params.data.after = after
+      config.params.after = after
     }
     const response = await this._axiosInstance.get(`${conversationId}/messages`, config);
     console.info(

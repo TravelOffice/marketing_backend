@@ -1,7 +1,11 @@
+import { getAwsSecretValue } from 'get-env';
 import { User } from '../models/User';
 import { dynamoProvider } from '../providers';
 import { UserRepository } from './interfaces/UserRepository';
 
 export default class UserRepositoryImpl implements UserRepository {
-  getUserAttributes = async (userId: string) => dynamoProvider.getItem<User>('dev-sale_chat', `User#${userId}`, `User#${userId}`);
+  getUserAttributes = async (userId: string) => {
+    const saleChatTable = await getAwsSecretValue('SALE_CHAT_TABLE');
+    return dynamoProvider.getItem<User>(saleChatTable, `User#${userId}`, `User#${userId}`);
+  }
 }
