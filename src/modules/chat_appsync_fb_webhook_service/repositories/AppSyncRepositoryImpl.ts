@@ -7,7 +7,7 @@ import {
   ReceiveMessageCommandResponse,
   FacebookWebhookMessageEvent,
   ChatPlatform,
-  AppSyncFacebookMessageData
+  AppSyncFacebookReceivedMessageData
 } from 'common-models';
 
 export default class AppSyncRepositoryImpl implements AppSyncRepository {
@@ -21,7 +21,7 @@ export default class AppSyncRepositoryImpl implements AppSyncRepository {
 
     // Initialize AppSync arguments
     const messageId = message.mid;
-    const messageData: AppSyncFacebookMessageData = Object.assign(message, {});
+    const messageData: AppSyncFacebookReceivedMessageData = Object.assign(message, {});
     delete messageData.mid; // Delete mid attribute, mid will be appeared in ReceiveMessageCommandArgs
     const args: ReceiveMessageCommandArgs = {
       id: messageId,
