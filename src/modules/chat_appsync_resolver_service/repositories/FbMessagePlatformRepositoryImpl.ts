@@ -1,5 +1,5 @@
 import { getAwsSecretValue } from 'get-env';
-import { Message, toSendFbMessagePayload, FacebookMessageResponsePayload } from '../models';
+import { FacebookMessageResponsePayload, FacebookUserProfile, Message, toSendFbMessagePayload } from '../models';
 import { dynamoProvider, fbMessagePlatformProvider } from '../providers';
 import { FbMessagePlatformRepository } from './interfaces/FbMessagePlatformRepository';
 
@@ -85,6 +85,22 @@ export default class FbMessagePlatformRepositoryImpl implements FbMessagePlatfor
       return fbMessagePlatformProvider.getMessages(pageToken, conversationId, after, limit);
     } catch (error) {
       console.log(`[FbMessagePlatformRepositoryImpl.getMessages] Generated an error`, error);
+    }
+  };
+
+  /**
+   * Get Facebook user profile information
+   * @param pageId Page id
+   * @param userId User id
+   * @returns User profile information
+   */
+  getUserProfile = async (pageId: string, userId: string): Promise<FacebookUserProfile | undefined> => {
+    try {
+      // Get page token that stored in DynamoDB table by `pageIdAsSender`
+      const pageToken = await this._getFbMessagePlatformToken(pageId);
+      return fbMessagePlatformProvider.getUserProfile(pageToken, userId);
+    } catch (error) {
+      console.log(`[FbMessagePlatformRepositoryImpl.getUserProfile] Generated an error`, error);
     }
   };
 }

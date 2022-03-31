@@ -1,3 +1,4 @@
+import { ChatPlatform } from 'common-models';
 import { Message } from './Message';
 
 type EventField = 'sendMessage' | 'receivedMessage' | 'allFbConversations' | 'allFbMessages' | 'allZaloConversations' | 'allZaloMessages';
@@ -51,9 +52,18 @@ type AllZaloMessageEvent = {
   }
 }
 
+type UserProfileEvent = {
+  field: 'userProfile',
+  arguments: {
+    platform: ChatPlatform,
+    pageId: string,
+    pageUserId: string
+  }
+}
+
 type UnknownEvent = {
   field: UnknownEventField<string>,
   arguments: any
 }
 
-export type AppSyncEvent = SendMessageEvent | ReceivedMessageEvent | AllFbConversationsEvent | AllFbMessagesEvent | AllZaloConversationsEvent | AllZaloMessageEvent | UnknownEvent;
+export type AppSyncEvent = SendMessageEvent | ReceivedMessageEvent | AllFbConversationsEvent | AllFbMessagesEvent | AllZaloConversationsEvent | AllZaloMessageEvent | UserProfileEvent | UnknownEvent;

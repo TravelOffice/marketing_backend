@@ -1,6 +1,6 @@
-import { fbMessagePlatformRepository, zaloMessagePlatformRepository } from './repositories';
-import { AppSyncEvent, Message } from './models';
 import { ChatPlatform } from 'common-models';
+import { AppSyncEvent, Message } from './models';
+import { fbMessagePlatformRepository, zaloMessagePlatformRepository } from './repositories';
 
 // eslint-disable-next-line import/prefer-default-export
 export const handler = async (event: AppSyncEvent) => {
@@ -41,6 +41,11 @@ export const handler = async (event: AppSyncEvent) => {
       resolverMessage = 'The message has been fetched from Zalo platform';
       break;
 
+    case 'userProfile':
+      returnedData = await getUserProfile(event.arguments.platform, event.arguments.pageId, event.arguments.pageUserId);
+      resolverMessage = `User profile has been fetched from ${event.arguments.platform} platform`;
+      break;
+
     default:
       throw new Error(`Unknown field, unable to resolve ${event['field']}`);
   }
@@ -50,6 +55,11 @@ export const handler = async (event: AppSyncEvent) => {
   }
 };
 
+/**
+ * Send message to chat platform
+ * @param message Message information
+ * @returns Created message returned from chat platform
+ */
 const sendMessage = async (message: Message) => {
   switch (message.chatPlatform) {
     case ChatPlatform.facebook:
@@ -59,4 +69,22 @@ const sendMessage = async (message: Message) => {
     default:
       throw new Error(`Chat platform ${message.chatPlatform} is not supported`);
   }
-}
+};
+
+/**
+ * Get user profile information
+ * @param platform Chat platform
+ * @param pageId Page id
+ * @param pageUserId User id
+ * @returns User profile information
+ */
+const getUserProfile = async (platform: ChatPlatform, pageId: string, pageUserId: string) => {
+  switch (platform) {
+    case ChatPlatform.facebook:
+      return fbMessagePlatformRepository.getUserProfile(pageId, pageUserId);
+    case ChatPlatform.zalo:
+      return {};
+    default:
+      throw new Error(`Chat platform ${platform} is not supported`);
+  }
+};
