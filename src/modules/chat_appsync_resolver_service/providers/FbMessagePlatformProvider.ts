@@ -1,6 +1,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import {
   FacebookMessageResponsePayload,
+  FacebookUserProfile,
   SendFacebookMessageRequestPayload
 } from '../models';
 
@@ -75,5 +76,28 @@ export default class FbMessagePlatformProvider {
     const messagesData = response.data;
     delete messagesData.paging.next; // For security issue, next value should be removed from payload
     return messagesData;
+  };
+
+  /**
+   * Get Facebook user profile information
+   * @param pageToken Page token to access data from message platform
+   * @param pageUserId Id of user
+   * @returns User information
+   */
+  getUserProfile = async (pageToken: string, pageUserId: string): Promise<FacebookUserProfile> => {
+    const config: AxiosRequestConfig = {
+      params: {
+        access_token: pageToken,
+        fields: 'name,first_name,last_name,profile_pic,gender'
+      }
+    }
+
+    const response = await this._axiosInstance.get(`${pageUserId}`, config);
+    console.info(
+      `[FbMessagePlatformProvider.getUserProfile] Return profile of Facebook user with id ${pageUserId}`,
+      response.data
+    );
+
+    return response.data;
   };
 }
