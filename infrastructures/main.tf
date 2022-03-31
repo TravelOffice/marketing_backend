@@ -31,6 +31,11 @@ locals {
       SECRET_MANAGER_ID         = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
       ATTACHMENT_MESSAGE_BUCKET = module.REMOTE_STATE.STATE.MARKETING.frontend.sale_web.attachment_s3_bucket
       PRESIGNED_URL_EXPIRES     = 60
+    },
+    zalo_page_vars = {
+      NODE_ENV                  = var.ENV
+      SECRET_MANAGER_ID         = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
+      CALLBACK_URL              = "sso.traveloffice.shop"
     }
   }
 }
