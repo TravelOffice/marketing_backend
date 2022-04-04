@@ -14,8 +14,8 @@ resource "aws_iam_role" "iam_role" {
         "Sid" : "1",
         "Effect" : "Allow",
         "Action" : "sts:AssumeRole",
-        "Principal": {
-          "Service": "appsync.amazonaws.com"
+        "Principal" : {
+          "Service" : "appsync.amazonaws.com"
         }
       }
     ]

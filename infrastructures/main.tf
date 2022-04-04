@@ -33,9 +33,9 @@ locals {
       PRESIGNED_URL_EXPIRES     = 60
     },
     zalo_page_vars = {
-      NODE_ENV                  = var.ENV
-      SECRET_MANAGER_ID         = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
-      CALLBACK_URL              = "sso.traveloffice.shop"
+      NODE_ENV          = var.ENV
+      SECRET_MANAGER_ID = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
+      CALLBACK_URL      = "sso.traveloffice.shop"
     }
   }
 }
@@ -60,8 +60,8 @@ module "LAMBDA_FUNCTION" {
   source            = "TravelOffice/lambda/aws"
   LAMBDA_FUNCTIONS  = var.LAMBDA_FUNCTIONS
   LAMBDA_LAYER_ARNS = module.LAMBDA_LAYER.lambda_layer_arns
-  VPC_ID            = module.REMOTE_STATE.STATE.BASE_INFRASTRUCTURE.backend.vpc.id
-  SUBNETS           = module.REMOTE_STATE.STATE.BASE_INFRASTRUCTURE.backend.vpc.private_subnets
+  VPC_ID            = module.REMOTE_STATE.STATE.MARKETING.backend.vpc.id
+  SUBNETS           = module.REMOTE_STATE.STATE.MARKETING.backend.vpc.private_subnets
   ENV               = var.ENV
   FEATURE_NAME      = var.FEATURE_NAME
   IAM_ROLES         = local.iam_roles
