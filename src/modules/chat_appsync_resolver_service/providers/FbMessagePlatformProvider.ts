@@ -59,7 +59,7 @@ export default class FbMessagePlatformProvider {
     const config: AxiosRequestConfig = {
       params: {
         access_token: pageToken,
-        fields: 'message,id,created_time,to,from,attachments',
+        fields: 'message,id,created_time,to,from,attachments,shares{id,link}',
         limit: limit,
       }
     }
