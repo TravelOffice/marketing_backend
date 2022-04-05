@@ -1,3 +1,4 @@
+#!/bin/bash
 CUR_DIR=$(pwd)
 echo "Building dependencies..."
 DEPENDENCIES_DIR=${CUR_DIR}/src/libs
