@@ -2,10 +2,10 @@ import compression from 'compression';
 import cors from 'cors';
 import express, { Request, Response, NextFunction } from 'express';
 import { StatusType } from './models/Lead';
-import { createOrUpdateLeadUseCase, getLeadUseCase } from './useCases';
+import { createOrUpdateLeadUseCase, getLeadUseCase, getLeadListByAssigneeUseCase } from './useCases';
 import { getCurrentUserId } from './utils/authorizer';
 import { FAILED, SUCCESS } from './utils/constants';
-import validate, { createLeadValidator, getLeadValidator } from './utils/validator';
+import validate, { createLeadValidator, getLeadValidator, updateLeadValidator } from './utils/validator';
 import wrapResponse from './utils/wrapResponse';
 
 
@@ -39,7 +39,7 @@ app.post('/leads', createLeadValidator(), async (req: Request, res: Response) =>
   }
 });
 
-app.put('/leads', createLeadValidator(), async (req: Request, res: Response) => {
+app.put('/leads', updateLeadValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
     const currentTime = Date.now();
@@ -60,6 +60,17 @@ app.get('/leads/:leadId', getLeadValidator(), async (req: Request, res: Response
     const userId = getCurrentUserId(req.headers.authorization!);
     const lead = await getLeadUseCase.invoke(leadId, userId);
     res.json(wrapResponse(SUCCESS, lead));
+  } catch (error: any) {
+    console.log('[app.get] Error', error);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+})
+
+app.get('/leads_assigned/', async (req: Request, res: Response) => {
+  try {
+    const userId = getCurrentUserId(req.headers.authorization!);
+    const leadList = await getLeadListByAssigneeUseCase.invoke(userId);
+    res.json(wrapResponse(SUCCESS, leadList));
   } catch (error: any) {
     console.log('[app.get] Error', error);
     res.json(wrapResponse(FAILED, undefined, error.message));
