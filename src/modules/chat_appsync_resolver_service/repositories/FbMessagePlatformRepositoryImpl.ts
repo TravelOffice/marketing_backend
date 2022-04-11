@@ -10,7 +10,7 @@ export default class FbMessagePlatformRepositoryImpl implements FbMessagePlatfor
    * @returns Facebook access token
    */
   _getFbMessagePlatformToken = async (pageId: string): Promise<string> => {
-    const saleChatTable = await getAwsSecretValue('SALE_CHAT_TABLE');
+    const saleChatTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
     const params = {
       TableName: saleChatTable,
       IndexName: 'PageIdIndex',
