@@ -12,7 +12,7 @@ export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePla
    * @returns Zalo access token
    */
   _getZaloMessagePlatformToken = async (pageId: string): Promise<string> => {
-    const saleChatTable = await getAwsSecretValue('SALE_CHAT_TABLE');
+    const saleChatTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
     const params = {
       TableName: saleChatTable,
       IndexName: 'PageIdIndex',

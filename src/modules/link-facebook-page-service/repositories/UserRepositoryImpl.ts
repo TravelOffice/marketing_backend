@@ -5,7 +5,7 @@ import { UserRepository } from './interfaces/UserRepository';
 
 export default class UserRepositoryImpl implements UserRepository {
   getUserAttributes = async (userId: string) => {
-    const saleChatTable = await getAwsSecretValue('SALE_CHAT_TABLE');
+    const saleChatTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
     return dynamoProvider.getItem<User>(saleChatTable, `User#${userId}`, `User#${userId}`);
   };
 }

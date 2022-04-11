@@ -12,7 +12,7 @@ export default class ZaloPageRepositoryImpl implements ZaloPageRepository {
    * @returns code verifier
    */
   getCodeVerifierFromDynamo = async (state: string) => {
-    const saleChatTable = await getAwsSecretValue('SALE_CHAT_TABLE');
+    const saleChatTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
     const item = await dynamoProvider.getItem(saleChatTable, 'Zalo#CodeVerifier', state);
     return item.codeVerifier;
   };
@@ -73,7 +73,7 @@ export default class ZaloPageRepositoryImpl implements ZaloPageRepository {
    * @param state Unique id - sort key
    */
   saveCodeVerifierToDynamo = async (codeVerifier: string, state: string) => {
-    const saleChatTable = await getAwsSecretValue('SALE_CHAT_TABLE');
+    const saleChatTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
     await dynamoProvider.putItem(saleChatTable, 'Zalo#CodeVerifier', state, { codeVerifier });
   };
 
@@ -83,7 +83,7 @@ export default class ZaloPageRepositoryImpl implements ZaloPageRepository {
    * @param page ZaloPage object
    */
   saveOAInfoToDynamo = async (tenantId: string, page: ZaloPage) => {
-    const saleChatTable = await getAwsSecretValue('SALE_CHAT_TABLE');
+    const saleChatTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
     await dynamoProvider.putItem(saleChatTable, `Tenant#${tenantId}`, `PAGE_zalo_${page.id}`, page);
   };
 
@@ -92,7 +92,7 @@ export default class ZaloPageRepositoryImpl implements ZaloPageRepository {
    * @param state Unique id - sort key
    */
   deleteCodeVerifierInDynamo = async (state: string) => {
-    const saleChatTable = await getAwsSecretValue('SALE_CHAT_TABLE');
+    const saleChatTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
     await dynamoProvider.deleteItem(saleChatTable, 'Zalo#CodeVerifier', state);
   };
 }
