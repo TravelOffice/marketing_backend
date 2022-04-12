@@ -1,6 +1,6 @@
 import { Request } from 'express';
 import {
-  body, ValidationError, validationResult
+  body, param, ValidationError, validationResult
 } from 'express-validator';
 import { LeadType, SexType, SourceType, StatusType, VocativeType } from '../models/Lead';
 
@@ -124,4 +124,12 @@ export function updateLeadValidator() {
 
     ...commonValidatorSchema,
   ];
+}
+
+export function getLeadValidator() {
+  return [
+    param('leadId', 'must be a non-empty string')
+      .notEmpty()
+      .isString(),
+  ]
 }

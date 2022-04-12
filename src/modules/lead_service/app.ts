@@ -2,10 +2,10 @@ import compression from 'compression';
 import cors from 'cors';
 import express, { Request, Response, NextFunction } from 'express';
 import { StatusType } from './models/Lead';
-import { createOrUpdateLeadUseCase } from './useCases';
+import { createOrUpdateLeadUseCase, getLeadUseCase } from './useCases';
 import { getCurrentUserId } from './utils/authorizer';
 import { FAILED, SUCCESS } from './utils/constants';
-import validate, { createLeadValidator } from './utils/validator';
+import validate, { createLeadValidator, getLeadValidator } from './utils/validator';
 import wrapResponse from './utils/wrapResponse';
 
 
@@ -23,7 +23,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
-app.post('/lead', createLeadValidator(), async (req: Request, res: Response) => {
+app.post('/leads', createLeadValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
     const currentTime = Date.now();
@@ -39,7 +39,7 @@ app.post('/lead', createLeadValidator(), async (req: Request, res: Response) => 
   }
 });
 
-app.put('/lead', createLeadValidator(), async (req: Request, res: Response) => {
+app.put('/leads', createLeadValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
     const currentTime = Date.now();
@@ -52,5 +52,18 @@ app.put('/lead', createLeadValidator(), async (req: Request, res: Response) => {
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });
+
+app.get('/leads/:leadId', getLeadValidator(), async (req: Request, res: Response) => {
+  try {
+    validate(req);
+    const leadId = req.params.leadId;
+    const userId = getCurrentUserId(req.headers.authorization!);
+    const lead = await getLeadUseCase.invoke(leadId, userId);
+    res.json(wrapResponse(SUCCESS, lead));
+  } catch (error: any) {
+    console.log('[app.get] Error', error);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+})
 
 export default app;
