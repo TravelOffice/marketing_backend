@@ -47,7 +47,7 @@ const commonValidatorSchema = [
   body('maritalStatus', 'must be a non-empty string')
     .if(body('maritalStatus').notEmpty())
     .isString(),
-  
+
   body('primaryPhoneNumber', 'must be non-empty')
     .notEmpty()
     .custom((value: string) => {
@@ -117,7 +117,7 @@ export function updateLeadValidator() {
     body('createrId', 'must be a non-empty string')
       .notEmpty()
       .isString(),
- 
+
     body('createrName', 'must be a non-empty string')
       .notEmpty()
       .isString(),
