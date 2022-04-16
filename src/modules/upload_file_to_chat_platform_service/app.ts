@@ -1,7 +1,7 @@
 import { ChatPlatform } from 'common-models';
 import compression from 'compression';
 import cors from 'cors';
-import express, { Request, Response } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import { getEnv } from 'get-env';
 import { s3Repository, zaloMessagePlatformRepository } from './repositories';
 import { FAILED, SUCCESS } from './utils/constants';
@@ -14,6 +14,13 @@ app.use(compression());
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.use((req: Request, res: Response, next: NextFunction) => {
+  res.setHeader('Access-Control-Allow-Origin', ['*']);
+  res.setHeader('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', '*');
+  next();
+});
 
 app.get('/upload-file-to-chat-platform', uploadFileToChaPlatformServiceValidator(), async (req: Request, res: Response) => {
   try {
