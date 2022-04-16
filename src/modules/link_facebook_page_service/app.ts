@@ -19,6 +19,13 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
   next();
 });
 
+app.use((req: Request, res: Response, next: NextFunction) => {
+  res.setHeader('Access-Control-Allow-Origin', ['*']);
+  res.setHeader('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', '*');
+  next();
+});
+
 app.post('/facebook/link', linkFacebookPageValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
