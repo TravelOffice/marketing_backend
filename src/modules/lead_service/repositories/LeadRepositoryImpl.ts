@@ -12,8 +12,8 @@ export default class LeadRepositoryImpl implements LeadRepository {
    */
   createOrUpdate = async (tenantId: string, lead: Lead) => {
     const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
-    const pk = `Tenant#${tenantId}#Lead#${lead.createAt}`;
-    const sk = `Lead#${lead.createAt}`;
+    const pk = `Tenant#${tenantId}#Lead#${lead.createdAt}`;
+    const sk = `Lead#${lead.createdAt}`;
     await dynamoProvider.putItem(table, pk, sk, lead);
     return lead;
   };
