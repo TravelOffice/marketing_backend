@@ -27,3 +27,4 @@ infrastructures/environments/**/serverless.auto.tfvars
 **/dist/*
 
 temp
+**/package-lock*

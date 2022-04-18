@@ -3,7 +3,8 @@ import { getEnv } from 'get-env';
 
 type PutItemInput = AWS.DynamoDB.PutItemInput;
 type GetItemInput = AWS.DynamoDB.GetItemInput;
-
+export type QueryInput = AWS.DynamoDB.QueryInput;
+type DeleteItemInput = AWS.DynamoDB.DeleteItemInput
 const dynamoDB : AWS.DynamoDB = new AWS.DynamoDB({ region: getEnv('AWS_REGION') });
 
 export default class DynamoProvider {
@@ -25,5 +26,18 @@ export default class DynamoProvider {
       return undefined;
     }
     return AWS.DynamoDB.Converter.unmarshall(Item) as T;
+  };
+
+  query = async (queryInput: QueryInput) => {
+    const rs = await dynamoDB.query(queryInput).promise();
+    return rs;
+  };
+
+  deleteItem = async (table: string, pk: string, sk: string) => {
+    const params : DeleteItemInput = {
+      TableName: table,
+      Key: AWS.DynamoDB.Converter.marshall({ pk, sk }),
+    };
+    await dynamoDB.deleteItem(params).promise();
   };
 }

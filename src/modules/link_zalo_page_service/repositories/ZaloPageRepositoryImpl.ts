@@ -1,3 +1,4 @@
+import * as AWS from 'aws';
 import { generateChallenge } from 'pkce-challenge';
 import * as randomstring from 'randomstring';
 import { getAwsSecretValue, getEnv } from 'get-env';
@@ -51,7 +52,11 @@ export default class ZaloPageRepositoryImpl implements ZaloPageRepository {
    * @param pageId The Zalo offficial account id
    * @returns accessToken, refreshToken
    */
-  getOfficialAccountInfo = async (authorizationCode: string, codeVerifier: string, pageId: string) => {
+  getOfficialAccountInfo = async (
+    authorizationCode: string,
+    codeVerifier: string,
+    pageId: string,
+  ) => {
     const getTokenResponse = await zaloApiProvider.getAccessToken(authorizationCode, codeVerifier);
     const getOAInfo = await zaloApiProvider.getOfficialAccountInfo(getTokenResponse.access_token);
     return {
@@ -84,6 +89,20 @@ export default class ZaloPageRepositoryImpl implements ZaloPageRepository {
    */
   saveOAInfoToDynamo = async (tenantId: string, page: ZaloPage) => {
     const saleChatTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const linkedPages = await dynamoProvider.query({
+      TableName: saleChatTable,
+      KeyConditionExpression: 'pk = :pk_tenant AND begins_with(sk, :sk_filter)',
+      ExpressionAttributeValues: {
+        ':pk_tenant': { S: `Tenant#${tenantId}` },
+        ':sk_filter': { S: 'PAGE_zalo_' },
+      },
+    });
+    if (linkedPages.Items && linkedPages.Items.length > 0) {
+      // Remove previous item before insert new one
+      const { sk, pk, ...rest } = AWS.DynamoDB.Converter.unmarshall(linkedPages.Items[0]);
+      const linkedPage = rest as ZaloPage;
+      await dynamoProvider.deleteItem(saleChatTable, `Tenant#${tenantId}`, `PAGE_zalo_${linkedPage.id}`);
+    }
     await dynamoProvider.putItem(saleChatTable, `Tenant#${tenantId}`, `PAGE_zalo_${page.id}`, page);
   };
 

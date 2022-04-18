@@ -4,6 +4,7 @@ import { getEnv } from 'get-env';
 type PutItemInput = AWS.DynamoDB.PutItemInput;
 type GetItemInput = AWS.DynamoDB.GetItemInput;
 type DeleteItemInput = AWS.DynamoDB.DeleteItemInput;
+type QueryInput = AWS.DynamoDB.QueryInput;
 
 const dynamoDB : AWS.DynamoDB = new AWS.DynamoDB({ region: getEnv('AWS_REGION') });
 
@@ -34,5 +35,10 @@ export default class DynamoProvider {
       Key: AWS.DynamoDB.Converter.marshall({ pk, sk }),
     };
     await dynamoDB.deleteItem(params).promise();
+  };
+
+  query = async (queryInput: QueryInput) => {
+    const rs = await dynamoDB.query(queryInput).promise();
+    return rs;
   };
 }
