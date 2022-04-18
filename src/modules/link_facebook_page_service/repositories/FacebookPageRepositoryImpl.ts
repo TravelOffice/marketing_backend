@@ -29,6 +29,6 @@ export default class FacebookPageRepositoryImpl implements FacebookPageRepositor
 
   saveToDynamo = async (tenantId: string, page: FacebookPage) => {
     const saleChatTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
-    dynamoProvider.putItem(saleChatTable, `Tenant#${tenantId}`, `PAGE_fb_${page.id}`, page);
+    await dynamoProvider.putItem(saleChatTable, `Tenant#${tenantId}`, `PAGE_fb_${page.id}`, page);
   };
 }
