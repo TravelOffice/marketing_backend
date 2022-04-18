@@ -1,3 +1,4 @@
+import * as AWS from 'aws';
 import { getAwsSecretValue } from 'get-env';
 import { FacebookPage } from '../models/FacebookPage';
 import { dynamoProvider, facebookApiProvider } from '../providers';
@@ -29,6 +30,20 @@ export default class FacebookPageRepositoryImpl implements FacebookPageRepositor
 
   saveToDynamo = async (tenantId: string, page: FacebookPage) => {
     const saleChatTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const linkedPages = await dynamoProvider.query({
+      TableName: saleChatTable,
+      KeyConditionExpression: 'pk = :pk_tenant AND begins_with(sk, :sk_filter)',
+      ExpressionAttributeValues: {
+        ':pk_tenant': { S: `Tenant#${tenantId}` },
+        ':sk_filter': { S: 'PAGE_fb_' },
+      },
+    });
+    if (linkedPages.Items && linkedPages.Items.length > 0) {
+      // Remove previous item before insert new one
+      const { sk, pk, ...rest } = AWS.DynamoDB.Converter.unmarshall(linkedPages.Items[0]);
+      const linkedPage = rest as FacebookPage;
+      await dynamoProvider.deleteItem(saleChatTable, `Tenant#${tenantId}`, `PAGE_fb_${linkedPage.id}`);
+    }
     await dynamoProvider.putItem(saleChatTable, `Tenant#${tenantId}`, `PAGE_fb_${page.id}`, page);
   };
 }
