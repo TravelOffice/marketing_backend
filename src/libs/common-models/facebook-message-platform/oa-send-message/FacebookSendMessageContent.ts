@@ -13,10 +13,12 @@ export type FacebookSendTextMessageContent = BasedFacebookSendMessageContent & {
 // Refer to https://developers.facebook.com/docs/messenger-platform/reference/send-api/#attachment
 export type AttachmentType = 'image' | 'audio' | 'video' | 'file'; // `template` type will be supported later
 export type FacebookSendAttachmentMessageContent = BasedFacebookSendMessageContent & {
-  type: AttachmentType,
-  payload: {
-    url: string,
-    is_reusable: boolean, // Set to true to make the saved asset sendable to other message recipients. Defaults to false.
+  attachment: {
+    type: AttachmentType,
+    payload: {
+      url: string,
+      is_reusable: boolean, // Set to true to make the saved asset sendable to other message recipients. Defaults to false.
+    }
   }
 }
 
