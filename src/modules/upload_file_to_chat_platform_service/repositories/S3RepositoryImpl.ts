@@ -9,6 +9,16 @@ export default class S3RepositoryImpl implements S3Repository {
    * @returns the path of file which saved to local
    */
   downloadFileFromS3 = async (bucket: string, fileKey: string, fileName: string) => {
-    return s3Provider.downloadFileFromS3(bucket, fileKey, fileName);
+    return await s3Provider.downloadFileFromS3(bucket, fileKey, fileName);
+  };
+
+  /**
+   * Delete s3 object
+   * @param bucket S3 bucket name
+   * @param fileKey Object key after uploaded to s3
+   * @returns void
+   */
+   deleteObject = async (bucket: string, objectKey: string) => {
+    return await s3Provider.deleteObject(bucket, objectKey);
   };
 }
