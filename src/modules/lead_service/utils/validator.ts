@@ -22,7 +22,7 @@ export default function validate(req: Request) {
 }
 
 const commonValidatorSchema = [
-  body('name', 'property must be a non-emtpy string')
+  body('name', 'property must be a non-empty string')
     .if(body('name').notEmpty())
     .isString(),
 
@@ -32,9 +32,9 @@ const commonValidatorSchema = [
 
   body('birthday', 'property must be match with YYYY-MM-DD')
     .if(body('birthday').notEmpty())
-    .custom((value) => {
-      const regex = /\d\d\d\d-(0[1-9]|1[0-2])-(0[1-9]|[1-2]\d|3[0-1])/;
-      return value.match(regex);
+    .custom((value: string) => {
+      const date = Date.parse(value);
+      return !isNaN(date);
     }),
 
   body('nationality', 'property must be a non-empty string')
@@ -42,6 +42,7 @@ const commonValidatorSchema = [
     .isString(),
 
   body('sex')
+    .if(body('sex').exists())
     .isIn(Object.values(SexType)).withMessage(`allow only in ${Object.values(SexType)}`),
 
   body('maritalStatus', 'must be a non-empty string')
@@ -56,6 +57,7 @@ const commonValidatorSchema = [
     }),
 
   body('otherPhoneNumbers', 'is must be a array of phone numbers')
+    .if(body('otherPhoneNumbers').exists())
     .isArray()
     .custom((value: []) => value.every((phone: string) => {
       const regex = /^\(?(\d{3})\)?[-. ]?(\d{3})[-. ]?(\d{4})$/;
@@ -88,7 +90,7 @@ const commonValidatorSchema = [
 
   body('tags', 'must be a array of string')
     .if(body('tags').exists())
-    .isArray({ min: 1 })
+    .isArray()
     .custom((value: []) => value.every((tag: string) => tag !== '')),
 
   body('source')
@@ -114,11 +116,11 @@ export function updateLeadValidator() {
       .notEmpty()
       .isString(),
 
-    body('createrId', 'must be a non-empty string')
+    body('creatorId', 'must be a non-empty string')
       .notEmpty()
       .isString(),
 
-    body('createrName', 'must be a non-empty string')
+    body('creatorName', 'must be a non-empty string')
       .notEmpty()
       .isString(),
 
