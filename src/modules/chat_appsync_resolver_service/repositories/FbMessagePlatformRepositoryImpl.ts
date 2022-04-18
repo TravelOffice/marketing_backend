@@ -51,7 +51,6 @@ export default class FbMessagePlatformRepositoryImpl implements FbMessagePlatfor
       return fbMessagePlatformProvider.sendMessage(pageToken, payload);
     } catch (error) {
       console.log(`[FbMessagePlatformRepositoryImpl.sendMessage] Generated an error`, error);
-      throw error;
     }
   };
 
