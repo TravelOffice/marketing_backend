@@ -65,7 +65,7 @@ app.get('/leads/:leadId', getLeadValidator(), async (req: Request, res: Response
   }
 });
 
-app.get('/leads_assigned/', async (req: Request, res: Response) => {
+app.get('/leads', async (req: Request, res: Response) => {
   try {
     const userId = getCurrentUserId(req.headers.authorization!);
     const leadList = await getLeadListByAssigneeUseCase.invoke(userId);
