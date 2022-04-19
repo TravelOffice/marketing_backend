@@ -30,4 +30,15 @@ export default class LeadRepositoryImpl implements LeadRepository {
     const sk = `Lead#${leadId}`;
     return dynamoProvider.getItem<Lead>(table, pk, sk);
   }
+
+  /**
+   * Get information of a lead list by condition with a value of a field
+   * @param field DynamoDB field name to query
+   * @param value The value of DynamoDB field name
+   * @returns A List of Lead object
+   */
+   getLeadListByField = async (tenantId: string, field: string, value: string) => {
+    const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    return dynamoProvider.getListItemByField(table, tenantId, field, value);
+  };
 }

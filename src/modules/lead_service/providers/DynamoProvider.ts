@@ -1,5 +1,6 @@
 import * as AWS from 'aws';
 import { getEnv } from 'get-env';
+import { Lead } from '../models/Lead';
 
 type PutItemInput = AWS.DynamoDB.PutItemInput;
 type GetItemInput = AWS.DynamoDB.GetItemInput;
@@ -25,5 +26,22 @@ export default class DynamoProvider {
       return undefined;
     }
     return AWS.DynamoDB.Converter.unmarshall(Item) as T;
+  };
+
+  getListItemByField = async (table: string, tenantId: string, field: string, value: string) : Promise<Lead[]> => {
+    const params = {
+      FilterExpression: '#field = :value and begins_with(pk, :tenantId)',
+      ExpressionAttributeNames: { '#field': field },
+      ExpressionAttributeValues: {
+        ':value': {S: value},
+        ':tenantId': {S: `Tenant#${tenantId}#Lead#`},
+      },
+      TableName: table,
+    };
+
+    const scanResult = await dynamoDB.scan(params).promise();
+    return scanResult.Items?.map((element) => {
+      return AWS.DynamoDB.Converter.unmarshall(element);
+    });
   };
 }
