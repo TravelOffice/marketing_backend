@@ -28,20 +28,26 @@ export default class DynamoProvider {
     return AWS.DynamoDB.Converter.unmarshall(Item) as T;
   };
 
-  getListItemByField = async (table: string, tenantId: string, field: string, value: string) : Promise<Lead[]> => {
+  getListItemByField = async (
+    table: string,
+    tenantId: string,
+    field: string,
+    value: string,
+  ) : Promise<Lead[]> => {
     const params = {
       FilterExpression: '#field = :value and begins_with(pk, :tenantId)',
       ExpressionAttributeNames: { '#field': field },
       ExpressionAttributeValues: {
-        ':value': {S: value},
-        ':tenantId': {S: `Tenant#${tenantId}#Lead#`},
+        ':value': { S: value },
+        ':tenantId': { S: `Tenant#${tenantId}#Lead#` },
       },
       TableName: table,
     };
 
     const scanResult = await dynamoDB.scan(params).promise();
-    return scanResult.Items?.map((element) => {
-      return AWS.DynamoDB.Converter.unmarshall(element);
-    });
+
+    return scanResult.Items?.map(
+      (element: any) => AWS.DynamoDB.Converter.unmarshall(element) as Lead,
+    ) || [];
   };
 }

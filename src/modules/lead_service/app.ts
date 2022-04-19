@@ -8,7 +8,6 @@ import { FAILED, SUCCESS } from './utils/constants';
 import validate, { createLeadValidator, getLeadValidator, updateLeadValidator } from './utils/validator';
 import wrapResponse from './utils/wrapResponse';
 
-
 const app = express();
 
 app.use(compression());
@@ -56,7 +55,7 @@ app.put('/leads', updateLeadValidator(), async (req: Request, res: Response) => 
 app.get('/leads/:leadId', getLeadValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
-    const leadId = req.params.leadId;
+    const { leadId } = req.params;
     const userId = getCurrentUserId(req.headers.authorization!);
     const lead = await getLeadUseCase.invoke(leadId, userId);
     res.json(wrapResponse(SUCCESS, lead));
@@ -64,7 +63,7 @@ app.get('/leads/:leadId', getLeadValidator(), async (req: Request, res: Response
     console.log('[app.get] Error', error);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
-})
+});
 
 app.get('/leads_assigned/', async (req: Request, res: Response) => {
   try {
@@ -75,6 +74,6 @@ app.get('/leads_assigned/', async (req: Request, res: Response) => {
     console.log('[app.get] Error', error);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
-})
+});
 
 export default app;
