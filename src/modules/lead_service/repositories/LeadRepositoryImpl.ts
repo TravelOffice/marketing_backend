@@ -29,7 +29,7 @@ export default class LeadRepositoryImpl implements LeadRepository {
     const pk = `Tenant#${tenantId}#Lead#${leadId}`;
     const sk = `Lead#${leadId}`;
     return dynamoProvider.getItem<Lead>(table, pk, sk);
-  }
+  };
 
   /**
    * Get information of a lead list by condition with a value of a field
@@ -37,7 +37,7 @@ export default class LeadRepositoryImpl implements LeadRepository {
    * @param value The value of DynamoDB field name
    * @returns A List of Lead object
    */
-   getLeadListByField = async (tenantId: string, field: string, value: string) => {
+  getLeadListByField = async (tenantId: string, field: string, value: string) => {
     const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
     return dynamoProvider.getListItemByField(table, tenantId, field, value);
   };

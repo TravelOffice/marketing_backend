@@ -1,8 +1,11 @@
 import { Request } from 'express';
 import {
-  body, param, ValidationError, validationResult
+  body, param, ValidationError, validationResult,
 } from 'express-validator';
-import { LeadType, SexType, SourceType, StatusType, VocativeType } from '../models/Lead';
+import {
+  LeadType, MaritalStatus, SexType, SourceType, StatusType, VocativeType,
+} from '../models/Lead';
+import { VALIDATE_BOOLEAN_MSG, VALIDATE_DATE_MSG, VALIDATE_EMAIL_MSG, VALIDATE_NON_EMPTY_STRING_MSG, VALIDATE_PHONE_ARRAY_MSG, VALIDATE_PHONE_MSG, VALIDATE_STRING_ARRAY_MSG, VALIDATE_STRING_MSG } from './constants';
 
 export default function validate(req: Request) {
   const errors = validationResult(req);
@@ -21,117 +24,98 @@ export default function validate(req: Request) {
   }
 }
 
-const commonValidatorSchema = [
-  body('name', 'property must be a non-empty string')
-    .if(body('name').notEmpty())
-    .isString(),
-
-  body('vocative')
-    .if(body('vocative').notEmpty())
-    .isIn(Object.values(VocativeType)).withMessage(`property allow only in ${Object.values(VocativeType)}`),
-
-  body('birthday', 'property must be match with YYYY-MM-DD')
-    .if(body('birthday').notEmpty())
-    .custom((value: string) => {
-      const date = Date.parse(value);
-      return !isNaN(date);
-    }),
-
-  body('nationality', 'property must be a non-empty string')
-    .if(body('nationality').notEmpty())
-    .isString(),
-
-  body('sex')
-    .if(body('sex').exists())
-    .isIn(Object.values(SexType)).withMessage(`allow only in ${Object.values(SexType)}`),
-
-  body('maritalStatus', 'must be a non-empty string')
-    .if(body('maritalStatus').notEmpty())
-    .isString(),
-
-  body('primaryPhoneNumber', 'must be non-empty')
-    .notEmpty()
-    .custom((value: string) => {
-      const regex = /^\(?(\d{3})\)?[-. ]?(\d{3})[-. ]?(\d{4})$/;
-      return value.match(regex);
-    }),
-
-  body('otherPhoneNumbers', 'is must be a array of phone numbers')
-    .if(body('otherPhoneNumbers').exists())
-    .isArray()
-    .custom((value: []) => value.every((phone: string) => {
-      const regex = /^\(?(\d{3})\)?[-. ]?(\d{3})[-. ]?(\d{4})$/;
-      return phone.match(regex);
-    })),
-
-  body('email', 'must be a valid email address')
-    .if(body('email').notEmpty())
-    .isEmail(),
-
-  body('country', 'must be a string')
-    .if(body('country').notEmpty())
-    .isString(),
-
-  body('province', 'must be a string')
-    .if(body('province').notEmpty())
-    .isString(),
-
-  body('district', 'must be a string')
-    .if(body('district').notEmpty())
-    .isString(),
-
-  body('ward', 'must be a string')
-    .if(body('ward').notEmpty())
-    .isString(),
-
-  body('address', 'must be a string')
-    .if(body('address').notEmpty())
-    .isString(),
-
-  body('tags', 'must be a array of string')
-    .if(body('tags').exists())
-    .isArray()
-    .custom((value: []) => value.every((tag: string) => tag !== '')),
-
-  body('source')
-    .isIn(Object.values(SourceType)).withMessage(`allow only in ${Object.values(SourceType)}`),
-
-  body('enabled', 'must be a boolean')
-    .isBoolean(),
-
-  body('type')
-    .isIn(Object.values(LeadType)).withMessage(`allow only in ${Object.values(LeadType)}`),
-];
-
-export function createLeadValidator() {
-  return commonValidatorSchema;
-}
-export function updateLeadValidator() {
+export function createUpdateLeadValidator() {
   return [
+    body('name', VALIDATE_NON_EMPTY_STRING_MSG)
+      .if(body('name').notEmpty())
+      .isString(),
+
+    body('vocative')
+      .if(body('vocative').notEmpty())
+      .isIn(Object.values(VocativeType)).withMessage(`property allow only in ${Object.values(VocativeType)}`),
+
+    body('birthday', VALIDATE_DATE_MSG)
+      .if(body('birthday').notEmpty())
+      .custom((value: string) => {
+        const date = Date.parse(value);
+        return !Number.isNaN(date);
+      }),
+
+    body('nationality', VALIDATE_NON_EMPTY_STRING_MSG)
+      .if(body('nationality').notEmpty())
+      .isString(),
+
+    body('sex')
+      .if(body('sex').exists())
+      .isIn(Object.values(SexType)).withMessage(`allow only in ${Object.values(SexType)}`),
+
+    body('maritalStatus')
+      .if(body('maritalStatus').notEmpty())
+      .isIn(Object.values(MaritalStatus)).withMessage(`allow only in ${Object.values(MaritalStatus)}`),
+
+    body('primaryPhoneNumber', VALIDATE_PHONE_MSG)
+      .notEmpty()
+      .custom((value: string) => {
+        const regex = /^\(?(\d{3})\)?[-. ]?(\d{3})[-. ]?(\d{4})$/;
+        return value.match(regex);
+      }),
+
+    body('otherPhoneNumbers', VALIDATE_PHONE_ARRAY_MSG)
+      .if(body('otherPhoneNumbers').exists())
+      .isArray()
+      .custom((value: []) => value.every((phone: string) => {
+        const regex = /^\(?(\d{3})\)?[-. ]?(\d{3})[-. ]?(\d{4})$/;
+        return phone.match(regex);
+      })),
+
+    body('email', VALIDATE_EMAIL_MSG)
+      .if(body('email').notEmpty())
+      .isEmail(),
+
+    body('country', VALIDATE_STRING_MSG)
+      .if(body('country').notEmpty())
+      .isString(),
+
+    body('province', VALIDATE_STRING_MSG)
+      .if(body('province').notEmpty())
+      .isString(),
+
+    body('district', VALIDATE_STRING_MSG)
+      .if(body('district').notEmpty())
+      .isString(),
+
+    body('ward', VALIDATE_STRING_MSG)
+      .if(body('ward').notEmpty())
+      .isString(),
+
+    body('address', VALIDATE_STRING_MSG)
+      .if(body('address').notEmpty())
+      .isString(),
+
+    body('tags', VALIDATE_STRING_ARRAY_MSG)
+      .if(body('tags').exists())
+      .isArray()
+      .custom((value: []) => value.every((tag: string) => tag !== '')),
+
+    body('source')
+      .isIn(Object.values(SourceType)).withMessage(`allow only in ${Object.values(SourceType)}`),
+
+    body('enabled', VALIDATE_BOOLEAN_MSG)
+      .isBoolean(),
+
+    body('type')
+      .isIn(Object.values(LeadType)).withMessage(`allow only in ${Object.values(LeadType)}`),
+
     body('status')
       .if(body('status').notEmpty())
       .isIn(Object.values(StatusType)).withMessage(`allow only in ${Object.values(StatusType)}`),
-
-    body('createdAt', 'must be a non-empty string')
-      .notEmpty()
-      .isNumeric(),
-
-    body('creatorId', 'must be a non-empty string')
-      .notEmpty()
-      .isString(),
-
-    body('creatorName', 'must be a non-empty string')
-      .notEmpty()
-      .isString(),
-
-    ...commonValidatorSchema,
   ];
 }
 
 export function getLeadValidator() {
   return [
-    param('leadId', 'must be a non-empty string')
+    param('leadId', VALIDATE_NON_EMPTY_STRING_MSG)
       .notEmpty()
       .isString(),
-  ]
+  ];
 }

@@ -23,7 +23,7 @@ app.post('/zalo/link', linkZaloPageValidator(), async (req: Request, res: Respon
   try {
     validate(req);
     const { authorizationCode, state, pageId } = req.body;
-    const {username} = getCurrentUserInfo(req.headers.authorization!);
+    const { username } = getCurrentUserInfo(req.headers.authorization!);
     const modelNames = await linkZaloPageUseCase.invoke(username, authorizationCode, state, pageId);
     res.json(wrapResponse(SUCCESS, modelNames));
   } catch (error: any) {
