@@ -114,7 +114,7 @@ export function updateLeadValidator() {
 
     body('createdAt', 'must be a non-empty string')
       .notEmpty()
-      .isString(),
+      .isNumeric(),
 
     body('creatorId', 'must be a non-empty string')
       .notEmpty()

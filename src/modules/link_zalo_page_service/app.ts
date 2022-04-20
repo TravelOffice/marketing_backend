@@ -4,7 +4,7 @@ import compression from 'compression';
 import { generateLoginUrlUseCase, linkZaloPageUseCase } from './useCases';
 import wrapResponse from './utils/wrapResponse';
 import { FAILED, SUCCESS } from './utils/constants';
-import { getCurrentUserId } from './utils/authorizer';
+import { getCurrentUserInfo } from './utils/authorizer';
 import validate, { linkZaloPageValidator } from './utils/validator';
 
 const app = express();
@@ -23,8 +23,8 @@ app.post('/zalo/link', linkZaloPageValidator(), async (req: Request, res: Respon
   try {
     validate(req);
     const { authorizationCode, state, pageId } = req.body;
-    const userId = getCurrentUserId(req.headers.authorization!);
-    const modelNames = await linkZaloPageUseCase.invoke(userId, authorizationCode, state, pageId);
+    const {username} = getCurrentUserInfo(req.headers.authorization!);
+    const modelNames = await linkZaloPageUseCase.invoke(username, authorizationCode, state, pageId);
     res.json(wrapResponse(SUCCESS, modelNames));
   } catch (error: any) {
     console.log('[app.post] Error', error);
