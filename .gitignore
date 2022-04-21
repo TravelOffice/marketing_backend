@@ -25,3 +25,5 @@ infrastructures/environments/**/serverless.auto.tfvars
 .vscode
 
 **/dist/*
+
+temp
