@@ -1,10 +1,10 @@
 import { Lead } from '../models/Lead';
 import { leadRepository, userRepository } from '../repositories';
-import { CreateOrUpdateLeadUseCase } from './interfaces/CreateOrUpdateLeadUseCase';
+import { CreateLeadUseCase } from './interfaces/CreateLeadUseCase';
 
-export default class CreateOrUpdateLeadUseCaseIpml implements CreateOrUpdateLeadUseCase {
+export default class CreateLeadUseCaseIpml implements CreateLeadUseCase {
   /**
-   * To generate zalo login url, there are steps need to do:
+   * To create lead, there are steps need to do:
    * - Step 1: Get tenant ID from dynamo db
    * - Step 2: Save lead information to dynamo db
    * @return pk, sk and all atributes of Lead

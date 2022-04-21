@@ -1,29 +1,30 @@
-import CreateOrUpdateLeadUseCaseImpl from './CreateOrUpdateLeadUseCaseImpl';
+import CreateLeadUseCaseImpl from './CreateLeadUseCaseImpl';
+import UpdateLeadUseCaseImpl from './UpdateLeadUseCaseImpl';
 import GetLeadListByAssigneeUseCaseIpml from './GetLeadListByFieldUseCaseImpl';
 import GetLeadUseCaseImpl from './GetLeadUseCaseImpl';
-import { CreateOrUpdateLeadUseCase } from './interfaces/CreateOrUpdateLeadUseCase';
+import { CreateLeadUseCase } from './interfaces/CreateLeadUseCase';
+import { UpdateLeadUseCase } from './interfaces/UpdateLeadUseCase';
 import { GetLeadListByAssigneeUseCase } from './interfaces/GetLeadListByAssignee';
 import { GetLeadUseCase } from './interfaces/GetLeadUseCase';
 
 interface UseCases {
-  createOrUpdateLeadUseCase: CreateOrUpdateLeadUseCase,
+  createLeadUseCase: CreateLeadUseCase,
+  updateLeadUseCase: UpdateLeadUseCase,
   getLeadUseCase: GetLeadUseCase,
-}
-
-interface UseCases {
-  createOrUpdateLeadUseCase: CreateOrUpdateLeadUseCase,
   getLeadListByAssigneeUseCase: GetLeadListByAssigneeUseCase,
 }
 
 const useCases : UseCases = {
-  createOrUpdateLeadUseCase: new CreateOrUpdateLeadUseCaseImpl(),
+  createLeadUseCase: new CreateLeadUseCaseImpl(),
+  updateLeadUseCase: new UpdateLeadUseCaseImpl(),
   getLeadUseCase: new GetLeadUseCaseImpl(),
   getLeadListByAssigneeUseCase: new GetLeadListByAssigneeUseCaseIpml(),
 };
 
 // eslint-disable-next-line import/prefer-default-export
 export const {
-  createOrUpdateLeadUseCase,
+  createLeadUseCase,
+  updateLeadUseCase,
   getLeadUseCase,
   getLeadListByAssigneeUseCase,
 } = useCases;

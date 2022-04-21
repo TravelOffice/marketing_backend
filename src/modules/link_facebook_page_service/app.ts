@@ -4,7 +4,7 @@ import compression from 'compression';
 import { linkFacebookPageUseCase } from './useCases';
 import wrapResponse from './utils/wrapResponse';
 import { FAILED, SUCCESS } from './utils/constants';
-import { getCurrentUserId } from './utils/authorizer';
+import { getCurrentUserInfo } from './utils/authorizer';
 import validate, { linkFacebookPageValidator } from './utils/validator';
 
 const app = express();
@@ -30,8 +30,8 @@ app.post('/facebook/link', linkFacebookPageValidator(), async (req: Request, res
   try {
     validate(req);
     const { userAccessToken, pageId } = req.body;
-    const currentUserId = getCurrentUserId(req.headers.authorization!);
-    const modelNames = await linkFacebookPageUseCase.invoke(currentUserId, pageId, userAccessToken);
+    const { username } = getCurrentUserInfo(req.headers.authorization!);
+    const modelNames = await linkFacebookPageUseCase.invoke(username, pageId, userAccessToken);
     res.json(wrapResponse(SUCCESS, modelNames));
   } catch (error: any) {
     console.log('error', error);

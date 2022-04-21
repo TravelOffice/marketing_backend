@@ -2,10 +2,12 @@ import compression from 'compression';
 import cors from 'cors';
 import express, { Request, Response, NextFunction } from 'express';
 import { StatusType } from './models/Lead';
-import { createOrUpdateLeadUseCase, getLeadUseCase, getLeadListByAssigneeUseCase } from './useCases';
-import { getCurrentUserId } from './utils/authorizer';
+import {
+  createLeadUseCase, getLeadUseCase, getLeadListByAssigneeUseCase, updateLeadUseCase,
+} from './useCases';
+import { getCurrentUserInfo } from './utils/authorizer';
 import { FAILED, SUCCESS } from './utils/constants';
-import validate, { createLeadValidator, getLeadValidator, updateLeadValidator } from './utils/validator';
+import validate, { createUpdateLeadValidator, getLeadValidator } from './utils/validator';
 import wrapResponse from './utils/wrapResponse';
 
 const app = express();
@@ -22,15 +24,19 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
-app.post('/leads', createLeadValidator(), async (req: Request, res: Response) => {
+app.post('/leads', createUpdateLeadValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
     const currentTime = Date.now();
+    const { username, name } = getCurrentUserInfo(req.headers.authorization!);
     req.body.createdAt = currentTime;
     req.body.updatedAt = currentTime;
     req.body.status = StatusType.NEW;
-    const userId = getCurrentUserId(req.headers.authorization!);
-    const lead = await createOrUpdateLeadUseCase.invoke(req.body, userId);
+    req.body.creatorId = username;
+    req.body.creatorName = name;
+    req.body.assigneeId = username;
+    req.body.assigneeName = name;
+    const lead = await createLeadUseCase.invoke(req.body, username);
     res.json(wrapResponse(SUCCESS, lead));
   } catch (error: any) {
     console.log('[app.post] Error', error);
@@ -38,13 +44,13 @@ app.post('/leads', createLeadValidator(), async (req: Request, res: Response) =>
   }
 });
 
-app.put('/leads', updateLeadValidator(), async (req: Request, res: Response) => {
+app.put('/leads', createUpdateLeadValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
     const currentTime = Date.now();
     req.body.updatedAt = currentTime;
-    const userId = getCurrentUserId(req.headers.authorization!);
-    const lead = await createOrUpdateLeadUseCase.invoke(req.body, userId);
+    const { username } = getCurrentUserInfo(req.headers.authorization!);
+    const lead = await updateLeadUseCase.invoke(req.body, username);
     res.json(wrapResponse(SUCCESS, lead));
   } catch (error: any) {
     console.log('[app.post] Error', error);
@@ -56,8 +62,8 @@ app.get('/leads/:leadId', getLeadValidator(), async (req: Request, res: Response
   try {
     validate(req);
     const { leadId } = req.params;
-    const userId = getCurrentUserId(req.headers.authorization!);
-    const lead = await getLeadUseCase.invoke(leadId, userId);
+    const { username } = getCurrentUserInfo(req.headers.authorization!);
+    const lead = await getLeadUseCase.invoke(leadId, username);
     res.json(wrapResponse(SUCCESS, lead));
   } catch (error: any) {
     console.log('[app.get] Error', error);
@@ -67,8 +73,8 @@ app.get('/leads/:leadId', getLeadValidator(), async (req: Request, res: Response
 
 app.get('/leads', async (req: Request, res: Response) => {
   try {
-    const userId = getCurrentUserId(req.headers.authorization!);
-    const leadList = await getLeadListByAssigneeUseCase.invoke(userId);
+    const { username } = getCurrentUserInfo(req.headers.authorization!);
+    const leadList = await getLeadListByAssigneeUseCase.invoke(username);
     res.json(wrapResponse(SUCCESS, leadList));
   } catch (error: any) {
     console.log('[app.get] Error', error);

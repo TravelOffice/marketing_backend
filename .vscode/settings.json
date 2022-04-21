@@ -1,5 +1,15 @@
 {
   "[terraform]": {
     "editor.formatOnSave": true
-  }
+  },
+  "eslint.workingDirectories": [
+    "./src/modules/*"
+  ],
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "[javascript]": {
+    "editor.tabSize": 2
+  },
+  "eslint.validate": ["javascript"]
 }
