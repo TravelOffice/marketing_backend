@@ -1,7 +1,10 @@
+import * as AWS from 'aws';
 import { getAwsSecretValue } from 'get-env';
 import { Lead } from '../models/Lead';
 import { dynamoProvider } from '../providers';
 import { LeadRepository } from './interfaces/LeadRepository';
+
+type QueryInput = AWS.DynamoDB.QueryInput;
 
 export default class LeadRepositoryImpl implements LeadRepository {
   /**
@@ -12,7 +15,7 @@ export default class LeadRepositoryImpl implements LeadRepository {
    */
   createOrUpdate = async (tenantId: string, lead: Lead) => {
     const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
-    const pk = `Tenant#${tenantId}#Lead#${lead.primaryPhoneNumber}`;
+    const pk = `Tenant#${tenantId}`;
     const sk = `Lead#${lead.primaryPhoneNumber}`;
     await dynamoProvider.putItem(table, pk, sk, lead);
     return lead;
@@ -26,19 +29,33 @@ export default class LeadRepositoryImpl implements LeadRepository {
    */
   getById = async (tenantId: String, leadId: String) => {
     const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
-    const pk = `Tenant#${tenantId}#Lead#${leadId}`;
+    const pk = `Tenant#${tenantId}`;
     const sk = `Lead#${leadId}`;
     return dynamoProvider.getItem<Lead>(table, pk, sk);
   };
 
   /**
    * Get information of a lead list by condition with a value of a field
+   * @param tenantId Tenant code
    * @param field DynamoDB field name to query
    * @param value The value of DynamoDB field name
    * @returns A List of Lead object
    */
   getLeadListByField = async (tenantId: string, field: string, value: string) => {
     const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
-    return dynamoProvider.getListItemByField(table, tenantId, field, value);
+    const params: QueryInput = {
+      TableName: table,
+      KeyConditionExpression: 'pk = :pk AND begins_with(sk, :sk_filter_value)',
+      ExpressionAttributeNames: {
+        '#field': field,
+      },
+      FilterExpression: ' #field = :value',
+      ExpressionAttributeValues: {
+        ':pk': { S: `Tenant#${tenantId}` },
+        ':sk_filter_value': { S: 'Lead#' },
+        ':value': { S: value },
+      },
+    };
+    return dynamoProvider.query(params);
   };
 }
