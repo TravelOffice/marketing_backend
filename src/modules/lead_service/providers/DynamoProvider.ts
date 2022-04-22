@@ -4,6 +4,7 @@ import { Lead } from '../models/Lead';
 
 type PutItemInput = AWS.DynamoDB.PutItemInput;
 type GetItemInput = AWS.DynamoDB.GetItemInput;
+type QueryInput = AWS.DynamoDB.QueryInput;
 
 const dynamoDB : AWS.DynamoDB = new AWS.DynamoDB({ region: getEnv('AWS_REGION') });
 
@@ -28,26 +29,11 @@ export default class DynamoProvider {
     return AWS.DynamoDB.Converter.unmarshall(Item) as T;
   };
 
-  getListItemByField = async (
-    table: string,
-    tenantId: string,
-    field: string,
-    value: string,
-  ) : Promise<Lead[]> => {
-    const params = {
-      FilterExpression: '#field = :value and begins_with(pk, :tenantId)',
-      ExpressionAttributeNames: { '#field': field },
-      ExpressionAttributeValues: {
-        ':value': { S: value },
-        ':tenantId': { S: `Tenant#${tenantId}#Lead#` },
-      },
-      TableName: table,
-    };
-
-    const scanResult = await dynamoDB.scan(params).promise();
-
-    return scanResult.Items?.map(
-      (element: any) => AWS.DynamoDB.Converter.unmarshall(element) as Lead,
-    ) || [];
+  query = async <T = any> (params: QueryInput): Promise<T[]> => {
+    const { Items } = await dynamoDB.query(params).promise();
+    if (Items) {
+      return Items.map((item: any) => AWS.DynamoDB.Converter.unmarshall(item) as T);
+    }
+    return [];
   };
 }
