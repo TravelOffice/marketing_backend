@@ -3,7 +3,7 @@ import cors from 'cors';
 import express, { Request, Response, NextFunction } from 'express';
 import { StatusType } from './models/Lead';
 import {
-  createLeadUseCase, getLeadUseCase, getLeadListByAssigneeUseCase, updateLeadUseCase,
+  createLeadUseCase, getLeadUseCase, getLeadListByAssigneeUseCase, updateLeadUseCase, getLeadListByTenantUseCase,
 } from './useCases';
 import { getCurrentUserInfo } from './utils/authorizer';
 import { FAILED, SUCCESS } from './utils/constants';
@@ -75,6 +75,17 @@ app.get('/leads', async (req: Request, res: Response) => {
   try {
     const { username } = getCurrentUserInfo(req.headers.authorization!);
     const leadList = await getLeadListByAssigneeUseCase.invoke(username);
+    res.json(wrapResponse(SUCCESS, leadList));
+  } catch (error: any) {
+    console.log('[app.get] Error', error);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.get('/admin/leads', async (req: Request, res: Response) => {
+  try {
+    const { username } = getCurrentUserInfo(req.headers.authorization!);
+    const leadList = await getLeadListByTenantUseCase.invoke(username);
     res.json(wrapResponse(SUCCESS, leadList));
   } catch (error: any) {
     console.log('[app.get] Error', error);
