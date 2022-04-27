@@ -1,6 +1,6 @@
 import * as AWS from 'aws';
 import { getAwsSecretValue } from 'get-env';
-import { Lead } from '../models/Lead';
+import { Lead, LeadType, LeadStatus } from '../models/Lead';
 import { dynamoProvider } from '../providers';
 import { LeadRepository } from './interfaces/LeadRepository';
 
@@ -17,7 +17,8 @@ export default class LeadRepositoryImpl implements LeadRepository {
     const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
     const pk = `Tenant#${tenantId}`;
     const sk = `Lead#${lead.primaryPhoneNumber}`;
-    await dynamoProvider.putItem(table, pk, sk, lead);
+    const typeLsi = `${lead.type}#${lead.assigneeId}#${lead.status}`;
+    await dynamoProvider.putItem(table, pk, sk, { ...lead, typeLsi });
     return lead;
   };
 
@@ -72,6 +73,37 @@ export default class LeadRepositoryImpl implements LeadRepository {
       ExpressionAttributeValues: {
         ':pk': { S: `Tenant#${tenantId}` },
         ':sk_filter_value': { S: 'Lead#' },
+      },
+    };
+    return dynamoProvider.query(params);
+  };
+
+  /**
+   * Get information of a lead list by tenantId, assignee, and status
+   * @param tenantId Tenant code
+   * @param userId Assignee of lead
+   * @param type type of Lead (Lead|Customer)
+   * @param status status of Lead
+   * @returns A List of Lead object
+   */
+  getLeadListByAssigneeAndStatus = async (
+    tenantId: string,
+    userId: string,
+    type: LeadType,
+    status?: LeadStatus,
+  ): Promise<Lead[]> => {
+    const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    let filterLSI = `${type}#${userId}`;
+    if (status) {
+      filterLSI = `${type}#${userId}#${status}`;
+    }
+    const params: QueryInput = {
+      TableName: table,
+      IndexName: 'TypeIndex',
+      KeyConditionExpression: 'pk = :pk AND begins_with(typeLsi, :lsi_filter_value)',
+      ExpressionAttributeValues: {
+        ':pk': { S: `Tenant#${tenantId}` },
+        ':lsi_filter_value': { S: filterLSI },
       },
     };
     return dynamoProvider.query(params);
