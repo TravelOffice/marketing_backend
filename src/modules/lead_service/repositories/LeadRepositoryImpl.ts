@@ -58,4 +58,22 @@ export default class LeadRepositoryImpl implements LeadRepository {
     };
     return dynamoProvider.query(params);
   };
+
+  /**
+   * Get information of a lead list by tenantId
+   * @param tenantId Tenant code
+   * @returns A List of Lead object
+   */
+  getLeadListByTenant = async (tenantId: string) => {
+    const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const params: QueryInput = {
+      TableName: table,
+      KeyConditionExpression: 'pk = :pk AND begins_with(sk, :sk_filter_value)',
+      ExpressionAttributeValues: {
+        ':pk': { S: `Tenant#${tenantId}` },
+        ':sk_filter_value': { S: 'Lead#' },
+      },
+    };
+    return dynamoProvider.query(params);
+  };
 }
