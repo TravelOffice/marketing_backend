@@ -1,0 +1,76 @@
+import { getAwsSecretValue } from 'get-env';
+import { Opportunity } from '../models/Opportunity';
+import { dynamoProvider } from '../providers';
+import { OpportunityRepository } from './interfaces/OpportunityRepository';
+import logger from '../utils/logger';
+
+export default class OpportunityRepositoryImpl implements OpportunityRepository {
+  /**
+   * Get a opportunity information in dynamo db
+   * @param id Opportunity ID
+   * @param tenantId Tenant ID
+   * @param leadId Lead/Customer ID
+   * @returns All atributes of Opportunity object
+   */
+  get = async (id: string, tenantId: string, leadId: string) => {
+    const dynamoTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const item = await dynamoProvider.getItem(
+      dynamoTable,
+      `Tenant#${tenantId}#Lead#${leadId}`,
+      `Tenant#${tenantId}#Opportunity#${id}`,
+    );
+    if (!item) throw new Error('Opportunity does not exists!');
+    const {
+      pk, sk, typeGsi, ...opportunity
+    } = item;
+    return opportunity;
+  };
+
+  /**
+   * Update a opportunity information in dynamo db
+   * @param tenantId Tenant ID
+   * @param opportunity Opportunity object
+   * @returns All atributes of Opportunity object
+   */
+  update = async (opportunity: Opportunity, tenantId: string) => {
+    const dynamoTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const { leadId } = opportunity;
+    const opportunityId = `${opportunity.createdAt}`;
+    const opportunityAssigneeId = `${opportunity.assigneeId}`;
+
+    await dynamoProvider.putItem(
+      dynamoTable,
+      `Tenant#${tenantId}#Lead#${leadId}`,
+      `Tenant#${tenantId}#Opportunity#${opportunityId}`,
+      opportunity,
+    );
+    if (opportunityAssigneeId) {
+      await dynamoProvider.putItem(
+        dynamoTable,
+        `Tenant#${tenantId}#Employee#${opportunityAssigneeId}`,
+        `Opportunity#${opportunityId}`,
+        opportunity,
+      );
+      logger.log(`Opportunity change opportunity AssigneeId to ${opportunityAssigneeId}`);
+    }
+
+    logger.log(`Opportunity updated with id = ${opportunityId}, leadId = ${leadId}, tenantId = ${tenantId}`);
+    return opportunity;
+  };
+
+  /**
+   * Unassign a opportunity information in dynamo db
+   * remove opportunity from Employee partition
+   * @param tenantId Tenant ID
+   * @param opportunity Opportunity object
+   * @returns All atributes of Opportunity object
+   */
+  unassign = async (id: string, tenantId: string, assigneeId: string) => {
+    const dynamoTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    await dynamoProvider.deleteItem(
+      dynamoTable,
+      `Tenant#${tenantId}#Employee#${assigneeId}`,
+      `Opportunity#${id}`,
+    );
+  };
+}
