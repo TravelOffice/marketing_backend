@@ -33,8 +33,7 @@ export default class S3Provider {
 
     console.log('[S3Provider.downloadFileFromS3 ] Downloading ', bucket, fileKey, filePath);
     const s3Object = await s3.getObject({ Bucket: bucket, Key: fileKey }).promise();
-    const data = s3Object?.Body?.toString('utf-8');
-    await fsPromises.writeFile(filePath, String(data), 'utf8');
+    await fsPromises.writeFile(filePath, s3Object.Body as Buffer);
     console.log('[S3Provider.downloadFileFromS3 ] Downloaded ', bucket, fileKey, filePath);
     return filePath;
   };
