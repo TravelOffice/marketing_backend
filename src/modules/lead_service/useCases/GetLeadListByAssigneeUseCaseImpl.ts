@@ -1,7 +1,6 @@
-import { Lead } from '../models/Lead';
+import { LeadStatus, LeadType } from '../models/Lead';
 import { leadRepository, userRepository } from '../repositories';
-import { GetLeadListByAssigneeUseCase } from './interfaces/GetLeadListByAssignee';
-
+import { GetLeadListByAssigneeUseCase } from './interfaces/GetLeadListByAssigneeUseCase';
 
 export default class GetLeadListByAssigneeUseCaseIpml implements GetLeadListByAssigneeUseCase {
   /**
@@ -10,10 +9,10 @@ export default class GetLeadListByAssigneeUseCaseIpml implements GetLeadListByAs
    * - Step 2: Get all leads in the tenant having user ID as assignee ID
    * @return pk, sk and all atributes of all Lead match the condition
    */
-  invoke = async (userId: string) => {
+  invoke = async (userId: string, type: LeadType, status?: LeadStatus) => {
     const userAttributes = await userRepository.getUserAttributes(userId);
     if (!userAttributes) throw new Error('User is not existed!');
     const tenantId = userAttributes.tenant;
-    return leadRepository.getLeadListByField(tenantId, 'assigneeId', userId);
+    return leadRepository.getLeadListByAssigneeAndStatus(tenantId, userId, type, status);
   };
 }

@@ -1,11 +1,16 @@
 import { Request } from 'express';
 import {
-  body, param, ValidationError, validationResult,
+  query, body, param, ValidationError, validationResult,
 } from 'express-validator';
 import {
-  LeadType, MaritalStatus, SexType, SourceType, StatusType, VocativeType,
+  LeadType, MaritalStatus, SexType, SourceType, LeadStatus, VocativeType,
 } from '../models/Lead';
-import { VALIDATE_BOOLEAN_MSG, VALIDATE_DATE_MSG, VALIDATE_EMAIL_MSG, VALIDATE_NON_EMPTY_STRING_MSG, VALIDATE_PHONE_ARRAY_MSG, VALIDATE_PHONE_MSG, VALIDATE_STRING_ARRAY_MSG, VALIDATE_STRING_MSG } from './constants';
+import {
+  VALIDATE_BOOLEAN_MSG, VALIDATE_DATE_MSG,
+  VALIDATE_EMAIL_MSG, VALIDATE_NON_EMPTY_STRING_MSG,
+  VALIDATE_PHONE_ARRAY_MSG, VALIDATE_PHONE_MSG,
+  VALIDATE_STRING_ARRAY_MSG, VALIDATE_STRING_MSG,
+} from './constants';
 
 export default function validate(req: Request) {
   const errors = validationResult(req);
@@ -108,7 +113,7 @@ export function createUpdateLeadValidator() {
 
     body('status')
       .if(body('status').notEmpty())
-      .isIn(Object.values(StatusType)).withMessage(`allow only in ${Object.values(StatusType)}`),
+      .isIn(Object.values(LeadStatus)).withMessage(`allow only in ${Object.values(LeadStatus)}`),
   ];
 }
 
@@ -117,5 +122,16 @@ export function getLeadValidator() {
     param('leadId', VALIDATE_NON_EMPTY_STRING_MSG)
       .notEmpty()
       .isString(),
+  ];
+}
+
+export function getAllLeadByAssigneeValidator() {
+  return [
+    query('type')
+      .notEmpty()
+      .isIn(Object.values(LeadType)).withMessage(`allow only in ${Object.values(LeadType)}`),
+    query('status')
+      .if(query('status').notEmpty())
+      .isIn(Object.values(LeadStatus)).withMessage(`allow only in ${Object.values(LeadStatus)}`),
   ];
 }

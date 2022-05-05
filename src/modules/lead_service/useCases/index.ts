@@ -1,11 +1,11 @@
 import CreateLeadUseCaseImpl from './CreateLeadUseCaseImpl';
 import UpdateLeadUseCaseImpl from './UpdateLeadUseCaseImpl';
-import GetLeadListByAssigneeUseCaseIpml from './GetLeadListByFieldUseCaseImpl';
+import GetLeadListByAssigneeUseCaseIpml from './GetLeadListByAssigneeUseCaseImpl';
 import GetLeadListByTenantUseCaseIpml from './GetLeadListByTenantUseCaseImpl';
 import GetLeadUseCaseImpl from './GetLeadUseCaseImpl';
 import { CreateLeadUseCase } from './interfaces/CreateLeadUseCase';
 import { UpdateLeadUseCase } from './interfaces/UpdateLeadUseCase';
-import { GetLeadListByAssigneeUseCase } from './interfaces/GetLeadListByAssignee';
+import { GetLeadListByAssigneeUseCase } from './interfaces/GetLeadListByAssigneeUseCase';
 import { GetLeadListByTenantUseCase } from './interfaces/GetLeadListByTenant';
 import { GetLeadUseCase } from './interfaces/GetLeadUseCase';
 

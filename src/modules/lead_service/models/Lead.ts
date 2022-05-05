@@ -2,14 +2,14 @@ export enum SexType {
   MALE = 'MALE',
   FEMALE = 'FEMALE',
   OTHER = 'OTHER',
-};
+}
 export enum VocativeType {
   MR_YOUNG = 'MR_YOUNG',
   MRS_YOUNG = 'MRS_YOUNG',
   MR_OLD = 'MR_OLD',
   MRS_OLD = 'MRS_OLD',
-};
-export enum StatusType {
+}
+export enum LeadStatus {
   NEW = 'NEW',
   QUALIFYING = 'QUALIFYING',
   QUALIFIED = 'QUALIFIED',
@@ -49,7 +49,7 @@ export interface Lead {
   district: string,
   ward: string,
   address: string,
-  status: StatusType,
+  status: LeadStatus,
   createdAt: string,
   updatedAt: string,
   tags: Array<string>,

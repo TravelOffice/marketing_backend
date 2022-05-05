@@ -1,13 +1,15 @@
 import compression from 'compression';
 import cors from 'cors';
 import express, { Request, Response, NextFunction } from 'express';
-import { StatusType } from './models/Lead';
+import { LeadType, LeadStatus } from './models/Lead';
 import {
-  createLeadUseCase, getLeadUseCase, getLeadListByAssigneeUseCase, updateLeadUseCase, getLeadListByTenantUseCase,
+  createLeadUseCase, getLeadUseCase,
+  getLeadListByAssigneeUseCase, updateLeadUseCase,
+  getLeadListByTenantUseCase,
 } from './useCases';
 import { getCurrentUserInfo } from './utils/authorizer';
 import { FAILED, SUCCESS } from './utils/constants';
-import validate, { createUpdateLeadValidator, getLeadValidator } from './utils/validator';
+import validate, { createUpdateLeadValidator, getLeadValidator, getAllLeadByAssigneeValidator } from './utils/validator';
 import wrapResponse from './utils/wrapResponse';
 
 const app = express();
@@ -31,7 +33,7 @@ app.post('/leads', createUpdateLeadValidator(), async (req: Request, res: Respon
     const { username, name } = getCurrentUserInfo(req.headers.authorization!);
     req.body.createdAt = currentTime;
     req.body.updatedAt = currentTime;
-    req.body.status = StatusType.NEW;
+    req.body.status = LeadStatus.NEW;
     req.body.creatorId = username;
     req.body.creatorName = name;
     req.body.assigneeId = username;
@@ -71,10 +73,16 @@ app.get('/leads/:leadId', getLeadValidator(), async (req: Request, res: Response
   }
 });
 
-app.get('/leads', async (req: Request, res: Response) => {
+app.get('/leads', getAllLeadByAssigneeValidator(), async (req: Request, res: Response) => {
   try {
+    validate(req);
     const { username } = getCurrentUserInfo(req.headers.authorization!);
-    const leadList = await getLeadListByAssigneeUseCase.invoke(username);
+    const { type, status } = req.query;
+    const leadList = await getLeadListByAssigneeUseCase.invoke(
+      username,
+      type as LeadType,
+      status as LeadStatus,
+    );
     res.json(wrapResponse(SUCCESS, leadList));
   } catch (error: any) {
     console.log('[app.get] Error', error);
