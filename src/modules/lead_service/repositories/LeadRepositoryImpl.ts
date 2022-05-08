@@ -97,7 +97,7 @@ export default class LeadRepositoryImpl implements LeadRepository {
     const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
     let filterLSI = `${type}#${userId}#${ENABLED}`;
     if (status) {
-      filterLSI = `${type}#${userId}#${ENABLED}#${status}}`;
+      filterLSI = `${type}#${userId}#${ENABLED}#${status}`;
     }
     const params: QueryInput = {
       TableName: table,
