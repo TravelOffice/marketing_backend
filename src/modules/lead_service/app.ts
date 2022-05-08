@@ -33,7 +33,6 @@ app.post('/leads', createUpdateLeadValidator(), async (req: Request, res: Respon
     const { username, name } = getCurrentUserInfo(req.headers.authorization!);
     req.body.createdAt = currentTime;
     req.body.updatedAt = currentTime;
-    req.body.status = LeadStatus.NEW;
     req.body.creatorId = username;
     req.body.creatorName = name;
     req.body.assigneeId = username;
