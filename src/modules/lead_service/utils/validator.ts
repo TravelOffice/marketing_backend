@@ -112,7 +112,6 @@ export function createUpdateLeadValidator() {
       .isIn(Object.values(LeadType)).withMessage(`allow only in ${Object.values(LeadType)}`),
 
     body('status')
-      .if(body('status').notEmpty())
       .isIn(Object.values(LeadStatus)).withMessage(`allow only in ${Object.values(LeadStatus)}`),
   ];
 }
