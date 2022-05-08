@@ -2,6 +2,7 @@ import * as AWS from 'aws';
 import { getAwsSecretValue } from 'get-env';
 import { Lead, LeadType, LeadStatus } from '../models/Lead';
 import { dynamoProvider } from '../providers';
+import { DISABLED, ENABLED } from '../utils/constants';
 import { LeadRepository } from './interfaces/LeadRepository';
 
 type QueryInput = AWS.DynamoDB.QueryInput;
@@ -17,7 +18,7 @@ export default class LeadRepositoryImpl implements LeadRepository {
     const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
     const pk = `Tenant#${tenantId}`;
     const sk = `Lead#${lead.primaryPhoneNumber}`;
-    const typeLsi = `${lead.type}#${lead.assigneeId}#${lead.status}`;
+    const typeLsi = `${lead.type}#${lead.assigneeId}#${lead.enabled ? ENABLED : DISABLED}#${lead.status}`;
     await dynamoProvider.putItem(table, pk, sk, { ...lead, typeLsi });
     return lead;
   };
@@ -79,7 +80,8 @@ export default class LeadRepositoryImpl implements LeadRepository {
   };
 
   /**
-   * Get information of a lead list by tenantId, assignee, and status
+   * Get information of a enabled lead list by tenantId, assignee, and status
+   * Disabled leads will be only viewed by admin
    * @param tenantId Tenant code
    * @param userId Assignee of lead
    * @param type type of Lead (Lead|Customer)
@@ -93,9 +95,9 @@ export default class LeadRepositoryImpl implements LeadRepository {
     status?: LeadStatus,
   ): Promise<Lead[]> => {
     const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
-    let filterLSI = `${type}#${userId}`;
+    let filterLSI = `${type}#${userId}#${ENABLED}`;
     if (status) {
-      filterLSI = `${type}#${userId}#${status}`;
+      filterLSI = `${type}#${userId}#${ENABLED}#${status}}`;
     }
     const params: QueryInput = {
       TableName: table,
