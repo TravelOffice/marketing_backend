@@ -6,5 +6,5 @@ export interface LinkZaloPageUseCase {
     authorizationCode: string,
     state: string,
     pageId: string
-  ) => Promise<void>
+  ) => Promise<ZaloPage>
 }

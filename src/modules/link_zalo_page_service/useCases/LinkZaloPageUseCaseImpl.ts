@@ -24,5 +24,6 @@ export default class LinkZaloPageUseCaseImpl implements LinkZaloPageUseCase {
     await zaloPageRepository.saveOAInfoToDynamo(tenantId, page);
     // Delete code verifier in db
     await zaloPageRepository.deleteCodeVerifierInDynamo(state);
+    return page;
   };
 }

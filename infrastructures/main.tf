@@ -27,7 +27,7 @@ locals {
     zalo_page_vars = {
       NODE_ENV          = var.ENV
       SECRET_MANAGER_ID = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
-      CALLBACK_URL      = "sso.traveloffice.shop"
+      CALLBACK_URL      = "www.traveloffice.shop/zalo/callback"
     }
   }
 }
