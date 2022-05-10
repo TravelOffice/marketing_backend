@@ -1,4 +1,3 @@
-import { Lead } from '../models/Lead';
 import { leadRepository, userRepository, cognitoUserRepository } from '../repositories';
 import { GetLeadListByTenantUseCase } from './interfaces/GetLeadListByTenant';
 

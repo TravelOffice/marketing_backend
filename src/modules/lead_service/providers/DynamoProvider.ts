@@ -1,6 +1,5 @@
 import * as AWS from 'aws';
 import { getEnv } from 'get-env';
-import { Lead } from '../models/Lead';
 
 type PutItemInput = AWS.DynamoDB.PutItemInput;
 type GetItemInput = AWS.DynamoDB.GetItemInput;
