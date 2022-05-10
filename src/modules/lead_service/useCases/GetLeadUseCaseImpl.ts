@@ -1,7 +1,6 @@
 import { leadRepository, userRepository } from '../repositories';
 import { GetLeadUseCase } from './interfaces/GetLeadUseCase';
 
-
 export default class GetLeadUseCaseImpl implements GetLeadUseCase {
   /**
    * To get lead by ID, there are steps need to do:
@@ -16,5 +15,5 @@ export default class GetLeadUseCaseImpl implements GetLeadUseCase {
     const lead = await leadRepository.getById(tenantId, leadId);
     if (!lead) throw new Error('Lead does not exist!');
     return lead;
-  }
+  };
 }
