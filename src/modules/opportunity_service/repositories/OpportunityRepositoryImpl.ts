@@ -8,6 +8,41 @@ import { QueryInput } from '../providers/DynamoProvider';
 
 export default class OpportunityRepositoryImpl implements OpportunityRepository {
   /**
+   * Create new opportunity, save to database
+   * @param tenantId The id of tenant which the opportunity belongs to.
+   * @param leadId The id of the lead associate to the opportunity.
+   * @param employeeId The id of the employee who creates the opportunity.
+   * @param opportunity The opportunity information to be created.
+   */
+  create = async (
+    tenantId: string,
+    leadId: string,
+    employeeId: string,
+    opportunity: Opportunity,
+  ) => {
+    // Save to Lead partition
+    const dynamoTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const createdAt = Date.now();
+    const opportunityId = `${createdAt}`;
+    const opportunityToCreate = {
+      ...opportunity,
+      id: opportunityId,
+      createdAt,
+      updatedAt: createdAt,
+    };
+    await dynamoProvider.putItem(dynamoTable, `Tenant#${tenantId}#Lead#${leadId}`, `Tenant#${tenantId}#Opportunity#${opportunityId}`, {
+      ...opportunityToCreate,
+      typeGsi: `OPPORTUNITY#Tenant#${tenantId}`,
+      typeLsi: `OPPORTUNITY#${opportunity.status}`,
+    });
+    // Save to Employee partition1
+    await dynamoProvider.putItem(dynamoTable, `Tenant#${tenantId}#Employee#${employeeId}`, `Opportunity#${opportunityId}`, {
+      ...opportunityToCreate,
+    });
+    return opportunityToCreate;
+  };
+
+  /**
    * Get a opportunity information in dynamo db
    * @param id Opportunity ID
    * @param tenantId Tenant ID

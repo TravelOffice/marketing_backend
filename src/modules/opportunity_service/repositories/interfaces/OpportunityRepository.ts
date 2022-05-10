@@ -1,6 +1,12 @@
 import { Opportunity } from '../../models/Opportunity';
 
 export interface OpportunityRepository {
+  create: (
+    tenantId: string,
+    leadId: string,
+    employeeId: string,
+    opportunity: Opportunity
+  ) => Promise<Opportunity>
   get: (id: string, tenantId: string, leadId: string) => Promise<Opportunity | undefined>
   getByAssignee: (
     id: string, tenantId: string, assigneeId: string,
