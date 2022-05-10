@@ -28,3 +28,4 @@ infrastructures/environments/**/serverless.auto.tfvars
 
 temp
 **/package-lock*
+**.idea/*
