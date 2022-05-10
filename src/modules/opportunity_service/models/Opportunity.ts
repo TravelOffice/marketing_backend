@@ -1,3 +1,4 @@
+/* eslint-disable no-shadow */
 import { Note } from './Note';
 import { Task } from './Task';
 
@@ -36,10 +37,10 @@ export interface Opportunity {
   status: OpportunityStatus,
   closedLostReason: string,
   estimatedRevenue: number,
-  estimatedConfirmDate: Date,
-  actualCloseDate: Date,
-  createdAt: Date,
-  updatedAt: Date,
+  estimatedConfirmDate: string,
+  actualCloseDate: string,
+  createdAt: number,
+  updatedAt: number,
   potential: OpportunityPotentialType,
   assigneeId: string, // TODO: Owner is sale person. Integrate sale management in the near future
   notes?: Note[],

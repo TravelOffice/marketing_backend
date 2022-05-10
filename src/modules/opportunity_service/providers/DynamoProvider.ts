@@ -1,10 +1,11 @@
 import * as AWS from 'aws';
 import { getEnv } from 'get-env';
 
-type PutItemInput = AWS.DynamoDB.PutItemInput;
-type GetItemInput = AWS.DynamoDB.GetItemInput;
+export type PutItemInput = AWS.DynamoDB.PutItemInput;
+export type GetItemInput = AWS.DynamoDB.GetItemInput;
 export type QueryInput = AWS.DynamoDB.QueryInput;
-type DeleteItemInput = AWS.DynamoDB.DeleteItemInput
+export type DeleteItemInput = AWS.DynamoDB.DeleteItemInput
+
 const dynamoDB : AWS.DynamoDB = new AWS.DynamoDB({ region: getEnv('AWS_REGION') });
 
 export default class DynamoProvider {

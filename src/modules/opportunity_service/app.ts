@@ -5,13 +5,14 @@ import {
   deleteOpportunityUseCase,
   getMyOpportunitiesUseCase,
   getOpportunitiesByLeadUseCase,
+  createOpportunityUseCase,
   getOpportunityUseCase,
   updateOpportunityUseCase,
 } from './useCases';
 import wrapResponse from './utils/wrapResponse';
 import { FAILED, SUCCESS } from './utils/constants';
 import { getCurrentUserId } from './utils/authorizer';
-import validate, { updateOpportunityValidator } from './utils/validator';
+import validate, { createOpportunityValidator, updateOpportunityValidator } from './utils/validator';
 import logger from './utils/logger';
 
 const app = express();
@@ -29,8 +30,21 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 });
 
 app.use((req: Request, _res: Response, next: NextFunction) => {
-  console.log(`Request to ${req.method}: ${req.url}`);
+  logger.log(`Request to ${req.method}: ${req.url}`);
   next();
+});
+
+app.post('/leads/:leadId/opportunities', createOpportunityValidator(), async (req: Request, res: Response) => {
+  try {
+    validate(req);
+    const { leadId } = req.params;
+    const userId = getCurrentUserId(req.headers.authorization!);
+    const opportunity = await createOpportunityUseCase.invoke(userId, leadId, req.body);
+    res.json(wrapResponse(SUCCESS, opportunity));
+  } catch (error: any) {
+    logger.log(error);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
 });
 
 app.get('/leads/:leadId/opportunities/:id', async (req: Request, res: Response) => {

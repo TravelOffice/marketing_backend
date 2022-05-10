@@ -20,6 +20,11 @@ export default function validate(req: Request) {
   }
 }
 
+function validateDate(dateInString: string) {
+  const date = Date.parse(dateInString);
+  return !Number.isNaN(date);
+}
+
 export function updateOpportunityValidator() {
   return [
     body('name').notEmpty().isString(),
@@ -38,11 +43,31 @@ export function updateOpportunityValidator() {
     }),
     body('assigneeId').notEmpty().isString(),
     body('potential').notEmpty().isIn(opportunityPotentials).withMessage(`allow only in ${opportunityPotentials}`),
-    body('owner').optional().isString(),
-    body('notes').optional().isObject(),
+    body('notes').optional().isArray().withMessage('notes must be array'),
     body('notes.*.name').if(body('notes').exists()).notEmpty().isString(),
     body('notes.*.description').if(body('notes').exists()).notEmpty().isString(),
-    body('tasks').optional().isObject(),
+    body('tasks').optional().isArray().withMessage('tasks must be array'),
+    body('tasks.*.name').if(body('tasks').exists()).notEmpty().isString(),
+    body('tasks.*.description').if(body('tasks').exists()).notEmpty().isString(),
+  ];
+}
+
+export function createOpportunityValidator() {
+  return [
+    body('name').notEmpty().isString(),
+    body('source').notEmpty().isIn(opportunitySources).withMessage(`allow only in ${opportunitySources}`),
+    body('description').optional().isString(),
+    body('status').notEmpty().isIn(opportunityStatuses).withMessage(`allow only in ${opportunityStatuses}`),
+    body('closedLostReason').optional().isString(),
+    body('estimatedRevenue').optional().isFloat({ min: 0 }),
+    body('estimatedConfirmDate').optional().custom(validateDate),
+    body('actualCloseDate').optional().custom(validateDate),
+    body('assigneeId').notEmpty().isString(),
+    body('potential').notEmpty().isIn(opportunityPotentials).withMessage(`allow only in ${opportunityPotentials}`),
+    body('notes').optional().isArray().withMessage('notes must be array'),
+    body('notes.*.name').if(body('notes').exists()).notEmpty().isString(),
+    body('notes.*.description').if(body('notes').exists()).notEmpty().isString(),
+    body('tasks').optional().isArray().withMessage('tasks must be array'),
     body('tasks.*.name').if(body('tasks').exists()).notEmpty().isString(),
     body('tasks.*.description').if(body('tasks').exists()).notEmpty().isString(),
   ];
