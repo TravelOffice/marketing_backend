@@ -73,4 +73,27 @@ export default class OpportunityRepositoryImpl implements OpportunityRepository 
       `Opportunity#${id}`,
     );
   };
+
+  delete = async (opportunity: Opportunity, tenantId: string) => {
+    const dynamoTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const { leadId } = opportunity;
+    const opportunityId = `${opportunity.createdAt}`;
+    const opportunityAssigneeId = `${opportunity.assigneeId}`;
+
+    await dynamoProvider.deleteItem(
+      dynamoTable,
+      `Tenant#${tenantId}#Lead#${leadId}`,
+      `Tenant#${tenantId}#Opportunity#${opportunityId}`,
+    );
+    if (opportunityAssigneeId) {
+      await dynamoProvider.deleteItem(
+        dynamoTable,
+        `Tenant#${tenantId}#Employee#${opportunityAssigneeId}`,
+        `Opportunity#${opportunityId}`,
+      );
+      logger.log(`Delete Opportunity from Employee ${opportunityAssigneeId} information sucessfully`);
+    }
+
+    logger.log(`Delete Opportunity with id = ${opportunityId}, leadId = ${leadId}, tenantId = ${tenantId} successfully`);
+  };
 }

@@ -31,7 +31,7 @@ export default class UpdateOpportunityUseCaseImpl implements UpdateOpportunityUs
     }
     // TODO: Need to check whether Opportunity belong to current user or not
     if (oldOpportunity.assigneeId !== opportunity.assigneeId) {
-      opportunityRepository.unassign(id, tenantId, oldOpportunity.assigneeId);
+      await opportunityRepository.unassign(id, tenantId, oldOpportunity.assigneeId);
     }
     return opportunityRepository.update(
       Object.assign(oldOpportunity, opportunity),
