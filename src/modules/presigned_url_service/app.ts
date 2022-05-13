@@ -31,6 +31,7 @@ app.get('/presigned-url', getPresignedUrlValidator(), async (req: Request, res: 
     const rs = await s3Repository.generatePresignedUrl(bucket, String(pageId), String(customerId), expires, String(fileType), String(fileName));
     res.json(wrapResponse(SUCCESS, rs));
   } catch (error: any) {
+    console.log(`[App.PresignUrl] Generated an error`, error);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });

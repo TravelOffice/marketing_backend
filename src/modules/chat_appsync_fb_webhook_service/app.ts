@@ -40,6 +40,7 @@ app.post('/chat-fb-webhook', async (req: Request, res: Response) => {
       res.sendStatus(404);
     }
   } catch (e: any) {
+    console.log(`[App.ChatFbWebhook POST] Generated an error`, e);
     res.json({ message: `${e.name}: ${e.message}` });
   }
 });
@@ -74,6 +75,7 @@ app.get('/chat-fb-webhook', async (req: Request, res: Response) => {
       }
     }
   } catch (e: any) {
+    console.log(`[App.ChatFbWebhook GET] Generated an error`, e);
     res.json({ message: `${e.name}: ${e.message}` });
   }
 });
