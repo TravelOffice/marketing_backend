@@ -47,6 +47,7 @@ app.post('/chat-zalo-webhook', async (req: Request, res: Response) => {
       res.sendStatus(404);
     }
   } catch (e: any) {
+    console.log(`[App.ChatZaloWebhook POST] Generated an error`, e);
     res.json({ message: `${e.name}: ${e.message}` });
   }
 });

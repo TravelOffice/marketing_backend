@@ -9,6 +9,7 @@ import wrapResponse from './utils/wrapResponse';
 import { FAILED, SUCCESS } from './utils/constants';
 import { getCurrentUserId } from './utils/authorizer';
 import validate, { updateOpportunityValidator } from './utils/validator';
+import logger from './utils/logger';
 
 const app = express();
 
@@ -36,6 +37,7 @@ app.get('/leads/:leadId/opportunities/:id', async (req: Request, res: Response) 
     const opportunity = await getOpportunityUseCase.invoke(id, userId, leadId);
     res.json(wrapResponse(SUCCESS, opportunity));
   } catch (error: any) {
+    logger.log(error);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });
@@ -48,6 +50,7 @@ app.put('/leads/:leadId/opportunities/:id', updateOpportunityValidator(), async 
     const opportunity = await updateOpportunityUseCase.invoke(id, userId, leadId, req.body);
     res.json(wrapResponse(SUCCESS, opportunity));
   } catch (error: any) {
+    logger.log(error);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });

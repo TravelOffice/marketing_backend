@@ -46,6 +46,7 @@ app.get('/upload-file-to-chat-platform', uploadFileToChaPlatformServiceValidator
     // Remove the s3 Object file
     await s3Repository.deleteObject(bucket, String(fileKey));
   } catch (error: unknown) {
+    console.log(`[App.ChatZaloWebhook POST] Generated an error`, error);
     let message = 'Unknown Error';
     if (error instanceof Error) message = error.message;
     res.json(wrapResponse(FAILED, undefined, message));
