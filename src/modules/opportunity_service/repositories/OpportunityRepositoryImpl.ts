@@ -3,6 +3,8 @@ import { Opportunity } from '../models/Opportunity';
 import { dynamoProvider } from '../providers';
 import { OpportunityRepository } from './interfaces/OpportunityRepository';
 import logger from '../utils/logger';
+import { QueryInput } from '../providers/DynamoProvider';
+import * as AWS from 'aws';
 
 export default class OpportunityRepositoryImpl implements OpportunityRepository {
   /**
@@ -95,5 +97,35 @@ export default class OpportunityRepositoryImpl implements OpportunityRepository 
     }
 
     logger.log(`Delete Opportunity with id = ${opportunityId}, leadId = ${leadId}, tenantId = ${tenantId} successfully`);
+  }
+  
+  /**
+   * Get list opportunities by leadId
+   * @param tenantId Tenant ID
+   * @param leadId Lead Id
+   * @returns All opportunities from lead
+   */
+  getListByLead = async (tenantId: string, leadId: string) => {
+    const dynamoTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const pk = `Tenant#${tenantId}#Lead#${leadId}`;
+    const skFilter = `Tenant#${tenantId}#Opportunity#`;
+
+    const params: QueryInput = {
+      TableName: dynamoTable,
+      KeyConditionExpression: 'pk = :pk AND begins_with(sk, :sk_filter_value)',
+      ExpressionAttributeValues: {
+        ':pk': { S: pk },
+        ':sk_filter_value': { S: skFilter }
+      }
+    };
+    const { Items } = await dynamoProvider.rawQuery(params);
+    if (Items) {
+      return Items.map((item: any) => { 
+        const opportunity = AWS.DynamoDB.Converter.unmarshall(item);
+        const { sk, pk, ...rest} = opportunity;
+        return rest as Opportunity;
+      });
+    }
+    return [];
   };
 }
