@@ -2,6 +2,7 @@ import cors from 'cors';
 import express, { Request, Response, NextFunction } from 'express';
 import compression from 'compression';
 import {
+  deleteOpportunityUseCase,
   getOpportunityUseCase,
   updateOpportunityUseCase,
 } from './useCases';
@@ -51,6 +52,18 @@ app.put('/leads/:leadId/opportunities/:id', updateOpportunityValidator(), async 
     res.json(wrapResponse(SUCCESS, opportunity));
   } catch (error: any) {
     logger.log(error);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.delete('/leads/:leadId/opportunities/:id', async (req: Request, res: Response) => {
+  try {
+    const { leadId, id } = req.params;
+    const userId = getCurrentUserId(req.headers.authorization!);
+    // TODO: Check condition before delete opportunity. Example: only draft oppotunity can be deleted
+    await deleteOpportunityUseCase.invoke(id, userId, leadId);
+    res.json(wrapResponse(SUCCESS));
+  } catch (error: any) {
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });
