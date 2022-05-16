@@ -128,4 +128,34 @@ export default class OpportunityRepositoryImpl implements OpportunityRepository 
     }
     return [];
   };
+
+  /**
+   * Get list opportunities by assignee ID
+   * @param tenantId Tenant ID
+   * @param assigneeId Assignee ID
+   * @returns All opportunities assigned
+   */
+  getListByAssignee = async (tenantId: string, assigneeId: string) => {
+    const dynamoTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const pk = `Tenant#${tenantId}#Employee#${assigneeId}`;
+    const skFilter = `Tenant#${tenantId}#Opportunity#`;
+
+    const params: QueryInput = {
+      TableName: dynamoTable,
+      KeyConditionExpression: 'pk = :pk AND begins_with(sk, :sk_filter_value)',
+      ExpressionAttributeValues: {
+        ':pk': { S: pk },
+        ':sk_filter_value': { S: skFilter }
+      }
+    };
+    const { Items } = await dynamoProvider.rawQuery(params);
+    if (Items) {
+      return Items.map((item: any) => { 
+        const opportunity = AWS.DynamoDB.Converter.unmarshall(item);
+        const { sk, pk, ...rest} = opportunity;
+        return rest as Opportunity;
+      });
+    }
+    return [];
+  }
 }

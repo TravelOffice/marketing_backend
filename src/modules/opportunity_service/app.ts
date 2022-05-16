@@ -3,6 +3,7 @@ import express, { Request, Response, NextFunction } from 'express';
 import compression from 'compression';
 import {
   deleteOpportunityUseCase,
+  getMyOpportunitiesUseCase,
   getOpportunitiesByLeadUseCase,
   getOpportunityUseCase,
   updateOpportunityUseCase,
@@ -49,6 +50,17 @@ app.get('/leads/:leadId/opportunities', async (req: Request, res: Response) => {
     const { leadId } = req.params;
     const userId = getCurrentUserId(req.headers.authorization!);
     const opportunities = await getOpportunitiesByLeadUseCase.invoke(userId, leadId);
+    res.json(wrapResponse(SUCCESS, opportunities));
+  } catch (error: any) {
+    logger.log(error);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.get('/opportunities', async (req: Request, res: Response) => {
+  try {
+    const userId = getCurrentUserId(req.headers.authorization!);
+    const opportunities = await getMyOpportunitiesUseCase.invoke(userId);
     res.json(wrapResponse(SUCCESS, opportunities));
   } catch (error: any) {
     logger.log(error);
