@@ -6,4 +6,5 @@ export interface OpportunityRepository {
   unassign: (id: string, tenantId: string, assigneeId: string) => Promise<void>
   delete: (opportunity: Opportunity, tenantId: string) => Promise<void>
   getListByLead: (tenantId: string, leadId: string) => Promise<Array<Opportunity>>
+  getListByAssignee: (tenantId: string, assigneeId: string) => Promise<Array<Opportunity>>
 }

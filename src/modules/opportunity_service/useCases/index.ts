@@ -1,7 +1,9 @@
 import DeleteOpportunityUseCaseImpl from './DeleteOpportunityUseCaseImpl';
+import GetMyOpportunitiesUseCaseImpl from './GetMyOpportunitiesUseCaseImpl';
 import GetOpportunitiesByLeadUseCaseImpl from './GetOpportunitiesByLeadUseCaseImpl';
 import GetOpportunityUseCaseImpl from './GetOpportunityUseCaseImpl';
 import { DeleteOpportunityUseCase } from './interfaces/DeleteOpportunityUseCase';
+import { GetMyOpportunitiesUseCase } from './interfaces/GetMyOpportunitiesUseCase';
 import { GetOpportunitiesByLeadUseCase } from './interfaces/GetOpportunitiesByLeadUseCase';
 import { GetOpportunityUseCase } from './interfaces/GetOpportunityUseCase';
 import { UpdateOpportunityUseCase } from './interfaces/UpdateOpportunityUseCase';
@@ -12,6 +14,7 @@ interface UseCases {
   updateOpportunityUseCase: UpdateOpportunityUseCase,
   deleteOpportunityUseCase: DeleteOpportunityUseCase,
   getOpportunitiesByLeadUseCase: GetOpportunitiesByLeadUseCase,
+  getMyOpportunitiesUseCase: GetMyOpportunitiesUseCase,
 }
 
 const useCases : UseCases = {
@@ -19,6 +22,7 @@ const useCases : UseCases = {
   updateOpportunityUseCase: new UpdateOpportunityUseCaseImpl(),
   deleteOpportunityUseCase: new DeleteOpportunityUseCaseImpl(),
   getOpportunitiesByLeadUseCase: new GetOpportunitiesByLeadUseCaseImpl(),
+  getMyOpportunitiesUseCase: new GetMyOpportunitiesUseCaseImpl(),
 };
 
 export const {
@@ -26,4 +30,5 @@ export const {
   updateOpportunityUseCase,
   deleteOpportunityUseCase,
   getOpportunitiesByLeadUseCase,
+  getMyOpportunitiesUseCase,
 } = useCases;
