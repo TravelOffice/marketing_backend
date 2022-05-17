@@ -141,7 +141,7 @@ export default class OpportunityRepositoryImpl implements OpportunityRepository 
       KeyConditionExpression: 'pk = :pk AND begins_with(sk, :sk_filter_value)',
       ExpressionAttributeValues: {
         ':pk': { S: `Tenant#${tenantId}#Employee#${assigneeId}` },
-        ':sk_filter_value': { S: `Tenant#${tenantId}#Opportunity#` },
+        ':sk_filter_value': { S: 'Opportunity#' },
       },
     };
     const { Items } = await dynamoProvider.rawQuery(params);
