@@ -29,6 +29,27 @@ export default class OpportunityRepositoryImpl implements OpportunityRepository 
   };
 
   /**
+   * Get a opportunity information in dynamo db
+   * @param id Opportunity ID
+   * @param tenantId Tenant ID
+   * @param assigneeId Assignee ID
+   * @returns All atributes of Opportunity object
+   */
+  getByAssignee = async (id: string, tenantId: string, assigneeId: string) => {
+    const dynamoTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const item = await dynamoProvider.getItem(
+      dynamoTable,
+      `Tenant#${tenantId}#Employee#${assigneeId}`,
+      `Opportunity#${id}`,
+    );
+    if (!item) throw new Error('Opportunity does not exists!');
+    const {
+      pk, sk, typeGsi, ...opportunity
+    } = item;
+    return opportunity;
+  };
+
+  /**
    * Update a opportunity information in dynamo db
    * @param tenantId Tenant ID
    * @param opportunity Opportunity object

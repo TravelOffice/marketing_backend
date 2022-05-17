@@ -81,13 +81,13 @@ app.put('/leads/:leadId/opportunities/:id', updateOpportunityValidator(), async 
   }
 });
 
-app.delete('/leads/:leadId/opportunities/:id', async (req: Request, res: Response) => {
+app.delete('/opportunities/:id', async (req: Request, res: Response) => {
   try {
-    const { leadId, id } = req.params;
+    const { id } = req.params;
     const userId = getCurrentUserId(req.headers.authorization!);
     // TODO: Check condition before delete opportunity.
     // Example: only draft oppotunity can be deleted
-    await deleteOpportunityUseCase.invoke(id, userId, leadId);
+    await deleteOpportunityUseCase.invoke(id, userId);
     res.json(wrapResponse(SUCCESS));
   } catch (error: any) {
     res.json(wrapResponse(FAILED, undefined, error.message));
