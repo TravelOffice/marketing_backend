@@ -1,5 +1,7 @@
 import { getAwsSecretValue } from 'get-env';
-import { FacebookMessageResponsePayload, FacebookUserProfile, Message, toSendFbMessagePayload } from '../models';
+import {
+  FacebookMessageResponsePayload, FacebookUserProfile, Message, toSendFbMessagePayload,
+} from '../models';
 import { dynamoProvider, fbMessagePlatformProvider } from '../providers';
 import { FbMessagePlatformRepository } from './interfaces/FbMessagePlatformRepository';
 
@@ -9,7 +11,7 @@ export default class FbMessagePlatformRepositoryImpl implements FbMessagePlatfor
    * @param pageId Page id
    * @returns Facebook access token
    */
-  _getFbMessagePlatformToken = async (pageId: string): Promise<string> => {
+  private readonly getFbMessagePlatformToken = async (pageId: string): Promise<string> => {
     const saleChatTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
     const params = {
       TableName: saleChatTable,
@@ -32,11 +34,11 @@ export default class FbMessagePlatformRepositoryImpl implements FbMessagePlatfor
     };
     const rs = await dynamoProvider.query(params);
     if (rs.Items && rs.Items?.length > 0) {
-      console.info('[FbMessagePlatformRepositoryImpl._getFbMessagePlatformToken] DynamoDB item', rs.Items[0]);
+      console.info('[FbMessagePlatformRepositoryImpl.getFbMessagePlatformToken] DynamoDB item', rs.Items[0]);
       return rs.Items[0].accessToken;
     }
     throw new Error(`Can not get token for Facebook page with id ${pageId}`);
-  }
+  };
 
   /**
    * Send message to customer from Fb page
@@ -45,12 +47,13 @@ export default class FbMessagePlatformRepositoryImpl implements FbMessagePlatfor
   sendMessage = async (message: Message): Promise<any> => {
     try {
       // Get page token that stored in DynamoDB table by `pageIdAsSender`
-      const pageToken = await this._getFbMessagePlatformToken(message.sender);
+      const pageToken = await this.getFbMessagePlatformToken(message.sender);
       // Send message
       const payload = toSendFbMessagePayload(message);
       return fbMessagePlatformProvider.sendMessage(pageToken, payload);
     } catch (error) {
-      console.log(`[FbMessagePlatformRepositoryImpl.sendMessage] Generated an error`, error);
+      console.log('[FbMessagePlatformRepositoryImpl.sendMessage] Generated an error', error);
+      return undefined;
     }
   };
 
@@ -59,13 +62,16 @@ export default class FbMessagePlatformRepositoryImpl implements FbMessagePlatfor
    * @param pageId Page id
    * @returns
    */
-  getConversations = async (pageId: string): Promise<FacebookMessageResponsePayload | undefined> => {
+  getConversations = async (
+    pageId: string,
+  ): Promise<FacebookMessageResponsePayload | undefined> => {
     try {
       // Get page token that stored in DynamoDB table by `pageIdAsSender`
-      const pageToken = await this._getFbMessagePlatformToken(pageId);
+      const pageToken = await this.getFbMessagePlatformToken(pageId);
       return fbMessagePlatformProvider.getConversations(pageToken, pageId);
     } catch (error) {
-      console.log(`[FbMessagePlatformRepositoryImpl.getConversations] Generated an error`, error);
+      console.log('[FbMessagePlatformRepositoryImpl.getConversations] Generated an error', error);
+      return undefined;
     }
   };
 
@@ -77,13 +83,19 @@ export default class FbMessagePlatformRepositoryImpl implements FbMessagePlatfor
    * @param limit Number of items returned from fb api
    * @returns
    */
-  getMessages = async (senderAsPageId: string, conversationId: string, after?: string, limit?: number): Promise<FacebookMessageResponsePayload | undefined> => {
+  getMessages = async (
+    senderAsPageId: string,
+    conversationId: string,
+    after?: string,
+    limit?: number,
+  ): Promise<FacebookMessageResponsePayload | undefined> => {
     try {
       // Get page token that stored in DynamoDB table by `pageIdAsSender`
-      const pageToken = await this._getFbMessagePlatformToken(senderAsPageId);
+      const pageToken = await this.getFbMessagePlatformToken(senderAsPageId);
       return fbMessagePlatformProvider.getMessages(pageToken, conversationId, after, limit);
     } catch (error) {
-      console.log(`[FbMessagePlatformRepositoryImpl.getMessages] Generated an error`, error);
+      console.log('[FbMessagePlatformRepositoryImpl.getMessages] Generated an error', error);
+      return undefined;
     }
   };
 
@@ -93,13 +105,17 @@ export default class FbMessagePlatformRepositoryImpl implements FbMessagePlatfor
    * @param userId User id
    * @returns User profile information
    */
-  getUserProfile = async (pageId: string, userId: string): Promise<FacebookUserProfile | undefined> => {
+  getUserProfile = async (
+    pageId: string,
+    userId: string,
+  ): Promise<FacebookUserProfile | undefined> => {
     try {
       // Get page token that stored in DynamoDB table by `pageIdAsSender`
-      const pageToken = await this._getFbMessagePlatformToken(pageId);
+      const pageToken = await this.getFbMessagePlatformToken(pageId);
       return fbMessagePlatformProvider.getUserProfile(pageToken, userId);
     } catch (error) {
-      console.log(`[FbMessagePlatformRepositoryImpl.getUserProfile] Generated an error`, error);
+      console.log('[FbMessagePlatformRepositoryImpl.getUserProfile] Generated an error', error);
+      return undefined;
     }
   };
 }

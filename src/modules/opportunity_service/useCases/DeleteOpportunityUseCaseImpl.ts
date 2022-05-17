@@ -1,4 +1,3 @@
-import { Opportunity } from '../models/Opportunity';
 import { opportunityRepository, userRepository } from '../repositories';
 import { DeleteOpportunityUseCase } from './interfaces/DeleteOpportunityUseCase';
 

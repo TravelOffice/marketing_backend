@@ -1,6 +1,6 @@
 import { Request } from 'express';
 import {
-  body, check, header, ValidationError, validationResult,
+  body, ValidationError, validationResult,
 } from 'express-validator';
 
 export default function validate(req: Request) {

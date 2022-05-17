@@ -43,7 +43,7 @@ export default class ZaloApiProvider {
   /**
    * Get Zalo official account information
    * @param accessToken Access token
-   * @returns 
+   * @returns
    */
   getOfficialAccountInfo = async (accessToken: string) => {
     const response = await this.axiosInstance.get(
@@ -51,8 +51,8 @@ export default class ZaloApiProvider {
       {
         headers: {
           access_token: accessToken,
-        }
-      }
+        },
+      },
     );
 
     if (response.data.error !== 0) {
@@ -61,5 +61,5 @@ export default class ZaloApiProvider {
       console.info('[ZaloApiProvider.getOfficialAccountInfo] Get official account successfully:', response.data);
       return response.data.data;
     }
-  }
+  };
 }

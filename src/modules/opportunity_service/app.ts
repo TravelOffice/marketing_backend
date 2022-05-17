@@ -85,7 +85,8 @@ app.delete('/leads/:leadId/opportunities/:id', async (req: Request, res: Respons
   try {
     const { leadId, id } = req.params;
     const userId = getCurrentUserId(req.headers.authorization!);
-    // TODO: Check condition before delete opportunity. Example: only draft oppotunity can be deleted
+    // TODO: Check condition before delete opportunity.
+    // Example: only draft oppotunity can be deleted
     await deleteOpportunityUseCase.invoke(id, userId, leadId);
     res.json(wrapResponse(SUCCESS));
   } catch (error: any) {

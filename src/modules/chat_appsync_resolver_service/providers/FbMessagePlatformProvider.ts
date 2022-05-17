@@ -2,21 +2,23 @@ import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import {
   FacebookMessageResponsePayload,
   FacebookUserProfile,
-  SendFacebookMessageRequestPayload
+  SendFacebookMessageRequestPayload,
 } from '../models';
 
 export default class FbMessagePlatformProvider {
-  private _messagePlatformBaseUrl: string = 'https://graph.facebook.com/v13.0';
-  private _messagePlatformRequestTimeout: number = 60000
-  private _axiosInstance: AxiosInstance;
+  private readonly messagePlatformBaseUrl: string = 'https://graph.facebook.com/v13.0';
+
+  private readonly messagePlatformRequestTimeout: number = 60000;
+
+  private readonly axiosInstance: AxiosInstance;
 
   /**
    * Constructor, init http client to communicate Fb Message Platform APIs
    */
   constructor() {
-    this._axiosInstance = axios.create({
-      baseURL: this._messagePlatformBaseUrl,
-      timeout: this._messagePlatformRequestTimeout, // Milliseconds
+    this.axiosInstance = axios.create({
+      baseURL: this.messagePlatformBaseUrl,
+      timeout: this.messagePlatformRequestTimeout, // Milliseconds
     });
   }
 
@@ -24,28 +26,35 @@ export default class FbMessagePlatformProvider {
    * Send message from page admin to customer
    * @param pageToken Page token stored in DynamoDB table
    * @param recipient Recipient that page admin want to send to
-   * @param message Message content. In the future, others message type will be supported such as image | video | url
+   * @param message Message content.
+   *  In the future, others message type will be supported such as image | video | url
    */
-  sendMessage = async (pageToken: string, messagePayload: SendFacebookMessageRequestPayload): Promise<void> => {
-    const response = await this._axiosInstance.post(
+  sendMessage = async (
+    pageToken: string,
+    messagePayload: SendFacebookMessageRequestPayload,
+  ): Promise<void> => {
+    const response = await this.axiosInstance.post(
       `/me/messages?access_token=${pageToken}`,
       messagePayload,
     );
     console.info(
       `[FbMessagePlatformProvider.sendMessage] The message from page ${pageToken} has been sent, response message from Message Platform`,
-      response.data
+      response.data,
     );
-  }
+  };
 
   /**
    * Get conversations list of given page
    * @param pageId Id of Facebook page
    */
-  getConversations = async (pageToken: string, pageId: string): Promise<FacebookMessageResponsePayload> => {
-    const response = await this._axiosInstance.get(`${pageId}/conversations?access_token=${pageToken}&fields=snippet,senders,participants,message_count,updated_time`);
+  getConversations = async (
+    pageToken: string,
+    pageId: string,
+  ): Promise<FacebookMessageResponsePayload> => {
+    const response = await this.axiosInstance.get(`${pageId}/conversations?access_token=${pageToken}&fields=snippet,senders,participants,message_count,updated_time`);
     console.info(
       `[FbMessagePlatformProvider.getConversations] Conversations of page ${pageId}`,
-      response.data
+      response.data,
     );
     return response.data;
   };
@@ -55,26 +64,32 @@ export default class FbMessagePlatformProvider {
    * @param conversationId Conversation id
    * @param before Before token for paging
    */
-  getMessages = async (pageToken: string, conversationId: string, after?: string, limit: number = 10): Promise<FacebookMessageResponsePayload> => {
+  getMessages = async (
+    pageToken: string,
+    conversationId: string,
+    after?: string,
+    limit: number = 10,
+  ): Promise<FacebookMessageResponsePayload> => {
     const config: AxiosRequestConfig = {
       params: {
         access_token: pageToken,
         fields: 'message,id,created_time,to,from,attachments,shares{id,link}',
-        limit: limit,
-      }
-    }
+        limit,
+      },
+    };
 
     if (after) { // Get first page if after token is null
-      config.params.after = after
+      config.params.after = after;
     }
-    const response = await this._axiosInstance.get(`${conversationId}/messages`, config);
+    const response = await this.axiosInstance.get(`${conversationId}/messages`, config);
     console.info(
       `[FbMessagePlatformProvider.getMessages] Return messages of conversation ${conversationId} with data`,
-      response.data
+      response.data,
     );
 
     const messagesData = response.data;
-    delete messagesData.paging.next; // For security issue, next value should be removed from payload
+    // For security issue, next value should be removed from payload
+    delete messagesData.paging.next;
     return messagesData;
   };
 
@@ -88,14 +103,14 @@ export default class FbMessagePlatformProvider {
     const config: AxiosRequestConfig = {
       params: {
         access_token: pageToken,
-        fields: 'name,first_name,last_name,profile_pic,gender'
-      }
-    }
+        fields: 'name,first_name,last_name,profile_pic,gender',
+      },
+    };
 
-    const response = await this._axiosInstance.get(`${pageUserId}`, config);
+    const response = await this.axiosInstance.get(`${pageUserId}`, config);
     console.info(
       `[FbMessagePlatformProvider.getUserProfile] Return profile of Facebook user with id ${pageUserId}`,
-      response.data
+      response.data,
     );
 
     return response.data;

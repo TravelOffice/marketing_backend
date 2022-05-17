@@ -1,4 +1,10 @@
-import { AppsyncFacebookSendMessageData, AppSyncReceiveMessageData, AppSyncSendMessageData, AppsyncZaloSendMessageData, ChatPlatform } from 'common-models';
+import {
+  AppsyncFacebookSendMessageData,
+  AppSyncReceiveMessageData,
+  AppSyncSendMessageData,
+  AppsyncZaloSendMessageData,
+  ChatPlatform,
+} from 'common-models';
 import { SendFacebookMessageRequestPayload } from './facebook/SendFacebookMessageRequestPayload';
 import { SendZaloMessageRequestPayload } from './zalo/SendZaloMessageRequestPayload';
 
@@ -17,21 +23,23 @@ export interface MessageForSend {
   messageData: AppSyncSendMessageData
 }
 
-export const toSendFbMessagePayload = (message: MessageForSend): SendFacebookMessageRequestPayload => {
-  return {
-    recipient: { id: message.recipient },
-    message: message.messageData as AppsyncFacebookSendMessageData,
-    messaging_type: 'MESSAGE_TAG',
-    tag: 'ACCOUNT_UPDATE'
-  };
-};
+export const toSendFbMessagePayload = (
+  message: MessageForSend,
+): SendFacebookMessageRequestPayload => ({
+  recipient: { id: message.recipient },
+  message: message.messageData as AppsyncFacebookSendMessageData,
+  messaging_type: 'MESSAGE_TAG',
+  tag: 'ACCOUNT_UPDATE',
+});
 
-export const toSendZaloMessagePayload = (message: MessageForSend): SendZaloMessageRequestPayload => {
-  const messageContent: AppsyncZaloSendMessageData = Object.assign({}, message.messageData);
+export const toSendZaloMessagePayload = (
+  message: MessageForSend,
+): SendZaloMessageRequestPayload => {
+  const messageContent: AppsyncZaloSendMessageData = { ...message.messageData };
   return {
     recipient: {
-      user_id: message.recipient
+      user_id: message.recipient,
     },
-    message: messageContent
-  }
-}
+    message: messageContent,
+  };
+};

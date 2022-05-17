@@ -11,6 +11,7 @@ const useCases : UseCases = {
   getToursUseCase: new GetToursUseCaseImpl(),
 };
 
+// eslint-disable-next-line import/prefer-default-export
 export const {
   getToursUseCase,
 } = useCases;

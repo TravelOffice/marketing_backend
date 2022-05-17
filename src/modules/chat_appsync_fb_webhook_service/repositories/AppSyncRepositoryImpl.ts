@@ -1,37 +1,41 @@
 import axios from 'axios';
+import {
+  AppSyncFacebookReceivedMessageData,
+  ChatPlatform, FacebookWebhookMessageEvent, ReceiveMessageCommandArgs,
+  ReceiveMessageCommandResponse, receiveMessageQuery,
+} from 'common-models';
 import { getAwsSecretValue } from 'get-env';
 import { AppSyncRepository } from './interfaces/AppSyncRepository';
-import {
-  receiveMessageQuery,
-  ReceiveMessageCommandArgs,
-  ReceiveMessageCommandResponse,
-  FacebookWebhookMessageEvent,
-  ChatPlatform,
-  AppSyncFacebookReceivedMessageData
-} from 'common-models';
 
 export default class AppSyncRepositoryImpl implements AppSyncRepository {
-  sendReceivedMessageCommand = async (webhookEvent: FacebookWebhookMessageEvent): Promise<ReceiveMessageCommandResponse> => {
+  sendReceivedMessageCommand = async (
+    webhookEvent: FacebookWebhookMessageEvent,
+  ): Promise<ReceiveMessageCommandResponse> => {
     // Get message payload
-    const message = webhookEvent.message;
+    const { message } = webhookEvent;
+    /** */
 
-    // Identify customer id. If is_echo === true => message is sent by Facebook page, otherwise message is sent by customer
-    // References https://developers.facebook.com/docs/messenger-platform/reference/webhook-events/message-echoes
+    /** Identify customer id.
+     * If is_echo === true => message is sent by Facebook page,
+     *  otherwise message is sent by customer
+     * References https://developers.facebook.com/docs/messenger-platform/reference/webhook-events/message-echoes
+    */
     const customerId = message.is_echo ? webhookEvent.recipient.id : webhookEvent.sender.id;
 
     // Initialize AppSync arguments
     const messageId = message.mid;
     const messageData: AppSyncFacebookReceivedMessageData = Object.assign(message, {});
-    delete messageData.mid; // Delete mid attribute, mid will be appeared in ReceiveMessageCommandArgs
+    // Delete mid attribute, mid will be appeared in ReceiveMessageCommandArgs
+    delete messageData.mid;
     const args: ReceiveMessageCommandArgs = {
       id: messageId,
       sender: webhookEvent.sender.id,
       recipient: webhookEvent.recipient.id,
-      customerId: customerId,
+      customerId,
       timestamp: webhookEvent.timestamp,
       messageData: JSON.stringify(messageData),
-      chatPlatform: ChatPlatform.facebook
-    }
+      chatPlatform: ChatPlatform.facebook,
+    };
 
     // Send command `receivedMessage` to AppSync graphql endpoint
     const endpoint = await getAwsSecretValue('CHAT_APPSYNC_GRAPHQL_ENDPOINT');
@@ -40,7 +44,7 @@ export default class AppSyncRepositoryImpl implements AppSyncRepository {
       baseURL: endpoint,
       timeout: 5000,
       headers: {
-        'x-api-key': apiKey
+        'x-api-key': apiKey,
       },
       method: 'POST',
       data: {

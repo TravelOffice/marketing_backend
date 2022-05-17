@@ -15,12 +15,17 @@ export default class S3Provider {
    * @param fileType Only this file type is allowed to upload to s3
    * @returns s3 object key and presigned url
    */
-  generatePresignedUrl = async (bucket: string, key: string, expires: number, fileType: string): Promise<{key: string, url: string}> => {
+  generatePresignedUrl = async (
+    bucket: string,
+    key: string,
+    expires: number,
+    fileType: string,
+  ): Promise<{key: string, url: string}> => {
     const url = await s3.getSignedUrlPromise('putObject', {
       Bucket: bucket,
       Key: key,
       Expires: expires,
-      ContentType: fileType
+      ContentType: fileType,
     });
     return { key, url };
   };

@@ -1,4 +1,4 @@
-import { AppsyncFacebookSendMessageData } from 'common-models'
+import { AppsyncFacebookSendMessageData } from 'common-models';
 
 export interface SendFacebookMessageRequestPayload {
   recipient: { id: string },

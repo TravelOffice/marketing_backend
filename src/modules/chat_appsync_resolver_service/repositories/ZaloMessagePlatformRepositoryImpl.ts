@@ -10,7 +10,7 @@ export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePla
    * @param pageId Page id
    * @returns Zalo access token
    */
-  _getZaloMessagePlatformToken = async (pageId: string): Promise<string> => {
+  private readonly getZaloMessagePlatformToken = async (pageId: string): Promise<string> => {
     const saleChatTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
     const params = {
       TableName: saleChatTable,
@@ -34,36 +34,37 @@ export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePla
     const rs = await dynamoProvider.query(params);
     if (rs.Items && rs.Items?.length > 0) {
       const dynamoItem = rs.Items[0];
-      console.info('[ZaloMessagePlatformRepositoryImpl._getZaloMessagePlatformToken] DynamoDB item', dynamoItem);
+      console.info('[ZaloMessagePlatformRepositoryImpl.getZaloMessagePlatformToken] DynamoDB item', dynamoItem);
       if (dynamoItem.expireIn > Date.now()) {
         return dynamoItem.accessToken;
-      } else {
-        const refreshTokenResponse = await zaloMessagePlatformProvider.refreshToken(dynamoItem.refreshToken);
-        if (refreshTokenResponse) {
-          const expireIn = new Date(Date.now() + refreshTokenResponse.expires_in * 1000);
-          const updateParams: AWS.DynamoDB.DocumentClient.UpdateItemInput = {
-            TableName: saleChatTable,
-            Key: {
-              'pk': dynamoItem.pk, // pk and sk can be unmarshall
-              'sk': dynamoItem.sk,
-            },
-            UpdateExpression: 'set accessToken = :at, refreshToken= :rt, expireIn = :ei',
-            ExpressionAttributeValues: {
-              ':at': refreshTokenResponse.access_token,
-              ':rt': refreshTokenResponse.refresh_token,
-              ':ei': expireIn.getTime()
-            },
-            ReturnValues: 'UPDATED_NEW'
-          };
-          const updatedRs = await dynamoProvider.update(updateParams);
-          if (updatedRs) {
-            return refreshTokenResponse.access_token;
-          }
+      }
+      const refreshTokenResponse = await zaloMessagePlatformProvider.refreshToken(
+        dynamoItem.refreshToken,
+      );
+      if (refreshTokenResponse) {
+        const expireIn = new Date(Date.now() + refreshTokenResponse.expires_in * 1000);
+        const updateParams: AWS.DynamoDB.DocumentClient.UpdateItemInput = {
+          TableName: saleChatTable,
+          Key: {
+            pk: dynamoItem.pk, // pk and sk can be unmarshall
+            sk: dynamoItem.sk,
+          },
+          UpdateExpression: 'set accessToken = :at, refreshToken= :rt, expireIn = :ei',
+          ExpressionAttributeValues: {
+            ':at': refreshTokenResponse.access_token,
+            ':rt': refreshTokenResponse.refresh_token,
+            ':ei': expireIn.getTime(),
+          },
+          ReturnValues: 'UPDATED_NEW',
+        };
+        const updatedRs = await dynamoProvider.update(updateParams);
+        if (updatedRs) {
+          return refreshTokenResponse.access_token;
         }
       }
     }
     throw new Error(`Can not get token for Zalo page with id ${pageId}`);
-  }
+  };
 
   /**
    * Send message to customer from Fb page
@@ -72,12 +73,12 @@ export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePla
   sendMessage = async (message: Message): Promise<any> => {
     try {
       // Get page token that stored in DynamoDB table by `pageIdAsSender`
-      const pageToken = await this._getZaloMessagePlatformToken(message.sender);
+      const pageToken = await this.getZaloMessagePlatformToken(message.sender);
       // Send message
       const payload = toSendZaloMessagePayload(message);
       return zaloMessagePlatformProvider.sendMessage(pageToken, payload);
     } catch (error) {
-      console.log(`[ZaloMessagePlatformRepositoryImpl.sendMessage] Generated an error`, error);
+      console.log('[ZaloMessagePlatformRepositoryImpl.sendMessage] Generated an error', error);
       throw error;
     }
   };
@@ -87,13 +88,17 @@ export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePla
    * @param pageId Page id
    * @returns
    */
-  getConversations = async (pageId: string, offset?: number, count?: number): Promise<ZaloMessageResponsePayload | undefined> => {
+  getConversations = async (
+    pageId: string,
+    offset?: number,
+    count?: number,
+  ): Promise<ZaloMessageResponsePayload | undefined> => {
     try {
       // Get page token that stored in DynamoDB table by `pageIdAsSender`
-      const pageToken = await this._getZaloMessagePlatformToken(pageId);
+      const pageToken = await this.getZaloMessagePlatformToken(pageId);
       return zaloMessagePlatformProvider.getConversations(pageToken, offset, count);
     } catch (error) {
-      console.log(`[ZaloMessagePlatformRepositoryImpl.getConversations] Generated an error`, error);
+      console.log('[ZaloMessagePlatformRepositoryImpl.getConversations] Generated an error', error);
       throw error;
     }
   };
@@ -105,13 +110,18 @@ export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePla
    * @param before Before token for paging
    * @returns
    */
-  getMessages = async (pageId: string, userId: string, offset?: number, count?: number): Promise<ZaloMessageResponsePayload | undefined> => {
+  getMessages = async (
+    pageId: string,
+    userId: string,
+    offset?: number,
+    count?: number,
+  ): Promise<ZaloMessageResponsePayload | undefined> => {
     try {
       // Get page token that stored in DynamoDB table by `pageIdAsSender`
-      const pageToken = await this._getZaloMessagePlatformToken(pageId);
+      const pageToken = await this.getZaloMessagePlatformToken(pageId);
       return zaloMessagePlatformProvider.getMessages(pageToken, userId, offset, count);
     } catch (error) {
-      console.log(`[ZaloMessagePlatformRepositoryImpl.getMessages] Generated an error`, error);
+      console.log('[ZaloMessagePlatformRepositoryImpl.getMessages] Generated an error', error);
       throw error;
     }
   };

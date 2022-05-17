@@ -8,9 +8,11 @@ export default class S3RepositoryImpl implements S3Repository {
    * @param fileKey Object key after uploaded to s3
    * @returns the path of file which saved to local
    */
-  downloadFileFromS3 = async (bucket: string, fileKey: string, fileName: string) => {
-    return await s3Provider.downloadFileFromS3(bucket, fileKey, fileName);
-  };
+  downloadFileFromS3 = async (
+    bucket: string,
+    fileKey: string,
+    fileName: string,
+  ) => s3Provider.downloadFileFromS3(bucket, fileKey, fileName);
 
   /**
    * Delete s3 object
@@ -18,7 +20,8 @@ export default class S3RepositoryImpl implements S3Repository {
    * @param fileKey Object key after uploaded to s3
    * @returns void
    */
-   deleteObject = async (bucket: string, objectKey: string) => {
-    return await s3Provider.deleteObject(bucket, objectKey);
-  };
+  deleteObject = async (
+    bucket: string,
+    objectKey: string,
+  ) => s3Provider.deleteObject(bucket, objectKey);
 }

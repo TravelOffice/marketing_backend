@@ -3,6 +3,11 @@ import { FacebookMessageResponsePayload, FacebookUserProfile, Message } from '..
 export interface FbMessagePlatformRepository {
   sendMessage: (message: Message) => Promise<any>;
   getConversations: (pageId: string) => Promise<FacebookMessageResponsePayload | undefined>;
-  getMessages: (senderAsPageId: string, conversationId: string, after?: string, limit?: number) => Promise<FacebookMessageResponsePayload | undefined>;
+  getMessages: (
+    senderAsPageId: string,
+    conversationId: string,
+    after?: string,
+    limit?: number
+  ) => Promise<FacebookMessageResponsePayload | undefined>;
   getUserProfile: (pageId: string, userId: string) => Promise<FacebookUserProfile | undefined>;
 }

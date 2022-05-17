@@ -1,12 +1,11 @@
 import { Request } from 'express';
 import {
-  body, check, header, ValidationError, validationResult,
+  body, header, ValidationError, validationResult,
 } from 'express-validator';
 
 export default function validate(req: Request) {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    const errMsgs = errors.array().map((error) => `Validate failed at ${error.location}: ${error.msg} ${error.param}`);
     const errorGroups : {[key: string]: ValidationError[]} = {};
     errors.array().forEach((err) => {
       const location = err.location || 'unknown';
