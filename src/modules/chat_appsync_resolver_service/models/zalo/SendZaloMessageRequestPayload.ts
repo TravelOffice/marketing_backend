@@ -1,4 +1,4 @@
-import { AppsyncZaloSendMessageData } from "common-models"
+import { AppsyncZaloSendMessageData } from 'common-models';
 
 export interface SendZaloMessageRequestPayload {
   recipient: {

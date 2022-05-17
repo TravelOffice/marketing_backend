@@ -32,21 +32,31 @@ app.get('/upload-file-to-chat-platform', uploadFileToChaPlatformServiceValidator
       pageId, fileKey, fileName, chatPlatform, fileType,
     } = req.query;
 
-    const filePath: string = await s3Repository.downloadFileFromS3(bucket, String(fileKey), String(fileName));
+    const filePath: string = await s3Repository.downloadFileFromS3(
+      bucket,
+      String(fileKey),
+      String(fileName),
+    );
     switch (chatPlatform) {
-      case ChatPlatform.zalo:
-        const rs = await zaloMessagePlatformRepository.uploadFile(String(pageId), filePath, String(fileType));
+      case ChatPlatform.zalo: {
+        const rs = await zaloMessagePlatformRepository.uploadFile(
+          String(pageId),
+          filePath,
+          String(fileType),
+        );
         res.json(wrapResponse(SUCCESS, rs));
         break;
-      default:
+      }
+      default: {
         throw new Error(`Upload file to platform ${chatPlatform} is not supported`);
+      }
     }
     // Remove the temporary file which downloaded from S3
     await fsPromises.unlink(filePath);
     // Remove the s3 Object file
     await s3Repository.deleteObject(bucket, String(fileKey));
   } catch (error: unknown) {
-    console.log(`[App.ChatZaloWebhook POST] Generated an error`, error);
+    console.log('[App.ChatZaloWebhook POST] Generated an error', error);
     let message = 'Unknown Error';
     if (error instanceof Error) message = error.message;
     res.json(wrapResponse(FAILED, undefined, message));

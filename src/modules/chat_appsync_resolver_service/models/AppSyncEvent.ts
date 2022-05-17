@@ -66,4 +66,5 @@ type UnknownEvent = {
   arguments: any
 }
 
+// eslint-disable-next-line max-len
 export type AppSyncEvent = SendMessageEvent | ReceivedMessageEvent | AllFbConversationsEvent | AllFbMessagesEvent | AllZaloConversationsEvent | AllZaloMessageEvent | UserProfileEvent | UnknownEvent;

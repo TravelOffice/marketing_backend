@@ -3,10 +3,7 @@ import app from './app';
 
 let serverlessExpressInstance: any;
 
-async function init() {}
-
 async function setup(event: any, context: any) {
-  await init();
   serverlessExpressInstance = serverlessExpress({ app });
   return serverlessExpressInstance(event, context);
 }

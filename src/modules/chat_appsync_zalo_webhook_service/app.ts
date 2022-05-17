@@ -19,18 +19,20 @@ const userSendDataEvents = [
   'user_send_sticker',
   'user_send_location',
   'user_send_business_card',
-  'user_send_file'
-]
+  'user_send_file',
+];
 
+/* eslint-disable max-len */
 /**
  * Test hook receive message
  * curl -H "Content-Type: application/json" -X POST "localhost:5002/chat-zalo-webhook" -d '
 {"app_id": "1364765243717231492","sender": {"id": "246845883529197922"}, "user_id_by_app": "552177279717587730", "recipient": { "id": "388613280878808645"}, "event_name": "user_send_text","message": {"text": "User sent message successfully", "msg_id": "96d3cdf3af150460909"}, "timestamp": "154390853474"}'
  */
+/* eslint-enable max-len */
 app.post('/chat-zalo-webhook', async (req: Request, res: Response) => {
   try {
     const zaloAppId = await getAwsSecretValue('ZALO_MESSAGE_PLATFORM_APP_ID');
-    let body = req.body;
+    const { body } = req;
 
     // Checks this is an event from a page subscription
     if (body.app_id === zaloAppId) {
@@ -47,7 +49,7 @@ app.post('/chat-zalo-webhook', async (req: Request, res: Response) => {
       res.sendStatus(404);
     }
   } catch (e: any) {
-    console.log(`[App.ChatZaloWebhook POST] Generated an error`, e);
+    console.log('[App.ChatZaloWebhook POST] Generated an error', e);
     res.json({ message: `${e.name}: ${e.message}` });
   }
 });

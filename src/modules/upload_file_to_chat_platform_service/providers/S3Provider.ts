@@ -17,7 +17,11 @@ export default class S3Provider {
    * @param key Object key after uploaded to s3
    * @returns the path of file which saved to local
    */
-  downloadFileFromS3 = async (bucket: string, fileKey: string, fileName: string): Promise<string> => {
+  downloadFileFromS3 = async (
+    bucket: string,
+    fileKey: string,
+    fileName: string,
+  ): Promise<string> => {
     const randomByteLength = 16;
     const folderName = crypto.randomBytes(randomByteLength).toString('hex');
     // In lambda we using the tmp folder to save the temporary file

@@ -11,11 +11,11 @@ interface Repositories {
 }
 
 const repositories: Repositories = {
-  s3Repository: new S3RepositoryImpl(),  
-  zaloMessagePlatformRepository: new ZaloMessagePlatformRepositoryImpl()
+  s3Repository: new S3RepositoryImpl(),
+  zaloMessagePlatformRepository: new ZaloMessagePlatformRepositoryImpl(),
 };
 
 export const {
   s3Repository,
-  zaloMessagePlatformRepository
+  zaloMessagePlatformRepository,
 } = repositories;

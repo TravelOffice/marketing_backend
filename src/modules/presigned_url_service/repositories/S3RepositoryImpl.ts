@@ -12,7 +12,14 @@ export default class S3RepositoryImpl implements S3Repository {
    * @param fileType Only this file type is allowed to upload to s3
    * @returns s3 object key and presigned url
    */
-  generatePresignedUrl = async (bucket: string, pageId: string, customerId: string, expires: number, fileType: string, fileName: string) => {
+  generatePresignedUrl = async (
+    bucket: string,
+    pageId: string,
+    customerId: string,
+    expires: number,
+    fileType: string,
+    fileName: string,
+  ) => {
     const randomByteLength = 16;
     const folderName = crypto.randomBytes(randomByteLength).toString('hex');
     const now = new Date();

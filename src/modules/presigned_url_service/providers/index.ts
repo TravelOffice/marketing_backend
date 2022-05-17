@@ -10,6 +10,7 @@ const providers : Providers = {
   s3Provider: new S3Provider(),
 };
 
+// eslint-disable-next-line import/prefer-default-export
 export const {
-  s3Provider
+  s3Provider,
 } = providers;

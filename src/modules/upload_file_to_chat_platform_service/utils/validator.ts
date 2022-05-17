@@ -27,8 +27,9 @@ export function uploadFileToChaPlatformServiceValidator() {
     query('fileName', 'is required').not().isEmpty(),
     query('fileType', 'is required')
       .not().isEmpty().withMessage('is required')
-      .isIn(Object.values(SupportedFileType)).withMessage('allow only in '+ Object.values(SupportedFileType)),
+      .isIn(Object.values(SupportedFileType))
+      .withMessage(`allow only in ${Object.values(SupportedFileType)}`),
     query('chatPlatform', 'is required').not().isEmpty(),
-    query('pageId', 'is required').not().isEmpty()
+    query('pageId', 'is required').not().isEmpty(),
   ];
 }

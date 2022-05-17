@@ -18,7 +18,11 @@ export default class LinkZaloPageUseCaseImpl implements LinkZaloPageUseCase {
     // Get code verifier from dynamo
     const codeVerifier = await zaloPageRepository.getCodeVerifierFromDynamo(state);
     // Get Zalo official account information
-    const page = await zaloPageRepository.getOfficialAccountInfo(authorizationCode, codeVerifier, pageId);
+    const page = await zaloPageRepository.getOfficialAccountInfo(
+      authorizationCode,
+      codeVerifier,
+      pageId,
+    );
     const tenantId = userAttributes.tenant;
     // Save tokens to dynamo db
     await zaloPageRepository.saveOAInfoToDynamo(tenantId, page);

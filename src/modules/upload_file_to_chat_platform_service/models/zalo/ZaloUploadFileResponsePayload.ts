@@ -5,5 +5,4 @@ export interface ZaloUploadFileResponsePayload {
   };
   error: number,
   message: string
-};
-
+}

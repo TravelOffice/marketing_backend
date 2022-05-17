@@ -1,6 +1,6 @@
 import { Request } from 'express';
 import {
-  header, body, ValidationError, validationResult,
+  body, ValidationError, validationResult,
 } from 'express-validator';
 import { opportunityPotentials, opportunitySources, opportunityStatuses } from '../models/Opportunity';
 
@@ -18,11 +18,6 @@ export default function validate(req: Request) {
       .map((entry) => `Validate failed at ${entry[0]}: ${entry[1].map((err) => `${err.param} ${err.msg}, value=${err.value}`).join('; ')}`);
     throw new Error(msgs.join('\n'));
   }
-}
-
-function validateTimestamp(timestamp: any) {
-  const date = Date.parse(timestamp);
-  return !!date;
 }
 
 export function updateOpportunityValidator() {

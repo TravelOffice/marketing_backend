@@ -11,6 +11,7 @@ const repositories : Repositories = {
   s3Repository: new S3RepositoryImpl(),
 };
 
+// eslint-disable-next-line import/prefer-default-export
 export const {
-  s3Repository
+  s3Repository,
 } = repositories;

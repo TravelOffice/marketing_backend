@@ -26,12 +26,14 @@ app.get('/presigned-url', getPresignedUrlValidator(), async (req: Request, res: 
     validate(req);
     const bucket = getEnv('ATTACHMENT_MESSAGE_BUCKET');
     const expires = Number(getEnv('PRESIGNED_URL_EXPIRES'));
-    const { pageId, customerId, fileType, fileName } = req.query;
+    const {
+      pageId, customerId, fileType, fileName,
+    } = req.query;
     // eslint-disable-next-line max-len
     const rs = await s3Repository.generatePresignedUrl(bucket, String(pageId), String(customerId), expires, String(fileType), String(fileName));
     res.json(wrapResponse(SUCCESS, rs));
   } catch (error: any) {
-    console.log(`[App.PresignUrl] Generated an error`, error);
+    console.log('[App.PresignUrl] Generated an error', error);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });

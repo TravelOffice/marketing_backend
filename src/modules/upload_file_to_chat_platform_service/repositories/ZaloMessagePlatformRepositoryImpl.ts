@@ -11,7 +11,7 @@ export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePla
    * @param pageId Page id
    * @returns Zalo access token
    */
-  _getZaloMessagePlatformToken = async (pageId: string): Promise<string> => {
+  private readonly getZaloMessagePlatformToken = async (pageId: string): Promise<string> => {
     const saleChatTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
     const params = {
       TableName: saleChatTable,
@@ -35,31 +35,32 @@ export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePla
     const rs = await dynamoProvider.query(params);
     if (rs.Items && rs.Items?.length > 0) {
       const dynamoItem = rs.Items[0];
-      console.info('[ZaloMessagePlatformRepositoryImpl._getZaloMessagePlatformToken] DynamoDB item', dynamoItem);
+      console.info('[ZaloMessagePlatformRepositoryImpl.getZaloMessagePlatformToken] DynamoDB item', dynamoItem);
       if (dynamoItem.expireIn > Date.now()) {
         return dynamoItem.accessToken;
-      } else {
-        const refreshTokenResponse = await zaloMessagePlatformProvider.refreshToken(dynamoItem.refreshToken);
-        if (refreshTokenResponse) {
-          const expireIn = new Date(Date.now() + refreshTokenResponse.expires_in * 1000);
-          const updateParams: AWS.DynamoDB.DocumentClient.UpdateItemInput = {
-            TableName: saleChatTable,
-            Key: {
-              'pk': dynamoItem.pk, // pk and sk can be unmarshall
-              'sk': dynamoItem.sk,
-            },
-            UpdateExpression: 'set accessToken = :at, refreshToken= :rt, expireIn = :ei',
-            ExpressionAttributeValues: {
-              ':at': refreshTokenResponse.access_token,
-              ':rt': refreshTokenResponse.refresh_token,
-              ':ei': expireIn.getTime()
-            },
-            ReturnValues: 'UPDATED_NEW'
-          };
-          const updatedRs = await dynamoProvider.update(updateParams);
-          if (updatedRs) {
-            return refreshTokenResponse.access_token;
-          }
+      }
+      const refreshTokenResponse = await zaloMessagePlatformProvider.refreshToken(
+        dynamoItem.refreshToken,
+      );
+      if (refreshTokenResponse) {
+        const expireIn = new Date(Date.now() + refreshTokenResponse.expires_in * 1000);
+        const updateParams: AWS.DynamoDB.DocumentClient.UpdateItemInput = {
+          TableName: saleChatTable,
+          Key: {
+            pk: dynamoItem.pk, // pk and sk can be unmarshall
+            sk: dynamoItem.sk,
+          },
+          UpdateExpression: 'set accessToken = :at, refreshToken= :rt, expireIn = :ei',
+          ExpressionAttributeValues: {
+            ':at': refreshTokenResponse.access_token,
+            ':rt': refreshTokenResponse.refresh_token,
+            ':ei': expireIn.getTime(),
+          },
+          ReturnValues: 'UPDATED_NEW',
+        };
+        const updatedRs = await dynamoProvider.update(updateParams);
+        if (updatedRs) {
+          return refreshTokenResponse.access_token;
         }
       }
     }
@@ -71,11 +72,15 @@ export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePla
    * @param pageId Page id
    * @param filePath path of file upload
    */
-   uploadFile = async (pageId: string, filePath: string, fileType: string): Promise<ZaloUploadFileResponsePayload | undefined> => {
+  uploadFile = async (
+    pageId: string,
+    filePath: string,
+    fileType: string,
+  ): Promise<ZaloUploadFileResponsePayload | undefined> => {
     try {
       // Get page token that stored in DynamoDB table by `pageIdAsSender`
-      const pageToken = await this._getZaloMessagePlatformToken(pageId);
-      switch(fileType) {
+      const pageToken = await this.getZaloMessagePlatformToken(pageId);
+      switch (fileType) {
         case SupportedFileType.FILE:
           return await zaloMessagePlatformProvider.uploadFile(pageToken, filePath);
         case SupportedFileType.IMAGE:
@@ -83,10 +88,10 @@ export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePla
         case SupportedFileType.GIF:
           return await zaloMessagePlatformProvider.uploadGifImage(pageToken, filePath);
         default:
-          throw new Error(`[ZaloMessagePlatformRepositoryImpl.uploadFile] not support file type ` + fileType);
+          throw new Error(`[ZaloMessagePlatformRepositoryImpl.uploadFile] not support file type ${fileType}`);
       }
     } catch (error) {
-      console.log(`[ZaloMessagePlatformRepositoryImpl.uploadFile] Generated an error`, error);
+      console.log('[ZaloMessagePlatformRepositoryImpl.uploadFile] Generated an error', error);
       throw error;
     }
   };
