@@ -61,7 +61,7 @@ type UserProfileEvent = {
   }
 }
 
-type UnknownEvent = {
+export type UnknownEvent = {
   field: UnknownEventField<string>,
   arguments: any
 }

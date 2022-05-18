@@ -1,5 +1,5 @@
 import { ChatPlatform } from 'common-models';
-import { AppSyncEvent, Message } from './models';
+import { AppSyncEvent, Message, UnknownEvent } from './models';
 import { fbMessagePlatformRepository, zaloMessagePlatformRepository } from './repositories';
 
 /**
@@ -100,7 +100,7 @@ export const handler = async (event: AppSyncEvent) => {
       break;
 
     default:
-      throw new Error(`Unknown field, unable to resolve ${event.field}`);
+      throw new Error(`Unknown field, unable to resolve ${(event as UnknownEvent).field}`);
   }
   return {
     message: resolverMessage,

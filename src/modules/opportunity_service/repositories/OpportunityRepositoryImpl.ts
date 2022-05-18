@@ -56,7 +56,9 @@ export default class OpportunityRepositoryImpl implements OpportunityRepository 
       `Tenant#${tenantId}#Lead#${leadId}`,
       `Tenant#${tenantId}#Opportunity#${id}`,
     );
-    if (!item) throw new Error('Opportunity does not exists!');
+    if (!item) {
+      return undefined;
+    }
     const {
       pk, sk, typeGsi, ...opportunity
     } = item;
@@ -77,7 +79,9 @@ export default class OpportunityRepositoryImpl implements OpportunityRepository 
       `Tenant#${tenantId}#Employee#${assigneeId}`,
       `Opportunity#${id}`,
     );
-    if (!item) throw new Error('Opportunity does not exists!');
+    if (!item) {
+      return undefined;
+    }
     const {
       pk, sk, typeGsi, ...opportunity
     } = item;
