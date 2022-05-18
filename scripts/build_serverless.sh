@@ -38,6 +38,10 @@ build_service() {
   npm install
   echo "Install successfully"
   npm run build
+  if [ $? -ne 0 ]; then
+      echo "Failed to build service ${SERVICENAME}!"
+      exit 1
+  fi
   echo "Build"
 
   rm -rf ${SERVICE_DIR}/node_modules

@@ -23,12 +23,20 @@ export default class CreateOpportunityUseCaseImpl implements CreateOpportunityUs
     const tenantId = currentUser.tenant;
 
     // Make sure the Lead exists
-    const isLeadExisted = await leadRepository.isLeadExisted(tenantId, leadId);
-    if (!isLeadExisted) {
+    const lead = await leadRepository.get(tenantId, leadId);
+    if (!lead) {
       throw new Error(`Lead ${leadId} of tenant ${tenantId} does not exists`);
     }
 
+    // Merge leadId and leadName into opportunity
+    const opportunityToUpdate : Opportunity = {
+      ...opportunity,
+      leadId,
+      leadName: lead.name,
+      assigneeId: lead.assigneeId,
+    };
+
     // Create new Opportunity
-    return opportunityRepository.create(tenantId, leadId, userId, opportunity);
+    return opportunityRepository.create(tenantId, leadId, userId, opportunityToUpdate);
   };
 }

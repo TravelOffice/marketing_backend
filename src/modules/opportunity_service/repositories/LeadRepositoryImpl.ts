@@ -14,4 +14,15 @@ export default class LeadRepositoryImpl implements LeadRepository {
     const lead = await dynamoProvider.getItem(dynamoTable, `Tenant#${tenantId}`, `Lead#${leadId}`);
     return !!lead;
   };
+
+  /**
+   * Method to get a Lead by given id
+   * @param tenantId The id of the Tenant which the Lead should belong to
+   * @param leadId The id of the Lead which should be checked
+   * @returns the Lead if existing or `undefined` otherwise.
+   */
+  get = async (tenantId: string, leadId: string) => {
+    const dynamoTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    return dynamoProvider.getItem(dynamoTable, `Tenant#${tenantId}`, `Lead#${leadId}`);
+  };
 }
