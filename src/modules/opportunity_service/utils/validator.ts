@@ -62,7 +62,6 @@ export function createOpportunityValidator() {
     body('estimatedRevenue').optional().isFloat({ min: 0 }),
     body('estimatedConfirmDate').optional().custom(validateDate),
     body('actualCloseDate').optional().custom(validateDate),
-    body('assigneeId').notEmpty().isString(),
     body('potential').notEmpty().isIn(opportunityPotentials).withMessage(`allow only in ${opportunityPotentials}`),
     body('notes').optional().isArray().withMessage('notes must be array'),
     body('notes.*.name').if(body('notes').exists()).notEmpty().isString(),
