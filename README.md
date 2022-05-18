@@ -1,6 +1,6 @@
 # Backend for marketing module
 
-## 1. Prerequisites
+## 1. Prerequisitesdsd
 * **NodeJS:** 14+
 * **IDE:** VSCode, Webstorm
 * **Build environment:** Linux, MacOS (Windows is not supported)
