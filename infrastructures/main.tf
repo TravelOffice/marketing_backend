@@ -13,7 +13,7 @@ locals {
     Feature   = var.FEATURE_NAME
   }
 
-  env_vars = {
+  env_vars =  {
     standard_vars = {
       NODE_ENV          = var.ENV
       SECRET_MANAGER_ID = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
