@@ -1,16 +1,16 @@
 import { Request } from 'express';
 import {
-  body, ValidationError, validationResult,
+  body, query, ValidationError, validationResult,
 } from 'express-validator';
 import { opportunityPotentials, opportunitySources, opportunityStatuses } from '../models/Opportunity';
 
 export default function validate(req: Request) {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    const errorGroups : {[key: string]: ValidationError[]} = {};
+    const errorGroups: { [key: string]: ValidationError[] } = {};
     errors.array().forEach((err) => {
       const location = err.location || 'unknown';
-      const errs : ValidationError[] = errorGroups[location] || [];
+      const errs: ValidationError[] = errorGroups[location] || [];
       errs.push(err);
       errorGroups[location] = errs;
     });
@@ -69,5 +69,17 @@ export function createOpportunityValidator() {
     body('tasks').optional().isArray().withMessage('tasks must be array'),
     body('tasks.*.name').if(body('tasks').exists()).notEmpty().isString(),
     body('tasks.*.description').if(body('tasks').exists()).notEmpty().isString(),
+  ];
+}
+
+export function getMyOpportunitiesValidator() {
+  return [
+    query('status').optional().isIn(opportunityStatuses).withMessage(`allow only in ${opportunityStatuses}`),
+  ];
+}
+
+export function getOpportunitiesByLeadValidator() {
+  return [
+    query('status').optional().isIn(opportunityStatuses).withMessage(`allow only in ${opportunityStatuses}`),
   ];
 }

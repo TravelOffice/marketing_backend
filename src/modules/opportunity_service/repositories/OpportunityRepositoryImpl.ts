@@ -1,6 +1,6 @@
 import { getAwsSecretValue } from 'get-env';
 import * as AWS from 'aws';
-import { Opportunity } from '../models/Opportunity';
+import { Opportunity, OpportunityStatus } from '../models/Opportunity';
 import { dynamoProvider } from '../providers';
 import { OpportunityRepository } from './interfaces/OpportunityRepository';
 import logger from '../utils/logger';
@@ -38,6 +38,7 @@ export default class OpportunityRepositoryImpl implements OpportunityRepository 
     // Save to Employee partition1
     await dynamoProvider.putItem(dynamoTable, `Tenant#${tenantId}#Employee#${employeeId}`, `Opportunity#${opportunityId}`, {
       ...opportunityToCreate,
+      typeLsi: `OPPORTUNITY#${opportunity.status}`,
     });
     return opportunityToCreate;
   };
@@ -165,15 +166,20 @@ export default class OpportunityRepositoryImpl implements OpportunityRepository 
    * @param leadId Lead Id
    * @returns All opportunities from lead
    */
-  getListByLead = async (tenantId: string, leadId: string) => {
+  getListByLead = async (tenantId: string, leadId: string, status?: OpportunityStatus) => {
     const dynamoTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    let filterLsi = 'OPPORTUNITY#';
+    if (status) {
+      filterLsi = `OPPORTUNITY#${status}`;
+    }
 
     const params: QueryInput = {
       TableName: dynamoTable,
-      KeyConditionExpression: 'pk = :pk AND begins_with(sk, :sk_filter_value)',
+      IndexName: 'TypeIndex',
+      KeyConditionExpression: 'pk = :pk AND begins_with(typeLsi, :lsi_filter_value)',
       ExpressionAttributeValues: {
         ':pk': { S: `Tenant#${tenantId}#Lead#${leadId}` },
-        ':sk_filter_value': { S: `Tenant#${tenantId}#Opportunity#` },
+        ':lsi_filter_value': { S: filterLsi },
       },
     };
     const { Items } = await dynamoProvider.rawQuery(params);
@@ -193,15 +199,20 @@ export default class OpportunityRepositoryImpl implements OpportunityRepository 
    * @param assigneeId Assignee ID
    * @returns All opportunities assigned
    */
-  getListByAssignee = async (tenantId: string, assigneeId: string) => {
+  getListByAssignee = async (tenantId: string, assigneeId: string, status?: OpportunityStatus) => {
     const dynamoTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    let filterLsi = 'OPPORTUNITY#';
+    if (status) {
+      filterLsi = `OPPORTUNITY#${status}`;
+    }
 
     const params: QueryInput = {
       TableName: dynamoTable,
-      KeyConditionExpression: 'pk = :pk AND begins_with(sk, :sk_filter_value)',
+      IndexName: 'TypeIndex',
+      KeyConditionExpression: 'pk = :pk AND begins_with(typeLsi, :lsi_filter_value)',
       ExpressionAttributeValues: {
         ':pk': { S: `Tenant#${tenantId}#Employee#${assigneeId}` },
-        ':sk_filter_value': { S: 'Opportunity#' },
+        ':lsi_filter_value': { S: filterLsi },
       },
     };
     const { Items } = await dynamoProvider.rawQuery(params);
