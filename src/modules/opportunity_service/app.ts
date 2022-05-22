@@ -12,8 +12,14 @@ import {
 import wrapResponse from './utils/wrapResponse';
 import { FAILED, SUCCESS } from './utils/constants';
 import { getCurrentUserId } from './utils/authorizer';
-import validate, { createOpportunityValidator, updateOpportunityValidator } from './utils/validator';
+import validate, {
+  createOpportunityValidator,
+  getMyOpportunitiesValidator,
+  getOpportunitiesByLeadValidator,
+  updateOpportunityValidator,
+} from './utils/validator';
 import logger from './utils/logger';
+import { OpportunityStatus } from './models/Opportunity';
 
 const app = express();
 
@@ -59,11 +65,17 @@ app.get('/leads/:leadId/opportunities/:id', async (req: Request, res: Response) 
   }
 });
 
-app.get('/leads/:leadId/opportunities', async (req: Request, res: Response) => {
+app.get('/leads/:leadId/opportunities', getOpportunitiesByLeadValidator(), async (req: Request, res: Response) => {
   try {
+    validate(req);
     const { leadId } = req.params;
+    const { status } = req.query;
     const userId = getCurrentUserId(req.headers.authorization!);
-    const opportunities = await getOpportunitiesByLeadUseCase.invoke(userId, leadId);
+    const opportunities = await getOpportunitiesByLeadUseCase.invoke(
+      userId,
+      leadId,
+      status as OpportunityStatus,
+    );
     res.json(wrapResponse(SUCCESS, opportunities));
   } catch (error: any) {
     logger.log(error);
@@ -71,10 +83,15 @@ app.get('/leads/:leadId/opportunities', async (req: Request, res: Response) => {
   }
 });
 
-app.get('/opportunities', async (req: Request, res: Response) => {
+app.get('/opportunities', getMyOpportunitiesValidator(), async (req: Request, res: Response) => {
   try {
+    validate(req);
+    const { status } = req.query;
     const userId = getCurrentUserId(req.headers.authorization!);
-    const opportunities = await getMyOpportunitiesUseCase.invoke(userId);
+    const opportunities = await getMyOpportunitiesUseCase.invoke(
+      userId,
+      status as OpportunityStatus,
+    );
     res.json(wrapResponse(SUCCESS, opportunities));
   } catch (error: any) {
     logger.log(error);
