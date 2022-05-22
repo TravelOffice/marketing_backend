@@ -1,5 +1,5 @@
-import { Opportunity } from '../../models/Opportunity';
+import { Opportunity, OpportunityStatus } from '../../models/Opportunity';
 
 export interface GetMyOpportunitiesUseCase {
-  invoke: (userId: string) => Promise<Array<Opportunity>>;
+  invoke: (userId: string, status?: OpportunityStatus) => Promise<Array<Opportunity>>;
 }

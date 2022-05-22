@@ -1,4 +1,4 @@
-import { Opportunity } from '../../models/Opportunity';
+import { Opportunity, OpportunityStatus } from '../../models/Opportunity';
 
 export interface OpportunityRepository {
   create: (
@@ -14,6 +14,10 @@ export interface OpportunityRepository {
   update: (opportunity: Opportunity, tenantId: string) => Promise<Opportunity>
   unassign: (id: string, tenantId: string, assigneeId: string) => Promise<void>
   delete: (opportunity: Opportunity, tenantId: string) => Promise<void>
-  getListByLead: (tenantId: string, leadId: string) => Promise<Array<Opportunity>>
-  getListByAssignee: (tenantId: string, assigneeId: string) => Promise<Array<Opportunity>>
+  getListByLead: (
+    tenantId: string, leadId: string, status?: OpportunityStatus,
+  ) => Promise<Array<Opportunity>>
+  getListByAssignee: (
+    tenantId: string, assigneeId: string, status?:OpportunityStatus,
+  ) => Promise<Array<Opportunity>>
 }
