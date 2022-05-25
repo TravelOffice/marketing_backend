@@ -5,6 +5,12 @@ import { dynamoProvider } from '../providers';
 import { OpportunityRepository } from './interfaces/OpportunityRepository';
 import logger from '../utils/logger';
 import { QueryInput } from '../providers/DynamoProvider';
+import {
+  EMPLOYEE_INDEX,
+  LEAD_INDEX,
+  OPPORTUNITY_INDEX,
+  TENANT_INDEX,
+} from '../utils/constants';
 
 export default class OpportunityRepositoryImpl implements OpportunityRepository {
   /**
@@ -30,15 +36,15 @@ export default class OpportunityRepositoryImpl implements OpportunityRepository 
       createdAt,
       updatedAt: createdAt,
     };
-    await dynamoProvider.putItem(dynamoTable, `Tenant#${tenantId}#Lead#${leadId}`, `Tenant#${tenantId}#Opportunity#${opportunityId}`, {
+    await dynamoProvider.putItem(dynamoTable, `${TENANT_INDEX}#${tenantId}#${LEAD_INDEX}#${leadId}`, `${TENANT_INDEX}#${tenantId}#${OPPORTUNITY_INDEX}#${opportunityId}`, {
       ...opportunityToCreate,
-      typeGsi: `OPPORTUNITY#Tenant#${tenantId}`,
-      typeLsi: `OPPORTUNITY#${opportunity.status}`,
+      typeGsi: `${OPPORTUNITY_INDEX}#${TENANT_INDEX}#${tenantId}`,
+      typeLsi: `${OPPORTUNITY_INDEX}#${opportunity.status}`,
     });
     // Save to Employee partition1
-    await dynamoProvider.putItem(dynamoTable, `Tenant#${tenantId}#Employee#${employeeId}`, `Opportunity#${opportunityId}`, {
+    await dynamoProvider.putItem(dynamoTable, `${TENANT_INDEX}#${tenantId}#${EMPLOYEE_INDEX}#${employeeId}`, `${OPPORTUNITY_INDEX}#${opportunityId}`, {
       ...opportunityToCreate,
-      typeLsi: `OPPORTUNITY#${opportunity.status}`,
+      typeLsi: `${OPPORTUNITY_INDEX}#${opportunity.status}`,
     });
     return opportunityToCreate;
   };
@@ -54,8 +60,8 @@ export default class OpportunityRepositoryImpl implements OpportunityRepository 
     const dynamoTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
     const item = await dynamoProvider.getItem(
       dynamoTable,
-      `Tenant#${tenantId}#Lead#${leadId}`,
-      `Tenant#${tenantId}#Opportunity#${id}`,
+      `${TENANT_INDEX}#${tenantId}#${LEAD_INDEX}#${leadId}`,
+      `${TENANT_INDEX}#${tenantId}#${OPPORTUNITY_INDEX}#${id}`,
     );
     if (!item) {
       return undefined;
@@ -77,8 +83,8 @@ export default class OpportunityRepositoryImpl implements OpportunityRepository 
     const dynamoTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
     const item = await dynamoProvider.getItem(
       dynamoTable,
-      `Tenant#${tenantId}#Employee#${assigneeId}`,
-      `Opportunity#${id}`,
+      `${TENANT_INDEX}#${tenantId}#${EMPLOYEE_INDEX}#${assigneeId}`,
+      `${OPPORTUNITY_INDEX}#${id}`,
     );
     if (!item) {
       return undefined;
@@ -103,15 +109,15 @@ export default class OpportunityRepositoryImpl implements OpportunityRepository 
 
     await dynamoProvider.putItem(
       dynamoTable,
-      `Tenant#${tenantId}#Lead#${leadId}`,
-      `Tenant#${tenantId}#Opportunity#${opportunityId}`,
+      `${TENANT_INDEX}#${tenantId}#${LEAD_INDEX}#${leadId}`,
+      `${TENANT_INDEX}#${tenantId}#${OPPORTUNITY_INDEX}#${opportunityId}`,
       opportunity,
     );
     if (opportunityAssigneeId) {
       await dynamoProvider.putItem(
         dynamoTable,
-        `Tenant#${tenantId}#Employee#${opportunityAssigneeId}`,
-        `Opportunity#${opportunityId}`,
+        `${TENANT_INDEX}#${tenantId}#${EMPLOYEE_INDEX}#${opportunityAssigneeId}`,
+        `${OPPORTUNITY_INDEX}#${opportunityId}`,
         opportunity,
       );
       logger.log(`Opportunity change opportunity AssigneeId to ${opportunityAssigneeId}`);
@@ -132,8 +138,8 @@ export default class OpportunityRepositoryImpl implements OpportunityRepository 
     const dynamoTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
     await dynamoProvider.deleteItem(
       dynamoTable,
-      `Tenant#${tenantId}#Employee#${assigneeId}`,
-      `Opportunity#${id}`,
+      `${TENANT_INDEX}#${tenantId}#${EMPLOYEE_INDEX}#${assigneeId}`,
+      `${OPPORTUNITY_INDEX}#${id}`,
     );
   };
 
@@ -145,14 +151,14 @@ export default class OpportunityRepositoryImpl implements OpportunityRepository 
 
     await dynamoProvider.deleteItem(
       dynamoTable,
-      `Tenant#${tenantId}#Lead#${leadId}`,
-      `Tenant#${tenantId}#Opportunity#${opportunityId}`,
+      `${TENANT_INDEX}#${tenantId}#${LEAD_INDEX}#${leadId}`,
+      `${TENANT_INDEX}#${tenantId}#${OPPORTUNITY_INDEX}#${opportunityId}`,
     );
     if (opportunityAssigneeId) {
       await dynamoProvider.deleteItem(
         dynamoTable,
-        `Tenant#${tenantId}#Employee#${opportunityAssigneeId}`,
-        `Opportunity#${opportunityId}`,
+        `${TENANT_INDEX}#${tenantId}#${EMPLOYEE_INDEX}#${opportunityAssigneeId}`,
+        `${OPPORTUNITY_INDEX}#${opportunityId}`,
       );
       logger.log(`Delete Opportunity from Employee ${opportunityAssigneeId} information sucessfully`);
     }
@@ -168,9 +174,9 @@ export default class OpportunityRepositoryImpl implements OpportunityRepository 
    */
   getListByLead = async (tenantId: string, leadId: string, status?: OpportunityStatus) => {
     const dynamoTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
-    let filterLsi = 'OPPORTUNITY#';
+    let filterLsi = `${OPPORTUNITY_INDEX}#`;
     if (status) {
-      filterLsi = `OPPORTUNITY#${status}`;
+      filterLsi = `${OPPORTUNITY_INDEX}#${status}`;
     }
 
     const params: QueryInput = {
@@ -178,7 +184,7 @@ export default class OpportunityRepositoryImpl implements OpportunityRepository 
       IndexName: 'TypeIndex',
       KeyConditionExpression: 'pk = :pk AND begins_with(typeLsi, :lsi_filter_value)',
       ExpressionAttributeValues: {
-        ':pk': { S: `Tenant#${tenantId}#Lead#${leadId}` },
+        ':pk': { S: `${TENANT_INDEX}#${tenantId}#${LEAD_INDEX}#${leadId}` },
         ':lsi_filter_value': { S: filterLsi },
       },
     };
@@ -201,9 +207,9 @@ export default class OpportunityRepositoryImpl implements OpportunityRepository 
    */
   getListByAssignee = async (tenantId: string, assigneeId: string, status?: OpportunityStatus) => {
     const dynamoTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
-    let filterLsi = 'OPPORTUNITY#';
+    let filterLsi = `${OPPORTUNITY_INDEX}#`;
     if (status) {
-      filterLsi = `OPPORTUNITY#${status}`;
+      filterLsi = `${OPPORTUNITY_INDEX}#${status}`;
     }
 
     const params: QueryInput = {
@@ -211,7 +217,7 @@ export default class OpportunityRepositoryImpl implements OpportunityRepository 
       IndexName: 'TypeIndex',
       KeyConditionExpression: 'pk = :pk AND begins_with(typeLsi, :lsi_filter_value)',
       ExpressionAttributeValues: {
-        ':pk': { S: `Tenant#${tenantId}#Employee#${assigneeId}` },
+        ':pk': { S: `${TENANT_INDEX}#${tenantId}#${EMPLOYEE_INDEX}#${assigneeId}` },
         ':lsi_filter_value': { S: filterLsi },
       },
     };

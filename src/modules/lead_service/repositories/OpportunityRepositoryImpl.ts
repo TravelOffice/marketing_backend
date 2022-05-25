@@ -4,6 +4,7 @@ import { Opportunity } from '../models/Opportunity';
 import { dynamoProvider } from '../providers';
 import { OpportunityRepository } from './interfaces/OpportunityRepository';
 import logger from '../utils/logger';
+import { LEAD_INDEX, OPPORTUNITY_INDEX, TENANT_INDEX } from '../utils/constants';
 
 type QueryInput = AWS.DynamoDB.QueryInput;
 
@@ -20,8 +21,8 @@ export default class OpportunityRepositoryImpl implements OpportunityRepository 
       TableName: dynamoTable,
       KeyConditionExpression: 'pk = :pk AND begins_with(sk, :sk)',
       ExpressionAttributeValues: {
-        ':pk': { S: `Tenant#${tenantId}#Lead#${leadId}` },
-        ':sk': { S: `Tenant#${tenantId}#Opportunity` },
+        ':pk': { S: `${TENANT_INDEX}#${tenantId}#${LEAD_INDEX}#${leadId}` },
+        ':sk': { S: `${TENANT_INDEX}#${tenantId}#${OPPORTUNITY_INDEX}` },
       },
     };
     return dynamoProvider.query(params) || [];
@@ -40,8 +41,8 @@ export default class OpportunityRepositoryImpl implements OpportunityRepository 
 
     await dynamoProvider.putItem(
       dynamoTable,
-      `Tenant#${tenantId}#Lead#${leadId}`,
-      `Tenant#${tenantId}#Opportunity#${opportunityId}`,
+      `${TENANT_INDEX}#${tenantId}#${LEAD_INDEX}#${leadId}`,
+      `${TENANT_INDEX}#${tenantId}#${OPPORTUNITY_INDEX}#${opportunityId}`,
       opportunity,
     );
 
