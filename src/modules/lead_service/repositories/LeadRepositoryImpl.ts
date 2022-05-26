@@ -2,7 +2,12 @@ import * as AWS from 'aws';
 import { getAwsSecretValue } from 'get-env';
 import { Lead, LeadType, LeadStatus } from '../models/Lead';
 import { dynamoProvider } from '../providers';
-import { DISABLED, ENABLED } from '../utils/constants';
+import {
+  DISABLED,
+  ENABLED,
+  LEAD_INDEX,
+  TENANT_INDEX,
+} from '../utils/constants';
 import { LeadRepository } from './interfaces/LeadRepository';
 
 type QueryInput = AWS.DynamoDB.QueryInput;
@@ -16,8 +21,8 @@ export default class LeadRepositoryImpl implements LeadRepository {
    */
   createOrUpdate = async (tenantId: string, lead: Lead) => {
     const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
-    const pk = `Tenant#${tenantId}`;
-    const sk = `Lead#${lead.primaryPhoneNumber}`;
+    const pk = `${TENANT_INDEX}#${tenantId}`;
+    const sk = `${LEAD_INDEX}#${lead.primaryPhoneNumber}`;
     const typeLsi = `${lead.type}#${lead.assigneeId}#${lead.enabled ? ENABLED : DISABLED}#${lead.status}`;
     await dynamoProvider.putItem(table, pk, sk, { ...lead, typeLsi });
     return lead;
@@ -31,8 +36,8 @@ export default class LeadRepositoryImpl implements LeadRepository {
    */
   getById = async (tenantId: String, leadId: String) => {
     const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
-    const pk = `Tenant#${tenantId}`;
-    const sk = `Lead#${leadId}`;
+    const pk = `${TENANT_INDEX}#${tenantId}`;
+    const sk = `${LEAD_INDEX}#${leadId}`;
     return dynamoProvider.getItem<Lead>(table, pk, sk);
   };
 
@@ -53,8 +58,8 @@ export default class LeadRepositoryImpl implements LeadRepository {
       },
       FilterExpression: ' #field = :value',
       ExpressionAttributeValues: {
-        ':pk': { S: `Tenant#${tenantId}` },
-        ':sk_filter_value': { S: 'Lead#' },
+        ':pk': { S: `${TENANT_INDEX}#${tenantId}` },
+        ':sk_filter_value': { S: `${LEAD_INDEX}#` },
         ':value': { S: value },
       },
     };
@@ -72,8 +77,8 @@ export default class LeadRepositoryImpl implements LeadRepository {
       TableName: table,
       KeyConditionExpression: 'pk = :pk AND begins_with(sk, :sk_filter_value)',
       ExpressionAttributeValues: {
-        ':pk': { S: `Tenant#${tenantId}` },
-        ':sk_filter_value': { S: 'Lead#' },
+        ':pk': { S: `${TENANT_INDEX}#${tenantId}` },
+        ':sk_filter_value': { S: `${LEAD_INDEX}#` },
       },
     };
     return dynamoProvider.query(params);
@@ -104,7 +109,7 @@ export default class LeadRepositoryImpl implements LeadRepository {
       IndexName: 'TypeIndex',
       KeyConditionExpression: 'pk = :pk AND begins_with(typeLsi, :lsi_filter_value)',
       ExpressionAttributeValues: {
-        ':pk': { S: `Tenant#${tenantId}` },
+        ':pk': { S: `${TENANT_INDEX}#${tenantId}` },
         ':lsi_filter_value': { S: filterLSI },
       },
     };

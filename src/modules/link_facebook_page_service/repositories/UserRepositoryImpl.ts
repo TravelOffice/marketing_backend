@@ -2,6 +2,7 @@ import * as AWS from 'aws';
 import { getAwsSecretValue } from 'get-env';
 import { User } from '../models/User';
 import { dynamoProvider } from '../providers';
+import { EMPLOYEE_INDEX, TENANT_INDEX } from '../utils/constants';
 import { UserRepository } from './interfaces/UserRepository';
 
 export default class UserRepositoryImpl implements UserRepository {
@@ -11,8 +12,8 @@ export default class UserRepositoryImpl implements UserRepository {
       TableName: saleChatTable,
       KeyConditionExpression: 'begins_with(pk, :pk_tenant) AND sk = :sk_employee',
       ExpressionAttributeValues: {
-        ':pk_tenant': { S: 'Tenant' },
-        ':sk_employee': { S: `Employee#${userId}` },
+        ':pk_tenant': { S: `${TENANT_INDEX}#` },
+        ':sk_employee': { S: `${EMPLOYEE_INDEX}#${userId}` },
       },
       IndexName: 'ReverseIndex',
     });

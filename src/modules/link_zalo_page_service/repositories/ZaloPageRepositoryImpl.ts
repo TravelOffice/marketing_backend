@@ -5,6 +5,7 @@ import { getAwsSecretValue, getEnv } from 'get-env';
 import { ZaloPage } from '../models/ZaloPage';
 import { dynamoProvider, zaloApiProvider } from '../providers';
 import { ZaloPageRepository } from './interfaces/ZaloPageRepository';
+import { TENANT_INDEX } from '../utils/constants';
 
 export default class ZaloPageRepositoryImpl implements ZaloPageRepository {
   /**
@@ -93,7 +94,7 @@ export default class ZaloPageRepositoryImpl implements ZaloPageRepository {
       TableName: saleChatTable,
       KeyConditionExpression: 'pk = :pk_tenant AND begins_with(sk, :sk_filter)',
       ExpressionAttributeValues: {
-        ':pk_tenant': { S: `Tenant#${tenantId}` },
+        ':pk_tenant': { S: `${TENANT_INDEX}#${tenantId}` },
         ':sk_filter': { S: 'PAGE_zalo_' },
       },
     });
@@ -101,9 +102,9 @@ export default class ZaloPageRepositoryImpl implements ZaloPageRepository {
       // Remove previous item before insert new one
       const { sk, pk, ...rest } = AWS.DynamoDB.Converter.unmarshall(linkedPages.Items[0]);
       const linkedPage = rest as ZaloPage;
-      await dynamoProvider.deleteItem(saleChatTable, `Tenant#${tenantId}`, `PAGE_zalo_${linkedPage.id}`);
+      await dynamoProvider.deleteItem(saleChatTable, `${TENANT_INDEX}#${tenantId}`, `PAGE_zalo_${linkedPage.id}`);
     }
-    await dynamoProvider.putItem(saleChatTable, `Tenant#${tenantId}`, `PAGE_zalo_${page.id}`, page);
+    await dynamoProvider.putItem(saleChatTable, `${TENANT_INDEX}#${tenantId}`, `PAGE_zalo_${page.id}`, page);
   };
 
   /**

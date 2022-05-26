@@ -4,6 +4,7 @@ import { dynamoProvider } from '../providers';
 import { UserRepository } from './interfaces/UserRepository';
 import { User } from '../models/User';
 import { QueryInput } from '../providers/DynamoProvider';
+import { EMPLOYEE_INDEX, TENANT_INDEX } from '../utils/constants';
 
 export default class UserRepositoryImpl implements UserRepository {
   getUserAttributes = async (userId: string) => {
@@ -13,8 +14,8 @@ export default class UserRepositoryImpl implements UserRepository {
       IndexName: 'ReverseIndex',
       KeyConditionExpression: 'sk = :sk_employee AND begins_with(pk, :pk_filter)',
       ExpressionAttributeValues: {
-        ':pk_filter': { S: 'Tenant#' },
-        ':sk_employee': { S: `Employee#${userId}` },
+        ':pk_filter': { S: `${TENANT_INDEX}#` },
+        ':sk_employee': { S: `${EMPLOYEE_INDEX}#${userId}` },
       },
     };
     const queryResult = await dynamoProvider.rawQuery(query);

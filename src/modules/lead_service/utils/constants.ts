@@ -2,9 +2,9 @@ export const SUCCESS = 'Successfully!';
 
 export const FAILED = 'Failed!';
 
-export const ENABLED = 'Enabled';
+export const ENABLED = 'ENABLED';
 
-export const DISABLED = 'Disabled';
+export const DISABLED = 'DISABLED';
 
 export const VALIDATE_NON_EMPTY_STRING_MSG = 'property must be a non-empty string';
 
@@ -23,3 +23,11 @@ export const VALIDATE_EMAIL_MSG = 'property must be a email address';
 export const VALIDATE_DATE_MSG = 'property must be a date';
 
 export const VALIDATE_BOOLEAN_MSG = 'property must be a boolean';
+
+export const TENANT_INDEX = 'TENANT';
+
+export const LEAD_INDEX = 'LEAD';
+
+export const OPPORTUNITY_INDEX = 'OPPORTUNITY';
+
+export const EMPLOYEE_INDEX = 'EMPLOYEE';
