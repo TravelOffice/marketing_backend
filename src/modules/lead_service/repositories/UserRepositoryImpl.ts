@@ -2,6 +2,7 @@ import * as AWS from 'aws';
 import { getAwsSecretValue } from 'get-env';
 import { User } from '../models/User';
 import { dynamoProvider } from '../providers';
+import { EMPLOYEE_INDEX, TENANT_INDEX } from '../utils/constants';
 import { UserRepository } from './interfaces/UserRepository';
 
 type QueryInput = AWS.DynamoDB.QueryInput;
@@ -20,9 +21,9 @@ export default class UserRepositoryImpl implements UserRepository {
       KeyConditionExpression: 'sk = :sk AND begins_with(pk, :pk_filter_value)',
       ExpressionAttributeValues: {
         // Given sk
-        ':sk': { S: `Employee#${username}` },
+        ':sk': { S: `${EMPLOYEE_INDEX}#${username}` },
         // Prefix to Tenant item
-        ':pk_filter_value': { S: 'Tenant#' },
+        ':pk_filter_value': { S: `${TENANT_INDEX}#` },
       },
     };
     const rs = await dynamoProvider.query(params);

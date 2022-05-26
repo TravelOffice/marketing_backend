@@ -74,12 +74,16 @@ export function createOpportunityValidator() {
 
 export function getMyOpportunitiesValidator() {
   return [
-    query('status').optional().isIn(opportunityStatuses).withMessage(`allow only in ${opportunityStatuses}`),
+    query('status')
+      .if(query('status').notEmpty())
+      .isIn(opportunityStatuses).withMessage(`allow only in ${opportunityStatuses}`),
   ];
 }
 
 export function getOpportunitiesByLeadValidator() {
   return [
-    query('status').optional().isIn(opportunityStatuses).withMessage(`allow only in ${opportunityStatuses}`),
+    query('status')
+      .if(query('status').notEmpty())
+      .isIn(opportunityStatuses).withMessage(`allow only in ${opportunityStatuses}`),
   ];
 }

@@ -2,6 +2,7 @@ import * as AWS from 'aws';
 import { getAwsSecretValue } from 'get-env';
 import { FacebookPage } from '../models/FacebookPage';
 import { dynamoProvider, facebookApiProvider } from '../providers';
+import { TENANT_INDEX } from '../utils/constants';
 import { FacebookPageRepository } from './interfaces/FacebookPageRepository';
 
 export default class FacebookPageRepositoryImpl implements FacebookPageRepository {
@@ -34,7 +35,7 @@ export default class FacebookPageRepositoryImpl implements FacebookPageRepositor
       TableName: saleChatTable,
       KeyConditionExpression: 'pk = :pk_tenant AND begins_with(sk, :sk_filter)',
       ExpressionAttributeValues: {
-        ':pk_tenant': { S: `Tenant#${tenantId}` },
+        ':pk_tenant': { S: `${TENANT_INDEX}#${tenantId}` },
         ':sk_filter': { S: 'PAGE_fb_' },
       },
     });
@@ -42,8 +43,8 @@ export default class FacebookPageRepositoryImpl implements FacebookPageRepositor
       // Remove previous item before insert new one
       const { sk, pk, ...rest } = AWS.DynamoDB.Converter.unmarshall(linkedPages.Items[0]);
       const linkedPage = rest as FacebookPage;
-      await dynamoProvider.deleteItem(saleChatTable, `Tenant#${tenantId}`, `PAGE_fb_${linkedPage.id}`);
+      await dynamoProvider.deleteItem(saleChatTable, `${TENANT_INDEX}#${tenantId}`, `PAGE_fb_${linkedPage.id}`);
     }
-    await dynamoProvider.putItem(saleChatTable, `Tenant#${tenantId}`, `PAGE_fb_${page.id}`, page);
+    await dynamoProvider.putItem(saleChatTable, `${TENANT_INDEX}#${tenantId}`, `PAGE_fb_${page.id}`, page);
   };
 }

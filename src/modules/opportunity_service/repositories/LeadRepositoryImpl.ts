@@ -1,5 +1,6 @@
 import { getAwsSecretValue } from 'get-env';
 import { dynamoProvider } from '../providers';
+import { LEAD_INDEX, TENANT_INDEX } from '../utils/constants';
 import { LeadRepository } from './interfaces/LeadRepository';
 
 export default class LeadRepositoryImpl implements LeadRepository {
@@ -11,7 +12,7 @@ export default class LeadRepositoryImpl implements LeadRepository {
    */
   isLeadExisted = async (tenantId: string, leadId: string) => {
     const dynamoTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
-    const lead = await dynamoProvider.getItem(dynamoTable, `Tenant#${tenantId}`, `Lead#${leadId}`);
+    const lead = await dynamoProvider.getItem(dynamoTable, `${TENANT_INDEX}#${tenantId}`, `${LEAD_INDEX}#${leadId}`);
     return !!lead;
   };
 
@@ -23,6 +24,6 @@ export default class LeadRepositoryImpl implements LeadRepository {
    */
   get = async (tenantId: string, leadId: string) => {
     const dynamoTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
-    return dynamoProvider.getItem(dynamoTable, `Tenant#${tenantId}`, `Lead#${leadId}`);
+    return dynamoProvider.getItem(dynamoTable, `${TENANT_INDEX}#${tenantId}`, `${LEAD_INDEX}#${leadId}`);
   };
 }
