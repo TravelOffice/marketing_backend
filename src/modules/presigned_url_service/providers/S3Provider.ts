@@ -1,4 +1,4 @@
-import * as AWS from 'aws';
+import AWS from 'aws';
 import { getEnv } from 'get-env';
 
 AWS.config.update({

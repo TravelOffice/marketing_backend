@@ -1,4 +1,4 @@
-import * as AWS from 'aws';
+import AWS from 'aws';
 import { getEnv } from 'get-env';
 
 type PutItemInput = AWS.DynamoDB.PutItemInput;

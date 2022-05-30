@@ -1,4 +1,4 @@
-import * as AWS from 'aws';
+import AWS from 'aws';
 import dotenv from 'dotenv';
 import fs from 'fs';
 

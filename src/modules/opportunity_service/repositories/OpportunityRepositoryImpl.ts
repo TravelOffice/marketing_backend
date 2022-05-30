@@ -1,5 +1,5 @@
 import { getAwsSecretValue } from 'get-env';
-import * as AWS from 'aws';
+import AWS from 'aws';
 import { Opportunity, OpportunityStatus } from '../models/Opportunity';
 import { dynamoProvider } from '../providers';
 import { OpportunityRepository } from './interfaces/OpportunityRepository';

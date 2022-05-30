@@ -1,4 +1,4 @@
-import * as AWS from 'aws';
+import AWS from 'aws';
 import * as crypto from 'crypto';
 import * as fs from 'fs';
 import { getEnv } from 'get-env';
