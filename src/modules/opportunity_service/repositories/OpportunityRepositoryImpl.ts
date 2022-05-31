@@ -106,25 +106,30 @@ export default class OpportunityRepositoryImpl implements OpportunityRepository 
     const { leadId } = opportunity;
     const opportunityId = `${opportunity.createdAt}`;
     const opportunityAssigneeId = `${opportunity.assigneeId}`;
+    const newOpportunity = {
+      ...opportunity,
+      typeLsi: `${OPPORTUNITY_INDEX}#${opportunity.status}`,
+      updatedAt: Date.now(),
+    };
 
     await dynamoProvider.putItem(
       dynamoTable,
       `${TENANT_INDEX}#${tenantId}#${LEAD_INDEX}#${leadId}`,
       `${TENANT_INDEX}#${tenantId}#${OPPORTUNITY_INDEX}#${opportunityId}`,
-      opportunity,
+      newOpportunity,
     );
     if (opportunityAssigneeId) {
       await dynamoProvider.putItem(
         dynamoTable,
         `${TENANT_INDEX}#${tenantId}#${EMPLOYEE_INDEX}#${opportunityAssigneeId}`,
         `${OPPORTUNITY_INDEX}#${opportunityId}`,
-        opportunity,
+        newOpportunity,
       );
       logger.log(`Opportunity change opportunity AssigneeId to ${opportunityAssigneeId}`);
     }
 
     logger.log(`Opportunity updated with id = ${opportunityId}, leadId = ${leadId}, tenantId = ${tenantId}`);
-    return opportunity;
+    return newOpportunity;
   };
 
   /**
