@@ -18,7 +18,7 @@ export default class UpdateOpportunityUseCaseImpl implements UpdateOpportunityUs
     id: string,
     userId: string,
     leadId: string,
-    opportunity: Omit<Opportunity, 'createdAt' | 'leadId'>,
+    opportunity: Omit<Opportunity, 'createdAt' | 'tenantId' | 'leadId' | 'leadName'>,
   ) => {
     const currentUser = await userRepository.getUserAttributes(userId);
     if (!currentUser) {
