@@ -5,6 +5,6 @@ export interface UpdateOpportunityUseCase {
     id: string,
     userId: string,
     leadId: string,
-    opportunity: Omit<Opportunity, 'createdAt' | 'tenantId' | 'leadId'>
+    opportunity: Omit<Opportunity, 'createdAt' | 'tenantId' | 'leadId' | 'leadName'>
   ) => Promise<Opportunity>;
 }
