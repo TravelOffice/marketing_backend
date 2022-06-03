@@ -1,6 +1,8 @@
 export interface Task {
   name: string,
   description: string,
-  createdAt: number,
-  closedAt: number,
+  createdAt?: number,
+  creatorId: string,
+  creatorName: string,
+  dueDate: string,
 }
