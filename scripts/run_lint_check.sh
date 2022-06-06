@@ -77,6 +77,10 @@ cd ${CUR_DIR}/src/modules
 MODULES_DIR=$(ls -d */ | cut -f1 -d'/')
 
 if [ "${SKIP_INSTALL}" != "true" ]; then
+  # Build dependencies
+  echo "Building dependencies"
+  cd ${CUR_DIR}
+  ./scripts/build_dependencies.sh
   for dir in $MODULES_DIR
   do
     install_module ${dir}

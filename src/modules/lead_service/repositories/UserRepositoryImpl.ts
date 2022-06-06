@@ -1,4 +1,4 @@
-import * as AWS from 'aws';
+import AWS from 'aws';
 import { getAwsSecretValue } from 'get-env';
 import { User } from '../models/User';
 import { dynamoProvider } from '../providers';

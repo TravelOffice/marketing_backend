@@ -1,4 +1,4 @@
-import * as AWS from 'aws';
+import AWS from 'aws';
 import { generateChallenge } from 'pkce-challenge';
 import * as randomstring from 'randomstring';
 import { getAwsSecretValue, getEnv } from 'get-env';
