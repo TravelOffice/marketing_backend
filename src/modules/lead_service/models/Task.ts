@@ -1,6 +1,16 @@
+export enum TaskPriority {
+  LOW = 'LOW',
+  MEDIUM = 'MEDIUM',
+  HIGH = 'HIGH'
+}
+
 export interface Task {
-  name: string,
+  title: string,
   description: string,
-  createdAt: number,
-  closedAt: number,
+  priority: TaskPriority,
+  createdAt?: number,
+  creatorId: string,
+  creatorName: string,
+  dueDate: string,
+  isCompleted: boolean
 }

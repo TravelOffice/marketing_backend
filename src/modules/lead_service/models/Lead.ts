@@ -1,3 +1,6 @@
+import { Note } from './Note';
+import { Task } from './Task';
+
 export enum SexType {
   MALE = 'MALE',
   FEMALE = 'FEMALE',
@@ -60,4 +63,6 @@ export interface Lead {
   source: SourceType,
   enabled: boolean,
   type: LeadType,
+  tasks?: Task[],
+  notes?: Note[]
 }
