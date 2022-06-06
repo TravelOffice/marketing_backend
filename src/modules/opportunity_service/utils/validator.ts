@@ -43,12 +43,18 @@ export function updateOpportunityValidator() {
     }),
     body('assigneeId').notEmpty().isString(),
     body('potential').notEmpty().isIn(opportunityPotentials).withMessage(`allow only in ${opportunityPotentials}`),
-    body('notes').optional().isArray().withMessage('notes must be array'),
+    body('notes').optional().isArray().withMessage('Notes must be array'),
     body('notes.*.name').if(body('notes').exists()).notEmpty().isString(),
     body('notes.*.description').if(body('notes').exists()).notEmpty().isString(),
-    body('tasks').optional().isArray().withMessage('tasks must be array'),
+    body('tasks').optional().isArray().withMessage('Tasks must be array'),
     body('tasks.*.name').if(body('tasks').exists()).notEmpty().isString(),
     body('tasks.*.description').if(body('tasks').exists()).notEmpty().isString(),
+    body('tasks.*.dueDate')
+      .if(body('tasks').exists()).notEmpty()
+      .custom((value: string) => {
+        const date = Date.parse(value);
+        return !Number.isNaN(date);
+      }),
   ];
 }
 
@@ -63,12 +69,18 @@ export function createOpportunityValidator() {
     body('estimatedConfirmDate').optional().custom(validateDate),
     body('actualCloseDate').optional().custom(validateDate),
     body('potential').notEmpty().isIn(opportunityPotentials).withMessage(`allow only in ${opportunityPotentials}`),
-    body('notes').optional().isArray().withMessage('notes must be array'),
+    body('notes').optional().isArray().withMessage('Notes must be array'),
     body('notes.*.name').if(body('notes').exists()).notEmpty().isString(),
     body('notes.*.description').if(body('notes').exists()).notEmpty().isString(),
-    body('tasks').optional().isArray().withMessage('tasks must be array'),
+    body('tasks').optional().isArray().withMessage('Tasks must be array'),
     body('tasks.*.name').if(body('tasks').exists()).notEmpty().isString(),
     body('tasks.*.description').if(body('tasks').exists()).notEmpty().isString(),
+    body('tasks.*.dueDate')
+      .if(body('tasks').exists()).notEmpty()
+      .custom((value: string) => {
+        const date = Date.parse(value);
+        return !Number.isNaN(date);
+      }),
   ];
 }
 

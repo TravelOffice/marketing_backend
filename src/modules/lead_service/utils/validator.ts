@@ -113,6 +113,19 @@ export function createUpdateLeadValidator() {
 
     body('status')
       .isIn(Object.values(LeadStatus)).withMessage(`allow only in ${Object.values(LeadStatus)}`),
+
+    body('notes').optional().isArray().withMessage('Notes must be array'),
+    body('notes.*.title').if(body('notes').exists()).notEmpty().isString(),
+    body('notes.*.description').if(body('notes').exists()).notEmpty().isString(),
+    body('tasks').optional().isArray().withMessage('Tasks must be array'),
+    body('tasks.*.title').if(body('tasks').exists()).notEmpty().isString(),
+    body('tasks.*.description').if(body('tasks').exists()).notEmpty().isString(),
+    body('tasks.*.dueDate')
+      .if(body('tasks').exists()).notEmpty()
+      .custom((value: string) => {
+        const date = Date.parse(value);
+        return !Number.isNaN(date);
+      }),
   ];
 }
 

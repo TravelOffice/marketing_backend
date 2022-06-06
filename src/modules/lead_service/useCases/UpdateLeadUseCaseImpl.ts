@@ -1,6 +1,14 @@
 import { Lead } from '../models/Lead';
+import { Note } from '../models/Note';
 import { Opportunity } from '../models/Opportunity';
-import { leadRepository, userRepository, opportunityRepository } from '../repositories';
+import { Task } from '../models/Task';
+import {
+  leadRepository,
+  userRepository,
+  opportunityRepository,
+  taskRepository,
+  noteRepository,
+} from '../repositories';
 import logger from '../utils/logger';
 import { UpdateLeadUseCase } from './interfaces/UpdateLeadUseCase';
 
@@ -46,6 +54,18 @@ export default class UpdateLeadUseCaseImpl implements UpdateLeadUseCase {
       }
     }
 
-    return leadRepository.createOrUpdate(tenantId, Object.assign(oldLead, newLead));
+    let tasks: Task[] = [];
+    let notes: Note[] = [];
+    if (newLead.tasks) {
+      tasks = taskRepository.generateData(newLead.tasks, userId, userAttributes.name);
+    }
+    if (newLead.notes) {
+      notes = noteRepository.generateData(newLead.notes, userId, userAttributes.name);
+    }
+
+    return leadRepository.createOrUpdate(tenantId, Object.assign(
+      oldLead,
+      { ...newLead, tasks, notes },
+    ));
   };
 }
