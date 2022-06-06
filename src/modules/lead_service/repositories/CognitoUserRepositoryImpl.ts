@@ -1,4 +1,4 @@
-import * as AWS from 'aws';
+import AWS from 'aws';
 import { getEnv, getAwsSecretValue } from 'get-env';
 import { CognitoUserRepository } from './interfaces/CognitoUserRepository';
 
