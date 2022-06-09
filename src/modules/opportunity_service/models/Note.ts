@@ -1,5 +1,5 @@
 export interface Note {
-  name: string,
+  title: string,
   description: string,
   createdAt?: number,
   creatorId: string,

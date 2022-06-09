@@ -1,5 +1,9 @@
+import { Note } from '../models/Note';
 import { Opportunity } from '../models/Opportunity';
-import { opportunityRepository, userRepository } from '../repositories';
+import { Task } from '../models/Task';
+import {
+  noteRepository, opportunityRepository, taskRepository, userRepository,
+} from '../repositories';
 import { UpdateOpportunityUseCase } from './interfaces/UpdateOpportunityUseCase';
 
 export default class UpdateOpportunityUseCaseImpl implements UpdateOpportunityUseCase {
@@ -33,8 +37,18 @@ export default class UpdateOpportunityUseCaseImpl implements UpdateOpportunityUs
     if (oldOpportunity.assigneeId !== opportunity.assigneeId) {
       await opportunityRepository.unassign(id, tenantId, oldOpportunity.assigneeId);
     }
+
+    let tasks: Task[] = [];
+    let notes: Note[] = [];
+    if (opportunity.tasks) {
+      tasks = taskRepository.generateData(opportunity.tasks, userId, currentUser.name);
+    }
+    if (opportunity.notes) {
+      notes = noteRepository.generateData(opportunity.notes, userId, currentUser.name);
+    }
+
     return opportunityRepository.update(
-      Object.assign(oldOpportunity, opportunity),
+      Object.assign(oldOpportunity, { ...opportunity, tasks, notes }),
       tenantId,
     );
   };

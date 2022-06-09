@@ -1,5 +1,7 @@
 import { Opportunity } from '../models/Opportunity';
-import { leadRepository, opportunityRepository, userRepository } from '../repositories';
+import {
+  leadRepository, noteRepository, opportunityRepository, taskRepository, userRepository,
+} from '../repositories';
 import { CreateOpportunityUseCase } from './interfaces/CreateOpportunityUseCase';
 
 export default class CreateOpportunityUseCaseImpl implements CreateOpportunityUseCase {
@@ -29,12 +31,21 @@ export default class CreateOpportunityUseCaseImpl implements CreateOpportunityUs
     }
 
     // Merge leadId and leadName into opportunity
-    const opportunityToUpdate : Opportunity = {
+    let opportunityToUpdate : Opportunity = {
       ...opportunity,
       leadId,
       leadName: lead.name,
       assigneeId: lead.assigneeId,
     };
+
+    if (opportunity.tasks) {
+      const tasks = taskRepository.generateData(opportunity.tasks, userId, currentUser.name);
+      opportunityToUpdate = { ...opportunityToUpdate, tasks };
+    }
+    if (opportunity.notes) {
+      const notes = noteRepository.generateData(opportunity.notes, userId, currentUser.name);
+      opportunityToUpdate = { ...opportunityToUpdate, notes };
+    }
 
     // Create new Opportunity
     return opportunityRepository.create(tenantId, leadId, userId, opportunityToUpdate);

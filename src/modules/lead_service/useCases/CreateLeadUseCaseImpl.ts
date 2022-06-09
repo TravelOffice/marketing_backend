@@ -27,7 +27,6 @@ export default class CreateLeadUseCaseIpml implements CreateLeadUseCase {
     let newLead: Lead = { ...lead };
     if (lead.tasks) {
       const tasks = taskRepository.generateData(lead.tasks, userId, userAttributes.name);
-      console.log(tasks);
       newLead = { ...lead, tasks };
     }
     if (lead.notes) {
