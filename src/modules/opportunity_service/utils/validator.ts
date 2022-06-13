@@ -44,10 +44,10 @@ export function updateOpportunityValidator() {
     body('assigneeId').notEmpty().isString(),
     body('potential').notEmpty().isIn(opportunityPotentials).withMessage(`allow only in ${opportunityPotentials}`),
     body('notes').optional().isArray().withMessage('Notes must be array'),
-    body('notes.*.name').if(body('notes').exists()).notEmpty().isString(),
+    body('notes.*.title').if(body('notes').exists()).notEmpty().isString(),
     body('notes.*.description').if(body('notes').exists()).notEmpty().isString(),
     body('tasks').optional().isArray().withMessage('Tasks must be array'),
-    body('tasks.*.name').if(body('tasks').exists()).notEmpty().isString(),
+    body('tasks.*.title').if(body('tasks').exists()).notEmpty().isString(),
     body('tasks.*.description').if(body('tasks').exists()).notEmpty().isString(),
     body('tasks.*.dueDate')
       .if(body('tasks').exists()).notEmpty()
