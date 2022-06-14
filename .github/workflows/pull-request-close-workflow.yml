@@ -1,0 +1,64 @@
+# Controls when the workflow will run
+name: OnClosePR
+
+on:
+  # Triggers the workflow on close pull request events but only for the dev and master branch
+  pull_request:
+    branches: [ dev, master ]
+    types:
+      - closed
+
+env:
+  PR_NUMBER: ${{ github.event.pull_request.number }}
+  ACTOR_NAME: ${{ github.event.pull_request.user.login }}
+  PR_TITLE: ${{ github.event.pull_request.title }}
+  PR_DESCRIPTION: "${{ github.event.pull_request.body }}"
+
+jobs:
+  clean_service_for_testing:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [14.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # Install nodejs
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      # Install TypeScript
+      - name: Install TypeScript
+        run: npm install -g typescript
+      
+      - name: Get the build service name
+        run: |
+          service=$(echo "${{ env.PR_DESCRIPTION }}" | grep -ow "Service: .*" | sed -E 's/Service: //g' | xargs)
+          echo "BUILD_SERVICE=${service}" >> $GITHUB_ENV
+
+      # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+      
+      # Build serverless
+      - name: Build service
+        run: ./scripts/build_service.sh ${{ secrets.BUILD_ENV }} ${{ env.BUILD_SERVICE }}
+      
+      # Provision lambda and ApiGateway
+      - name: Provision lambda and ApiGateway
+        run: |
+          ./scripts/aws_deploy.sh ${{ secrets.BUILD_ENV }} ${{ secrets.TF_BUCKET }} ${{ env.BUILD_SERVICE }} destroy
