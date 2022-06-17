@@ -5,7 +5,7 @@ import { CreateOpportunityUseCase } from './interfaces/CreateOpportunityUseCase'
 export default class CreateOpportunityUseCaseImpl implements CreateOpportunityUseCase {
   /**
    * Use case is used for the user (Employee) to create new Opportunity and associate to a Lead.
-   * @param userId The id of the Employee, must be valid.
+   * @param userId The id of the Employee, must be   valid.
    * @param leadId The id of the Lead, must be valid.
    * @param opportunity The Opportunity information which should be stored.
    * @returns Promise of created Opportunity.

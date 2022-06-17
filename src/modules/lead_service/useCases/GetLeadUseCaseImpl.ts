@@ -4,7 +4,7 @@ import { GetLeadUseCase } from './interfaces/GetLeadUseCase';
 export default class GetLeadUseCaseImpl implements GetLeadUseCase {
   /**
    * To get lead by ID, there are steps need to do:
-   * - Step 1: Get tenant ID from dynamo db
+   * - Step 1: Get tenant ID from dynamo   db
    * - Step 2: Get lead from dynamo db
    * @return Lead Object
    */

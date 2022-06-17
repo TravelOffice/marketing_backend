@@ -7,7 +7,7 @@ export default class NoteRepositoryImpl implements NoteRepository {
    * @param tasks List of notek
    * @param creatorId Id of creator
    * @param creatorName Name of creator
-   * @returns List of note after generating data
+   * @returns List of note after   generating data
    */
   generateData = (notes: Note[], creatorId: string, creatorName: string): Note[] => {
     const newNotes: Note[] = notes.map((note) => (
