@@ -13,6 +13,7 @@ infrastructures/environments/**/serverless.auto.tfvars
 
 # build file
 **/deploy/*
+**/deploy2aws/*
 **/builds/*
 
 **/base_infra_output*
