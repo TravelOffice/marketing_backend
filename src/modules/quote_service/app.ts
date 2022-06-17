@@ -2,11 +2,17 @@ import cors from 'cors';
 import express, { Request, Response, NextFunction } from 'express';
 import compression from 'compression';
 import {
-  createQuoteUseCase, deleteQuoteUseCase, getQuoteListUseCase, getQuoteUseCase,
+  createQuoteUseCase,
+  deleteQuoteUseCase,
+  getQuoteListUseCase,
+  getQuotesByOpportunityUseCase,
+  getQuoteUseCase,
   updateQuoteUseCase,
 } from './useCases';
 import wrapResponse from './utils/wrapResponse';
 import { FAILED, SUCCESS } from './utils/constants';
+import { getCurrentUserId } from './utils/authorizer';
+import logger from './utils/logger';
 
 const app = express();
 
@@ -77,6 +83,24 @@ app.delete('/:id', async (req: Request, res: Response) => {
     res.json(wrapResponse(SUCCESS, {}));
   } catch {
     res.json(wrapResponse(FAILED, undefined));
+  }
+});
+
+app.get('/leads/:leadId/opportunities/:oppId/quotes', async (req: Request, res: Response) => {
+  try {
+    const { leadId, oppId } = req.params;
+    const { status } = req.query;
+    const userId = getCurrentUserId(req.headers.authorization!);
+    const quotesByOpportunity = await getQuotesByOpportunityUseCase.invoke(
+      userId,
+      leadId,
+      oppId,
+      status as string,
+    );
+    res.json(wrapResponse(SUCCESS, quotesByOpportunity));
+  } catch (error: any) {
+    logger.log(error);
+    res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });
 

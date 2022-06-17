@@ -6,4 +6,10 @@ export interface QuoteRepository {
   get: (id: string | number) => Promise<Quote>
   update: (id: string | number, quote: Quote) => Promise<Quote>
   delete: (id: string | number) => Promise<void>
+  getListByOpportunity: (
+    tenantId: string,
+    leadId: string,
+    opportunity: string,
+    status?: string,
+  ) => Promise<Array<Quote>>
 }
