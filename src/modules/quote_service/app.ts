@@ -4,12 +4,17 @@ import { getCurrentUserInfo } from 'decode-token';
 import express, { NextFunction, Request, Response } from 'express';
 import { QuoteStatus } from './models/Quote';
 import {
-  createQuoteUseCase, deleteQuoteUseCase,
-  getLatestQuotesByAssigneeUseCase, getQuoteUseCase, updateQuoteUseCase,
+  createQuoteUseCase,
+  deleteQuoteUseCase,
+  getLatestQuotesByAssigneeUseCase,
+  getQuotesByOpportunityUseCase,
+  getQuoteUseCase,
+  updateQuoteUseCase,
 } from './useCases';
 import { FAILED, SUCCESS } from './utils/constants';
 import validate, { getlatestQuotesByAssigneeValidator } from './utils/validator';
 import wrapResponse from './utils/wrapResponse';
+import logger from './utils/logger';
 
 const app = express();
 
@@ -83,6 +88,24 @@ app.delete('/:id', async (req: Request, res: Response) => {
     res.json(wrapResponse(SUCCESS, {}));
   } catch {
     res.json(wrapResponse(FAILED, undefined));
+  }
+});
+
+app.get('/leads/:leadId/opportunities/:oppId/quotes', async (req: Request, res: Response) => {
+  try {
+    const { leadId, oppId } = req.params;
+    const { status } = req.query;
+    const { username } = getCurrentUserInfo(req.headers.authorization!);
+    const quotesByOpportunity = await getQuotesByOpportunityUseCase.invoke(
+      username,
+      leadId,
+      oppId,
+      status as string,
+    );
+    res.json(wrapResponse(SUCCESS, quotesByOpportunity));
+  } catch (error: any) {
+    logger.log(error);
+    res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });
 

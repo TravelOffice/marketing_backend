@@ -53,7 +53,9 @@ jobs:
           for changed_file in ${{ steps.get-changed-files.outputs.all }}; do
             SERVICE=$(echo ${changed_file} | grep -oE "src/modules/.*" | sed -E 's/src\/modules\///g' | sed -E 's/\/.*//g')
             if [ ! -z ${SERVICE} ]; then
-              CHANGED_SERVICES="${SERVICE} ${CHANGED_SERVICES}"
+              if [[ "${CHANGED_SERVICES}" != *"${SERVICE}"* ]]; then
+                CHANGED_SERVICES="${SERVICE} ${CHANGED_SERVICES}"
+              fi
             fi
           done
           if [ -z ${SERVICE} ]; then

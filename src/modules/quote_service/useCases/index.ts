@@ -10,6 +10,8 @@ import { GetQuoteListByAssigneeUseCase } from './interfaces/GetLatestQuotesByAss
 import { GetQuoteUseCase } from './interfaces/GetQuoteUseCase';
 import { UpdateQuoteUseCase } from './interfaces/UpdateQuoteUseCase';
 import UpdateQuoteUseCaseImpl from './UpdateQuoteUseCaseImpl';
+import { GetQuotesByOpportunityUseCase } from './interfaces/GetQuotesByOpportunityUseCase';
+import GetQuotesByOpportunityUseCaseImpl from './GetQuotesByOpportunityUseCaseImpl';
 
 interface UseCases {
   getLatestQuotesByAssigneeUseCase: GetQuoteListByAssigneeUseCase,
@@ -17,6 +19,7 @@ interface UseCases {
   getQuoteUseCase: GetQuoteUseCase,
   updateQuoteUseCase: UpdateQuoteUseCase,
   deleteQuoteUseCase: DeleteQuoteUseCase,
+  getQuotesByOpportunityUseCase: GetQuotesByOpportunityUseCase,
 }
 
 const useCases : UseCases = {
@@ -25,6 +28,7 @@ const useCases : UseCases = {
   getQuoteUseCase: new GetQuoteUseCaseImpl(),
   updateQuoteUseCase: new UpdateQuoteUseCaseImpl(),
   deleteQuoteUseCase: new DeleteQuoteUseCaseImpl(),
+  getQuotesByOpportunityUseCase: new GetQuotesByOpportunityUseCaseImpl(),
 };
 
 export const {
@@ -33,4 +37,5 @@ export const {
   getQuoteUseCase,
   updateQuoteUseCase,
   deleteQuoteUseCase,
+  getQuotesByOpportunityUseCase,
 } = useCases;
