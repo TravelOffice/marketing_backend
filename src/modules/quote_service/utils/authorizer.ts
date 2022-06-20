@@ -4,7 +4,10 @@ export function decodeToken(jwtToken: string) {
   return jwtDecode<any>(jwtToken);
 }
 
-export function getCurrentUserId(jwtToken: string) {
+export function getCurrentUserInfo(jwtToken: string) {
   const decoded = decodeToken(jwtToken);
-  return decoded['cognito:username'];
+  return {
+    username: decoded['cognito:username'],
+    name: decoded.name,
+  };
 }

@@ -1,7 +1,8 @@
 import { Request } from 'express';
 import {
-  header, ValidationError, validationResult,
+  query, ValidationError, validationResult,
 } from 'express-validator';
+import { QuoteStatus } from '../models/Quote';
 
 export default function validate(req: Request) {
   const errors = validationResult(req);
@@ -19,8 +20,10 @@ export default function validate(req: Request) {
   }
 }
 
-export function linkFacebookPageValidator() {
+export function getlatestQuotesByAssigneeValidator() {
   return [
-    header('authorization', 'must be JWT').isJWT(),
+    query('status')
+      .if(query('status').notEmpty())
+      .isIn(Object.values(QuoteStatus)).withMessage(`allow only in ${Object.values(QuoteStatus)}`),
   ];
 }
