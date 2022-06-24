@@ -2,11 +2,14 @@ import cors from 'cors';
 import express, { Request, Response, NextFunction } from 'express';
 import compression from 'compression';
 import {
-  createQuoteUseCase, deleteQuoteUseCase, getQuoteListUseCase, getQuoteUseCase,
+  createQuoteUseCase, deleteQuoteUseCase, getLatestQuotesByAssigneeUseCase, getQuoteUseCase,
   updateQuoteUseCase,
 } from './useCases';
 import wrapResponse from './utils/wrapResponse';
 import { FAILED, SUCCESS } from './utils/constants';
+import { getCurrentUserInfo } from './utils/authorizer';
+import { QuoteStatus } from './models/Quote';
+import validate, { getlatestQuotesByAssigneeValidator } from './utils/validator';
 
 const app = express();
 
@@ -27,9 +30,12 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
   next();
 });
 
-app.get('/', async (req: Request, res: Response) => {
+app.get('/quotes', getlatestQuotesByAssigneeValidator(), async (req: Request, res: Response) => {
   try {
-    const quotes = await getQuoteListUseCase.invoke();
+    validate(req);
+    const { username } = getCurrentUserInfo(req.headers.authorization!);
+    const { status } = req.query;
+    const quotes = await getLatestQuotesByAssigneeUseCase.invoke(username, status as QuoteStatus);
     res.json(wrapResponse(SUCCESS, quotes));
   } catch {
     res.json(wrapResponse(FAILED, undefined));

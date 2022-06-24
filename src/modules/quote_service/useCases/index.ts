@@ -2,17 +2,17 @@
 
 import CreateQuoteUseCaseImpl from './CreateQuoteUseCaseImpl';
 import DeleteQuoteUseCaseImpl from './DeleteQuoteUseCaseImpl';
-import GetQuoteListUseCaseImpl from './GetQuoteListUseCaseImpl';
+import GetQuoteListByAssigneeUseCaseImpl from './GetLatestQuotesByAssigneeUseCaseImpl';
 import GetQuoteUseCaseImpl from './GetQuoteUseCaseImpl';
 import { CreateQuoteUseCase } from './interfaces/CreateQuoteUseCase';
 import { DeleteQuoteUseCase } from './interfaces/DeleteQuoteUseCase';
-import { GetQuoteListUseCase } from './interfaces/GetQuoteListUseCase';
+import { GetQuoteListByAssigneeUseCase } from './interfaces/GetLatestQuotesByAssigneeUseCase';
 import { GetQuoteUseCase } from './interfaces/GetQuoteUseCase';
 import { UpdateQuoteUseCase } from './interfaces/UpdateQuoteUseCase';
 import UpdateQuoteUseCaseImpl from './UpdateQuoteUseCaseImpl';
 
 interface UseCases {
-  getQuoteListUseCase: GetQuoteListUseCase,
+  getLatestQuotesByAssigneeUseCase: GetQuoteListByAssigneeUseCase,
   createQuoteUseCase: CreateQuoteUseCase,
   getQuoteUseCase: GetQuoteUseCase,
   updateQuoteUseCase: UpdateQuoteUseCase,
@@ -20,7 +20,7 @@ interface UseCases {
 }
 
 const useCases : UseCases = {
-  getQuoteListUseCase: new GetQuoteListUseCaseImpl(),
+  getLatestQuotesByAssigneeUseCase: new GetQuoteListByAssigneeUseCaseImpl(),
   createQuoteUseCase: new CreateQuoteUseCaseImpl(),
   getQuoteUseCase: new GetQuoteUseCaseImpl(),
   updateQuoteUseCase: new UpdateQuoteUseCaseImpl(),
@@ -28,7 +28,7 @@ const useCases : UseCases = {
 };
 
 export const {
-  getQuoteListUseCase,
+  getLatestQuotesByAssigneeUseCase,
   createQuoteUseCase,
   getQuoteUseCase,
   updateQuoteUseCase,
