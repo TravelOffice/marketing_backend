@@ -45,6 +45,12 @@ echo "Install successfully"
 npm run build || exit 0
 echo "Build"
 
+retVal=$?
+if [ $retVal -ne 0 ]; then
+    echo "Service ${SERVICENAME} lint check failed!"
+    exit $retVal
+fi
+
 rm -rf ${SERVICE_DIR}/node_modules
 rm -rf ${SERVICE_DIR}/package-lock.json
 echo "Install production dependencies"

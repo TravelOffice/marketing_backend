@@ -28,18 +28,12 @@ export default class DynamoProvider {
     return AWS.DynamoDB.Converter.unmarshall(Item) as T;
   };
 
-  query = async (
-    table: string,
-    keyCondition: string,
-    expressionAttributeValues: AWS.DynamoDB.ExpressionAttributeValueMap,
-  ) => {
-    const params : QueryInput = {
-      TableName: table,
-      KeyConditionExpression: keyCondition,
-      ExpressionAttributeValues: expressionAttributeValues,
-    };
-    const rs = await dynamoDB.query(params).promise();
-    return rs;
+  query = async <T = any> (params: QueryInput): Promise<T[]> => {
+    const { Items } = await dynamoDB.query(params).promise();
+    if (Items) {
+      return Items.map((item: any) => AWS.DynamoDB.Converter.unmarshall(item) as T);
+    }
+    return [];
   };
 
   updateItem = async (
