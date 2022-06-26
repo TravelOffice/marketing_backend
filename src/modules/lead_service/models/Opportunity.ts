@@ -38,8 +38,8 @@ export interface Opportunity {
   estimatedRevenue: number,
   estimatedConfirmDate: string,
   actualCloseDate: string,
-  createdAt: Number,
-  updatedAt: Number,
+  createdAt: number,
+  updatedAt: number,
   potential: OpportunityPotentialType,
   assigneeId: string, // TODO: Owner is sale person. Integrate sale management in the near future
   notes?: Note[],

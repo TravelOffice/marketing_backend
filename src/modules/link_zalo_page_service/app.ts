@@ -1,11 +1,11 @@
-import cors from 'cors';
-import express, { Request, Response, NextFunction } from 'express';
 import compression from 'compression';
+import cors from 'cors';
+import { getCurrentUserInfo } from 'decode-token';
+import express, { NextFunction, Request, Response } from 'express';
 import { generateLoginUrlUseCase, linkZaloPageUseCase } from './useCases';
-import wrapResponse from './utils/wrapResponse';
 import { FAILED, SUCCESS } from './utils/constants';
-import { getCurrentUserInfo } from './utils/authorizer';
 import validate, { linkZaloPageValidator } from './utils/validator';
+import wrapResponse from './utils/wrapResponse';
 
 const app = express();
 

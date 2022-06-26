@@ -1,11 +1,11 @@
-import cors from 'cors';
-import express, { Request, Response, NextFunction } from 'express';
-import { getEnv } from 'get-env';
 import compression from 'compression';
+import cors from 'cors';
+import express, { NextFunction, Request, Response } from 'express';
+import { getEnv } from 'get-env';
 import { s3Repository } from './repositories';
-import wrapResponse from './utils/wrapResponse';
 import { FAILED, SUCCESS } from './utils/constants';
 import validate, { getPresignedUrlValidator } from './utils/validator';
+import wrapResponse from './utils/wrapResponse';
 
 const app = express();
 

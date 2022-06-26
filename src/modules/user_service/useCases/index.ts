@@ -1,34 +1,34 @@
-import CreateUserUseCaseImpl from './CreateUserUseCaseImpl';
-import DeleteUserUseCaseImpl from './DeleteUserUseCaseImpl';
-import GetUserListUseCaseImpl from './GetUserListUseCaseImpl';
-import GetUserUseCaseImpl from './GetUserUseCaseImpl';
-import { CreateUserUseCase } from './interfaces/CreateUserUseCase';
-import { DeleteUserUseCase } from './interfaces/DeleteUserUseCase';
-import { GetUserListUseCase } from './interfaces/GetUserListUseCase';
-import { GetUserUseCase } from './interfaces/GetUserUseCase';
-import { UpdateUserUseCase } from './interfaces/UpdateUserUseCase';
-import UpdateUserUseCaseImpl from './UpdateUserUseCaseImpl';
+import CreateTenantUserUseCaseImpl from './CreateTenantUserUseCaseImpl';
+import DeleteTenantUserUseCaseImpl from './DeleteTenantUserUseCaseImpl';
+import GetUserListUseCaseImpl from './GetTenantUserListUseCaseImpl';
+import GetUserTenantUseCaseImpl from './GetTenantUserUseCaseImpl';
+import { CreateTenantUserUseCase } from './interfaces/CreateTenantUserUseCase';
+import { DeleteTenantUserUseCase } from './interfaces/DeleteTenantUserUseCase';
+import { GetTenantUserListUseCase } from './interfaces/GetTenantUserListUseCase';
+import { GetTenantUserUseCase } from './interfaces/GetTenantUserUseCase';
+import { UpdateTenantUserUseCase } from './interfaces/UpdateTenantUserUseCase';
+import UpdateTenantUserUseCaseImpl from './UpdateTenantUserUseCaseImpl';
 
 interface UseCases {
-  getUserListUseCase: GetUserListUseCase,
-  createUserUseCase: CreateUserUseCase,
-  getUserUseCase: GetUserUseCase,
-  updateUserUseCase: UpdateUserUseCase,
-  deleteUserUseCase: DeleteUserUseCase,
+  getTenantUserListUseCase: GetTenantUserListUseCase,
+  createTenantUserUseCase: CreateTenantUserUseCase,
+  getTenantUserUseCase: GetTenantUserUseCase,
+  updateTenantUserUseCase: UpdateTenantUserUseCase,
+  deleteTenantUserUseCase: DeleteTenantUserUseCase,
 }
 
 const useCases : UseCases = {
-  getUserListUseCase: new GetUserListUseCaseImpl(),
-  createUserUseCase: new CreateUserUseCaseImpl(),
-  getUserUseCase: new GetUserUseCaseImpl(),
-  updateUserUseCase: new UpdateUserUseCaseImpl(),
-  deleteUserUseCase: new DeleteUserUseCaseImpl(),
+  getTenantUserListUseCase: new GetUserListUseCaseImpl(),
+  createTenantUserUseCase: new CreateTenantUserUseCaseImpl(),
+  getTenantUserUseCase: new GetUserTenantUseCaseImpl(),
+  updateTenantUserUseCase: new UpdateTenantUserUseCaseImpl(),
+  deleteTenantUserUseCase: new DeleteTenantUserUseCaseImpl(),
 };
 
 export const {
-  getUserListUseCase,
-  createUserUseCase,
-  getUserUseCase,
-  updateUserUseCase,
-  deleteUserUseCase,
+  getTenantUserListUseCase,
+  createTenantUserUseCase,
+  getTenantUserUseCase,
+  updateTenantUserUseCase,
+  deleteTenantUserUseCase,
 } = useCases;

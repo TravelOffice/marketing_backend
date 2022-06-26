@@ -2,9 +2,9 @@ import { User } from '../../models/User';
 
 export interface UserRepository {
   getUserAttributes: (userId: string) => Promise<User | undefined>,
-  list: () => Promise<Array<User>>
-  create: (user: User) => Promise<User>
-  get: (id: string | number) => Promise<User>
-  update: (id: string | number, user: User) => Promise<User>
-  delete: (id: string | number) => Promise<void>
+  list: (tenantId: string) => Promise<Array<User>>
+  create: (tenantId: string, user: User) => Promise<User>
+  get: (tenantId: string, userId: string) => Promise<User>
+  update: (tenantId: string, user: User) => Promise<User>
+  delete: (tenantId: string, userId: string) => Promise<void>
 }

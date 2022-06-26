@@ -1,25 +1,23 @@
-import cors from 'cors';
-import express, { Request, Response, NextFunction } from 'express';
 import compression from 'compression';
+import cors from 'cors';
+import { getCurrentUserInfo } from 'decode-token';
+import express, { NextFunction, Request, Response } from 'express';
+import { OpportunityStatus } from './models/Opportunity';
 import {
-  deleteOpportunityUseCase,
+  createOpportunityUseCase, deleteOpportunityUseCase,
   getMyOpportunitiesUseCase,
-  getOpportunitiesByLeadUseCase,
-  createOpportunityUseCase,
-  getOpportunityUseCase,
+  getOpportunitiesByLeadUseCase, getOpportunityUseCase,
   updateOpportunityUseCase,
 } from './useCases';
-import wrapResponse from './utils/wrapResponse';
 import { FAILED, SUCCESS } from './utils/constants';
-import { getCurrentUserId } from './utils/authorizer';
+import logger from './utils/logger';
 import validate, {
   createOpportunityValidator,
   getMyOpportunitiesValidator,
   getOpportunitiesByLeadValidator,
   updateOpportunityValidator,
 } from './utils/validator';
-import logger from './utils/logger';
-import { OpportunityStatus } from './models/Opportunity';
+import wrapResponse from './utils/wrapResponse';
 
 const app = express();
 
@@ -44,8 +42,8 @@ app.post('/leads/:leadId/opportunities', createOpportunityValidator(), async (re
   try {
     validate(req);
     const { leadId } = req.params;
-    const userId = getCurrentUserId(req.headers.authorization!);
-    const opportunity = await createOpportunityUseCase.invoke(userId, leadId, req.body);
+    const { username } = getCurrentUserInfo(req.headers.authorization!);
+    const opportunity = await createOpportunityUseCase.invoke(username, leadId, req.body);
     res.json(wrapResponse(SUCCESS, opportunity));
   } catch (error: any) {
     logger.log(error);
@@ -56,8 +54,8 @@ app.post('/leads/:leadId/opportunities', createOpportunityValidator(), async (re
 app.get('/leads/:leadId/opportunities/:id', async (req: Request, res: Response) => {
   try {
     const { leadId, id } = req.params;
-    const userId = getCurrentUserId(req.headers.authorization!);
-    const opportunity = await getOpportunityUseCase.invoke(id, userId, leadId);
+    const { username } = getCurrentUserInfo(req.headers.authorization!);
+    const opportunity = await getOpportunityUseCase.invoke(id, username, leadId);
     res.json(wrapResponse(SUCCESS, opportunity));
   } catch (error: any) {
     logger.log(error);
@@ -70,9 +68,9 @@ app.get('/leads/:leadId/opportunities', getOpportunitiesByLeadValidator(), async
     validate(req);
     const { leadId } = req.params;
     const { status } = req.query;
-    const userId = getCurrentUserId(req.headers.authorization!);
+    const { username } = getCurrentUserInfo(req.headers.authorization!);
     const opportunities = await getOpportunitiesByLeadUseCase.invoke(
-      userId,
+      username,
       leadId,
       status as OpportunityStatus,
     );
@@ -87,9 +85,9 @@ app.get('/opportunities', getMyOpportunitiesValidator(), async (req: Request, re
   try {
     validate(req);
     const { status } = req.query;
-    const userId = getCurrentUserId(req.headers.authorization!);
+    const { username } = getCurrentUserInfo(req.headers.authorization!);
     const opportunities = await getMyOpportunitiesUseCase.invoke(
-      userId,
+      username,
       status as OpportunityStatus,
     );
     res.json(wrapResponse(SUCCESS, opportunities));
@@ -103,8 +101,8 @@ app.put('/leads/:leadId/opportunities/:id', updateOpportunityValidator(), async 
   try {
     validate(req);
     const { leadId, id } = req.params;
-    const userId = getCurrentUserId(req.headers.authorization!);
-    const opportunity = await updateOpportunityUseCase.invoke(id, userId, leadId, req.body);
+    const { username } = getCurrentUserInfo(req.headers.authorization!);
+    const opportunity = await updateOpportunityUseCase.invoke(id, username, leadId, req.body);
     res.json(wrapResponse(SUCCESS, opportunity));
   } catch (error: any) {
     logger.log(error);
@@ -115,10 +113,10 @@ app.put('/leads/:leadId/opportunities/:id', updateOpportunityValidator(), async 
 app.delete('/opportunities/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const userId = getCurrentUserId(req.headers.authorization!);
+    const { username } = getCurrentUserInfo(req.headers.authorization!);
     // TODO: Check condition before delete opportunity.
     // Example: only draft oppotunity can be deleted
-    await deleteOpportunityUseCase.invoke(id, userId);
+    await deleteOpportunityUseCase.invoke(id, username);
     res.json(wrapResponse(SUCCESS));
   } catch (error: any) {
     res.json(wrapResponse(FAILED, undefined, error.message));
