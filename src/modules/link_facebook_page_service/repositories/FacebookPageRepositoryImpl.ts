@@ -2,7 +2,7 @@ import AWS from 'aws';
 import { getAwsSecretValue } from 'get-env';
 import { FacebookPage } from '../models/FacebookPage';
 import { dynamoProvider, facebookApiProvider } from '../providers';
-import { TENANT_INDEX } from '../utils/constants';
+import { FACEBOOK_PAGE_INDEX, TENANT_INDEX } from '../utils/constants';
 import { FacebookPageRepository } from './interfaces/FacebookPageRepository';
 
 export default class FacebookPageRepositoryImpl implements FacebookPageRepository {
@@ -36,15 +36,39 @@ export default class FacebookPageRepositoryImpl implements FacebookPageRepositor
       KeyConditionExpression: 'pk = :pk_tenant AND begins_with(sk, :sk_filter)',
       ExpressionAttributeValues: {
         ':pk_tenant': { S: `${TENANT_INDEX}#${tenantId}` },
-        ':sk_filter': { S: 'PAGE_fb_' },
+        ':sk_filter': { S: FACEBOOK_PAGE_INDEX },
       },
     });
     if (linkedPages.Items && linkedPages.Items.length > 0) {
       // Remove previous item before insert new one
       const { sk, pk, ...rest } = AWS.DynamoDB.Converter.unmarshall(linkedPages.Items[0]);
       const linkedPage = rest as FacebookPage;
-      await dynamoProvider.deleteItem(saleChatTable, `${TENANT_INDEX}#${tenantId}`, `PAGE_fb_${linkedPage.id}`);
+      await dynamoProvider.deleteItem(saleChatTable, `${TENANT_INDEX}#${tenantId}`, `${FACEBOOK_PAGE_INDEX}${linkedPage.id}`);
     }
-    await dynamoProvider.putItem(saleChatTable, `${TENANT_INDEX}#${tenantId}`, `PAGE_fb_${page.id}`, page);
+    await dynamoProvider.putItem(saleChatTable, `${TENANT_INDEX}#${tenantId}`, `${FACEBOOK_PAGE_INDEX}${page.id}`, page);
+  };
+
+  /**
+   * Check whether the page is linked to another tenant or not
+   * @param pageId ID of Facebook page
+   * @param tenantId ID of the tenant
+   * @returns true if the page is linked to another tenant otherwise false
+   */
+  checkPageLinkedToAnotherTenant = async (pageId: string, tenantId: string) => {
+    const saleChatTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const linkedPages = await dynamoProvider.query({
+      TableName: saleChatTable,
+      IndexName: 'ReverseIndex',
+      KeyConditionExpression: 'sk = :sk_pageId AND begins_with(pk, :pk_filter)',
+      ExpressionAttributeValues: {
+        ':sk_pageId': { S: `${FACEBOOK_PAGE_INDEX}${pageId}` },
+        ':pk_filter': { S: `${TENANT_INDEX}#` },
+      },
+    });
+    if (linkedPages.Items) {
+      return linkedPages.Items.length > 1
+      || linkedPages.Items.some((page) => page.tenantId !== tenantId);
+    }
+    return false;
   };
 }
