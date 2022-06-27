@@ -10,4 +10,5 @@ export interface ZaloPageRepository {
   saveCodeVerifierToDynamo: (codeVerifier: string, state: string) => Promise<void>,
   saveOAInfoToDynamo: (tenantId: string, page: ZaloPage) => Promise<void>,
   deleteCodeVerifierInDynamo: (state: string) => Promise<void>,
+  checkPageLinkedToAnotherTenant: (pageId: string, tenantId: string) => Promise<boolean>,
 }

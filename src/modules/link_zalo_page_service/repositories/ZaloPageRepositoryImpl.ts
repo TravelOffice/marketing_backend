@@ -5,7 +5,7 @@ import { getAwsSecretValue, getEnv } from 'get-env';
 import { ZaloPage } from '../models/ZaloPage';
 import { dynamoProvider, zaloApiProvider } from '../providers';
 import { ZaloPageRepository } from './interfaces/ZaloPageRepository';
-import { TENANT_INDEX } from '../utils/constants';
+import { TENANT_INDEX, ZALO_PAGE_INDEX } from '../utils/constants';
 
 export default class ZaloPageRepositoryImpl implements ZaloPageRepository {
   /**
@@ -95,16 +95,16 @@ export default class ZaloPageRepositoryImpl implements ZaloPageRepository {
       KeyConditionExpression: 'pk = :pk_tenant AND begins_with(sk, :sk_filter)',
       ExpressionAttributeValues: {
         ':pk_tenant': { S: `${TENANT_INDEX}#${tenantId}` },
-        ':sk_filter': { S: 'PAGE_zalo_' },
+        ':sk_filter': { S: ZALO_PAGE_INDEX },
       },
     });
     if (linkedPages.Items && linkedPages.Items.length > 0) {
       // Remove previous item before insert new one
       const { sk, pk, ...rest } = AWS.DynamoDB.Converter.unmarshall(linkedPages.Items[0]);
       const linkedPage = rest as ZaloPage;
-      await dynamoProvider.deleteItem(saleChatTable, `${TENANT_INDEX}#${tenantId}`, `PAGE_zalo_${linkedPage.id}`);
+      await dynamoProvider.deleteItem(saleChatTable, `${TENANT_INDEX}#${tenantId}`, `${ZALO_PAGE_INDEX}${linkedPage.id}`);
     }
-    await dynamoProvider.putItem(saleChatTable, `${TENANT_INDEX}#${tenantId}`, `PAGE_zalo_${page.id}`, page);
+    await dynamoProvider.putItem(saleChatTable, `${TENANT_INDEX}#${tenantId}`, `${ZALO_PAGE_INDEX}${page.id}`, page);
   };
 
   /**
@@ -114,5 +114,29 @@ export default class ZaloPageRepositoryImpl implements ZaloPageRepository {
   deleteCodeVerifierInDynamo = async (state: string) => {
     const saleChatTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
     await dynamoProvider.deleteItem(saleChatTable, 'Zalo#CodeVerifier', state);
+  };
+
+  /**
+   * Check whether the page is linked to another tenant or not
+   * @param pageId ID of Facebook page
+   * @param tenantId ID of the tenant
+   * @returns true if the page is linked to another tenant otherwise false
+   */
+  checkPageLinkedToAnotherTenant = async (pageId: string, tenantId: string) => {
+    const saleChatTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const linkedPages = await dynamoProvider.query({
+      TableName: saleChatTable,
+      IndexName: 'ReverseIndex',
+      KeyConditionExpression: 'sk = :sk_pageId AND begins_with(pk, :pk_filter)',
+      ExpressionAttributeValues: {
+        ':sk_pageId': { S: `${ZALO_PAGE_INDEX}${pageId}` },
+        ':pk_filter': { S: `${TENANT_INDEX}#` },
+      },
+    });
+    if (linkedPages.Items) {
+      return linkedPages.Items.length > 1
+      || linkedPages.Items.some((page) => page.tenantId !== tenantId);
+    }
+    return false;
   };
 }
