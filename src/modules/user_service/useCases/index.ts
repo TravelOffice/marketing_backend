@@ -1,9 +1,11 @@
 import CreateTenantUserUseCaseImpl from './CreateTenantUserUseCaseImpl';
 import DeleteTenantUserUseCaseImpl from './DeleteTenantUserUseCaseImpl';
+import GetLinkedPagesUseCaseImpl from './GetLinkedPagesUseCaseImpl';
 import GetUserListUseCaseImpl from './GetTenantUserListUseCaseImpl';
 import GetUserTenantUseCaseImpl from './GetTenantUserUseCaseImpl';
 import { CreateTenantUserUseCase } from './interfaces/CreateTenantUserUseCase';
 import { DeleteTenantUserUseCase } from './interfaces/DeleteTenantUserUseCase';
+import { GetLinkedPagesUseCase } from './interfaces/GetLinkedPagesUserUseCase';
 import { GetTenantUserListUseCase } from './interfaces/GetTenantUserListUseCase';
 import { GetTenantUserUseCase } from './interfaces/GetTenantUserUseCase';
 import { UpdateTenantUserUseCase } from './interfaces/UpdateTenantUserUseCase';
@@ -15,6 +17,7 @@ interface UseCases {
   getTenantUserUseCase: GetTenantUserUseCase,
   updateTenantUserUseCase: UpdateTenantUserUseCase,
   deleteTenantUserUseCase: DeleteTenantUserUseCase,
+  getLinkedPageUseCase: GetLinkedPagesUseCase,
 }
 
 const useCases : UseCases = {
@@ -23,6 +26,7 @@ const useCases : UseCases = {
   getTenantUserUseCase: new GetUserTenantUseCaseImpl(),
   updateTenantUserUseCase: new UpdateTenantUserUseCaseImpl(),
   deleteTenantUserUseCase: new DeleteTenantUserUseCaseImpl(),
+  getLinkedPageUseCase: new GetLinkedPagesUseCaseImpl(),
 };
 
 export const {
@@ -31,4 +35,5 @@ export const {
   getTenantUserUseCase,
   updateTenantUserUseCase,
   deleteTenantUserUseCase,
+  getLinkedPageUseCase,
 } = useCases;

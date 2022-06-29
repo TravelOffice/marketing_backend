@@ -1,4 +1,5 @@
 import AWS from 'aws';
+import { ChatPlatform } from 'common-models';
 import { getAwsSecretValue } from 'get-env';
 import { FacebookPage } from '../models/FacebookPage';
 import { dynamoProvider, facebookApiProvider } from '../providers';
@@ -26,6 +27,7 @@ export default class FacebookPageRepositoryImpl implements FacebookPageRepositor
       id: res.id,
       name: res.name,
       accessToken: res.access_token,
+      platform: ChatPlatform.facebook,
     };
   };
 

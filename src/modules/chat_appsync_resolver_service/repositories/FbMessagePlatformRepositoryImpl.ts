@@ -3,6 +3,7 @@ import {
   FacebookMessageResponsePayload, FacebookUserProfile, Message, toSendFbMessagePayload,
 } from '../models';
 import { dynamoProvider, fbMessagePlatformProvider } from '../providers';
+import { FACEBOK_PAGE_INDEX } from '../utils/constants';
 import { FbMessagePlatformRepository } from './interfaces/FbMessagePlatformRepository';
 
 export default class FbMessagePlatformRepositoryImpl implements FbMessagePlatformRepository {
@@ -21,14 +22,14 @@ export default class FbMessagePlatformRepositoryImpl implements FbMessagePlatfor
         '#pageId': 'id',
         '#sk': 'sk',
       },
-      // Filter the item startwith `PAGE_fb_` to make sure the item is facebook token
+      // Filter the item startwith `PAGE#FACEBOOK#` to make sure the item is facebook token
       // Prevent the same token with other providers such as Zalo, Telegram
       FilterExpression: 'begins_with(#sk, :sk_filter_value)',
       ExpressionAttributeValues: {
         // Given page id
         ':id': pageId,
         // Prefix to Facebook item
-        ':sk_filter_value': 'PAGE_fb_',
+        ':sk_filter_value': FACEBOK_PAGE_INDEX,
       },
       ProjectionExpression: 'sk,accessToken,id',
     };
