@@ -10,4 +10,6 @@ export const OPPORTUNITY_INDEX = 'OPPORTUNITY';
 
 export const EMPLOYEE_INDEX = 'EMPLOYEE';
 
-export const ZALO_PAGE_INDEX = 'PAGE_zalo_';
+export const ZALO_PAGE_INDEX = 'PAGE#ZALO#';
+
+export const ZALO_CODE_VERIFIER_INDEX = 'ZALO#CodeVerifier';

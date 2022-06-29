@@ -5,6 +5,7 @@ import express, { NextFunction, Request, Response } from 'express';
 import {
   createTenantUserUseCase,
   deleteTenantUserUseCase,
+  getLinkedPageUseCase,
   getTenantUserListUseCase,
   getTenantUserUseCase,
   updateTenantUserUseCase,
@@ -121,6 +122,17 @@ app.delete('/users/:userId', async (req: Request, res: Response) => {
     res.json(wrapResponse(SUCCESS));
   } catch (error: any) {
     logger.log(`[app.delete] Error' ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.get('/me/linked_pages', async (req: Request, res: Response) => {
+  try {
+    const { username } = getCurrentUserInfo(req.headers.authorization!);
+    const pages = await getLinkedPageUseCase.invoke(username);
+    res.json(wrapResponse(SUCCESS, pages));
+  } catch (error:any) {
+    logger.log(`[app.get] Error' ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });

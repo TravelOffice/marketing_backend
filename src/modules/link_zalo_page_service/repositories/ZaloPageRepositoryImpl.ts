@@ -1,11 +1,12 @@
 import AWS from 'aws';
+import { ChatPlatform } from 'common-models';
+import { getAwsSecretValue, getEnv } from 'get-env';
 import { generateChallenge } from 'pkce-challenge';
 import * as randomstring from 'randomstring';
-import { getAwsSecretValue, getEnv } from 'get-env';
 import { ZaloPage } from '../models/ZaloPage';
 import { dynamoProvider, zaloApiProvider } from '../providers';
+import { TENANT_INDEX, ZALO_CODE_VERIFIER_INDEX, ZALO_PAGE_INDEX } from '../utils/constants';
 import { ZaloPageRepository } from './interfaces/ZaloPageRepository';
-import { TENANT_INDEX, ZALO_PAGE_INDEX } from '../utils/constants';
 
 export default class ZaloPageRepositoryImpl implements ZaloPageRepository {
   /**
@@ -15,7 +16,7 @@ export default class ZaloPageRepositoryImpl implements ZaloPageRepository {
    */
   getCodeVerifierFromDynamo = async (state: string) => {
     const saleChatTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
-    const item = await dynamoProvider.getItem(saleChatTable, 'Zalo#CodeVerifier', state);
+    const item = await dynamoProvider.getItem(saleChatTable, ZALO_CODE_VERIFIER_INDEX, state);
     return item.codeVerifier;
   };
 
@@ -70,6 +71,7 @@ export default class ZaloPageRepositoryImpl implements ZaloPageRepository {
       avatar: getOAInfo.avatar,
       cover: getOAInfo.cover,
       isVerified: getOAInfo.is_verified,
+      platform: ChatPlatform.zalo,
     };
   };
 
@@ -80,7 +82,7 @@ export default class ZaloPageRepositoryImpl implements ZaloPageRepository {
    */
   saveCodeVerifierToDynamo = async (codeVerifier: string, state: string) => {
     const saleChatTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
-    await dynamoProvider.putItem(saleChatTable, 'Zalo#CodeVerifier', state, { codeVerifier });
+    await dynamoProvider.putItem(saleChatTable, ZALO_CODE_VERIFIER_INDEX, state, { codeVerifier });
   };
 
   /**
@@ -113,7 +115,7 @@ export default class ZaloPageRepositoryImpl implements ZaloPageRepository {
    */
   deleteCodeVerifierInDynamo = async (state: string) => {
     const saleChatTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
-    await dynamoProvider.deleteItem(saleChatTable, 'Zalo#CodeVerifier', state);
+    await dynamoProvider.deleteItem(saleChatTable, ZALO_CODE_VERIFIER_INDEX, state);
   };
 
   /**

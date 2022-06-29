@@ -10,4 +10,4 @@ export const OPPORTUNITY_INDEX = 'OPPORTUNITY';
 
 export const EMPLOYEE_INDEX = 'EMPLOYEE';
 
-export const FACEBOOK_PAGE_INDEX = 'PAGE_fb_';
+export const FACEBOOK_PAGE_INDEX = 'PAGE#FACEBOOK#';

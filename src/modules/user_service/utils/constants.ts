@@ -35,3 +35,5 @@ export const QUOTE_INDEX = 'QUOTE';
 export const LATEST_QUOTE_INDEX = 'LATEST_QUOTE';
 
 export const USERNAME_DELIMITER = '#';
+
+export const PAGE_INDEX = 'PAGE';
