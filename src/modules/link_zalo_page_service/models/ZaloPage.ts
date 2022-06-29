@@ -1,3 +1,5 @@
+import { ChatPlatform } from 'common-models';
+
 export interface ZaloPage {
   id: string,
   accessToken: string,
@@ -8,4 +10,5 @@ export interface ZaloPage {
   avatar: string,
   cover: string,
   isVerified: boolean,
+  platform: ChatPlatform,
 }
