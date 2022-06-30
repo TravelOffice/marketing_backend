@@ -20,6 +20,8 @@ export const VALIDATE_DATE_MSG = 'property must be a date';
 
 export const VALIDATE_BOOLEAN_MSG = 'property must be a boolean';
 
+export const VALIDATE_USERNAME_SYNTAX_STRING_MSG = 'username must not contain # character';
+
 export const TENANT_INDEX = 'TENANT';
 
 export const LEAD_INDEX = 'LEAD';
@@ -31,3 +33,5 @@ export const EMPLOYEE_INDEX = 'EMPLOYEE';
 export const QUOTE_INDEX = 'QUOTE';
 
 export const LATEST_QUOTE_INDEX = 'LATEST_QUOTE';
+
+export const USERNAME_DELIMITER = '#';

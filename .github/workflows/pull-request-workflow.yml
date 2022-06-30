@@ -9,6 +9,11 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ dev, master ]
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -23,6 +28,7 @@ jobs:
   run-lint-check:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
+    if: ${{ !github.event.pull_request.draft }}
 
     strategy:
       matrix:
@@ -44,9 +50,33 @@ jobs:
       - name: Install TypeScript
         run: npm install -g typescript
 
+      - id: get-changed-files
+        uses: Ana06/get-changed-files@v2.1.0
+
+      - name: Get the build service name
+        id: get-services-name
+        run: |
+          CHANGED_SERVICES=
+          for changed_file in ${{ steps.get-changed-files.outputs.all }}; do
+            SERVICE=$(echo ${changed_file} | grep -oE "src/modules/.*" | sed -E 's/src\/modules\///g' | sed -E 's/\/.*//g')
+            if [ ! -z ${SERVICE} ]; then
+              if [[ "${CHANGED_SERVICES}" != *"${SERVICE}"* ]]; then
+                CHANGED_SERVICES="${SERVICE} ${CHANGED_SERVICES}"
+              fi
+            fi
+          done
+          if [ -z ${SERVICE} ]; then
+            echo "Not found any services changed!"
+            echo ::set-output name=services-existed::false
+          else
+            echo "CHANGED_SERVICES=${CHANGED_SERVICES}" >> $GITHUB_ENV
+            echo ::set-output name=services-existed::true
+          fi
+
       # Run lint check
       - name: Run Lint
         run: |
+          echo "Run Lint check for services: ${CHANGED_SERVICES}"
           chmod +x ./scripts/*.sh
           ./scripts/run_lint_check.sh
 
@@ -108,7 +138,8 @@ jobs:
       - name: Build service
         if: ${{ steps.get-services-name.outputs.services-existed == 'true' }}
         run: |
-          for SERVICE in ${{ env.CHANGED_SERVICES }}; do
+          echo "Build service: ${CHANGED_SERVICES}"
+          for SERVICE in ${CHANGED_SERVICES}; do
             ./scripts/build_service.sh ${{ secrets.BUILD_ENV }} ${SERVICE}
           done
 

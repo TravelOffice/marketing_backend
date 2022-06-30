@@ -52,8 +52,7 @@ export default class DynamoProvider {
       ExpressionAttributeNames: expressionAttributeNames,
       ReturnValues: 'UPDATED_NEW',
     };
-    const rs = await dynamoDB.updateItem(params).promise();
-    return rs;
+    return dynamoDB.updateItem(params).promise();
   };
 
   rawQuery = async (input: QueryInput) => dynamoDB.query(input).promise();

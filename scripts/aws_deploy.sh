@@ -95,33 +95,33 @@ sed -i "s/ENV_VALUE/${ENV}/g" ${DEPLOY_DIR}/vars.tf
 sed -i "s/TF_BUCKET_VALUE/${TF_BUCKET}/g" ${DEPLOY_DIR}/vars.tf
 sed -i "s/NAME_POST_FIX_VALUE/${ACTOR_NAME}-pr${PR_NUMBER}/g" ${DEPLOY_DIR}/vars.tf
 
-SERVERLES_DEF_FILE=${DEPLOY_DIR}/serverless.tf
+SERVERLESS_DEF_FILE=${DEPLOY_DIR}/serverless.tf
 
 # Define the layer
-cat <<EOF >  ${SERVERLES_DEF_FILE}
+cat <<EOF >  ${SERVERLESS_DEF_FILE}
 variable "LAMBDA_LAYERS" {
   default = {
 EOF
 
 for SERVICENAME in ${CHANGED_SERVICES}; do
-  echo "    ${SERVICENAME} = {" >> ${SERVERLES_DEF_FILE}
-  echo "      path = \"src/layers/${SERVICENAME}\"" >>  ${SERVERLES_DEF_FILE}
-  echo "    }," >> ${SERVERLES_DEF_FILE}
+  echo "    ${SERVICENAME} = {" >> ${SERVERLESS_DEF_FILE}
+  echo "      path = \"src/layers/${SERVICENAME}\"" >>  ${SERVERLESS_DEF_FILE}
+  echo "    }," >> ${SERVERLESS_DEF_FILE}
 done
 
-cat <<EOF >>  ${SERVERLES_DEF_FILE}
+cat <<EOF >>  ${SERVERLESS_DEF_FILE}
   }
 }
 EOF
 
 # Define the lambda function
-cat <<EOF >>  ${SERVERLES_DEF_FILE}
+cat <<EOF >>  ${SERVERLESS_DEF_FILE}
 variable "LAMBDA_FUNCTIONS" {
   default = {
 EOF
 
 for SERVICENAME in ${CHANGED_SERVICES}; do
-cat <<EOF >>  ${SERVERLES_DEF_FILE}
+cat <<EOF >>  ${SERVERLESS_DEF_FILE}
     "${SERVICENAME}" = {
       path     = "src/modules/${SERVICENAME}/dist"
       memory_size = 512
@@ -133,25 +133,28 @@ cat <<EOF >>  ${SERVERLES_DEF_FILE}
           "SecretManagerRead",
           "DynamoTableReadWrite"
         ]
-        aws_policies    = []
+        aws_policies    = [
+          "AmazonCognitoPowerUser"
+        ]
       },
     },
 EOF
 done
 
-cat <<EOF >>  ${SERVERLES_DEF_FILE}
+cat <<EOF >>  ${SERVERLESS_DEF_FILE}
   }
 }
 EOF
 
 # Define the rest api information
-cat <<EOF >>  ${SERVERLES_DEF_FILE}
+cat <<EOF >>  ${SERVERLESS_DEF_FILE}
 variable "API_ENDPOINTS" {
   default = {
 EOF
 
 for SERVICENAME in ${CHANGED_SERVICES}; do
-  RAW_APIS=$(grep -rE "^app" ${CUR_DIR}/src/modules/${SERVICENAME}/app.ts | grep -vE "app.use")
+  APP_FILE="${CUR_DIR}/src/modules/${SERVICENAME}/app.ts"
+  RAW_APIS=$(test -f ${APP_FILE} && grep -rE "^app" ${APP_FILE} | grep -vE "app.use")
 
   declare -A new_api_map=()
   for api in ${RAW_APIS}; do
@@ -168,46 +171,47 @@ for SERVICENAME in ${CHANGED_SERVICES}; do
   done;
 
   for key in ${!new_api_map[@]};do
-    echo "    \"${key}\" = {" >>  ${SERVERLES_DEF_FILE}
+    echo "    \"${key}\" = {" >>  ${SERVERLESS_DEF_FILE}
     for method in ${new_api_map[$key]}; do
       METHOD=$(echo $method | tr 'a-z' 'A-Z')
-      echo "      \"${METHOD}\" = {" >>  ${SERVERLES_DEF_FILE}
-      echo "        lambda_name   = \"${SERVICENAME}\"" >>  ${SERVERLES_DEF_FILE}
-      echo "        authorization = false" >>  ${SERVERLES_DEF_FILE}
-      echo "      }" >>  ${SERVERLES_DEF_FILE}
+      echo "      \"${METHOD}\" = {" >>  ${SERVERLESS_DEF_FILE}
+      echo "        lambda_name   = \"${SERVICENAME}\"" >>  ${SERVERLESS_DEF_FILE}
+      echo "        authorization = true" >>  ${SERVERLESS_DEF_FILE}
+      echo "      }" >>  ${SERVERLESS_DEF_FILE}
     done
-    echo "    }," >>  ${SERVERLES_DEF_FILE}
+    echo "    }," >>  ${SERVERLESS_DEF_FILE}
   done
 
 done
 
-cat <<EOF >>  ${SERVERLES_DEF_FILE}
+cat <<EOF >>  ${SERVERLESS_DEF_FILE}
   }
 }
 EOF
 
 # Define the lambda env
-cat <<EOF >>  ${SERVERLES_DEF_FILE}
+cat <<EOF >>  ${SERVERLESS_DEF_FILE}
 variable "LAMBDA_ENV" {
   default = {
 EOF
 
 for SERVICENAME in ${CHANGED_SERVICES}; do
-  LAMBDA_ENV=$(grep -vE "NODE_ENV|PORT|AWS_REGION" ${CUR_DIR}/src/modules/${SERVICENAME}/.env.development)
-  echo "    ${SERVICENAME} = {" >> ${SERVERLES_DEF_FILE}
+  ENV_FILE="${CUR_DIR}/src/modules/${SERVICENAME}/.env.development"
+  LAMBDA_ENV=$(test -f ${ENV_FILE} && grep -vE "NODE_ENV|PORT|AWS_REGION" ${ENV_FILE})
+  echo "    ${SERVICENAME} = {" >> ${SERVERLESS_DEF_FILE}
 
   for var in ${LAMBDA_ENV}; do
     arrVAR=(${var//=/ })
     leftVAR=${arrVAR[0]}
     rightVAR=${arrVAR[1]}
-    echo "      ${leftVAR} = \"${rightVAR}\"" >> ${SERVERLES_DEF_FILE}
+    echo "      ${leftVAR} = \"${rightVAR}\"" >> ${SERVERLESS_DEF_FILE}
   done
 
-  echo "    }," >> ${SERVERLES_DEF_FILE}
+  echo "    }," >> ${SERVERLESS_DEF_FILE}
 
 done
 
-cat <<EOF >>  ${SERVERLES_DEF_FILE}
+cat <<EOF >>  ${SERVERLESS_DEF_FILE}
   }
 }
 EOF

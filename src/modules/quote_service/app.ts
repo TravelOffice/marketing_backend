@@ -1,15 +1,15 @@
-import cors from 'cors';
-import express, { Request, Response, NextFunction } from 'express';
 import compression from 'compression';
-import {
-  createQuoteUseCase, deleteQuoteUseCase, getLatestQuotesByAssigneeUseCase, getQuoteUseCase,
-  updateQuoteUseCase,
-} from './useCases';
-import wrapResponse from './utils/wrapResponse';
-import { FAILED, SUCCESS } from './utils/constants';
-import { getCurrentUserInfo } from './utils/authorizer';
+import cors from 'cors';
+import { getCurrentUserInfo } from 'decode-token';
+import express, { NextFunction, Request, Response } from 'express';
 import { QuoteStatus } from './models/Quote';
+import {
+  createQuoteUseCase, deleteQuoteUseCase,
+  getLatestQuotesByAssigneeUseCase, getQuoteUseCase, updateQuoteUseCase,
+} from './useCases';
+import { FAILED, SUCCESS } from './utils/constants';
 import validate, { getlatestQuotesByAssigneeValidator } from './utils/validator';
+import wrapResponse from './utils/wrapResponse';
 
 const app = express();
 

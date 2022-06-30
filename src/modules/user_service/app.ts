@@ -1,12 +1,18 @@
-import cors from 'cors';
-import express, { Request, Response, NextFunction } from 'express';
 import compression from 'compression';
+import cors from 'cors';
+import { getCurrentUserInfo } from 'decode-token';
+import express, { NextFunction, Request, Response } from 'express';
 import {
+  createTenantUserUseCase,
+  deleteTenantUserUseCase,
+  getTenantUserListUseCase,
+  getTenantUserUseCase,
+  updateTenantUserUseCase,
 } from './useCases';
-import wrapResponse from './utils/wrapResponse';
-import { FAILED } from './utils/constants';
-import validate, { getlatestQuotesByAssigneeValidator } from './utils/validator';
+import { FAILED, SUCCESS } from './utils/constants';
 import logger from './utils/logger';
+import validate, { createTenantUserValidator, updateTenantUserValidator } from './utils/validator';
+import wrapResponse from './utils/wrapResponse';
 
 const app = express();
 
@@ -27,44 +33,95 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
   next();
 });
 
-app.get('/users', getlatestQuotesByAssigneeValidator(), async (req: Request, res: Response) => {
+app.get('/users', async (req: Request, res: Response) => {
+  try {
+    const { username: authenticatedUserName } = getCurrentUserInfo(req.headers.authorization!);
+    const users = await getTenantUserListUseCase.invoke(authenticatedUserName);
+    res.json(wrapResponse(SUCCESS, users));
+  } catch (error: any) {
+    logger.log(`[app.get] Error' ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.post('/users', createTenantUserValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
-  } catch {
-    res.json(wrapResponse(FAILED, undefined));
+    const {
+      username: authenticatedUserName,
+    } = getCurrentUserInfo(req.headers.authorization!);
+
+    const user = await createTenantUserUseCase.invoke(authenticatedUserName, req.body);
+
+    res.json(wrapResponse(SUCCESS, user));
+  } catch (error: any) {
+    logger.log(`[app.post] Error' ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });
 
-app.post('/', async (req: Request, res: Response) => {
+app.get('/users/:userId', async (req: Request, res: Response) => {
   try {
-    // TODO: Validate request body if needed
-  } catch {
-    res.json(wrapResponse(FAILED, undefined));
+    const { userId } = req.params;
+    const user = await getTenantUserUseCase.invoke(userId);
+    res.json(wrapResponse(SUCCESS, user));
+  } catch (error: any) {
+    logger.log(`[app.get] Error' ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });
 
-app.get('/:id', async (req: Request, res: Response) => {
+app.get('/me', async (req: Request, res: Response) => {
   try {
-    // TODO: Convert the `id` to integer if needed
-  } catch {
-    res.json(wrapResponse(FAILED, undefined));
+    const { username: authenticatedUserName } = getCurrentUserInfo(req.headers.authorization!);
+    const user = await getTenantUserUseCase.invoke(authenticatedUserName);
+    res.json(wrapResponse(SUCCESS, user));
+  } catch (error: any) {
+    logger.log(`[app.get] Error' ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });
 
-app.put('/:id', async (req: Request, res: Response) => {
+app.put('/users/:userId', updateTenantUserValidator(), async (req: Request, res: Response) => {
   try {
-    // TODO: Convert the `id` to integer if needed
-    // TODO: Validate request body if needed
-  } catch {
-    res.json(wrapResponse(FAILED, undefined));
+    validate(req);
+    const { userId } = req.params;
+    const { username: authenticatedUserName } = getCurrentUserInfo(req.headers.authorization!);
+
+    const user = await updateTenantUserUseCase.invoke(authenticatedUserName, userId, req.body);
+    res.json(wrapResponse(SUCCESS, user));
+  } catch (error: any) {
+    logger.log(`[app.put] Error' ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });
 
-app.delete('/:id', async (req: Request, res: Response) => {
+app.put('/me', updateTenantUserValidator(), async (req: Request, res: Response) => {
   try {
-    // TODO: Convert the `id` to integer if needed
-  } catch {
-    res.json(wrapResponse(FAILED, undefined));
+    validate(req);
+    const { username: authenticatedUserName } = getCurrentUserInfo(req.headers.authorization!);
+
+    const user = await updateTenantUserUseCase.invoke(
+      authenticatedUserName,
+      authenticatedUserName,
+      req.body,
+    );
+    res.json(wrapResponse(SUCCESS, user));
+  } catch (error: any) {
+    logger.log(`[app.put] Error' ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.delete('/users/:userId', async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+    const { username: authenticatedUserName } = getCurrentUserInfo(req.headers.authorization!);
+    await deleteTenantUserUseCase.invoke(authenticatedUserName, userId);
+    res.json(wrapResponse(SUCCESS));
+  } catch (error: any) {
+    logger.log(`[app.delete] Error' ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });
 

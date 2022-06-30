@@ -1,0 +1,17 @@
+{
+  "name": "decode-token",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^17.0.8"
+  },
+  "dependencies": {
+    "jwt-decode": "^3.1.2"
+  }
+}
