@@ -9,7 +9,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "aws-xray-sdk-core": "^3.3.5"
+    "aws-xray-sdk-core": "^3.3.5",
+    "dotenv": "^16.0.1"
   },
   "devDependencies": {
     "@types/node": "^17.0.10",

@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ -z "${CHANGED_SERVICES}" ]; then
+  echo "Missing CHANGED_SERVICES"
+  exit 1
+fi
+
 POSITIONAL_ARGS=()
 
 while [[ $# -gt 0 ]]; do
@@ -73,22 +78,19 @@ lint_check() {
   fi
 }
 
-cd ${CUR_DIR}/src/modules
-MODULES_DIR=$(ls -d */ | cut -f1 -d'/')
-
 if [ "${SKIP_INSTALL}" != "true" ]; then
   # Build dependencies
   echo "Building dependencies"
   cd ${CUR_DIR}
   ./scripts/build_dependencies.sh
-  for dir in $MODULES_DIR
+  for dir in ${CHANGED_SERVICES}
   do
     install_module ${dir}
   done
 fi
 
 echo "Lint checking..."
-for dir in $MODULES_DIR
+for dir in ${CHANGED_SERVICES}
 do
   lint_check ${dir}
 done

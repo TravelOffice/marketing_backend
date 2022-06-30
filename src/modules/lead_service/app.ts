@@ -1,15 +1,17 @@
 import compression from 'compression';
 import cors from 'cors';
-import express, { Request, Response, NextFunction } from 'express';
-import { LeadType, LeadStatus } from './models/Lead';
+import { getCurrentUserInfo } from 'decode-token';
+import express, { NextFunction, Request, Response } from 'express';
+import { LeadStatus, LeadType } from './models/Lead';
 import {
-  createLeadUseCase, getLeadUseCase,
-  getLeadListByAssigneeUseCase, updateLeadUseCase,
+  createLeadUseCase,
+  getLeadListByAssigneeUseCase,
   getLeadListByTenantUseCase,
+  getLeadUseCase,
+  updateLeadUseCase,
 } from './useCases';
-import { getCurrentUserInfo } from './utils/authorizer';
 import { FAILED, SUCCESS } from './utils/constants';
-import validate, { createUpdateLeadValidator, getLeadValidator, getAllLeadByAssigneeValidator } from './utils/validator';
+import validate, { createUpdateLeadValidator, getAllLeadByAssigneeValidator, getLeadValidator } from './utils/validator';
 import wrapResponse from './utils/wrapResponse';
 
 const app = express();
@@ -48,8 +50,7 @@ app.post('/leads', createUpdateLeadValidator(), async (req: Request, res: Respon
 app.put('/leads', createUpdateLeadValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
-    const currentTime = Date.now();
-    req.body.updatedAt = currentTime;
+    req.body.updatedAt = Date.now();
     const { username } = getCurrentUserInfo(req.headers.authorization!);
     const lead = await updateLeadUseCase.invoke(req.body, username);
     res.json(wrapResponse(SUCCESS, lead));
