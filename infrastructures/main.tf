@@ -4,6 +4,7 @@ variable "API_ENDPOINTS" {}
 variable "LAMBDA_TRIGGERS" {}
 variable "LAMBDA_CRONS" {}
 variable "TF_BUCKET" {}
+variable "APPSYNC_FUNCTIONS" {}
 variable "APPSYNC_RESOLVERS" {}
 locals {
   remote_feature_name = "base_infrastructure"
@@ -90,7 +91,10 @@ module "APPSYNC_CONFIGURATION" {
   ENV               = var.ENV
   FEATURE_NAME      = var.FEATURE_NAME
   APPSYNC_API_ID    = module.REMOTE_STATE.STATE.MARKETING.backend.appsync.id
+  APPSYNC_FUNCTIONS = var.APPSYNC_FUNCTIONS
   APPSYNC_RESOLVERS = var.APPSYNC_RESOLVERS
   LAMBDA_ARN        = module.LAMBDA_FUNCTION.lambda_arns["chat_appsync_resolver_service"] #TODO: Need update correct lambda resolver name
+  DYNAMODB_ARN      = module.REMOTE_STATE.STATE.MARKETING.backend.dynamodb.arn
+  DYNAMODB_NAME     = module.REMOTE_STATE.STATE.MARKETING.backend.dynamodb.name
   TAGS              = local.tags
 }

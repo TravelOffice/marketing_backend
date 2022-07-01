@@ -78,6 +78,7 @@ jobs:
 
       # Run lint check
       - name: Run Lint
+        if: ${{ steps.get-services-name.outputs.services-existed == 'true' }}
         run: |
           echo "Run Lint check for services: ${CHANGED_SERVICES}"
           chmod +x ./scripts/*.sh
