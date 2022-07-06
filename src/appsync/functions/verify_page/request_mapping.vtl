@@ -1,0 +1,30 @@
+#set( $pageId = "" )
+#set( $platform = "" )
+#set( $tenant = $context.arguments.tenant )
+#set( $fieldName = $context.info.fieldName )
+
+#if( $context.info.fieldName == "sendMessage" )
+  #set( $pageId = $context.arguments.sender )
+#elseif( $context.arguments.pageId )
+  #set( $pageId = $context.arguments.pageId )
+#else
+  $util.error('VerifyPage: Missing pageId!')
+#end
+
+#if( $context.arguments.chatPlatform )
+  #set( $platform = $context.arguments.chatPlatform.toUpperCase() )
+#elseif( $fieldName.contains("allFb") )
+  #set( $platform = "FACEBOOK" )
+#elseif( $fieldName.contains("allZalo") )
+  #set( $platform = "ZALO" )
+#else
+  $util.error('VerifyPage: Unsupported platform $fieldName!')
+#end
+
+{
+    "operation": "GetItem",
+    "key": {
+        "pk": $util.dynamodb.toDynamoDBJson("TENANT#$tenant"),
+        "sk": $util.dynamodb.toDynamoDBJson("PAGE#$platform#$pageId"),
+    }
+}
