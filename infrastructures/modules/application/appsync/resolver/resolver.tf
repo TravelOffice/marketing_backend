@@ -2,16 +2,41 @@ variable "ENV" {}
 variable "FEATURE_NAME" {}
 variable "APPSYNC_API_ID" {}
 variable "APPSYNC_RESOLVERS" {}
-variable "DATA_SOURCE" {}
+variable "APPSYNC_FUNCTIONS_ID" {}
 
+locals {
+  appsync_default_config = {
+    kind              = "UNIT",
+    request_template  = "{}"
+    response_template = "{}"
+    data_source       = null
+  }
+  root_path = format("%s/../../..", path.root)
+}
 
 # UNIT type resolver (default)
-resource "aws_appsync_resolver" "test" {
+resource "aws_appsync_resolver" "resolver" {
   for_each          = var.APPSYNC_RESOLVERS
   api_id            = var.APPSYNC_API_ID
   field             = each.value.field
   type              = each.value.type
-  data_source       = var.DATA_SOURCE
-  request_template  = each.value.request_template
-  response_template = each.value.response_template
+  kind              = try(each.value.kind, local.appsync_default_config.kind)
+  data_source       = can(each.value.data_source) ? lower("${var.ENV}_${each.value.data_source}") : local.appsync_default_config.data_source
+  request_template  = can(each.value.request_template) ? file(format("%s/%s", local.root_path, each.value.request_template.path)) : local.appsync_default_config.request_template
+  response_template = can(each.value.response_template) ? file(format("%s/%s", local.root_path, each.value.response_template.path)) : local.appsync_default_config.response_template
+  dynamic "pipeline_config" {
+    for_each = can(each.value.pipeline_config) ? [each.value.pipeline_config] : []
+    content {
+      functions = [
+        for function in pipeline_config.value.functions : var.APPSYNC_FUNCTIONS_ID[function]
+      ]
+    }
+  }
+  dynamic "caching_config" {
+    for_each = can(each.value.caching_config) ? [each.value.caching_config] : []
+    content {
+      caching_keys = caching_config.value.caching_keys
+      ttl          = caching_config.value.ttl
+    }
+  }
 }
