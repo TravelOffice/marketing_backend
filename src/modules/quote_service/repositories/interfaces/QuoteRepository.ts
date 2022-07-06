@@ -9,4 +9,10 @@ export interface QuoteRepository {
   getLatestQuotesByLeadAndStatus: (
     tenantId: string, leadId: string, status?: QuoteStatus,
   ) => Promise<Array<Quote>>
+  getListByOpportunity: (
+    tenantId: string,
+    leadId: string,
+    opportunity: string,
+    status?: string,
+  ) => Promise<Array<Quote>>
 }
