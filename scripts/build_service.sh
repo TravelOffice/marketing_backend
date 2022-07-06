@@ -65,6 +65,11 @@ ln -sf ../../../modules/${SERVICENAME}/node_modules .
 echo "Link layer successfully"
 cd $CUR_DIR
 
+# Clean aws-sdk
+cd ${CUR_DIR}/src/libs/aws-sdk
+rm -rf node_modules
+npm install --production
+
 echo "Zipping function and layer..."
 mkdir -p ${CUR_DIR}/temp
 rm -rf ${CUR_DIR}/temp/*

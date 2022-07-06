@@ -1,4 +1,5 @@
 import AWS from 'aws';
+import { ChatPlatform } from 'common-models';
 import { getAwsSecretValue } from 'get-env';
 import { dynamoProvider } from '../providers';
 import { QueryInput } from '../providers/DynamoProvider';
@@ -35,5 +36,19 @@ export default class PageRepositoryImpl implements PageRepository {
       };
     });
     return linkedPages;
+  };
+
+  /**
+   * Delete the linked page in dynamo db
+   * @param tenantId ID of tenant
+   * @param platform Platform of page
+   * @param pageId ID of page
+   * @returns void
+   */
+  delete = async (tenantId: string, platform: ChatPlatform, pageId: string) => {
+    const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const pk = `${TENANT_INDEX}#${tenantId}`;
+    const sk = `${PAGE_INDEX}#${platform.toUpperCase()}#${pageId}`;
+    return dynamoProvider.deleteItem(table, pk, sk);
   };
 }

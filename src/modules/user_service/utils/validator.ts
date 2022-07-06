@@ -1,7 +1,8 @@
+import { ChatPlatform } from 'common-models';
 import { Request } from 'express';
 import {
-  ValidationError, validationResult,
   body,
+  query, ValidationError, validationResult,
 } from 'express-validator';
 import { LANGUAGES_TYPE, ROLES_TYPE, THEMES_TYPE } from '../models/User';
 import {
@@ -136,5 +137,15 @@ export function updateTenantUserValidator() {
       .optional()
       .isIn(Object.values(LANGUAGES_TYPE))
       .withMessage(`allow only in ${Object.values(LANGUAGES_TYPE)}`),
+  ];
+}
+
+export function unlinkPageValidator() {
+  return [
+    query('platform')
+      .isIn(Object.values(ChatPlatform)).withMessage(`allow only in ${Object.values(ChatPlatform)}`),
+    query('pageid')
+      .notEmpty()
+      .isString(),
   ];
 }
