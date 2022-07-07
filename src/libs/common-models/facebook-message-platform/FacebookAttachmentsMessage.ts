@@ -26,7 +26,10 @@ export interface FacebookTemplateAttachment {
   payload: any, // // Refer to https://developers.facebook.com/docs/messenger-platform/reference/templates#available_templates
 }
 
-export type FacebookAttachment = FacebookMediaAttachment | FacebookFallbackAttachment | FacebookTemplateAttachment;
+export type FacebookAttachment =
+  FacebookMediaAttachment
+  | FacebookFallbackAttachment
+  | FacebookTemplateAttachment;
 
 export type FacebookAttachmentsMessage = BasedFacebookMessage & {
   attachments: Array<FacebookAttachment>
