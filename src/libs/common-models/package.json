@@ -10,8 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "graphql": "^16.3.0",
-    "graphql-tag": "^2.12.6",
-    "telegrambot": "file:../telegram-bot-api"
+    "graphql-tag": "^2.12.6"
   },
   "devDependencies": {
     "@types/node": "^17.0.8",

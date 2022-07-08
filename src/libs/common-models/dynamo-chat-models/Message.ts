@@ -1,4 +1,4 @@
-import { Message as TelegramMessage } from 'telegrambot';
+import { Message as TelegramMessage } from '../telegram-message-platform';
 import { BaseDdbModel } from './BaseDdbModel';
 
 export type ChatPlatformMessage = TelegramMessage;
