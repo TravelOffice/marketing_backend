@@ -5,7 +5,6 @@
  * - ZaloSendFileMessage
  */
 
-
 export type ZaloSendImageMessage = {
   payload: {
     template_type: 'media', // Display image

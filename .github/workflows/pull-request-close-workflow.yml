@@ -43,10 +43,10 @@ jobs:
       # Install TypeScript
       - name: Install TypeScript
         run: npm install -g typescript
-      
+
       - id: get-changed-files
         uses: Ana06/get-changed-files@v2.1.0
-      
+
       - name: Get the build service name
         run: |
           CHANGED_SERVICES=
@@ -60,11 +60,15 @@ jobs:
           done
           if [ -z ${SERVICE} ]; then
             echo "Not found any services changed!"
-          fi 
-          echo "CHANGED_SERVICES=${CHANGED_SERVICES}" >> $GITHUB_ENV
+            echo ::set-output name=services-existed::false
+          else
+            echo "CHANGED_SERVICES=${CHANGED_SERVICES}" >> $GITHUB_ENV
+            echo ::set-output name=services-existed::true
+          fi
 
       # Build serverless
       - name: Build service
+        if: ${{ steps.get-services-name.outputs.services-existed == 'true' }}
         run: |
           for SERVICE in ${{ env.CHANGED_SERVICES }}; do
             ./scripts/build_service.sh ${{ secrets.BUILD_ENV }} ${SERVICE}
@@ -72,9 +76,11 @@ jobs:
 
       # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
       - name: Setup Terraform
+        if: ${{ steps.get-services-name.outputs.services-existed == 'true' }}
         uses: hashicorp/setup-terraform@v1
-      
+
       # Provision lambda and ApiGateway
       - name: Provision Lambda and ApiGateway
+        if: ${{ steps.get-services-name.outputs.services-existed == 'true' }}
         run: |
           ./scripts/aws_deploy.sh ${{ secrets.BUILD_ENV }} destroy

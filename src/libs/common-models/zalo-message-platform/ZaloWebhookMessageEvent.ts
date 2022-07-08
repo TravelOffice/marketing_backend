@@ -1,4 +1,4 @@
-import { ZaloReceivedAttachmentMessage } from './user-send-message/ZaloReceivedAttachmentsMessage'
+import { ZaloReceivedAttachmentMessage } from './user-send-message/ZaloReceivedAttachmentsMessage';
 import { ZaloReceivedTextMessage } from './user-send-message/ZaloReceivedTextMessage';
 
 // Type of message that user can send to official account
@@ -14,6 +14,8 @@ export enum USER_SEND_EVENTS {
   FILE = 'user_send_file',
 }
 
+export type ZaloReceivedMessageContent = ZaloReceivedTextMessage | ZaloReceivedAttachmentMessage;
+
 export interface ZaloWebhookMessageEvent {
   app_id: string,
   sender: { id: string },
@@ -23,5 +25,3 @@ export interface ZaloWebhookMessageEvent {
   user_id_by_app: string,
   message: ZaloReceivedMessageContent // Based on type of event
 }
-
-export type ZaloReceivedMessageContent = ZaloReceivedTextMessage | ZaloReceivedAttachmentMessage;
