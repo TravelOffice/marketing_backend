@@ -63,9 +63,15 @@ export interface ZaloReceivedFileMessage {
   type: 'file'
 }
 
-export type ZaloReceivedAttachment = ZaloReceivedAudioMessage | ZaloReceivedFileMessage | ZaloReceivedImageMessage | ZaloReceivedLocationMessage | ZaloReceivedMediaMessage | ZaloReceivedStikerMessage;
+export type ZaloReceivedAttachment =
+  ZaloReceivedAudioMessage
+  | ZaloReceivedFileMessage
+  | ZaloReceivedImageMessage
+  | ZaloReceivedLocationMessage
+  | ZaloReceivedMediaMessage
+  | ZaloReceivedStikerMessage;
 
 export type ZaloReceivedAttachmentMessage = BasedZaloReceivedMessage & {
-    text?: string,
-    attachments: Array<ZaloReceivedAttachment>
+  text?: string,
+  attachments: Array<ZaloReceivedAttachment>
 }
