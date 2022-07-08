@@ -1,4 +1,4 @@
-import { Chat as TelegramConversation } from 'telegrambot';
+import { Chat as TelegramConversation } from '../telegram-message-platform';
 import { BaseDdbModel } from './BaseDdbModel';
 import { ChatPlatformMessage } from './Message';
 
