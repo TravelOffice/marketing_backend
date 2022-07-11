@@ -1,3 +1,4 @@
+import { ChatPlatform } from 'common-models';
 import compression from 'compression';
 import cors from 'cors';
 import { getCurrentUserInfo } from 'decode-token';
@@ -8,11 +9,12 @@ import {
   getLinkedPageUseCase,
   getTenantUserListUseCase,
   getTenantUserUseCase,
+  unlinkPageUsecase,
   updateTenantUserUseCase,
 } from './useCases';
 import { FAILED, SUCCESS } from './utils/constants';
 import logger from './utils/logger';
-import validate, { createTenantUserValidator, updateTenantUserValidator } from './utils/validator';
+import validate, { createTenantUserValidator, unlinkPageValidator, updateTenantUserValidator } from './utils/validator';
 import wrapResponse from './utils/wrapResponse';
 
 const app = express();
@@ -131,6 +133,19 @@ app.get('/me/linked_pages', async (req: Request, res: Response) => {
     const { username } = getCurrentUserInfo(req.headers.authorization!);
     const pages = await getLinkedPageUseCase.invoke(username);
     res.json(wrapResponse(SUCCESS, pages));
+  } catch (error:any) {
+    logger.log(`[app.get] Error' ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.delete('/me/linked_pages', unlinkPageValidator(), async (req: Request, res: Response) => {
+  try {
+    validate(req);
+    const { username } = getCurrentUserInfo(req.headers.authorization!);
+    const { platform, pageId } = req.query;
+    await unlinkPageUsecase.invoke(username, platform as ChatPlatform, pageId as string);
+    res.json(wrapResponse(SUCCESS, undefined));
   } catch (error:any) {
     logger.log(`[app.get] Error' ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
