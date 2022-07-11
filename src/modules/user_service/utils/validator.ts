@@ -144,7 +144,7 @@ export function unlinkPageValidator() {
   return [
     query('platform')
       .isIn(Object.values(ChatPlatform)).withMessage(`allow only in ${Object.values(ChatPlatform)}`),
-    query('pageid')
+    query('pageId')
       .notEmpty()
       .isString(),
   ];

@@ -1,5 +1,5 @@
 import { ChatType } from './TelegramTypes';
-import { Message } from './TelegramMessage';
+import { TelegramMessage } from './TelegramMessage';
 
 export interface ChatPhoto {
   small_file_id: string;
@@ -17,7 +17,7 @@ export interface ChatPermissions {
   can_pin_messages?: boolean | undefined;
 }
 
-export interface Chat {
+export interface TelegramChat {
   id: number;
   type: ChatType;
   title?: string | undefined;
@@ -27,7 +27,7 @@ export interface Chat {
   photo?: ChatPhoto | undefined;
   description?: string | undefined;
   invite_link?: string | undefined;
-  pinned_message?: Message | undefined;
+  pinned_message?: TelegramMessage | undefined;
   permissions?: ChatPermissions | undefined;
   can_set_sticker_set?: boolean | undefined;
   sticker_set_name?: string | undefined;

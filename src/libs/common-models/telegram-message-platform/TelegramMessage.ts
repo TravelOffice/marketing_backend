@@ -1,20 +1,20 @@
-import { Chat } from './TelegramChat';
+import { TelegramChat } from './TelegramChat';
 import { User } from './TelegramUser';
 import * as MessageContents from './message-contents';
 
-export interface Message {
+export interface TelegramMessage {
   message_id: number;
   from?: User | undefined;
   date: number;
-  chat: Chat;
-  sender_chat?: Chat | undefined;
+  chat: TelegramChat;
+  sender_chat?: TelegramChat | undefined;
   forward_from?: User | undefined;
-  forward_from_chat?: Chat | undefined;
+  forward_from_chat?: TelegramChat | undefined;
   forward_from_message_id?: number | undefined;
   forward_signature?: string | undefined;
   forward_sender_name?: string | undefined;
   forward_date?: number | undefined;
-  reply_to_message?: Message | undefined;
+  reply_to_message?: TelegramMessage | undefined;
   edit_date?: number | undefined;
   media_group_id?: string | undefined;
   author_signature?: string | undefined;
@@ -45,6 +45,6 @@ export interface Message {
   channel_chat_created?: boolean | undefined;
   migrate_to_chat_id?: number | undefined;
   migrate_from_chat_id?: number | undefined;
-  pinned_message?: Message | undefined;
+  pinned_message?: TelegramMessage | undefined;
   dice?: MessageContents.Dice | undefined;
 }
