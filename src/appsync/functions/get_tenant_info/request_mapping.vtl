@@ -32,8 +32,9 @@
   $util.error('GetTenantInfo: Missing identifying information!')
 #end
 
-## Append tenant information to context arguments
-$util.qr($context.arguments.put("tenant", $tenant))
-$util.qr($context.arguments.put("username", $username))
+## Append tenant information to stash map to pass tenant, username through pipeline resolver
+## Then, Lambda resolver function can use these values later
+$util.qr($context.stash.put("tenant", $tenant))
+$util.qr($context.stash.put("username", $username))
 
 {}
