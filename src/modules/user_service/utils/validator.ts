@@ -15,10 +15,10 @@ import {
 export default function validate(req: Request) {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    const errorGroups : {[key: string]: ValidationError[]} = {};
+    const errorGroups: { [key: string]: ValidationError[] } = {};
     errors.array().forEach((err) => {
       const location = err.location || 'unknown';
-      const errs : ValidationError[] = errorGroups[location] || [];
+      const errs: ValidationError[] = errorGroups[location] || [];
       errs.push(err);
       errorGroups[location] = errs;
     });
@@ -144,7 +144,7 @@ export function unlinkPageValidator() {
   return [
     query('platform')
       .isIn(Object.values(ChatPlatform)).withMessage(`allow only in ${Object.values(ChatPlatform)}`),
-    query('pageId')
+    query('pageid')
       .notEmpty()
       .isString(),
   ];
