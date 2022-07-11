@@ -1,6 +1,10 @@
+import AWS from 'aws';
 import { ChatPlatform } from 'common-models';
 import { AppSyncEvent, Message, UnknownEvent } from './models';
 import { fbMessagePlatformRepository, zaloMessagePlatformRepository } from './repositories';
+import { TELEGRAM_SERVICE_NAME } from './utils/environments';
+
+const lambda = new AWS.Lambda();
 
 /**
  * Send message to chat platform
@@ -36,8 +40,12 @@ const getUserProfile = async (platform: ChatPlatform, pageId: string, pageUserId
   }
 };
 
-// eslint-disable-next-line import/prefer-default-export
-export const handler = async (event: AppSyncEvent) => {
+/**
+ * Handle all the AppSync event for both Facebook and Zalo platform
+ * @param event AppSync event payload
+ * @returns Data from chat platform
+ */
+const handleFbZaloAppSyncEvent = async (event: AppSyncEvent) => {
   const args = event.arguments; // Args from AppSync
   let resolverMessage: string; // Resolved result as a message
   let returnedData: any; // Resolved data
@@ -106,4 +114,30 @@ export const handler = async (event: AppSyncEvent) => {
     message: resolverMessage,
     data: returnedData,
   };
+};
+
+// eslint-disable-next-line import/prefer-default-export
+export const handler = async (event: AppSyncEvent) => {
+  const eventField = event.field;
+  const { platform } = event.arguments;
+
+  // Check whether platform is telegram
+  // Force `allTelegramConversations`, `allTelegramMessages` as telegram event
+  const isTelegramEvent = eventField.startsWith('allTelegram') || platform === ChatPlatform.telegram;
+  if (isTelegramEvent) {
+    // Invoke `telegram_platform_service` service to get the data from Telegram
+    const invokeParams: AWS.Lambda.Types.InvocationRequest = {
+      FunctionName: TELEGRAM_SERVICE_NAME,
+      InvocationType: 'RequestResponse',
+      LogType: 'Tail',
+      Payload: JSON.stringify(event),
+    };
+    const { Payload: payloadString } = await lambda.invoke(invokeParams).promise();
+    if (payloadString && typeof payloadString === 'string') {
+      return JSON.parse(payloadString);
+    }
+    throw new Error('Unable to read payload returned from invocation');
+  } else {
+    return handleFbZaloAppSyncEvent(event);
+  }
 };

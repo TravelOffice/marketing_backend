@@ -3,6 +3,8 @@
   "operation": "Invoke",
   "payload": {
       "field": "$context.info.fieldName",
+      "tenant": "$context.stash.tenant",
+      "username": "$context.stash.username",
       "arguments": $utils.toJson($context.arguments),
   }
 }
