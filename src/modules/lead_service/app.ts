@@ -11,6 +11,7 @@ import {
   updateLeadUseCase,
 } from './useCases';
 import { FAILED, SUCCESS } from './utils/constants';
+import logger from './utils/logger';
 import validate, { createUpdateLeadValidator, getAllLeadByAssigneeValidator, getLeadValidator } from './utils/validator';
 import wrapResponse from './utils/wrapResponse';
 
@@ -42,7 +43,7 @@ app.post('/leads', createUpdateLeadValidator(), async (req: Request, res: Respon
     const lead = await createLeadUseCase.invoke(req.body, username);
     res.json(wrapResponse(SUCCESS, lead));
   } catch (error: any) {
-    console.log('[app.post] Error', error);
+    logger.log(`[POST /leads] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });
@@ -55,7 +56,7 @@ app.put('/leads', createUpdateLeadValidator(), async (req: Request, res: Respons
     const lead = await updateLeadUseCase.invoke(req.body, username);
     res.json(wrapResponse(SUCCESS, lead));
   } catch (error: any) {
-    console.log('[app.post] Error', error);
+    logger.log(`[PUT /leads] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });
@@ -68,7 +69,7 @@ app.get('/leads/:leadId', getLeadValidator(), async (req: Request, res: Response
     const lead = await getLeadUseCase.invoke(leadId, username);
     res.json(wrapResponse(SUCCESS, lead));
   } catch (error: any) {
-    console.log('[app.get] Error', error);
+    logger.log(`[GET /leads/:leadId] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });
@@ -85,7 +86,7 @@ app.get('/leads', getAllLeadByAssigneeValidator(), async (req: Request, res: Res
     );
     res.json(wrapResponse(SUCCESS, leadList));
   } catch (error: any) {
-    console.log('[app.get] Error', error);
+    logger.log(`[GET/leads] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });
@@ -96,7 +97,7 @@ app.get('/admin/leads', async (req: Request, res: Response) => {
     const leadList = await getLeadListByTenantUseCase.invoke(username);
     res.json(wrapResponse(SUCCESS, leadList));
   } catch (error: any) {
-    console.log('[app.get] Error', error);
+    logger.log(`[GET /admin/leads] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });

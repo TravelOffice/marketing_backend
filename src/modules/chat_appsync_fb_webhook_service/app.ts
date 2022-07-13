@@ -3,6 +3,7 @@ import express, { Request, Response } from 'express';
 import compression from 'compression';
 import { getAwsSecretValue } from 'get-env';
 import { appSyncRepository } from './repositories';
+import logger from './utils/logger';
 
 const app = express();
 app.use(compression());
@@ -48,7 +49,7 @@ app.post('/chat-fb-webhook', async (req: Request, res: Response) => {
         // Gets the message. entry.messaging is an array, but
         // will only ever contain one message, so we get index 0
         const webhookEvent = entry.messaging[0];
-        console.info('[app.post] Received webhook event', webhookEvent);
+        logger.log(`[POST /chat-fb-webhook] Received webhook event ${webhookEvent}`);
 
         await appSyncRepository.sendReceivedMessageCommand(webhookEvent);
       });
@@ -63,7 +64,7 @@ app.post('/chat-fb-webhook', async (req: Request, res: Response) => {
       res.sendStatus(404);
     }
   } catch (e: any) {
-    console.log('[App.ChatFbWebhook POST] Generated an error', e);
+    logger.log(`[POST /chat-fb-webhook] Generated an error ${e}`);
     res.json({ message: `${e.name}: ${e.message}` });
   }
 });
@@ -88,7 +89,7 @@ app.get('/chat-fb-webhook', async (req: Request, res: Response) => {
       // Checks the mode and token sent is correct
       if (mode === 'subscribe' && token === verifyToken) {
         // Responds with the challenge token from the request
-        console.log('[app.get] WEBHOOK_VERIFIED');
+        logger.log('[app.get] WEBHOOK_VERIFIED');
         res.status(200).send(challenge);
       } else {
         // Responds with '403 Forbidden' if verify tokens do not match
@@ -96,7 +97,7 @@ app.get('/chat-fb-webhook', async (req: Request, res: Response) => {
       }
     }
   } catch (e: any) {
-    console.log('[App.ChatFbWebhook GET] Generated an error', e);
+    logger.log(`[GET /chat-fb-webhook] Generated an error ${e}`);
     res.json({ message: `${e.name}: ${e.message}` });
   }
 });

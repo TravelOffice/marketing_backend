@@ -94,7 +94,7 @@ module "APPSYNC_CONFIGURATION" {
   APPSYNC_FUNCTIONS = var.APPSYNC_FUNCTIONS
   APPSYNC_RESOLVERS = var.APPSYNC_RESOLVERS
   LAMBDA_ARN        = module.LAMBDA_FUNCTION.lambda_arns["chat_appsync_resolver_service"] #TODO: Need update correct lambda resolver name
-  DYNAMODB_ARN      = module.REMOTE_STATE.STATE.MARKETING.backend.dynamodb.arn
-  DYNAMODB_NAME     = module.REMOTE_STATE.STATE.MARKETING.backend.dynamodb.name
+  DYNAMODB_ARN      = module.REMOTE_STATE.STATE.MARKETING.backend.dynamodb.travel_table.arn
+  DYNAMODB_NAME     = module.REMOTE_STATE.STATE.MARKETING.backend.dynamodb.travel_table.name
   TAGS              = local.tags
 }

@@ -42,7 +42,7 @@ app.get('/users', async (req: Request, res: Response) => {
     const users = await getTenantUserListUseCase.invoke(authenticatedUserName);
     res.json(wrapResponse(SUCCESS, users));
   } catch (error: any) {
-    logger.log(`[app.get] Error' ${error}`);
+    logger.log(`[app.get] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });
@@ -58,7 +58,7 @@ app.post('/users', createTenantUserValidator(), async (req: Request, res: Respon
 
     res.json(wrapResponse(SUCCESS, user));
   } catch (error: any) {
-    logger.log(`[app.post] Error' ${error}`);
+    logger.log(`[app.post] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });
@@ -69,7 +69,7 @@ app.get('/users/:userId', async (req: Request, res: Response) => {
     const user = await getTenantUserUseCase.invoke(userId);
     res.json(wrapResponse(SUCCESS, user));
   } catch (error: any) {
-    logger.log(`[app.get] Error' ${error}`);
+    logger.log(`[app.get] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });
@@ -80,7 +80,7 @@ app.get('/me', async (req: Request, res: Response) => {
     const user = await getTenantUserUseCase.invoke(authenticatedUserName);
     res.json(wrapResponse(SUCCESS, user));
   } catch (error: any) {
-    logger.log(`[app.get] Error' ${error}`);
+    logger.log(`[app.get] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });
@@ -94,7 +94,7 @@ app.put('/users/:userId', updateTenantUserValidator(), async (req: Request, res:
     const user = await updateTenantUserUseCase.invoke(authenticatedUserName, userId, req.body);
     res.json(wrapResponse(SUCCESS, user));
   } catch (error: any) {
-    logger.log(`[app.put] Error' ${error}`);
+    logger.log(`[app.put] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });
@@ -111,7 +111,7 @@ app.put('/me', updateTenantUserValidator(), async (req: Request, res: Response) 
     );
     res.json(wrapResponse(SUCCESS, user));
   } catch (error: any) {
-    logger.log(`[app.put] Error' ${error}`);
+    logger.log(`[app.put] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });
@@ -123,7 +123,7 @@ app.delete('/users/:userId', async (req: Request, res: Response) => {
     await deleteTenantUserUseCase.invoke(authenticatedUserName, userId);
     res.json(wrapResponse(SUCCESS));
   } catch (error: any) {
-    logger.log(`[app.delete] Error' ${error}`);
+    logger.log(`[app.delete] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });
@@ -134,7 +134,7 @@ app.get('/me/linked_pages', async (req: Request, res: Response) => {
     const pages = await getLinkedPageUseCase.invoke(username);
     res.json(wrapResponse(SUCCESS, pages));
   } catch (error:any) {
-    logger.log(`[app.get] Error' ${error}`);
+    logger.log(`[app.get] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });
@@ -147,7 +147,7 @@ app.delete('/me/linked_pages', unlinkPageValidator(), async (req: Request, res: 
     await unlinkPageUsecase.invoke(username, platform as ChatPlatform, pageId as string);
     res.json(wrapResponse(SUCCESS, undefined));
   } catch (error:any) {
-    logger.log(`[app.get] Error' ${error}`);
+    logger.log(`[app.get] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });

@@ -3,6 +3,7 @@ import {
   FacebookMessageResponsePayload, FacebookUserProfile, Message, toSendFbMessagePayload,
 } from '../models';
 import { dynamoProvider, fbMessagePlatformProvider } from '../providers';
+import logger from '../utils/logger';
 import { FACEBOK_PAGE_INDEX } from '../utils/constants';
 import { FbMessagePlatformRepository } from './interfaces/FbMessagePlatformRepository';
 
@@ -13,9 +14,9 @@ export default class FbMessagePlatformRepositoryImpl implements FbMessagePlatfor
    * @returns Facebook access token
    */
   private readonly getFbMessagePlatformToken = async (pageId: string): Promise<string> => {
-    const saleChatTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
     const params = {
-      TableName: saleChatTable,
+      TableName: travelTable,
       IndexName: 'PageIdIndex',
       KeyConditionExpression: '#pageId = :id',
       ExpressionAttributeNames: {
@@ -53,7 +54,7 @@ export default class FbMessagePlatformRepositoryImpl implements FbMessagePlatfor
       const payload = toSendFbMessagePayload(message);
       return fbMessagePlatformProvider.sendMessage(pageToken, payload);
     } catch (error) {
-      console.log('[FbMessagePlatformRepositoryImpl.sendMessage] Generated an error', error);
+      logger.log(`[FbMessagePlatformRepositoryImpl.sendMessage] Generated an error ${error}`);
       return undefined;
     }
   };
@@ -71,7 +72,7 @@ export default class FbMessagePlatformRepositoryImpl implements FbMessagePlatfor
       const pageToken = await this.getFbMessagePlatformToken(pageId);
       return fbMessagePlatformProvider.getConversations(pageToken, pageId);
     } catch (error) {
-      console.log('[FbMessagePlatformRepositoryImpl.getConversations] Generated an error', error);
+      logger.log(`[FbMessagePlatformRepositoryImpl.getConversations] Generated an error ${error}`);
       return undefined;
     }
   };
@@ -95,7 +96,7 @@ export default class FbMessagePlatformRepositoryImpl implements FbMessagePlatfor
       const pageToken = await this.getFbMessagePlatformToken(senderAsPageId);
       return fbMessagePlatformProvider.getMessages(pageToken, conversationId, after, limit);
     } catch (error) {
-      console.log('[FbMessagePlatformRepositoryImpl.getMessages] Generated an error', error);
+      logger.log(`[FbMessagePlatformRepositoryImpl.getMessages] Generated an error ${error}`);
       return undefined;
     }
   };
@@ -115,7 +116,7 @@ export default class FbMessagePlatformRepositoryImpl implements FbMessagePlatfor
       const pageToken = await this.getFbMessagePlatformToken(pageId);
       return fbMessagePlatformProvider.getUserProfile(pageToken, userId);
     } catch (error) {
-      console.log('[FbMessagePlatformRepositoryImpl.getUserProfile] Generated an error', error);
+      logger.log(`[FbMessagePlatformRepositoryImpl.getUserProfile] Generated an error ${error}`);
       return undefined;
     }
   };

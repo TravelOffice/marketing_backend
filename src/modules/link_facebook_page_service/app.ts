@@ -4,6 +4,7 @@ import { getCurrentUserInfo } from 'decode-token';
 import express, { NextFunction, Request, Response } from 'express';
 import { linkFacebookPageUseCase } from './useCases';
 import { FAILED, SUCCESS } from './utils/constants';
+import logger from './utils/logger';
 import validate, { linkFacebookPageValidator } from './utils/validator';
 import wrapResponse from './utils/wrapResponse';
 
@@ -15,7 +16,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use((req: Request, _res: Response, next: NextFunction) => {
-  console.log(`Request to ${req.method}: ${req.url}`);
+  logger.log(`Request to ${req.method}: ${req.url}`);
   next();
 });
 
@@ -34,7 +35,7 @@ app.post('/facebook/link', linkFacebookPageValidator(), async (req: Request, res
     const modelNames = await linkFacebookPageUseCase.invoke(username, pageId, userAccessToken);
     res.json(wrapResponse(SUCCESS, modelNames));
   } catch (error: any) {
-    console.log('error', error);
+    logger.log(`[app.post] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });
