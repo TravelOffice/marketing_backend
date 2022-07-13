@@ -2,10 +2,10 @@ import compression from 'compression';
 import cors from 'cors';
 import { getCurrentUserInfo } from 'decode-token';
 import express, { NextFunction, Request, Response } from 'express';
-import { linkFacebookPageUseCase } from './useCases';
+import { generateLoginUrlUsecCase, linkFacebookPageUseCase, linkZaloPageUseCase } from './useCases';
 import { FAILED, SUCCESS } from './utils/constants';
 import logger from './utils/logger';
-import validate, { linkFacebookPageValidator } from './utils/validator';
+import validate, { linkFacebookPageValidator, linkZaloPageValidator } from './utils/validator';
 import wrapResponse from './utils/wrapResponse';
 
 const app = express();
@@ -36,6 +36,29 @@ app.post('/facebook/link', linkFacebookPageValidator(), async (req: Request, res
     res.json(wrapResponse(SUCCESS, modelNames));
   } catch (error: any) {
     logger.log(`[app.post] Error ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.post('/zalo/link', linkZaloPageValidator(), async (req: Request, res: Response) => {
+  try {
+    validate(req);
+    const { authorizationCode, state, pageId } = req.body;
+    const { username } = getCurrentUserInfo(req.headers.authorization!);
+    const zaloPage = await linkZaloPageUseCase.invoke(username, authorizationCode, state, pageId);
+    res.json(wrapResponse(SUCCESS, zaloPage));
+  } catch (error: any) {
+    logger.log(`[POST /zalo/link] Error ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.get('/zalo/link', async (req: Request, res: Response) => {
+  try {
+    const loginUrl = await generateLoginUrlUsecCase.invoke();
+    res.json(wrapResponse(SUCCESS, loginUrl));
+  } catch (error: any) {
+    logger.log(`[GET /zalo/link] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });
