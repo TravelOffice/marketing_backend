@@ -31,7 +31,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 });
 
 app.use((req: Request, _res: Response, next: NextFunction) => {
-  console.log(`Request to ${req.method}: ${req.url}`);
+  logger.log(`Request to ${req.method}: ${req.url}`);
   next();
 });
 
@@ -52,7 +52,8 @@ app.post('/', async (req: Request, res: Response) => {
     // TODO: Validate request body if needed
     const quote = await createQuoteUseCase.invoke(req.body);
     res.json(wrapResponse(SUCCESS, quote));
-  } catch {
+  } catch (error: any) {
+    logger.log(`[POST /] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined));
   }
 });
@@ -63,7 +64,8 @@ app.get('/:id', async (req: Request, res: Response) => {
     // TODO: Convert the `id` to integer if needed
     const quote = await getQuoteUseCase.invoke(id);
     res.json(wrapResponse(SUCCESS, quote));
-  } catch {
+  } catch (error: any) {
+    logger.log(`[GET /:id] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined));
   }
 });
@@ -75,7 +77,8 @@ app.put('/:id', async (req: Request, res: Response) => {
     // TODO: Validate request body if needed
     const quote = await updateQuoteUseCase.invoke(id, req.body);
     res.json(wrapResponse(SUCCESS, quote));
-  } catch {
+  } catch (error: any) {
+    logger.log(`[PUT /:id] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined));
   }
 });
@@ -86,7 +89,8 @@ app.delete('/:id', async (req: Request, res: Response) => {
     // TODO: Convert the `id` to integer if needed
     await deleteQuoteUseCase.invoke(id);
     res.json(wrapResponse(SUCCESS, {}));
-  } catch {
+  } catch (error: any) {
+    logger.log(`[DELETE /:id] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined));
   }
 });
@@ -104,7 +108,7 @@ app.get('/leads/:leadId/opportunities/:oppId/quotes', async (req: Request, res: 
     );
     res.json(wrapResponse(SUCCESS, quotesByOpportunity));
   } catch (error: any) {
-    logger.log(error);
+    logger.log(`[GET /leads/:leadId:opportunities/:oppId/quotes] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });

@@ -14,9 +14,9 @@ export default class UserRepositoryImpl implements UserRepository {
    * @returns User object
    */
   getUserAttributes = async (username: string): Promise<User | undefined> => {
-    const saleChatTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
     const params: QueryInput = {
-      TableName: saleChatTable,
+      TableName: travelTable,
       IndexName: 'ReverseIndex',
       KeyConditionExpression: 'sk = :sk AND begins_with(pk, :pk_filter_value)',
       ExpressionAttributeValues: {

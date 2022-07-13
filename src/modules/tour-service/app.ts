@@ -2,6 +2,7 @@ import cors from 'cors';
 import express, { Request, Response } from 'express';
 import { getEnv } from 'get-env';
 import compression from 'compression';
+import logger from './utils/logger';
 
 const app = express();
 
@@ -12,7 +13,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.get('/', async (req: Request, res: Response) => {
   const env = await getEnv('NODE_ENV');
-  console.log(env);
+  logger.log(env);
   res.json({ message: 'hello' });
 });
 

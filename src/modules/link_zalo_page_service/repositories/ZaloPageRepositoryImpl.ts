@@ -15,8 +15,8 @@ export default class ZaloPageRepositoryImpl implements ZaloPageRepository {
    * @returns code verifier
    */
   getCodeVerifierFromDynamo = async (state: string) => {
-    const saleChatTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
-    const item = await dynamoProvider.getItem(saleChatTable, ZALO_CODE_VERIFIER_INDEX, state);
+    const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const item = await dynamoProvider.getItem(travelTable, ZALO_CODE_VERIFIER_INDEX, state);
     return item.codeVerifier;
   };
 
@@ -81,8 +81,8 @@ export default class ZaloPageRepositoryImpl implements ZaloPageRepository {
    * @param state Unique id - sort key
    */
   saveCodeVerifierToDynamo = async (codeVerifier: string, state: string) => {
-    const saleChatTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
-    await dynamoProvider.putItem(saleChatTable, ZALO_CODE_VERIFIER_INDEX, state, { codeVerifier });
+    const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    await dynamoProvider.putItem(travelTable, ZALO_CODE_VERIFIER_INDEX, state, { codeVerifier });
   };
 
   /**
@@ -91,9 +91,9 @@ export default class ZaloPageRepositoryImpl implements ZaloPageRepository {
    * @param page ZaloPage object
    */
   saveOAInfoToDynamo = async (tenantId: string, page: ZaloPage) => {
-    const saleChatTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
     const linkedPages = await dynamoProvider.query({
-      TableName: saleChatTable,
+      TableName: travelTable,
       KeyConditionExpression: 'pk = :pk_tenant AND begins_with(sk, :sk_filter)',
       ExpressionAttributeValues: {
         ':pk_tenant': { S: `${TENANT_INDEX}#${tenantId}` },
@@ -104,9 +104,9 @@ export default class ZaloPageRepositoryImpl implements ZaloPageRepository {
       // Remove previous item before insert new one
       const { sk, pk, ...rest } = AWS.DynamoDB.Converter.unmarshall(linkedPages.Items[0]);
       const linkedPage = rest as ZaloPage;
-      await dynamoProvider.deleteItem(saleChatTable, `${TENANT_INDEX}#${tenantId}`, `${ZALO_PAGE_INDEX}${linkedPage.id}`);
+      await dynamoProvider.deleteItem(travelTable, `${TENANT_INDEX}#${tenantId}`, `${ZALO_PAGE_INDEX}${linkedPage.id}`);
     }
-    await dynamoProvider.putItem(saleChatTable, `${TENANT_INDEX}#${tenantId}`, `${ZALO_PAGE_INDEX}${page.id}`, page);
+    await dynamoProvider.putItem(travelTable, `${TENANT_INDEX}#${tenantId}`, `${ZALO_PAGE_INDEX}${page.id}`, page);
   };
 
   /**
@@ -114,8 +114,8 @@ export default class ZaloPageRepositoryImpl implements ZaloPageRepository {
    * @param state Unique id - sort key
    */
   deleteCodeVerifierInDynamo = async (state: string) => {
-    const saleChatTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
-    await dynamoProvider.deleteItem(saleChatTable, ZALO_CODE_VERIFIER_INDEX, state);
+    const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    await dynamoProvider.deleteItem(travelTable, ZALO_CODE_VERIFIER_INDEX, state);
   };
 
   /**
@@ -125,9 +125,9 @@ export default class ZaloPageRepositoryImpl implements ZaloPageRepository {
    * @returns true if the page is linked to another tenant otherwise false
    */
   checkPageLinkedToAnotherTenant = async (pageId: string, tenantId: string) => {
-    const saleChatTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
     const linkedPages = await dynamoProvider.query({
-      TableName: saleChatTable,
+      TableName: travelTable,
       IndexName: 'ReverseIndex',
       KeyConditionExpression: 'sk = :sk_pageId AND begins_with(pk, :pk_filter)',
       ExpressionAttributeValues: {

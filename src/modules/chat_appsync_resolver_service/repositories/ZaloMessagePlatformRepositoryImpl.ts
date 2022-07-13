@@ -2,6 +2,7 @@ import AWS from 'aws';
 import { getAwsSecretValue } from 'get-env';
 import { Message, toSendZaloMessagePayload, ZaloMessageResponsePayload } from '../models';
 import { dynamoProvider, zaloMessagePlatformProvider } from '../providers';
+import logger from '../utils/logger';
 import { ZALO_PAGE_INDEX } from '../utils/constants';
 import { ZaloMessagePlatformRepository } from './interfaces/ZaloMessagePlatformRepository';
 
@@ -12,9 +13,9 @@ export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePla
    * @returns Zalo access token
    */
   private readonly getZaloMessagePlatformToken = async (pageId: string): Promise<string> => {
-    const saleChatTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
     const params = {
-      TableName: saleChatTable,
+      TableName: travelTable,
       IndexName: 'PageIdIndex',
       KeyConditionExpression: '#pageId = :id',
       ExpressionAttributeNames: {
@@ -45,7 +46,7 @@ export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePla
       if (refreshTokenResponse) {
         const expireIn = new Date(Date.now() + refreshTokenResponse.expires_in * 1000);
         const updateParams: AWS.DynamoDB.DocumentClient.UpdateItemInput = {
-          TableName: saleChatTable,
+          TableName: travelTable,
           Key: {
             pk: dynamoItem.pk, // pk and sk can be unmarshall
             sk: dynamoItem.sk,
@@ -79,7 +80,7 @@ export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePla
       const payload = toSendZaloMessagePayload(message);
       return zaloMessagePlatformProvider.sendMessage(pageToken, payload);
     } catch (error) {
-      console.log('[ZaloMessagePlatformRepositoryImpl.sendMessage] Generated an error', error);
+      logger.log(`[ZaloMessagePlatformRepositoryImpl.sendMessage] Generated an error ${error}`);
       throw error;
     }
   };
@@ -99,7 +100,7 @@ export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePla
       const pageToken = await this.getZaloMessagePlatformToken(pageId);
       return zaloMessagePlatformProvider.getConversations(pageToken, offset, count);
     } catch (error) {
-      console.log('[ZaloMessagePlatformRepositoryImpl.getConversations] Generated an error', error);
+      logger.log(`[ZaloMessagePlatformRepositoryImpl.getConversations] Generated an error ${error}`);
       throw error;
     }
   };
@@ -122,7 +123,7 @@ export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePla
       const pageToken = await this.getZaloMessagePlatformToken(pageId);
       return zaloMessagePlatformProvider.getMessages(pageToken, userId, offset, count);
     } catch (error) {
-      console.log('[ZaloMessagePlatformRepositoryImpl.getMessages] Generated an error', error);
+      logger.log(`[ZaloMessagePlatformRepositoryImpl.getMessages] Generated an error ${error}`);
       throw error;
     }
   };

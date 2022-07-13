@@ -4,6 +4,7 @@ import { getCurrentUserInfo } from 'decode-token';
 import express, { NextFunction, Request, Response } from 'express';
 import { generateLoginUrlUseCase, linkZaloPageUseCase } from './useCases';
 import { FAILED, SUCCESS } from './utils/constants';
+import logger from './utils/logger';
 import validate, { linkZaloPageValidator } from './utils/validator';
 import wrapResponse from './utils/wrapResponse';
 
@@ -15,7 +16,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use((req: Request, _res: Response, next: NextFunction) => {
-  console.log(`Request to ${req.method}: ${req.url}`);
+  logger.log(`Request to ${req.method}: ${req.url}`);
   next();
 });
 
@@ -27,7 +28,7 @@ app.post('/zalo/link', linkZaloPageValidator(), async (req: Request, res: Respon
     const zaloPage = await linkZaloPageUseCase.invoke(username, authorizationCode, state, pageId);
     res.json(wrapResponse(SUCCESS, zaloPage));
   } catch (error: any) {
-    console.log('[app.post] Error', error);
+    logger.log(`[POST /zalo/link] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });
@@ -37,7 +38,7 @@ app.get('/zalo/link', async (req: Request, res: Response) => {
     const loginUrl = await generateLoginUrlUseCase.invoke();
     res.json(wrapResponse(SUCCESS, loginUrl));
   } catch (error: any) {
-    console.log('[app.get] Error', error);
+    logger.log(`[GET /zalo/link] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });

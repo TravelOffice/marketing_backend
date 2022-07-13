@@ -10,6 +10,7 @@ import {
   QUOTE_INDEX,
   TENANT_INDEX,
 } from '../utils/constants';
+import logger from '../utils/logger';
 import { QuoteRepository } from './interfaces/QuoteRepository';
 
 export default class QuoteRepositoryImpl implements QuoteRepository {
@@ -18,22 +19,23 @@ export default class QuoteRepositoryImpl implements QuoteRepository {
   };
 
   get = async (id: string | number) => {
-    console.log(id);
+    logger.log(`[QuoteRepository.get] id ${id}`);
     throw new Error('Method not implemented!');
   };
 
   create = async (quote: Quote) => {
-    console.log(quote);
+    logger.log(`[QuoteRepository.create] quote ${quote}`);
     throw new Error('Method not implemented!');
   };
 
   update = async (id: string | number, quote: Quote) => {
-    console.log(id, quote);
+    logger.log(`[QuoteRepository.update] id ${id}`);
+    logger.log(`[QuoteRepository.update] quote ${quote}`);
     throw new Error('Method not implemented!');
   };
 
   delete = async (id: string | number) => {
-    console.log(id);
+    logger.log(`[QuoteRepository.delete] id ${id}`);
     throw new Error('Method not implemented!');
   };
 

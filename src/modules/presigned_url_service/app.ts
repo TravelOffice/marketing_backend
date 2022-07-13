@@ -4,6 +4,7 @@ import express, { NextFunction, Request, Response } from 'express';
 import { getEnv } from 'get-env';
 import { s3Repository } from './repositories';
 import { FAILED, SUCCESS } from './utils/constants';
+import logger from './utils/logger';
 import validate, { getPresignedUrlValidator } from './utils/validator';
 import wrapResponse from './utils/wrapResponse';
 
@@ -33,7 +34,7 @@ app.get('/presigned-url', getPresignedUrlValidator(), async (req: Request, res: 
     const rs = await s3Repository.generatePresignedUrl(bucket, String(pageId), String(customerId), expires, String(fileType), String(fileName));
     res.json(wrapResponse(SUCCESS, rs));
   } catch (error: any) {
-    console.log('[App.PresignUrl] Generated an error', error);
+    logger.log(`[GET /presigned-url] Generated an error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });

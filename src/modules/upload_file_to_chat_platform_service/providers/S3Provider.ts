@@ -3,6 +3,7 @@ import * as crypto from 'crypto';
 import * as fs from 'fs';
 import { getEnv } from 'get-env';
 import * as path from 'path';
+import logger from '../utils/logger';
 
 AWS.config.update({
   region: getEnv('AWS_REGION'),
@@ -35,10 +36,10 @@ export default class S3Provider {
 
     const filePath = path.join(folderPath, fileName);
 
-    console.log('[S3Provider.downloadFileFromS3 ] Downloading ', bucket, fileKey, filePath);
+    logger.log(`[S3Provider.downloadFileFromS3] Downloading bucket: ${bucket}, filekey: ${fileKey}, filePath: ${filePath}`);
     const s3Object = await s3.getObject({ Bucket: bucket, Key: fileKey }).promise();
     await fsPromises.writeFile(filePath, s3Object.Body as Buffer);
-    console.log('[S3Provider.downloadFileFromS3 ] Downloaded ', bucket, fileKey, filePath);
+    logger.log(`[S3Provider.downloadFileFromS3] Downloaded bucket: ${bucket}, fileKey: ${fileKey}, filePath: ${filePath}`);
     return filePath;
   };
 
@@ -50,8 +51,8 @@ export default class S3Provider {
    */
   deleteObject = async (bucket: string, objectKey: string) => {
     const objectParams = { Bucket: bucket, Key: objectKey };
-    console.log('[S3Provider.deleteObject ] Deleting ', bucket, objectKey);
+    logger.log(`[S3Provider.deleteObject] Deleting bucket: ${bucket}, objectKey: ${objectKey}`);
     await s3.deleteObject(objectParams).promise();
-    console.log('[S3Provider.deleteObject ] Deleted ', bucket, objectKey);
+    logger.log(`[S3Provider.deleteObject] Deleted bucket: ${bucket}, objectKey: ${objectKey}`);
   };
 }
