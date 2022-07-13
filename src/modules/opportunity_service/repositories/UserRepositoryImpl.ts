@@ -8,9 +8,9 @@ import { EMPLOYEE_INDEX, TENANT_INDEX } from '../utils/constants';
 
 export default class UserRepositoryImpl implements UserRepository {
   getUserAttributes = async (userId: string) => {
-    const saleChatTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
     const query: QueryInput = {
-      TableName: saleChatTable,
+      TableName: travelTable,
       IndexName: 'ReverseIndex',
       KeyConditionExpression: 'sk = :sk_employee AND begins_with(pk, :pk_filter)',
       ExpressionAttributeValues: {

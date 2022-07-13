@@ -3,6 +3,7 @@ import { getAwsSecretValue } from 'get-env';
 import { ZaloUploadFileResponsePayload } from '../models';
 import { dynamoProvider, zaloMessagePlatformProvider } from '../providers';
 import { SupportedFileType } from '../utils/constants';
+import logger from '../utils/logger';
 import { ZaloMessagePlatformRepository } from './interfaces/ZaloMessagePlatformRepository';
 
 export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePlatformRepository {
@@ -12,9 +13,9 @@ export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePla
    * @returns Zalo access token
    */
   private readonly getZaloMessagePlatformToken = async (pageId: string): Promise<string> => {
-    const saleChatTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
     const params = {
-      TableName: saleChatTable,
+      TableName: travelTable,
       IndexName: 'PageIdIndex',
       KeyConditionExpression: '#pageId = :id',
       ExpressionAttributeNames: {
@@ -45,7 +46,7 @@ export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePla
       if (refreshTokenResponse) {
         const expireIn = new Date(Date.now() + refreshTokenResponse.expires_in * 1000);
         const updateParams: AWS.DynamoDB.DocumentClient.UpdateItemInput = {
-          TableName: saleChatTable,
+          TableName: travelTable,
           Key: {
             pk: dynamoItem.pk, // pk and sk can be unmarshall
             sk: dynamoItem.sk,
@@ -91,7 +92,7 @@ export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePla
           throw new Error(`[ZaloMessagePlatformRepositoryImpl.uploadFile] not support file type ${fileType}`);
       }
     } catch (error) {
-      console.log('[ZaloMessagePlatformRepositoryImpl.uploadFile] Generated an error', error);
+      logger.log(`[ZaloMessagePlatformRepositoryImpl.uploadFile] Generated an error ${error}`);
       throw error;
     }
   };

@@ -3,6 +3,7 @@ import express, { Request, Response } from 'express';
 import compression from 'compression';
 import { getAwsSecretValue } from 'get-env';
 import { appSyncRepository } from './repositories';
+import logger from './utils/logger';
 
 const app = express();
 app.use(compression());
@@ -49,7 +50,7 @@ app.post('/chat-zalo-webhook', async (req: Request, res: Response) => {
       res.sendStatus(404);
     }
   } catch (e: any) {
-    console.log('[App.ChatZaloWebhook POST] Generated an error', e);
+    logger.log(`[POST /chat-zalo-webhook] Generated an error ${e}`);
     res.json({ message: `${e.name}: ${e.message}` });
   }
 });

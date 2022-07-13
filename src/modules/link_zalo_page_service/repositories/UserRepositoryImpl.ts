@@ -7,9 +7,9 @@ import { UserRepository } from './interfaces/UserRepository';
 
 export default class UserRepositoryImpl implements UserRepository {
   getUserAttributes = async (userId: string) => {
-    const saleChatTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
     const result = await dynamoProvider.query({
-      TableName: saleChatTable,
+      TableName: travelTable,
       KeyConditionExpression: 'begins_with(pk, :pk_tenant) AND sk = :sk_employee',
       ExpressionAttributeValues: {
         ':pk_tenant': { S: `${TENANT_INDEX}#` },

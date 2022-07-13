@@ -32,9 +32,9 @@ export default class FacebookPageRepositoryImpl implements FacebookPageRepositor
   };
 
   saveToDynamo = async (tenantId: string, page: FacebookPage) => {
-    const saleChatTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
     const linkedPages = await dynamoProvider.query({
-      TableName: saleChatTable,
+      TableName: travelTable,
       KeyConditionExpression: 'pk = :pk_tenant AND begins_with(sk, :sk_filter)',
       ExpressionAttributeValues: {
         ':pk_tenant': { S: `${TENANT_INDEX}#${tenantId}` },
@@ -45,9 +45,9 @@ export default class FacebookPageRepositoryImpl implements FacebookPageRepositor
       // Remove previous item before insert new one
       const { sk, pk, ...rest } = AWS.DynamoDB.Converter.unmarshall(linkedPages.Items[0]);
       const linkedPage = rest as FacebookPage;
-      await dynamoProvider.deleteItem(saleChatTable, `${TENANT_INDEX}#${tenantId}`, `${FACEBOOK_PAGE_INDEX}${linkedPage.id}`);
+      await dynamoProvider.deleteItem(travelTable, `${TENANT_INDEX}#${tenantId}`, `${FACEBOOK_PAGE_INDEX}${linkedPage.id}`);
     }
-    await dynamoProvider.putItem(saleChatTable, `${TENANT_INDEX}#${tenantId}`, `${FACEBOOK_PAGE_INDEX}${page.id}`, page);
+    await dynamoProvider.putItem(travelTable, `${TENANT_INDEX}#${tenantId}`, `${FACEBOOK_PAGE_INDEX}${page.id}`, page);
   };
 
   /**
@@ -57,9 +57,9 @@ export default class FacebookPageRepositoryImpl implements FacebookPageRepositor
    * @returns true if the page is linked to another tenant otherwise false
    */
   checkPageLinkedToAnotherTenant = async (pageId: string, tenantId: string) => {
-    const saleChatTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
     const linkedPages = await dynamoProvider.query({
-      TableName: saleChatTable,
+      TableName: travelTable,
       IndexName: 'ReverseIndex',
       KeyConditionExpression: 'sk = :sk_pageId AND begins_with(pk, :pk_filter)',
       ExpressionAttributeValues: {
