@@ -26,3 +26,11 @@ export function linkFacebookPageValidator() {
     body('userAccessToken', 'is required').not().isEmpty(),
   ];
 }
+
+export function linkZaloPageValidator() {
+  return [
+    body('authorizationCode', 'is required').not().isEmpty(),
+    body('pageId', 'is required').not().isEmpty(),
+    body('state', 'is required').not().isEmpty(),
+  ];
+}

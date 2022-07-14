@@ -8,6 +8,9 @@ on:
     types:
       - closed
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+
 env:
   PR_NUMBER: ${{ github.event.pull_request.number }}
   ACTOR_NAME: ${{ github.event.pull_request.user.login }}
@@ -47,25 +50,46 @@ jobs:
       - id: get-changed-files
         uses: Ana06/get-changed-files@v2.1.0
 
-      - name: Get the build service name
+      - name: Get the removed service name
+        id: get-removed-services-name
         run: |
+          REMOVED_SERVICES=
+          for removed_file in ${{ steps.get-changed-files.outputs.removed }}; do
+            SERVICE=$(echo ${removed_file} | grep -oE "src/modules/.*" | grep -E "app.ts|lambda.ts" | sed -E 's/src\/modules\///g' | sed -E 's/\/.*//g')
+            if [ ! -z ${SERVICE} ]; then
+              if [[ "${REMOVED_SERVICES}" != *"${SERVICE}"* ]]; then
+                REMOVED_SERVICES="${SERVICE} ${REMOVED_SERVICES}"
+              fi
+            fi
+          done
+          if [ -z "${REMOVED_SERVICES}" ]; then
+            echo "Not found any services removed!"
+          else
+            echo "Removed service: ${REMOVED_SERVICES}"
+          fi
+          echo ::set-output name=services-removed::"${REMOVED_SERVICES}"
+
+      - name: Get the build service name
+        id: get-services-name
+        run: |
+          REMOVED_SERVICES="${{ steps.get-removed-services-name.outputs.services-removed }}"
           CHANGED_SERVICES=
           for changed_file in ${{ steps.get-changed-files.outputs.all }}; do
             SERVICE=$(echo ${changed_file} | grep -oE "src/modules/.*" | sed -E 's/src\/modules\///g' | sed -E 's/\/.*//g')
             if [ ! -z ${SERVICE} ]; then
-              if [[ "${CHANGED_SERVICES}" != *"${SERVICE}"* ]]; then
+              if [[ "${CHANGED_SERVICES}" != *"${SERVICE}"* && "${REMOVED_SERVICES}" != *"${SERVICE}"* ]]; then
                 CHANGED_SERVICES="${SERVICE} ${CHANGED_SERVICES}"
               fi
             fi
           done
-          if [ -z ${SERVICE} ]; then
+          if [ -z "${CHANGED_SERVICES}" ]; then
             echo "Not found any services changed!"
             echo ::set-output name=services-existed::false
           else
+            echo "Build service: ${CHANGED_SERVICES}"
             echo "CHANGED_SERVICES=${CHANGED_SERVICES}" >> $GITHUB_ENV
             echo ::set-output name=services-existed::true
           fi
-
       # Build serverless
       - name: Build service
         if: ${{ steps.get-services-name.outputs.services-existed == 'true' }}

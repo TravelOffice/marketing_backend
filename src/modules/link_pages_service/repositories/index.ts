@@ -3,15 +3,19 @@
 import FacebookPageRepositoryImpl from './FacebookPageRepositoryImpl';
 import { FacebookPageRepository } from './interfaces/FacebookPageRepository';
 import { UserRepository } from './interfaces/UserRepository';
+import { ZaloPageRepository } from './interfaces/ZaloPageRepository';
 import UserRepositoryImpl from './UserRepositoryImpl';
+import ZaloPageRepositoryImpl from './ZaloPageRepositoryImpl';
 
 interface Repositories {
   facebookPageRepository: FacebookPageRepository,
+  zaloPageRepository: ZaloPageRepository,
   userRepository: UserRepository,
 }
 
 const repositories : Repositories = {
   facebookPageRepository: new FacebookPageRepositoryImpl(),
+  zaloPageRepository: new ZaloPageRepositoryImpl(),
   userRepository: new UserRepositoryImpl(),
 };
 
@@ -19,5 +23,6 @@ const repositories : Repositories = {
 // eslint-disable-next-line import/prefer-default-export
 export const {
   facebookPageRepository,
+  zaloPageRepository,
   userRepository,
 } = repositories;
