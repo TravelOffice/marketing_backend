@@ -22,6 +22,8 @@ export const VALIDATE_BOOLEAN_MSG = 'property must be a boolean';
 
 export const VALIDATE_USERNAME_SYNTAX_STRING_MSG = 'username must not contain # character';
 
+export const VALIDATE_USERNAME_RESERVED_STRING_MSG = 'Invalid username';
+
 export const TENANT_INDEX = 'TENANT';
 
 export const LEAD_INDEX = 'LEAD';
