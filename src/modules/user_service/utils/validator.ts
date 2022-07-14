@@ -9,6 +9,7 @@ import {
   USERNAME_DELIMITER,
   VALIDATE_EMAIL_MSG,
   VALIDATE_NON_EMPTY_STRING_MSG,
+  VALIDATE_USERNAME_RESERVED_STRING_MSG,
   VALIDATE_USERNAME_SYNTAX_STRING_MSG,
 } from './constants';
 
@@ -38,6 +39,10 @@ export function createTenantUserValidator() {
     'role',
   ];
 
+  const reservedUsernames = [
+    'unknown',
+  ];
+
   return [
     body().custom((value) => {
       const keys = Object.keys(value);
@@ -49,7 +54,10 @@ export function createTenantUserValidator() {
       .isString()
       .not()
       .contains(USERNAME_DELIMITER)
-      .withMessage(VALIDATE_USERNAME_SYNTAX_STRING_MSG),
+      .withMessage(VALIDATE_USERNAME_SYNTAX_STRING_MSG)
+      .not()
+      .isIn(reservedUsernames)
+      .withMessage(VALIDATE_USERNAME_RESERVED_STRING_MSG),
 
     body('firstName', VALIDATE_NON_EMPTY_STRING_MSG)
       .optional()
