@@ -1,4 +1,4 @@
-import { ZaloPage } from '../../models/ZaloPage';
+import { ZaloPage } from 'common-models';
 
 export interface LinkZaloPageUseCase {
   invoke : (

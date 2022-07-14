@@ -220,7 +220,17 @@ terraform init -reconfigure
 
 if [ "${ACTION}" == "deploy" ]; then
   terraform apply -auto-approve
+  retVal=$?
+  if [ $retVal -ne 0 ]; then
+      echo "Deploy failed!"
+      exit $retVal
+  fi
 fi
 if [ "${ACTION}" == "destroy" ]; then
   terraform destroy -auto-approve
+  retVal=$?
+  if [ $retVal -ne 0 ]; then
+      echo "Destroy failed!"
+      exit $retVal
+  fi
 fi

@@ -26,7 +26,7 @@ export default class PageRepositoryImpl implements PageRepository {
     if (!pageItems || pageItems.length === 0) {
       return [];
     }
-    const linkedPages = pageItems.map((item: any) => {
+    return pageItems.map((item: any) => {
       const page = AWS.DynamoDB.Converter.unmarshall(item);
       return {
         id: page.id,
@@ -35,7 +35,6 @@ export default class PageRepositoryImpl implements PageRepository {
         platform: page.platform,
       };
     });
-    return linkedPages;
   };
 
   /**

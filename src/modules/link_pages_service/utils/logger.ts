@@ -1,6 +1,7 @@
 const logger = {
   log(message: any) {
     const caller = new Error().stack?.split('\n')[1].trim().split(' ')[2];
+    // eslint-disable-next-line no-console
     console.log(`[${caller}]: ${message}`);
   },
 };

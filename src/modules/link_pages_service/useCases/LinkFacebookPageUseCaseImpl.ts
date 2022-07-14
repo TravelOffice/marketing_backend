@@ -1,4 +1,5 @@
-import { facebookPageRepository, userRepository } from '../repositories';
+import { ChatPlatform } from 'common-models';
+import { facebookPageRepository, pageRepository, userRepository } from '../repositories';
 import { LinkFacebookPageUseCase } from './interfaces/LinkFacebookPageUseCase';
 
 export default class LinkFacebookPageUseCaseImpl implements LinkFacebookPageUseCase {
@@ -21,7 +22,12 @@ export default class LinkFacebookPageUseCaseImpl implements LinkFacebookPageUseC
     const tenantId = userAttributes.tenant;
 
     // Check the page already linked to another tenant or not
-    if (await facebookPageRepository.checkPageLinkedToAnotherTenant(pageId, tenantId)) {
+    const isLinkedPage = await pageRepository.checkPageLinkedToAnotherTenant(
+      pageId,
+      tenantId,
+      ChatPlatform.facebook,
+    );
+    if (isLinkedPage) {
       throw new Error(`Page ${pageId} already linked to another Tenant`);
     }
 

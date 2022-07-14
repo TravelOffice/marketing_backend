@@ -2,10 +2,12 @@ import compression from 'compression';
 import cors from 'cors';
 import { getCurrentUserInfo } from 'decode-token';
 import express, { NextFunction, Request, Response } from 'express';
-import { generateLoginUrlUsecCase, linkFacebookPageUseCase, linkZaloPageUseCase } from './useCases';
+import {
+  generateLoginUrlUsecCase, linkFacebookPageUseCase, linkTelegramPageUseCase, linkZaloPageUseCase,
+} from './useCases';
 import { FAILED, SUCCESS } from './utils/constants';
 import logger from './utils/logger';
-import validate, { linkFacebookPageValidator, linkZaloPageValidator } from './utils/validator';
+import validate, { linkFacebookPageValidator, linkTelegramPageValidator, linkZaloPageValidator } from './utils/validator';
 import wrapResponse from './utils/wrapResponse';
 
 const app = express();
@@ -35,7 +37,7 @@ app.post('/facebook/link', linkFacebookPageValidator(), async (req: Request, res
     const modelNames = await linkFacebookPageUseCase.invoke(username, pageId, userAccessToken);
     res.json(wrapResponse(SUCCESS, modelNames));
   } catch (error: any) {
-    logger.log(`[app.post] Error ${error}`);
+    logger.log(`[POST /facebook/link] Error ${JSON.stringify(error)}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });
@@ -59,6 +61,19 @@ app.get('/zalo/link', async (req: Request, res: Response) => {
     res.json(wrapResponse(SUCCESS, loginUrl));
   } catch (error: any) {
     logger.log(`[GET /zalo/link] Error ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.post('/telegram/link', linkTelegramPageValidator(), async (req: Request, res: Response) => {
+  try {
+    validate(req);
+    const { token } = req.body;
+    const { username } = getCurrentUserInfo(req.headers.authorization!);
+    const telegramPage = await linkTelegramPageUseCase.invoke(username, token);
+    res.json(wrapResponse(SUCCESS, telegramPage));
+  } catch (error: any) {
+    logger.log(`[GET /telegram/link] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });
