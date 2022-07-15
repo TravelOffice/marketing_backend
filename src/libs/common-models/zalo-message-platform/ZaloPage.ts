@@ -1,4 +1,4 @@
-import { ChatPlatform } from 'common-models';
+import { ChatPlatform } from '../graphql-models';
 
 export interface ZaloPage {
   id: string,

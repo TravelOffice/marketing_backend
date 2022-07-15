@@ -25,10 +25,11 @@ locals {
       ATTACHMENT_MESSAGE_BUCKET = module.REMOTE_STATE.STATE.MARKETING.frontend.sale_web.attachment_s3_bucket
       PRESIGNED_URL_EXPIRES     = 60
     },
-    zalo_page_vars = {
-      NODE_ENV          = var.ENV
-      SECRET_MANAGER_ID = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
-      CALLBACK_URL      = "www.traveloffice.shop/zalo/callback"
+    link_pages_vars = {
+      NODE_ENV             = var.ENV
+      SECRET_MANAGER_ID    = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
+      ZALO_CALLBACK_URL    = "www.traveloffice.shop/zalo/callback"
+      TELEGRAM_WEBHOOK_URL = "https://${var.ENV}-marketing-backend.traveloffice.shop/chat-telegram-webhook"
     }
   }
 }

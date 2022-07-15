@@ -1,8 +1,7 @@
-import { FacebookPage } from '../../models/FacebookPage';
+import { FacebookPage } from 'common-models';
 
 export interface FacebookPageRepository {
   exchangeUserAccessToken: (token: string) => Promise<string>,
   getPageAccessToken: (pageId: string, userAccessToken: string) => Promise<FacebookPage>,
   saveToDynamo: (tenantId: string, page: FacebookPage) => Promise<void>,
-  checkPageLinkedToAnotherTenant: (pageId: string, tenantId: string) => Promise<boolean>
 }

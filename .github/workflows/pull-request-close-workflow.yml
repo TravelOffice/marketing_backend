@@ -27,6 +27,9 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
+      - name: downcase ACTOR_NAME
+        run: |
+          echo "ACTOR_NAME=${ACTOR_NAME,,}" >> $GITHUB_ENV
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
 
