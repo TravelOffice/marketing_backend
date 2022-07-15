@@ -1,4 +1,5 @@
-import { zaloPageRepository, userRepository } from '../repositories';
+import { ChatPlatform } from 'common-models';
+import { zaloPageRepository, userRepository, pageRepository } from '../repositories';
 import { LinkZaloPageUseCase } from './interfaces/LinkZaloPageUseCase';
 
 export default class LinkZaloPageUseCaseImpl implements LinkZaloPageUseCase {
@@ -20,8 +21,13 @@ export default class LinkZaloPageUseCaseImpl implements LinkZaloPageUseCase {
     if (!userAttributes) throw new Error('User not existed!');
     const tenantId = userAttributes.tenant;
 
-    // Check the page already linked to another tenant or not
-    if (await zaloPageRepository.checkPageLinkedToAnotherTenant(pageId, tenantId)) {
+    // Check whether the page is already linked to another tenant or not
+    const isLinkedPage = await pageRepository.checkPageLinkedToAnotherTenant(
+      pageId,
+      tenantId,
+      ChatPlatform.zalo,
+    );
+    if (isLinkedPage) {
       throw new Error(`Page ${pageId} already linked to another Tenant`);
     }
 

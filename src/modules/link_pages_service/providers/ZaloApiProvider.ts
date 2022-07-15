@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { getAwsSecretValue } from 'get-env';
+import logger from '../utils/logger';
 
 export default class ZaloApiProvider {
   private readonly axiosInstance = axios.create();
@@ -35,7 +36,7 @@ export default class ZaloApiProvider {
     if (response.data.error) {
       throw new Error(response.data.error_name);
     } else {
-      console.info('[ZaloApiProvider.getAccessToken] Get access token successfully:', response.data);
+      logger.log(`[ZaloApiProvider.getAccessToken] Get access token successfully: ${response.data}`);
       return response.data;
     }
   };
@@ -58,7 +59,7 @@ export default class ZaloApiProvider {
     if (response.data.error !== 0) {
       throw new Error(response.data.message);
     } else {
-      console.info('[ZaloApiProvider.getOfficialAccountInfo] Get official account successfully:', response.data);
+      logger.log(`[ZaloApiProvider.getOfficialAccountInfo] Get official account successfully: ${response.data}`);
       return response.data.data;
     }
   };

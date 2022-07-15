@@ -4,3 +4,4 @@ export * from './TelegramTypes';
 export * from './TelegramChat';
 export * from './TelegramUser';
 export * from './TelegramWebhookMessageEvent';
+export * from './TelegramBot';

@@ -1,6 +1,6 @@
 import { Request } from 'express';
 import {
-  body, header, ValidationError, validationResult,
+  body, ValidationError, validationResult,
 } from 'express-validator';
 
 export default function validate(req: Request) {
@@ -21,16 +21,30 @@ export default function validate(req: Request) {
 
 export function linkFacebookPageValidator() {
   return [
-    header('authorization', 'must be JWT').isJWT(),
-    body('pageId', 'is required').not().isEmpty(),
-    body('userAccessToken', 'is required').not().isEmpty(),
+    body('pageId')
+      .not().isEmpty()
+      .isString(),
+    body('userAccessToken')
+      .not().isEmpty()
+      .isString(),
   ];
 }
 
 export function linkZaloPageValidator() {
   return [
-    body('authorizationCode', 'is required').not().isEmpty(),
-    body('pageId', 'is required').not().isEmpty(),
-    body('state', 'is required').not().isEmpty(),
+    body('pageId')
+      .not().isEmpty()
+      .isString(),
+    body('state')
+      .not().isEmpty()
+      .isString(),
+  ];
+}
+
+export function linkTelegramPageValidator() {
+  return [
+    body('token')
+      .not().isEmpty()
+      .isString(),
   ];
 }
