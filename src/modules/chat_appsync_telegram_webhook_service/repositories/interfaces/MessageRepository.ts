@@ -1,7 +1,6 @@
 import {
-  ChatPlatform, TelegramMessageContent,
+  ChatPlatform, TelegramBot, TelegramMessageContent,
 } from 'common-models';
-import { Page } from '../../models/Page';
 
 export interface MessageRepository {
   sendReceivedMessageCommand: (
@@ -13,14 +12,14 @@ export interface MessageRepository {
   saveChatMessage: (
     tenantId: string,
     platform: ChatPlatform,
-    page: Page,
+    page: TelegramBot,
     message: TelegramMessageContent
   ) => Promise<void>
 
   saveConversation: (
     tenantId: string,
     platform: ChatPlatform,
-    page: Page,
+    page: TelegramBot,
     message: TelegramMessageContent
   ) => Promise<void>
 }

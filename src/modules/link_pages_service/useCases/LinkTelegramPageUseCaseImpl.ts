@@ -56,7 +56,10 @@ export default class LinkTelegramPageUseCaseImpl implements LinkTelegramPageUseC
     logger.log(`[LinkTelegramPageUsecase.invoke] Register webhook: ${JSON.stringify(rsRegisterWebhook)}`);
 
     // Save the page information to the correct tenant.
-    await telegramPageRepository.saveToDynamo(tenantId, { ...bot, secretToken });
+    await telegramPageRepository.saveToDynamo(
+      tenantId,
+      { ...bot, secretToken, name: bot.first_name },
+    );
 
     const { accessToken, ...telegramBot } = bot;
 

@@ -1,7 +1,6 @@
 import AWS from 'aws';
-import { ChatPlatform } from 'common-models';
+import { ChatPlatform, TelegramBot } from 'common-models';
 import { getAwsSecretValue } from 'get-env';
-import { Page } from '../models/Page';
 import { dynamoProvider } from '../providers';
 import { QueryInput } from '../providers/DynamoProvider';
 import { PAGE_INDEX, TENANT_INDEX } from '../utils/constants';
@@ -33,6 +32,6 @@ export default class PageRepositoryImpl implements PageRepository {
     const {
       pk, sk, typeLsi, ...page
     } = pageItem;
-    return page as Page;
+    return page as TelegramBot;
   };
 }

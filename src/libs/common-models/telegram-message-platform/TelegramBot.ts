@@ -2,6 +2,7 @@ import { ChatPlatform } from '../graphql-models';
 import { User } from './TelegramUser';
 
 export interface TelegramBot extends User {
+  name: string,
   can_join_groups: boolean,
   can_read_all_group_messages: boolean,
   supports_inline_queries: boolean,
