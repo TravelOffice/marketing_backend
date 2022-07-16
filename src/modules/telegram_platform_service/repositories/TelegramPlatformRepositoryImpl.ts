@@ -4,7 +4,12 @@ import { getAwsSecretValue } from 'get-env';
 import { RestrictedTelegramConversation } from '../models';
 import { dynamoProvider } from '../providers';
 import { QueryInput } from '../providers/DynamoProvider';
-import { ASSIGNEE_INDEX, CONVERSATION_INDEX, TENANT_INDEX } from '../utils/constants';
+import {
+  ASSIGNEE_INDEX,
+  CONVERSATION_INDEX,
+  PARTITION_KEY_DELIMITER,
+  TENANT_INDEX,
+} from '../utils/constants';
 import { TelegramPlatformRepository } from './interfaces/TelegramPlatformRepository';
 
 export default class TelegramPlatformRepositoryImpl implements TelegramPlatformRepository {
@@ -51,9 +56,10 @@ export default class TelegramPlatformRepositoryImpl implements TelegramPlatformR
         const {
           sk, pk, typeLsi, ...rest
         } = conversation;
+        const [, conversationId] = sk.split(PARTITION_KEY_DELIMITER);
         return {
           ...rest,
-          conversationId: sk,
+          conversationId,
         } as RestrictedTelegramConversation;
       });
     }
