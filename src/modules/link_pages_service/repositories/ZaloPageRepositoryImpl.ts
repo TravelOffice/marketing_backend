@@ -1,4 +1,3 @@
-import AWS from 'aws';
 import { ChatPlatform, ZaloPage } from 'common-models';
 import { getAwsSecretValue, getEnv } from 'get-env';
 import { generateChallenge } from 'pkce-challenge';
@@ -92,20 +91,6 @@ export default class ZaloPageRepositoryImpl implements ZaloPageRepository {
   saveOAInfoToDynamo = async (tenantId: string, page: ZaloPage) => {
     const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
     const zaloIndex = `${PAGE_INDEX}#${ChatPlatform.zalo.toUpperCase()}`;
-    const linkedPages = await dynamoProvider.query({
-      TableName: travelTable,
-      KeyConditionExpression: 'pk = :pk_tenant AND begins_with(sk, :sk_filter)',
-      ExpressionAttributeValues: {
-        ':pk_tenant': { S: `${TENANT_INDEX}#${tenantId}` },
-        ':sk_filter': { S: `${PAGE_INDEX}#${ChatPlatform.zalo.toUpperCase()}` },
-      },
-    });
-    if (linkedPages.Items && linkedPages.Items.length > 0) {
-      // Remove the previous item before inserting new one
-      const { sk, pk, ...rest } = AWS.DynamoDB.Converter.unmarshall(linkedPages.Items[0]);
-      const linkedPage = rest as ZaloPage;
-      await dynamoProvider.deleteItem(travelTable, `${TENANT_INDEX}#${tenantId}`, `${zaloIndex}#${linkedPage.id}`);
-    }
     await dynamoProvider.putItem(travelTable, `${TENANT_INDEX}#${tenantId}`, `${zaloIndex}#${page.id}`, page);
   };
 
