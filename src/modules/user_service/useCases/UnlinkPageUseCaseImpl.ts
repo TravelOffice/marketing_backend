@@ -1,5 +1,5 @@
 import { ChatPlatform } from 'common-models';
-import { pageRepository, userRepository } from '../repositories';
+import { pageRepository, telegramRepository, userRepository } from '../repositories';
 import { UnlinkPageUseCase } from './interfaces/UnlinkPageUseCase';
 
 export default class UnlinkPageUseCaseImpl implements UnlinkPageUseCase {
@@ -24,6 +24,16 @@ export default class UnlinkPageUseCaseImpl implements UnlinkPageUseCase {
     // Get the current tenant from authenticated user
     const tenantId = userAttributes.tenant;
     if (!tenantId) throw new Error(`User [${username}] is missing tenant attribute`);
+
+    // Delete webhook in case unlink Telegram Bot
+    if (platform === ChatPlatform.telegram) {
+      const telegramBot = await telegramRepository.get(tenantId, pageId);
+      if (telegramBot) {
+        await telegramRepository.deleteWebhook(telegramBot.accessToken);
+      } else {
+        throw new Error(`Telegram Bot ${pageId} isn't linked`);
+      }
+    }
 
     // Get the linked page
     return pageRepository.delete(tenantId, platform, pageId);

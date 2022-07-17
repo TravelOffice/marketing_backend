@@ -1,4 +1,6 @@
-import { ChatPlatform } from 'common-models';
+import {
+  ChatPlatform,
+} from 'common-models';
 import { Page } from '../../models/Page';
 
 export interface PageRepository {

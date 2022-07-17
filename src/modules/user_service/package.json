@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "@vendia/serverless-express": "^4.5.2",
+    "axios": "^0.26.0",
     "aws": "file:../../libs/aws-sdk",
     "common-models": "file:../../libs/common-models",
     "compression": "^1.7.4",
