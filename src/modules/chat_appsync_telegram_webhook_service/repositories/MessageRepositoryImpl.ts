@@ -1,10 +1,9 @@
 import {
   ChatPlatform, DDBConversation, DDBMessage, MessageEntity, ReceiveMessageCommandArgs,
-  TelegramMessageContent,
+  TelegramBot, TelegramMessageContent,
 } from 'common-models';
 import { getAwsSecretValue } from 'get-env';
 import { MessageGroupType } from '../models/Message';
-import { Page } from '../models/Page';
 import { appSyncProvider, dynamoProvider } from '../providers';
 import {
   ASSIGNEE_INDEX,
@@ -71,7 +70,7 @@ export default class MessageRepositoryImpl implements MessageRepository {
   saveChatMessage = async (
     tenantId: string,
     platform: ChatPlatform,
-    page: Page,
+    page: TelegramBot,
     message: TelegramMessageContent,
   ) => {
     // Save the message to DynamoDB
@@ -108,7 +107,7 @@ export default class MessageRepositoryImpl implements MessageRepository {
   saveConversation = async (
     tenantId: string,
     platform: ChatPlatform,
-    page: Page,
+    page: TelegramBot,
     message: TelegramMessageContent,
   ) => {
     // Get the current conversation information

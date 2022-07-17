@@ -2,8 +2,9 @@ import compression from 'compression';
 import cors from 'cors';
 import express, { Request, Response } from 'express';
 import { receiveTelegramWebhookUseCase } from './useCases';
-import { EVENT_RECEIVED } from './utils/constants';
+import { EVENT_RECEIVED, SECRET_TOKEN_HEADER } from './utils/constants';
 import logger from './utils/logger';
+import validate, { receiveWebhookValidator } from './utils/validator';
 
 const app = express();
 app.use(compression());
@@ -37,15 +38,17 @@ app.use(express.urlencoded({ extended: true }));
       }
     }'
  */
-app.post('/chat-telegram-webhook/:tenantId', async (req: Request, res: Response) => {
+app.post('/chat-telegram-webhook/:tenantId', receiveWebhookValidator(), async (req: Request, res: Response) => {
   try {
+    validate(req);
     const { tenantId } = req.params;
     const { body } = req;
+    const secretToken = req.headers[SECRET_TOKEN_HEADER]?.toString() || '';
 
     // Checks this is an event from a page subscription
     logger.log(`[POST /chat-telegram-webhook/:tenantId] Received telegram webhook event [${tenantId}]: ${JSON.stringify(body, null, 2)}`);
 
-    await receiveTelegramWebhookUseCase.invoke(body, tenantId);
+    await receiveTelegramWebhookUseCase.invoke(body, tenantId, secretToken);
     // Returns a '200 OK' response to all requests
     res.status(200).send(EVENT_RECEIVED);
   } catch (e: any) {

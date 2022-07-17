@@ -16,10 +16,24 @@ export default class ReceiveTelegramWebhookUseCaseImpl implements ReceiveTelegra
    * @param webhookEvent The telegram received webhook event
    * @param tenantId The tenant ID
    */
-  invoke = async (webhookEvent: TelegramWebhookMessageEvent, tenantId: string) => {
+  invoke = async (
+    webhookEvent: TelegramWebhookMessageEvent,
+    tenantId: string,
+    secretToken: string,
+  ) => {
     // Get message payload
     const { message } = webhookEvent;
     const platform = ChatPlatform.telegram;
+
+    // Get the linked page information
+    const page = await pageRepository.get(tenantId, platform);
+    if (!page) {
+      throw new Error('This page is not linked yet!');
+    }
+
+    if (page.secretToken !== secretToken) {
+      throw new Error('This webhook event is invalid');
+    }
 
     // TODO: Other type of webhook event will be supported later. Now only supported message event
     if (!message) {
@@ -33,12 +47,6 @@ export default class ReceiveTelegramWebhookUseCaseImpl implements ReceiveTelegra
 
     // Send received message command to AppSync
     await messageRepository.sendReceivedMessageCommand(tenantId, platform, { ...message });
-
-    // Get the linked page information
-    const page = await pageRepository.get(tenantId, platform);
-    if (!page) {
-      throw new Error('This page is not linked yet!');
-    }
 
     // Save the chat message
     await messageRepository.saveChatMessage(tenantId, platform, page, message);

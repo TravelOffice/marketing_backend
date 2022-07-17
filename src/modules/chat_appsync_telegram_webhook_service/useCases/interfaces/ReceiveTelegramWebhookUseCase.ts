@@ -1,5 +1,9 @@
 import { TelegramWebhookMessageEvent } from 'common-models';
 
 export interface ReceiveTelegramWebhookUseCase {
-  invoke: (webhookEvent: TelegramWebhookMessageEvent, tenantId: string) => Promise<void>;
+  invoke: (
+    webhookEvent: TelegramWebhookMessageEvent,
+    tenantId: string,
+    secretToken: string
+  ) => Promise<void>;
 }
