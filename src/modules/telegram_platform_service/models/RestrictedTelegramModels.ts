@@ -11,3 +11,12 @@ export interface RestrictedTelegramConversation extends RestrictedDDBModel<DDBCo
 }
 
 export interface RestrictedTelegramMessage extends RestrictedDDBModel<DDBMessage> { }
+
+export interface TelegramPagingMessage {
+  nextToken?: string
+  messages: Array<RestrictedTelegramMessage>,
+}
+
+export interface TelegramConversationWithAssignee extends RestrictedTelegramConversation {
+  assignee: string
+}

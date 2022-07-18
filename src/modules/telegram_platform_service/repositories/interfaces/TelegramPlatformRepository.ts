@@ -1,7 +1,22 @@
-import { RestrictedTelegramConversation } from '../../models';
+import {
+  RestrictedTelegramConversation,
+  TelegramConversationWithAssignee,
+  TelegramPagingMessage,
+} from '../../models';
 
 export interface TelegramPlatformRepository {
-  getChat: () => Promise<void>,
+  getChat: (
+    tenantId: string,
+    botId: string,
+    chatId: string,
+  ) => Promise<TelegramConversationWithAssignee>,
+  getConversationMessages: (
+    tenantId: string,
+    botId: string,
+    chatId: string,
+    nextToken?: string,
+    limit?: number,
+  ) => Promise<TelegramPagingMessage>,
   getUserProfile: () => Promise<void>,
   sendMessage: () => Promise<void>,
   getConversations: (

@@ -34,6 +34,10 @@ export const LATEST_QUOTE_INDEX = 'LATEST_QUOTE';
 
 export const CONVERSATION_INDEX = 'CONVERSATION';
 
+export const MESSAGE_INDEX = 'MESSAGE';
+
 export const ASSIGNEE_INDEX = 'ASSIGNEE';
 
 export const PARTITION_KEY_DELIMITER = '#';
+
+export const PAGINATION_LIMIT = 10;
