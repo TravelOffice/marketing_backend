@@ -1,4 +1,4 @@
-import { getTelegramConversationsUseCase } from './usecases';
+import { getTelegramConversationsUseCase, getTelegramMessagesUseCase } from './usecases';
 import logger from './utils/logger';
 
 interface AppSyncEvent {
@@ -27,6 +27,20 @@ const handleAppSyncEvent = async (event: AppSyncEvent) => {
       resolverMessage = 'The conversations has been fetched from Telegram platform';
       returnedData = conversations;
       logger.log(`Fetched conversations for user ${event.tenant}#${event.username} ${JSON.stringify(conversations, null, 2)}`);
+      break;
+    }
+    case 'allTelegramMessages': {
+      const messages = await getTelegramMessagesUseCase.invoke(
+        event.tenant,
+        event.username,
+        event.arguments.pageId,
+        event.arguments.conversationId,
+        event.arguments.nextToken,
+        event.arguments.limit,
+      );
+      resolverMessage = 'The messages has been fetched from Telegram platform';
+      returnedData = messages;
+      logger.log(`Fetched messages for user ${event.tenant}#${event.username}: ConversationId ${event.arguments.conversationId} ${JSON.stringify(messages, null, 2)}`);
       break;
     }
 
