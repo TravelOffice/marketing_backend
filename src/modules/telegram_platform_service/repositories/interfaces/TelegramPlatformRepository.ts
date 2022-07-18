@@ -7,6 +7,6 @@ export interface TelegramPlatformRepository {
   getConversations: (
     tenantId: string,
     botId: string,
-    assigneeId: string,
+    assigneeId?: string,
   ) => Promise<Array<RestrictedTelegramConversation>>,
 }

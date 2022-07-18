@@ -34,9 +34,11 @@ export default class TelegramPlatformRepositoryImpl implements TelegramPlatformR
     throw new Error('Method is not implemented yet.');
   };
 
-  getConversations = async (tenantId: string, botId: string, assigneeId: string) => {
+  getConversations = async (tenantId: string, botId: string, assigneeId?: string) => {
     const dynamoTable = await getAwsSecretValue('DYNAMO_CHAT_TABLE');
     const telegramPlatformStr: ChatPlatformStrings = 'telegram'; // Platform unique code
+    // Combination of ASSIGNEE#<username>
+    const assigneeIndex = assigneeId ? `${ASSIGNEE_INDEX}#${assigneeId}` : `${ASSIGNEE_INDEX}#`;
 
     const params: QueryInput = {
       TableName: dynamoTable,
@@ -45,8 +47,7 @@ export default class TelegramPlatformRepositoryImpl implements TelegramPlatformR
       ExpressionAttributeValues: {
         // Combination of TENANT#<tenant_id>#CONVERSATION#<platform>#<id>
         ':pk': { S: `${TENANT_INDEX}#${tenantId}#${CONVERSATION_INDEX}#${telegramPlatformStr.toUpperCase()}#${botId}` },
-        // Combination of ASSIGNEE#<username>
-        ':lsi_filter_value': { S: `${ASSIGNEE_INDEX}#${assigneeId}` },
+        ':lsi_filter_value': { S: assigneeIndex },
       },
     };
     const { Items: conversationItems } = await dynamoProvider.rawQuery(params);
