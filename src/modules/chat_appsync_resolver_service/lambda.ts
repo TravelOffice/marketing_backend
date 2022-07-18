@@ -119,11 +119,11 @@ const handleFbZaloAppSyncEvent = async (event: AppSyncEvent) => {
 // eslint-disable-next-line import/prefer-default-export
 export const handler = async (event: AppSyncEvent) => {
   const eventField = event.field;
-  const { platform } = event.arguments;
+  const { chatPlatform } = event.arguments;
 
   // Check whether platform is telegram
   // Force `allTelegramConversations`, `allTelegramMessages` as telegram event
-  const isTelegramEvent = eventField.startsWith('allTelegram') || platform === ChatPlatform.telegram;
+  const isTelegramEvent = eventField.startsWith('allTelegram') || chatPlatform === ChatPlatform.telegram;
   if (isTelegramEvent) {
     // Invoke `telegram_platform_service` service to get the data from Telegram
     const invokeParams: AWS.Lambda.Types.InvocationRequest = {

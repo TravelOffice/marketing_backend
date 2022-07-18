@@ -1,3 +1,4 @@
+import { SendMessageOptions, TelegramMessage } from 'common-models';
 import {
   RestrictedTelegramConversation,
   TelegramConversationWithAssignee,
@@ -18,7 +19,15 @@ export interface TelegramPlatformRepository {
     limit?: number,
   ) => Promise<TelegramPagingMessage>,
   getUserProfile: () => Promise<void>,
-  sendMessage: () => Promise<void>,
+  getAccessToken: (
+    tenantId: string, botId: string,
+  ) => Promise<string>
+  sendTextMessage: (
+    accessToken: string,
+    chatId: string,
+    text: string,
+    options?: SendMessageOptions,
+  ) => Promise<TelegramMessage>,
   getConversations: (
     tenantId: string,
     botId: string,

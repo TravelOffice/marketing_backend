@@ -41,3 +41,7 @@ export const ASSIGNEE_INDEX = 'ASSIGNEE';
 export const PARTITION_KEY_DELIMITER = '#';
 
 export const PAGINATION_LIMIT = 10;
+
+export const PAGE_INDEX = 'PAGE';
+
+export const UNKNOWN_USER = 'unknown';
