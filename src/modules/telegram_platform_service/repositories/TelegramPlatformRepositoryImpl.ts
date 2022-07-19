@@ -1,5 +1,8 @@
 import AWS from 'aws';
-import { ChatPlatform, ChatPlatformStrings } from 'common-models';
+import {
+  ChatPlatform,
+  ChatPlatformStrings, SendMessageOptions,
+} from 'common-models';
 import { getAwsSecretValue } from 'get-env';
 import {
   RestrictedTelegramConversation,
@@ -7,7 +10,7 @@ import {
   TelegramConversationWithAssignee,
   TelegramPagingMessage,
 } from '../models';
-import { dynamoProvider } from '../providers';
+import { dynamoProvider, telegramProvider } from '../providers';
 import { QueryInput } from '../providers/DynamoProvider';
 import {
   ASSIGNEE_INDEX,
@@ -16,6 +19,7 @@ import {
   PAGINATION_LIMIT,
   PARTITION_KEY_DELIMITER,
   TENANT_INDEX,
+  PAGE_INDEX,
 } from '../utils/constants';
 import { TelegramPlatformRepository } from './interfaces/TelegramPlatformRepository';
 
@@ -111,13 +115,6 @@ export default class TelegramPlatformRepositoryImpl implements TelegramPlatformR
     throw new Error('Method is not implemented yet.');
   };
 
-  /**
-   * Send message to Telegram user
-   */
-  sendMessage = async () => {
-    throw new Error('Method is not implemented yet.');
-  };
-
   getConversations = async (tenantId: string, botId: string, assigneeId?: string) => {
     const dynamoTable = await getAwsSecretValue('DYNAMO_CHAT_TABLE');
     const telegramPlatformStr: ChatPlatformStrings = 'telegram'; // Platform unique code
@@ -150,4 +147,26 @@ export default class TelegramPlatformRepositoryImpl implements TelegramPlatformR
     }
     return [];
   };
+
+  getAccessToken = async (tenantId: string, botId: string) => {
+    const dynamoTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const telegramPlatformStr: ChatPlatformStrings = 'telegram';
+    const pk = `${TENANT_INDEX}#${tenantId}`;
+    const sk = `${PAGE_INDEX}#${telegramPlatformStr.toUpperCase()}#${botId}`;
+    const telegramBot = await dynamoProvider.getItem(dynamoTable, pk, sk);
+    if (telegramBot) {
+      return telegramBot.accessToken;
+    }
+    throw new Error(`[TelegramPlatformRepository.getAccessToken] Can't get bot ${botId} token`);
+  };
+
+  /**
+   * Send message to Telegram user
+   */
+  sendTextMessage = async (
+    accessToken: string,
+    chatId: string,
+    text: string,
+    options?: SendMessageOptions,
+  ) => telegramProvider.sendTextMessage(accessToken, chatId, text, options);
 }

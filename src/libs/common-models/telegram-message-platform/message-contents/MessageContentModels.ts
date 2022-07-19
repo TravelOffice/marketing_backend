@@ -3,13 +3,22 @@ import { PhotoSize } from './FileBasedModels';
 import { User } from '../TelegramUser';
 
 /// MESSAGE CONTENT MODELS ///
+export interface MessageEntity {
+  type: MessageEntityType;
+  offset: number;
+  length: number;
+  url?: string;
+  user?: User;
+  language?: string;
+}
+
 export interface Game {
   title: string;
   description: string;
   photo: PhotoSize[];
-  text?: string | undefined;
-  text_entities?: MessageEntity[] | undefined;
-  animation?: Animation | undefined;
+  text?: string;
+  text_entities?: MessageEntity[];
+  animation?: Animation;
 }
 
 export interface MaskPosition {
@@ -25,19 +34,19 @@ export interface Sticker {
   is_animated: boolean;
   width: number;
   height: number;
-  thumb?: PhotoSize | undefined;
-  emoji?: string | undefined;
-  set_name?: string | undefined;
-  mask_position?: MaskPosition | undefined;
-  file_size?: number | undefined;
+  thumb?: PhotoSize;
+  emoji?: string;
+  set_name?: string;
+  mask_position?: MaskPosition;
+  file_size?: number;
 }
 
 export interface Contact {
   phone_number: string;
   first_name: string;
-  last_name?: string | undefined;
-  user_id?: number | undefined;
-  vcard?: string | undefined;
+  last_name?: string;
+  user_id?: number;
+  vcard?: string;
 }
 
 export interface Dice {
@@ -54,8 +63,8 @@ export interface Venue {
   location: Location;
   title: string;
   address: string;
-  foursquare_id?: string | undefined;
-  foursquare_type?: string | undefined;
+  foursquare_id?: string;
+  foursquare_type?: string;
 }
 
 type PollType = 'regular' | 'quiz';
@@ -74,13 +83,4 @@ export interface Poll {
   allows_multiple_answers: boolean;
   type: PollType;
   total_voter_count: number;
-}
-
-export interface MessageEntity {
-  type: MessageEntityType;
-  offset: number;
-  length: number;
-  url?: string | undefined;
-  user?: User | undefined;
-  language?: string | undefined;
 }

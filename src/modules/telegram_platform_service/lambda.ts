@@ -1,4 +1,4 @@
-import { getTelegramConversationsUseCase, getTelegramMessagesUseCase } from './usecases';
+import { getTelegramConversationsUseCase, getTelegramMessagesUseCase, sendMessageUseCase } from './usecases';
 import logger from './utils/logger';
 
 interface AppSyncEvent {
@@ -43,6 +43,19 @@ const handleAppSyncEvent = async (event: AppSyncEvent) => {
       logger.log(`Fetched messages for user ${event.tenant}#${event.username}: ConversationId ${event.arguments.conversationId} ${JSON.stringify(messages, null, 2)}`);
       break;
     }
+    case 'sendMessage': {
+      const sentMessage = await sendMessageUseCase.invoke(
+        event.tenant,
+        event.arguments.sender,
+        event.arguments.recipient,
+        event.arguments.messageData.text,
+        event.arguments.messageData.options,
+      );
+      resolverMessage = 'The message has been sent from Telegram bot';
+      returnedData = sentMessage;
+      logger.log(`Sent message successfully: ${JSON.stringify(returnedData, null, 2)}`);
+      break;
+    }
 
     default:
       throw new Error(`Event field ${field} is not supported yet.`);
@@ -63,7 +76,7 @@ const handleAppSyncEvent = async (event: AppSyncEvent) => {
 // eslint-disable-next-line import/prefer-default-export
 export const handler = async (event: AppSyncEvent, context: any) => {
   try {
-    logger.log(`Forwarded AppSync event ${event}`);
+    logger.log(`Forwarded AppSync event ${JSON.stringify(event)}`);
     return handleAppSyncEvent(event);
   } catch (error) {
     context.fail(error);

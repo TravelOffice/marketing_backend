@@ -7,8 +7,7 @@ export default class TelegramApiProvider {
 
   get = async (url: string, params?: Object) => {
     try {
-      const query : any = { ...params };
-      const response = await this.axiosInstance.get(url, { params: query });
+      const response = await this.axiosInstance.get(url, { params });
       return response.data.result;
     } catch (e: any) {
       if (axios.isAxiosError(e)) {
