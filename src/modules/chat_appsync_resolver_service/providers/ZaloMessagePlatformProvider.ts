@@ -5,6 +5,7 @@ import {
   ZaloMessageResponsePayload,
   ZaloRefreshTokenResponsePayload,
 } from '../models';
+import logger from '../utils/logger';
 
 export default class ZaloMessagePlatformProvider {
   private readonly messagePlatformBaseUrl: string = 'https://openapi.zalo.me/v2.0';
@@ -46,7 +47,7 @@ export default class ZaloMessagePlatformProvider {
     if (response.data.error) {
       throw new Error(response.data.error_name);
     } else {
-      console.info('[ZaloMessagePlatformProvider.refreshToken] Refresh token successfully:', response.data);
+      logger.log('[ZaloMessagePlatformProvider.refreshToken] Refresh token successfully:', response.data);
       return response.data;
     }
   };
@@ -73,7 +74,7 @@ export default class ZaloMessagePlatformProvider {
       },
     );
     if (response.data.error === 0) {
-      console.info(
+      logger.log(
         `[ZaloMessagePlatformProvider.sendMessage] The message from page ${pageToken} has been sent, response message from Message Platform`,
         response.data,
       );
@@ -109,7 +110,7 @@ export default class ZaloMessagePlatformProvider {
       },
     );
     if (response.data.error === 0) {
-      console.info(
+      logger.log(
         '[ZaloMessagePlatformProvider.getConversations] Get conversations successfully:',
         response.data,
       );
@@ -147,7 +148,7 @@ export default class ZaloMessagePlatformProvider {
       },
     );
     if (response.data.error === 0) {
-      console.info(
+      logger.log(
         `[ZaloMessagePlatformProvider.getMessages] Return messages of user ${userId} with data`,
         response.data,
       );

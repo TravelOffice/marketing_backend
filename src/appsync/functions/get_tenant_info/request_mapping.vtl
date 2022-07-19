@@ -22,7 +22,7 @@
 #if( $context.identity )
     #set( $indentity = $context.identity.username.split("[$USERNAME_DELIMITER]") )
     #set( $indentitySize = $indentity.size() )
-    #if( $indentitySize < 1 || $indentitySize) > 2 )
+    #if( $indentitySize < 1 || $indentitySize > 2 )
       $util.error('GetTenantInfo: Invalid authenticated username!')
     #else
       #set( $tenant = $indentity.get(0) )

@@ -36,7 +36,7 @@ export default class FbMessagePlatformRepositoryImpl implements FbMessagePlatfor
     };
     const rs = await dynamoProvider.query(params);
     if (rs.Items && rs.Items?.length > 0) {
-      console.info('[FbMessagePlatformRepositoryImpl.getFbMessagePlatformToken] DynamoDB item', rs.Items[0]);
+      logger.log('[FbMessagePlatformRepositoryImpl.getFbMessagePlatformToken] DynamoDB item', rs.Items[0]);
       return rs.Items[0].accessToken;
     }
     throw new Error(`Can not get token for Facebook page with id ${pageId}`);
