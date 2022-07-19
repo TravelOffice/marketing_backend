@@ -7,37 +7,37 @@ export interface ChatPhoto {
 }
 
 export interface ChatPermissions {
-  can_send_messages?: boolean | undefined;
-  can_send_media_messages?: boolean | undefined;
-  can_send_polls?: boolean | undefined;
-  can_send_other_messages?: boolean | undefined;
-  can_add_web_page_previews?: boolean | undefined;
-  can_change_info?: boolean | undefined;
-  can_invite_users?: boolean | undefined;
-  can_pin_messages?: boolean | undefined;
+  can_send_messages?: boolean;
+  can_send_media_messages?: boolean;
+  can_send_polls?: boolean;
+  can_send_other_messages?: boolean;
+  can_add_web_page_previews?: boolean;
+  can_change_info?: boolean;
+  can_invite_users?: boolean;
+  can_pin_messages?: boolean;
 }
 
 export interface TelegramChat {
   id: number;
   type: ChatType;
-  title?: string | undefined;
-  username?: string | undefined;
-  first_name?: string | undefined;
-  last_name?: string | undefined;
-  photo?: ChatPhoto | undefined;
-  description?: string | undefined;
-  invite_link?: string | undefined;
-  pinned_message?: TelegramMessage | undefined;
-  permissions?: ChatPermissions | undefined;
-  can_set_sticker_set?: boolean | undefined;
-  sticker_set_name?: string | undefined;
-  has_private_forwards?: boolean | undefined;
-  has_protected_content?: boolean | undefined;
-  slow_mode_delay?: number | undefined;
-  message_auto_delete_time?: number | undefined;
-  linked_chat_id?: number | undefined;
+  title?: string;
+  username?: string;
+  first_name?: string;
+  last_name?: string;
+  photo?: ChatPhoto;
+  description?: string;
+  invite_link?: string;
+  pinned_message?: TelegramMessage;
+  permissions?: ChatPermissions;
+  can_set_sticker_set?: boolean;
+  sticker_set_name?: string;
+  has_private_forwards?: boolean;
+  has_protected_content?: boolean;
+  slow_mode_delay?: number;
+  message_auto_delete_time?: number;
+  linked_chat_id?: number;
   /**
    * @deprecated since version Telegram Bot API 4.4 - July 29, 2019
    */
-  all_members_are_administrators?: boolean | undefined;
+  all_members_are_administrators?: boolean;
 }
