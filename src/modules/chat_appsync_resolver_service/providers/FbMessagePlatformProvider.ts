@@ -4,6 +4,7 @@ import {
   FacebookUserProfile,
   SendFacebookMessageRequestPayload,
 } from '../models';
+import logger from '../utils/logger';
 
 export default class FbMessagePlatformProvider {
   private readonly messagePlatformBaseUrl: string = 'https://graph.facebook.com/v13.0';
@@ -37,7 +38,7 @@ export default class FbMessagePlatformProvider {
       `/me/messages?access_token=${pageToken}`,
       messagePayload,
     );
-    console.info(
+    logger.log(
       `[FbMessagePlatformProvider.sendMessage] The message from page ${pageToken} has been sent, response message from Message Platform`,
       response.data,
     );
@@ -52,7 +53,7 @@ export default class FbMessagePlatformProvider {
     pageId: string,
   ): Promise<FacebookMessageResponsePayload> => {
     const response = await this.axiosInstance.get(`${pageId}/conversations?access_token=${pageToken}&fields=snippet,senders,participants,message_count,updated_time`);
-    console.info(
+    logger.log(
       `[FbMessagePlatformProvider.getConversations] Conversations of page ${pageId}`,
       response.data,
     );
@@ -82,7 +83,7 @@ export default class FbMessagePlatformProvider {
       config.params.after = after;
     }
     const response = await this.axiosInstance.get(`${conversationId}/messages`, config);
-    console.info(
+    logger.log(
       `[FbMessagePlatformProvider.getMessages] Return messages of conversation ${conversationId} with data`,
       response.data,
     );
@@ -108,7 +109,7 @@ export default class FbMessagePlatformProvider {
     };
 
     const response = await this.axiosInstance.get(`${pageUserId}`, config);
-    console.info(
+    logger.log(
       `[FbMessagePlatformProvider.getUserProfile] Return profile of Facebook user with id ${pageUserId}`,
       response.data,
     );
