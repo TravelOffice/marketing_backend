@@ -36,7 +36,7 @@ export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePla
     const rs = await dynamoProvider.query(params);
     if (rs.Items && rs.Items?.length > 0) {
       const dynamoItem = rs.Items[0];
-      console.info('[ZaloMessagePlatformRepositoryImpl.getZaloMessagePlatformToken] DynamoDB item', dynamoItem);
+      logger.log('[ZaloMessagePlatformRepositoryImpl.getZaloMessagePlatformToken] DynamoDB item', dynamoItem);
       if (dynamoItem.expireIn > Date.now()) {
         return dynamoItem.accessToken;
       }
