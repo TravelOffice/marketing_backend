@@ -1,5 +1,7 @@
 import axios, { AxiosInstance } from 'axios';
-import { SendMessageOptions, TelegramMessage } from 'common-models';
+import {
+  FileOptions, SendDocumentOptions, SendMessageOptions, SendPhotoOptions, TelegramMessage,
+} from 'common-models';
 import logger from '../utils/logger';
 
 export default class TelegramPlatformProvider {
@@ -53,9 +55,56 @@ export default class TelegramPlatformProvider {
     const params = {
       chat_id: chatId,
       text,
-      options,
+      ...options,
     };
     return this.get(`bot${accessToken}/sendMessage`, params);
+  };
+
+  /**
+   * Send photo message
+   * @param accessToken Telegram bot token
+   * @param chatId ID of conversation
+   * @param photo Uploaded file url
+   * @param options SendPhotoOptions object
+   * @returns Sent message object
+   */
+  sendPhotoMessage = async (
+    accessToken: string,
+    chatId: string,
+    photo: string,
+    options?: SendPhotoOptions,
+  ): Promise<TelegramMessage> => {
+    const params = {
+      chat_id: chatId,
+      photo,
+      ...options,
+    };
+    return this.get(`bot${accessToken}/sendPhoto`, params);
+  };
+
+  /**
+   * Send document message
+   * Sending by URL will currently only work for GIF, PDF and ZIP files.
+   * @param accessToken Telegram bot token
+   * @param chatId ID of conversation
+   * @param document Uploaded document url
+   * @param options SendDocumentOptions object
+   * @returns Sent message object
+   */
+  sendDocumentMessage = async (
+    accessToken: string,
+    chatId: string,
+    document: string,
+    options?: SendDocumentOptions,
+    fileOptions?: FileOptions,
+  ): Promise<TelegramMessage> => {
+    const params = {
+      chat_id: chatId,
+      document,
+      ...options,
+      ...fileOptions,
+    };
+    return this.get(`bot${accessToken}/sendDocument`, params);
   };
 
   private readonly get = async (url: string, params?: Object) => {

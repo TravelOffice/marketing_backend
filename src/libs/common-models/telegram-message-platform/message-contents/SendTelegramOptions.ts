@@ -7,7 +7,7 @@ interface SendBasicOptions {
     protect_content?: boolean;
 }
 
-interface FileOptions {
+export interface FileOptions {
     filename?: string;
     contentType?: string;
 }
@@ -24,5 +24,14 @@ export interface SendPhotoOptions extends SendBasicOptions {
 
 export interface SendDocumentOptions extends SendBasicOptions {
     parse_mode?: ParseMode;
+    thumb?: string,
     caption?: string;
+}
+
+export interface SendMessageData {
+    text?: string,
+    photo?: string,
+    doc?: string,
+    options?: SendMessageOptions | SendPhotoOptions | SendDocumentOptions,
+    fileOptions?: FileOptions,
 }

@@ -1,7 +1,7 @@
 import AWS from 'aws';
 import {
   ChatPlatform,
-  ChatPlatformStrings, SendMessageOptions,
+  ChatPlatformStrings, FileOptions, SendMessageOptions,
 } from 'common-models';
 import { getAwsSecretValue } from 'get-env';
 import {
@@ -169,4 +169,25 @@ export default class TelegramPlatformRepositoryImpl implements TelegramPlatformR
     text: string,
     options?: SendMessageOptions,
   ) => telegramProvider.sendTextMessage(accessToken, chatId, text, options);
+
+  /**
+   * Send message to Telegram user
+   */
+  sendPhotoMessage = async (
+    accessToken: string,
+    chatId: string,
+    photo: string,
+    options?: SendMessageOptions,
+  ) => telegramProvider.sendPhotoMessage(accessToken, chatId, photo, options);
+
+  /**
+   * Send message to Telegram user
+   */
+  sendDocumentMessage = async (
+    accessToken: string,
+    chatId: string,
+    document: string,
+    options?: SendMessageOptions,
+    fileOptions?: FileOptions,
+  ) => telegramProvider.sendDocumentMessage(accessToken, chatId, document, options, fileOptions);
 }

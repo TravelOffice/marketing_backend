@@ -44,16 +44,15 @@ const handleAppSyncEvent = async (event: AppSyncEvent) => {
       break;
     }
     case 'sendMessage': {
-      const sentMessage = await sendMessageUseCase.invoke(
+      await sendMessageUseCase.invoke(
         event.tenant,
         event.arguments.sender,
         event.arguments.recipient,
-        event.arguments.messageData.text,
-        event.arguments.messageData.options,
+        event.arguments.messageData,
       );
       resolverMessage = 'The message has been sent from Telegram bot';
-      returnedData = sentMessage;
-      logger.log(`Sent message successfully: ${JSON.stringify(returnedData, null, 2)}`);
+      returnedData = undefined;
+      logger.log(`Sent message successfully: ${JSON.stringify(event.arguments.messageData, null, 2)}`);
       break;
     }
 

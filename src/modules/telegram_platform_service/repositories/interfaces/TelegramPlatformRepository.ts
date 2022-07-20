@@ -1,4 +1,4 @@
-import { SendMessageOptions, TelegramMessage } from 'common-models';
+import { FileOptions, SendMessageOptions, TelegramMessage } from 'common-models';
 import {
   RestrictedTelegramConversation,
   TelegramConversationWithAssignee,
@@ -27,6 +27,19 @@ export interface TelegramPlatformRepository {
     chatId: string,
     text: string,
     options?: SendMessageOptions,
+  ) => Promise<TelegramMessage>,
+  sendPhotoMessage: (
+    accessToken: string,
+    chatId: string,
+    photo: string,
+    options?: SendMessageOptions,
+  ) => Promise<TelegramMessage>,
+  sendDocumentMessage: (
+    accessToken: string,
+    chatId: string,
+    document: string,
+    options?: SendMessageOptions,
+    fileOptions?: FileOptions,
   ) => Promise<TelegramMessage>,
   getConversations: (
     tenantId: string,
