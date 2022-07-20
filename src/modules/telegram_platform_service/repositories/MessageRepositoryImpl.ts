@@ -1,9 +1,14 @@
 import {
-  ChatPlatform, DDBConversation, DDBMessage, MessageEntity, TelegramMessageContent,
+  ChatPlatform,
+  DDBConversation,
+  DDBMessage,
+  MessageEntity,
+  ReceiveMessageCommandArgs,
+  TelegramMessageContent,
 } from 'common-models';
 import { getAwsSecretValue } from 'get-env';
 import { MessageGroupType } from '../models/Message';
-import { dynamoProvider } from '../providers';
+import { appsyncProvider, dynamoProvider } from '../providers';
 import {
   ASSIGNEE_INDEX,
   CONVERSATION_INDEX, MESSAGE_INDEX, TENANT_INDEX, UNKNOWN_USER,
@@ -29,6 +34,36 @@ export default class MessageRepositoryImpl implements MessageRepository {
       return MessageGroupType.FILE;
     }
     return MessageGroupType.OTHER;
+  };
+
+  /**
+   * Send received message command to AppSync
+   * @param tenantId Tenant ID
+   * @param platform chat platform
+   * @param message The chat message
+   */
+  sendReceivedMessageCommand = async (
+    platform: ChatPlatform,
+    message: TelegramMessageContent,
+  ): Promise<void> => {
+    // Delete message_id attribute, mid will be appeared in ReceiveMessageCommandArgs
+    const { message_id: messageId, ...messageData } = message;
+    const sender = message.from?.id.toString() || '';
+    const customerId = message.chat.username || `${message.chat.id}` || '';
+    const recipient = customerId;
+
+    const commandArgs: ReceiveMessageCommandArgs = {
+      id: messageId.toString(),
+      sender,
+      recipient,
+      customerId,
+      timestamp: message.date,
+      messageData: JSON.stringify(messageData),
+      chatPlatform: platform,
+    };
+
+    // Send the message command to AppSync
+    await appsyncProvider.sendReceivedMessageCommand(commandArgs);
   };
 
   /**

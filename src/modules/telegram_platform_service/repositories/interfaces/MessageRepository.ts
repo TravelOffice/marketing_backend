@@ -3,6 +3,11 @@ import {
 } from 'common-models';
 
 export interface MessageRepository {
+  sendReceivedMessageCommand: (
+    platform: ChatPlatform,
+    message: TelegramMessageContent,
+  ) => Promise<void>
+
   saveChatMessage: (
     tenantId: string,
     platform: ChatPlatform,
