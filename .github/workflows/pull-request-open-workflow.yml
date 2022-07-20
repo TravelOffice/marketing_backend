@@ -127,6 +127,9 @@ jobs:
         run: |
           echo "ACTOR_NAME=${ACTOR_NAME,,}" >> $GITHUB_ENV
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: downcase ACTOR_NAME
+        run: |
+          echo "ACTOR_NAME=${ACTOR_NAME,,}" >> $GITHUB_ENV
       - uses: actions/checkout@v3
 
       - name: Configure AWS credentials
