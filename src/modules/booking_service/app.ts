@@ -1,13 +1,13 @@
 import cors from 'cors';
 import express, { Request, Response, NextFunction } from 'express';
 import compression from 'compression';
+import { getCurrentUserInfo } from 'decode-token';
 import {
   getBookingListByLeadUseCase,
 } from './useCases';
 import wrapResponse from './utils/wrapResponse';
 import { FAILED, SUCCESS } from './utils/constants';
 import { BookingStatus } from './models/Booking';
-import { getCurrentUserId } from './utils/authorizer';
 import logger from './utils/logger';
 
 const app = express();
@@ -33,7 +33,7 @@ app.get('/leads/:leadId/bookings', async (req: Request, res: Response) => {
   try {
     const { status } = req.query;
     const { leadId } = req.params;
-    const { username } = getCurrentUserId(req.headers.authorization!);
+    const { username } = getCurrentUserInfo(req.headers.authorization!);
     const bookings = await getBookingListByLeadUseCase.invoke(
       username,
       leadId,
