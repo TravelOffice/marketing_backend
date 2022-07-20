@@ -2,27 +2,43 @@
 type ParseMode = 'Markdown' | 'MarkdownV2' | 'HTML';
 
 interface SendBasicOptions {
-    disable_notification?: boolean;
-    reply_to_message_id?: number;
-    protect_content?: boolean;
+  disable_notification?: boolean;
+  reply_to_message_id?: number;
+  protect_content?: boolean;
 }
 
-interface FileOptions {
-    filename?: string;
-    contentType?: string;
+export interface FileOptions {
+  filename?: string;
+  contentType?: string;
 }
 
 export interface SendMessageOptions extends SendBasicOptions {
-    parse_mode?: ParseMode;
-    disable_web_page_preview?: boolean;
+  parse_mode?: ParseMode;
+  disable_web_page_preview?: boolean;
 }
 
 export interface SendPhotoOptions extends SendBasicOptions {
-    parse_mode?: ParseMode;
-    caption?: string;
+  parse_mode?: ParseMode;
+  caption?: string;
 }
 
 export interface SendDocumentOptions extends SendBasicOptions {
-    parse_mode?: ParseMode;
-    caption?: string;
+  parse_mode?: ParseMode;
+  caption?: string;
+}
+
+export interface SendAudioOptions extends SendBasicOptions {
+  parse_mode?: ParseMode;
+  caption?: string;
+  duration?: number;
+  performer?: string;
+  title?: string;
+}
+
+export interface SendVideoOptions extends SendBasicOptions {
+  parse_mode?: ParseMode;
+  duration?: number;
+  width?: number;
+  height?: number;
+  caption?: string;
 }

@@ -1,11 +1,11 @@
-import { SendMessageOptions, TelegramMessage } from 'common-models';
+import { TelegramMessage } from 'common-models';
+import { TelegramSendMessageData } from '../../models/send-message/SendMessageData';
 
 export interface SendMessageUseCase {
   invoke: (
     tenantId: string,
     botId: string,
     chatId: string,
-    text: string,
-    options?: SendMessageOptions,
+    data: TelegramSendMessageData,
   ) => Promise<TelegramMessage>;
 }
