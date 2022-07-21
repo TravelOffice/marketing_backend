@@ -1,6 +1,7 @@
 import { TelegramMessage } from 'common-models';
 import {
   RestrictedTelegramConversation,
+  RestrictedTelegramFile,
   TelegramConversationWithAssignee,
   TelegramPagingMessage,
 } from '../../models';
@@ -37,5 +38,12 @@ export interface TelegramPlatformRepository {
     tenantId: string,
     botId: string,
     assigneeId?: string,
-  ) => Promise<Array<RestrictedTelegramConversation>>
+  ) => Promise<Array<RestrictedTelegramConversation>>,
+
+  getFileInfo: (
+    tenantId: string,
+    accessToken: string,
+    chatId: string,
+    fileId: string,
+  ) => Promise<RestrictedTelegramFile>,
 }

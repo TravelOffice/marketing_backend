@@ -1,4 +1,9 @@
-import { getTelegramConversationsUseCase, getTelegramMessagesUseCase, sendMessageUseCase } from './usecases';
+import {
+  getFileInfoUseCase,
+  getTelegramConversationsUseCase,
+  getTelegramMessagesUseCase,
+  sendMessageUseCase,
+} from './usecases';
 import logger from './utils/logger';
 
 interface AppSyncEvent {
@@ -53,6 +58,19 @@ const handleAppSyncEvent = async (event: AppSyncEvent) => {
       resolverMessage = 'The message has been sent from Telegram bot';
       returnedData = undefined;
       logger.log(`Sent message successfully: ${JSON.stringify(sentMessage, null, 2)}`);
+      break;
+    }
+    case 'getTelegramFileInfo': {
+      logger.log(`Receive getTelegramFileInfo event ${event}`);
+      const fileInfo = await getFileInfoUseCase.invoke(
+        event.tenant,
+        event.arguments.pageId,
+        event.arguments.conversationId,
+        event.arguments.fileId,
+      );
+      resolverMessage = 'The file information has been fetched from Telegram platform';
+      returnedData = fileInfo;
+      logger.log(`Fetched file for [${event.tenant}#${event.arguments.conversationId}]: successfully: ${JSON.stringify(returnedData, null, 2)}`);
       break;
     }
 

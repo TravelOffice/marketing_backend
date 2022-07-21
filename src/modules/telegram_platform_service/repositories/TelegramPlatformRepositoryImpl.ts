@@ -1,11 +1,13 @@
 import AWS from 'aws';
 import {
   ChatPlatform,
+  ChatPlatformFile,
   ChatPlatformStrings,
 } from 'common-models';
 import { getAwsSecretValue } from 'get-env';
 import {
   RestrictedTelegramConversation,
+  RestrictedTelegramFile,
   RestrictedTelegramMessage,
   TelegramConversationWithAssignee,
   TelegramPagingMessage,
@@ -19,12 +21,12 @@ import {
   SendTextMessageStrategy,
   SendVideoMessageStrategy,
 } from '../patterns/send-message';
-import { dynamoProvider, telegramProvider } from '../providers';
+import { dynamoProvider, s3Provider, telegramProvider } from '../providers';
 import { QueryInput } from '../providers/DynamoProvider';
 import {
-  ASSIGNEE_INDEX,
-  CONVERSATION_INDEX,
-  MESSAGE_INDEX, PAGE_INDEX, PAGINATION_LIMIT,
+  ASSIGNEE_INDEX, CONVERSATION_INDEX,
+  FILE_INDEX, MESSAGE_INDEX,
+  PAGE_INDEX, PAGINATION_LIMIT,
   PARTITION_KEY_DELIMITER,
   TENANT_INDEX,
 } from '../utils/constants';
@@ -204,5 +206,103 @@ export default class TelegramPlatformRepositoryImpl implements TelegramPlatformR
         break;
     }
     return messageStrategy.send(accessToken, chatId, data);
+  };
+
+  /**
+   * Method to save telegram file information to DynamoDB
+   * @param tenantId The id of the Tenant
+   * @param chatId The id of the conversation
+   * @param fileId The telegram file id
+   * @param fileInfo The file information
+   * @returns Promise<RestrictedTelegramFile> The file information
+   */
+  saveFileInfo = async (
+    tenantId: string,
+    chatId: string,
+    fileId: string,
+    fileInfo: ChatPlatformFile,
+  ) => {
+    const table = await getAwsSecretValue('DYNAMO_CHAT_TABLE');
+    const telegramPlatformStr = ChatPlatform.telegram.toUpperCase();
+
+    await dynamoProvider.putItem(
+      table,
+      `${TENANT_INDEX}#${tenantId}#${CONVERSATION_INDEX}#${telegramPlatformStr}#${chatId}`,
+      `${FILE_INDEX}#${fileId}`,
+      { fileInfo },
+    );
+    return { fileInfo } as RestrictedTelegramFile;
+  };
+
+  /**
+   * Method to get telegram file information
+   * - Step 1: Check whether file information exists in the database or not
+   *     + Get file information from database
+   *     + Check whether file id with other conversation have information or not
+   * - Step 2: If file not exists, get the original telegram file information
+   * - Step 3: Save the file content to S3
+   * - Step 4: Save file information to the DynamoDB
+   * @param tenantId The id of the Tenant
+   * @param accessToken The bot token
+   * @param chatId The id of the conversation
+   * @param fileId The telegram file id
+   * @returns Promise<RestrictedTelegramFile> The file information
+   */
+  getFileInfo = async (
+    tenantId: string,
+    accessToken: string,
+    chatId: string,
+    fileId: string,
+  ) => {
+    const table = await getAwsSecretValue('DYNAMO_CHAT_TABLE');
+    const telegramPlatformStr = ChatPlatform.telegram.toUpperCase();
+
+    // Get the file information from database
+    const item = await dynamoProvider.getItem(
+      table,
+      `${TENANT_INDEX}#${tenantId}#${CONVERSATION_INDEX}#${telegramPlatformStr}#${chatId}`,
+      `${FILE_INDEX}#${fileId}`,
+    );
+
+    if (item) {
+      const {
+        sk, pk, typeLsi, ...rest
+      } = item;
+      return rest as RestrictedTelegramFile;
+    }
+
+    // Check whether file id with other conversation have information or not
+    const params: QueryInput = {
+      TableName: table,
+      IndexName: 'ReverseIndex',
+      KeyConditionExpression: 'sk = :sk AND begins_with(pk, :pk_filter)',
+      ExpressionAttributeValues: {
+        ':sk': { S: `${FILE_INDEX}#${fileId}` },
+        ':pk_filter': { S: `${TENANT_INDEX}#${tenantId}#${CONVERSATION_INDEX}#${telegramPlatformStr}#` },
+      },
+    };
+    const { Items: files } = await dynamoProvider.rawQuery(params);
+    if (files && files?.length > 0) {
+      const { fileInfo } = AWS.DynamoDB.Converter.unmarshall(files[0]);
+      return this.saveFileInfo(tenantId, chatId, fileId, fileInfo);
+    }
+    // Get the original file information from Telegram CDN
+    const originalFile = await telegramProvider.getFile(accessToken, fileId);
+
+    if (!originalFile || !originalFile.file_path) throw new Error(`Cannot get original file ${fileId} from Telegram`);
+
+    const chatFileBucket = await getAwsSecretValue('CHAT_FILE_BUCKET');
+    // Save file to S3
+    const filePath = await s3Provider.downloadFileToS3FromUrl(
+      `${chatFileBucket}`,
+      `${tenantId}/${fileId}/${originalFile.file_path}`,
+      telegramProvider.getFilePath(accessToken, originalFile.file_path),
+    );
+
+    const fileInfo: ChatPlatformFile = {
+      ...originalFile,
+      file_path: filePath,
+    };
+    return this.saveFileInfo(tenantId, chatId, fileId, fileInfo);
   };
 }
