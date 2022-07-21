@@ -1,4 +1,4 @@
-import { TelegramMessage } from 'common-models';
+import { TelegramMessage, User, UserProfilePhotos } from 'common-models';
 import {
   RestrictedTelegramConversation,
   RestrictedTelegramFile,
@@ -22,10 +22,15 @@ export interface TelegramPlatformRepository {
     limit?: number,
   ) => Promise<TelegramPagingMessage>
 
-  getUserProfile: () => Promise<void>
+  getUserProfile: (
+    tenantId: string,
+    botId: string,
+    chatId: string,
+    userId: string,
+  ) => Promise<User | { user: User, avatars: UserProfilePhotos }>,
 
   getAccessToken: (
-    tenantId: string, botId: string,
+    botId: string,
   ) => Promise<string>
 
   sendMessage: (

@@ -3,6 +3,8 @@ import {
   ChatPlatform,
   ChatPlatformFile,
   ChatPlatformStrings,
+  User,
+  UserProfilePhotos,
 } from 'common-models';
 import { getAwsSecretValue } from 'get-env';
 import {
@@ -26,8 +28,9 @@ import { QueryInput } from '../providers/DynamoProvider';
 import {
   ASSIGNEE_INDEX, CONVERSATION_INDEX,
   FILE_INDEX, MESSAGE_INDEX,
-  PAGE_INDEX, PAGINATION_LIMIT,
+  PAGINATION_LIMIT,
   PARTITION_KEY_DELIMITER,
+  TELEGRAM_PAGE_INDEX,
   TENANT_INDEX,
 } from '../utils/constants';
 import { TelegramPlatformRepository } from './interfaces/TelegramPlatformRepository';
@@ -119,9 +122,32 @@ export default class TelegramPlatformRepositoryImpl implements TelegramPlatformR
 
   /**
    * Get user profile information
+   * @param tenantId The id of the Tenant
+   * @param botId The id of telegram bot
+   * @param chatId The id of the conversation
+   * @param userId The id of user
+   * @returns User information and avatar path
    */
-  getUserProfile = async () => {
-    throw new Error('Method is not implemented yet.');
+  getUserProfile = async (tenantId: string, botId: string, chatId: string, userId: string) => {
+    // Get telegram bot access token
+    const accessToken = await this.getAccessToken(botId);
+    // Get user information and user avatars
+    const { user, avatars } = await telegramProvider.getUserProfile(
+      accessToken,
+      chatId,
+      userId,
+    ) as { user: User, avatars: UserProfilePhotos };
+    // Get file info from bot api (Params: Avatar file id)
+    if (avatars && avatars.total_count > 0) {
+      // Telegram stored all the avatars of user
+      // In addition, Telegram system treats first avatar as current user avatar
+      const { file_id: fileId } = avatars.photos[0][0]; // Get the first size
+      const { fileInfo: avatar } = await this.getFileInfo(tenantId, accessToken, chatId, fileId);
+      return { ...user, avatar };
+    }
+
+    // Also check if user dont have avatar
+    return { ...user };
   };
 
   getConversations = async (tenantId: string, botId: string, assigneeId?: string) => {
@@ -157,15 +183,33 @@ export default class TelegramPlatformRepositoryImpl implements TelegramPlatformR
     return [];
   };
 
-  getAccessToken = async (tenantId: string, botId: string) => {
-    const dynamoTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
-    const telegramPlatformStr: ChatPlatformStrings = 'telegram';
-    const pk = `${TENANT_INDEX}#${tenantId}`;
-    const sk = `${PAGE_INDEX}#${telegramPlatformStr.toUpperCase()}#${botId}`;
-    const telegramBot = await dynamoProvider.getItem(dynamoTable, pk, sk);
-    if (telegramBot) {
-      return telegramBot.accessToken;
+  getAccessToken = async (botId: string) => {
+    const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const params = {
+      TableName: travelTable,
+      IndexName: 'PageIdIndex',
+      KeyConditionExpression: '#pageId = :id',
+      ExpressionAttributeNames: {
+        '#pageId': 'id',
+        '#sk': 'sk',
+      },
+      // Filter the item startwith `PAGE#TELEGRAM#` to make sure the item is Telegram token
+      // Prevent the same token with other providers such as Zalo, Telegram
+      FilterExpression: 'begins_with(#sk, :sk_filter_value)',
+      ExpressionAttributeValues: {
+        // Given page id
+        ':id': { S: botId },
+        // Prefix to Telegram item
+        ':sk_filter_value': { S: TELEGRAM_PAGE_INDEX },
+      },
+      ProjectionExpression: 'sk,accessToken,id',
+    };
+
+    const items = await dynamoProvider.query(params);
+    if (items && items.length > 0) {
+      return items[0].accessToken;
     }
+
     throw new Error(`[TelegramPlatformRepository.getAccessToken] Can't get bot ${botId} token`);
   };
 

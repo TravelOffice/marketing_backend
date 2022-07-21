@@ -19,7 +19,7 @@ export default class GetFileInfoUseCaseImpl implements GetFileInfoUseCase {
     fileId: string,
   ) => {
     // Get Telegram bot token
-    const accessToken = await telegramPlatformRepository.getAccessToken(tenantId, botId);
+    const accessToken = await telegramPlatformRepository.getAccessToken(botId);
 
     // Get telegram file
     return telegramPlatformRepository.getFileInfo(tenantId, accessToken, chatId, fileId);
