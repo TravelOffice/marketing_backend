@@ -16,7 +16,7 @@ export default class AppSyncHandlerFactory {
 
     // Check whether platform is telegram
     // Force `allTelegramConversations`, `allTelegramMessages` as telegram event
-    const isTelegramEvent = eventField.startsWith('allTelegram') || chatPlatform === ChatPlatform.telegram;
+    const isTelegramEvent = eventField.toLowerCase().includes('telegram') || chatPlatform === ChatPlatform.telegram;
     if (isTelegramEvent) {
       // Invoke `telegram_platform_service` service to get the data from Telegram
       return new TelegramHandler();

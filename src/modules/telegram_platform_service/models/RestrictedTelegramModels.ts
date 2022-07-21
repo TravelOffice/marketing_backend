@@ -1,4 +1,6 @@
-import { DDBConversation, DDBMessage, BaseDdbModel } from 'common-models';
+import {
+  DDBConversation, DDBMessage, BaseDdbModel, DDBFile,
+} from 'common-models';
 
 // Type of sk is string
 type TypeOfSk = BaseDdbModel['sk'];
@@ -20,3 +22,5 @@ export interface TelegramPagingMessage {
 export interface TelegramConversationWithAssignee extends RestrictedTelegramConversation {
   assignee: string
 }
+
+export interface RestrictedTelegramFile extends RestrictedDDBModel<DDBFile> { }

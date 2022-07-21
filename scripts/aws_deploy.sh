@@ -125,6 +125,7 @@ cat <<EOF >>  ${SERVERLESS_DEF_FILE}
     "${SERVICENAME}" = {
       path     = "src/modules/${SERVICENAME}/dist"
       memory_size = 512
+      timeout     = 30
       layers   = ["${SERVICENAME}"]
       env_vars = "${SERVICENAME}"
       permission = {
@@ -134,7 +135,10 @@ cat <<EOF >>  ${SERVERLESS_DEF_FILE}
           "DynamoTableReadWrite"
         ]
         aws_policies    = [
-          "AmazonCognitoPowerUser"
+          # TODO: Need to implement permission for each lambda
+          "AmazonCognitoPowerUser",
+          "service-role/AWSLambdaRole",
+          "AmazonS3FullAccess"
         ]
       },
     },

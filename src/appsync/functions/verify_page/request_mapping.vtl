@@ -1,7 +1,7 @@
 #set( $pageId = "" )
 #set( $platform = "" )
 #set( $tenant = $context.stash.tenant )
-#set( $fieldName = $context.info.fieldName )
+#set( $fieldName = $context.info.fieldName.toLowerCase() )
 
 #if( $context.info.fieldName == "sendMessage" )
   #set( $pageId = $context.arguments.sender )
@@ -13,11 +13,11 @@
 
 #if( $context.arguments.chatPlatform )
   #set( $platform = $context.arguments.chatPlatform.toUpperCase() )
-#elseif( $fieldName.contains("allFb") )
+#elseif( $fieldName.contains("fb") )
   #set( $platform = "FACEBOOK" )
-#elseif( $fieldName.contains("allZalo") )
+#elseif( $fieldName.contains("zalo") )
   #set( $platform = "ZALO" )
-#elseif( $fieldName.contains("allTelegram") )
+#elseif( $fieldName.contains("telegram") )
   #set( $platform = "TELEGRAM" )
 #else
   $util.error('VerifyPage: Unsupported platform $fieldName!')

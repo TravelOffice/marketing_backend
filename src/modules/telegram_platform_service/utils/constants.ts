@@ -44,4 +44,6 @@ export const PAGINATION_LIMIT = 10;
 
 export const PAGE_INDEX = 'PAGE';
 
+export const FILE_INDEX = 'FILE';
+
 export const UNKNOWN_USER = 'unknown';
