@@ -1,5 +1,13 @@
 import axios, { AxiosInstance } from 'axios';
-import { SendMessageOptions, TelegramMessage } from 'common-models';
+import {
+  FileOptions,
+  SendAudioOptions,
+  SendMessageOptions,
+  SendPhotoOptions,
+  SendVideoOptions,
+  TelegramMessage,
+} from 'common-models';
+import { TelegramAttachmentContent } from '../models/send-message/SendMessageOptions';
 import logger from '../utils/logger';
 
 export default class TelegramPlatformProvider {
@@ -58,6 +66,107 @@ export default class TelegramPlatformProvider {
     return this.get(`bot${accessToken}/sendMessage`, params);
   };
 
+  /**
+   * Send photo message
+   * @param accessToken Telegram bot token
+   * @param chatId ID of conversation
+   * @param photo Content of message
+   * @param options SendMessageOptions object
+   * @param fileOptions File options
+   * @returns Sent message object
+   */
+  sendPhoto = async (
+    accessToken: string,
+    chatId: string,
+    photo: TelegramAttachmentContent,
+    options?: SendPhotoOptions,
+    fileOptions?: FileOptions,
+  ): Promise<TelegramMessage> => {
+    const params = {
+      chat_id: chatId,
+      photo,
+      options,
+      fileOptions,
+    };
+    return this.get(`bot${accessToken}/sendPhoto`, params);
+  };
+
+  /**
+   * Send photo message. Audio must be in the .MP3 or .M4A format
+   * @param accessToken Telegram bot token
+   * @param chatId ID of conversation
+   * @param audio Content of message
+   * @param options SendMessageOptions object
+   * @param fileOptions File options
+   * @returns Sent message object
+   */
+  sendAudio = async (
+    accessToken: string,
+    chatId: string,
+    audio: TelegramAttachmentContent,
+    options?: SendAudioOptions,
+    fileOptions?: FileOptions,
+  ): Promise<TelegramMessage> => {
+    const params = {
+      chat_id: chatId,
+      audio,
+      options,
+      fileOptions,
+    };
+    return this.get(`bot${accessToken}/sendAudio`, params);
+  };
+
+  /**
+   * Send video message.
+   * Telegram clients support MPEG4 videos (other formats may be sent as Document)
+   * @param accessToken Telegram bot token
+   * @param chatId ID of conversation
+   * @param video Content of message
+   * @param options SendMessageOptions object
+   * @param fileOptions File options
+   * @returns Sent message object
+   */
+  sendVideo = async (
+    accessToken: string,
+    chatId: string,
+    video: TelegramAttachmentContent,
+    options?: SendVideoOptions,
+    fileOptions?: FileOptions,
+  ): Promise<TelegramMessage> => {
+    const params = {
+      chat_id: chatId,
+      video,
+      options,
+      fileOptions,
+    };
+    return this.get(`bot${accessToken}/sendVideo`, params);
+  };
+
+  /**
+   * Send document message.
+   * @param accessToken Telegram bot token
+   * @param chatId ID of conversation
+   * @param document Content of message
+   * @param options SendMessageOptions object
+   * @param fileOptions File options
+   * @returns Sent message object
+   */
+  sendDocument = async (
+    accessToken: string,
+    chatId: string,
+    document: TelegramAttachmentContent,
+    options?: SendVideoOptions,
+    fileOptions?: FileOptions,
+  ): Promise<TelegramMessage> => {
+    const params = {
+      chat_id: chatId,
+      document,
+      options,
+      fileOptions,
+    };
+    return this.get(`bot${accessToken}/sendDocument`, params);
+  };
+
   private readonly get = async (url: string, params?: Object) => {
     try {
       const response = await this.axiosInstance.get(url, { params });
@@ -65,6 +174,20 @@ export default class TelegramPlatformProvider {
     } catch (e: any) {
       if (axios.isAxiosError(e)) {
         logger.log(`[TelegramPlatformProvider.get] Error: ${JSON.stringify(e)}`);
+        if (e.response) {
+          // The request was made and the server responded with a status code
+          // that falls out of the range of 2xx
+          logger.log(`[TelegramPlatformProvider.get] Server response an error with data ${JSON.stringify(e.response)}`);
+        } else if (e.request) {
+          // The request was made but no response was received
+          // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+          // http.ClientRequest in node.js
+          logger.log(e.request);
+        } else {
+          // Something happened in setting up the request that triggered an Error
+          logger.log(`[TelegramPlatformProvider.get] Setting up request error ${e.message}`);
+        }
+        logger.log(e.config);
         throw new Error(e.message);
       } else {
         throw e;

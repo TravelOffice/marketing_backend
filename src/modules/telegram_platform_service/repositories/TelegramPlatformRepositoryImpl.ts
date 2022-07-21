@@ -1,7 +1,7 @@
 import AWS from 'aws';
 import {
   ChatPlatform,
-  ChatPlatformStrings, SendMessageOptions,
+  ChatPlatformStrings,
 } from 'common-models';
 import { getAwsSecretValue } from 'get-env';
 import {
@@ -10,16 +10,23 @@ import {
   TelegramConversationWithAssignee,
   TelegramPagingMessage,
 } from '../models';
+import { TelegramSendMessageData } from '../models/send-message/SendMessageData';
+import {
+  AbstractSendMessageStrategy,
+  SendAudioMessageStrategy,
+  SendDocumentMessageStrategy,
+  SendPhotoMessageStrategy,
+  SendTextMessageStrategy,
+  SendVideoMessageStrategy,
+} from '../patterns/send-message';
 import { dynamoProvider, telegramProvider } from '../providers';
 import { QueryInput } from '../providers/DynamoProvider';
 import {
   ASSIGNEE_INDEX,
   CONVERSATION_INDEX,
-  MESSAGE_INDEX,
-  PAGINATION_LIMIT,
+  MESSAGE_INDEX, PAGE_INDEX, PAGINATION_LIMIT,
   PARTITION_KEY_DELIMITER,
   TENANT_INDEX,
-  PAGE_INDEX,
 } from '../utils/constants';
 import { TelegramPlatformRepository } from './interfaces/TelegramPlatformRepository';
 
@@ -161,12 +168,41 @@ export default class TelegramPlatformRepositoryImpl implements TelegramPlatformR
   };
 
   /**
-   * Send message to Telegram user
+   * Send text message to Telegram user
+   * @param accessToken Telegram access token
+   * @param chatId Conversation id stored at DynamoDB
+   * @param data Message data to send
+   * @returns Message object
    */
-  sendTextMessage = async (
+  sendMessage = async (
     accessToken: string,
     chatId: string,
-    text: string,
-    options?: SendMessageOptions,
-  ) => telegramProvider.sendTextMessage(accessToken, chatId, text, options);
+    data: TelegramSendMessageData,
+  ) => {
+    let messageStrategy: AbstractSendMessageStrategy;
+    const { messageType } = data;
+    // Intialize strategy object for executing send message
+    switch (messageType) {
+      case 'audio':
+        messageStrategy = new SendAudioMessageStrategy(telegramProvider);
+        break;
+
+      case 'video':
+        messageStrategy = new SendVideoMessageStrategy(telegramProvider);
+        break;
+
+      case 'image':
+        messageStrategy = new SendPhotoMessageStrategy(telegramProvider);
+        break;
+
+      case 'file':
+        messageStrategy = new SendDocumentMessageStrategy(telegramProvider);
+        break;
+
+      default:
+        messageStrategy = new SendTextMessageStrategy(telegramProvider);
+        break;
+    }
+    return messageStrategy.send(accessToken, chatId, data);
+  };
 }

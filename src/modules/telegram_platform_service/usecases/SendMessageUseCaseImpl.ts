@@ -1,4 +1,5 @@
-import { ChatPlatform, SendMessageOptions } from 'common-models';
+import { ChatPlatform } from 'common-models';
+import { TelegramSendMessageData } from '../models/send-message/SendMessageData';
 import { messageRepository, telegramPlatformRepository } from '../repositories';
 import { SendMessageUseCase } from './interfaces/SendMessageUseCase';
 
@@ -20,18 +21,16 @@ export default class SendMessageUseCaseImpl implements SendMessageUseCase {
     tenantId: string,
     botId: string,
     chatId: string,
-    text: string,
-    options?: SendMessageOptions,
+    data: TelegramSendMessageData,
   ) => {
     // Get Telegram Bot token
     const accessToken = await telegramPlatformRepository.getAccessToken(tenantId, botId);
 
     // Send message by Telegram bot
-    const sentMessage = await telegramPlatformRepository.sendTextMessage(
+    const sentMessage = await telegramPlatformRepository.sendMessage(
       accessToken,
       chatId,
-      text,
-      options,
+      data,
     );
 
     const platform = ChatPlatform.telegram;
