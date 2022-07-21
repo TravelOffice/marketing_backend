@@ -9,12 +9,21 @@ import { SendFacebookMessageRequestPayload } from './facebook/SendFacebookMessag
 import { SendZaloMessageRequestPayload } from './zalo/SendZaloMessageRequestPayload';
 
 export interface Message {
-  id: string,
+  // Message id
+  id?: string,
+  // Sender id
   sender: string,
+  // Recipient id
   recipient: string,
+  // Sending time
   timestamp: number,
-  messageData: AppSyncReceiveMessageData,
-  chatPlatform: ChatPlatform
+  /**
+   * AppSyncReceiveMessageData for receive message mutation
+   * AppSyncSendMessageData for send message muatation
+   */
+  messageData: AppSyncReceiveMessageData | AppSyncSendMessageData,
+  // Chat platform such as fb / zalo / telegram
+  chatPlatform: ChatPlatform,
 }
 
 export interface MessageForSend {

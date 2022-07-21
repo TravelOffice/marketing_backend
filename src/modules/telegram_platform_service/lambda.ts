@@ -48,12 +48,11 @@ const handleAppSyncEvent = async (event: AppSyncEvent) => {
         event.tenant,
         event.arguments.sender,
         event.arguments.recipient,
-        event.arguments.messageData.text,
-        event.arguments.messageData.options,
+        event.arguments.messageData,
       );
       resolverMessage = 'The message has been sent from Telegram bot';
-      returnedData = sentMessage;
-      logger.log(`Sent message successfully: ${JSON.stringify(returnedData, null, 2)}`);
+      returnedData = undefined;
+      logger.log(`Sent message successfully: ${JSON.stringify(sentMessage, null, 2)}`);
       break;
     }
 
