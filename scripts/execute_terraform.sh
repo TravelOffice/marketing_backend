@@ -28,3 +28,8 @@ cd ${CUR_DIR}
 
 echo "Running terraform -chdir=./infrastructures/environments/${ENV} ${TF_COMAND}"
 terraform -chdir="./infrastructures/environments/${ENV}" ${TF_COMAND}
+
+if [ $? -ne 0 ]; then
+  echo "Failed to run terraform command [${TF_COMAND}]!"
+  exit 1
+fi

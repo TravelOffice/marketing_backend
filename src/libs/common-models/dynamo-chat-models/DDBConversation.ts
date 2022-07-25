@@ -1,8 +1,9 @@
+import { FacebookConversation } from '../facebook-message-platform';
 import { TelegramChat as TelegramConversation } from '../telegram-message-platform';
 import { BaseDdbModel } from './BaseDdbModel';
 import { ChatPlatformMessage } from './DDBMessage';
 
-export type ChatPlatformConversation = TelegramConversation;
+export type ChatPlatformConversation = TelegramConversation | FacebookConversation;
 
 export interface DDBConversation extends BaseDdbModel {
   info: ChatPlatformConversation,

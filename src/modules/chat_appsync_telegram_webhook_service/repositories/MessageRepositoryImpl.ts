@@ -54,6 +54,7 @@ export default class MessageRepositoryImpl implements MessageRepository {
       timestamp: message.date,
       messageData: JSON.stringify(messageData),
       chatPlatform: platform,
+      username: UNKNOWN_USER, // TODO: Need to implement filter subscription by username later
     };
 
     // Send the message command to AppSync

@@ -9,5 +9,6 @@ export default class ReceiveMessageHandler implements AppSyncHandler {
   handle = async (event: AppSyncEvent) : Promise<AppSyncReponse> => ({
     message: `One message is received by Sales Webhook and passthrough to AppSync: ${JSON.stringify(event.arguments, null, 2)}`,
     data: event.arguments,
+    username: event.arguments.username,
   });
 }

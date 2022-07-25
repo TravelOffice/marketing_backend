@@ -9,4 +9,5 @@ export interface ReceiveMessageCommandArgs {
   // AWS AppSync support AWSJSON type, JSON must be stringified before sending to AppSync
   messageData: string,
   chatPlatform: ChatPlatform,
+  username: string,
 }
