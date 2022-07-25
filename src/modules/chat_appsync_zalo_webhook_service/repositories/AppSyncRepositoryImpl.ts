@@ -5,6 +5,7 @@ import {
   ReceiveMessageCommandResponse, receiveMessageQuery, ZaloWebhookMessageEvent,
 } from 'common-models';
 import { getAwsSecretValue } from 'get-env';
+import { UNKNOWN_USER } from '../utils/constants';
 import { AppSyncRepository } from './interfaces/AppSyncRepository';
 
 export default class AppSyncRepositoryImpl implements AppSyncRepository {
@@ -27,6 +28,7 @@ export default class AppSyncRepositoryImpl implements AppSyncRepository {
       timestamp: Number(webhookEvent.timestamp),
       messageData: JSON.stringify(messageData),
       chatPlatform: ChatPlatform.zalo,
+      username: UNKNOWN_USER, // TODO: Need to implement filter subscription by username later
     };
 
     // Send command `receivedMessage` to AppSync graphql endpoint

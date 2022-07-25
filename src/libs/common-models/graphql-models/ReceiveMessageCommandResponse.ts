@@ -11,5 +11,6 @@ export interface ReceiveMessageCommandResponse {
     messageData: AppSyncReceiveMessageData,
     chatPlatform: ChatPlatform,
   }, // GraphQL model
-  message: string // Query result as string
+  message: string, // Query result as string,
+  username: string
 }

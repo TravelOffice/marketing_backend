@@ -45,7 +45,7 @@ module "LAMBDA_FUNCTION" {
 }
 
 module "API_GATEWAY" {
-  count                 = length(var.API_ENDPOINTS)
+  count                 = length(var.API_ENDPOINTS) == 0 ? 0 : 1
   source                = "TravelOffice/apigateway/aws"
   LAMBDA_ARNS           = module.LAMBDA_FUNCTION.lambda_arns
   API_ENDPOINTS         = var.API_ENDPOINTS
