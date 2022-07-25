@@ -27,9 +27,7 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - name: downcase ACTOR_NAME
-        run: |
-          echo "ACTOR_NAME=${ACTOR_NAME,,}" >> $GITHUB_ENV
+
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
 
@@ -50,6 +48,7 @@ jobs:
       - name: Install TypeScript
         run: npm install -g typescript
 
+      # Get all changed files to get changed services
       - id: get-changed-files
         uses: Ana06/get-changed-files@v2.1.0
 
@@ -66,48 +65,50 @@ jobs:
             fi
           done
           if [ -z "${REMOVED_SERVICES}" ]; then
-            echo "Not found any services removed!"
+            echo "::notice::GetRemovedServices Not found any removed services!!"
           else
             echo "Removed service: ${REMOVED_SERVICES}"
+            echo "::notice::GetRemovedServices Removed service: ${REMOVED_SERVICES}"
           fi
           echo ::set-output name=services-removed::"${REMOVED_SERVICES}"
 
-      - name: Get the build service name
-        id: get-services-name
+      - name: Get the deployment service name
+        id: get-deployment-services-name
         run: |
           REMOVED_SERVICES="${{ steps.get-removed-services-name.outputs.services-removed }}"
-          CHANGED_SERVICES=
+          DEPLOYMENT_SERVICES=
           for changed_file in ${{ steps.get-changed-files.outputs.all }}; do
             SERVICE=$(echo ${changed_file} | grep -oE "src/modules/.*" | sed -E 's/src\/modules\///g' | sed -E 's/\/.*//g')
             if [ ! -z ${SERVICE} ]; then
-              if [[ "${CHANGED_SERVICES}" != *"${SERVICE}"* && "${REMOVED_SERVICES}" != *"${SERVICE}"* ]]; then
-                CHANGED_SERVICES="${SERVICE} ${CHANGED_SERVICES}"
+              if [[ "${DEPLOYMENT_SERVICES}" != *"${SERVICE}"* && "${REMOVED_SERVICES}" != *"${SERVICE}"* ]]; then
+                DEPLOYMENT_SERVICES="${SERVICE} ${DEPLOYMENT_SERVICES}"
               fi
             fi
           done
-          if [ -z "${CHANGED_SERVICES}" ]; then
-            echo "Not found any services changed!"
+          if [ -z "${DEPLOYMENT_SERVICES}" ]; then
+            echo "::notice::GetDeploymentServices Not found any deployment services!!"
             echo ::set-output name=services-existed::false
           else
-            echo "Build service: ${CHANGED_SERVICES}"
-            echo "CHANGED_SERVICES=${CHANGED_SERVICES}" >> $GITHUB_ENV
+            echo "::notice::GetDeploymentServices Deployment service: ${DEPLOYMENT_SERVICES}"
+            echo "DEPLOYMENT_SERVICES=${DEPLOYMENT_SERVICES}" >> $GITHUB_ENV
             echo ::set-output name=services-existed::true
+            echo ::set-output name=deployment-services::${DEPLOYMENT_SERVICES}
           fi
       # Build serverless
       - name: Build service
-        if: ${{ steps.get-services-name.outputs.services-existed == 'true' }}
+        if: ${{ steps.get-deployment-services-name.outputs.services-existed == 'true' }}
         run: |
-          for SERVICE in ${{ env.CHANGED_SERVICES }}; do
+          for SERVICE in ${{ env.DEPLOYMENT_SERVICES }}; do
             ./scripts/build_service.sh ${{ secrets.BUILD_ENV }} ${SERVICE}
           done
 
       # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
       - name: Setup Terraform
-        if: ${{ steps.get-services-name.outputs.services-existed == 'true' }}
+        if: ${{ steps.get-deployment-services-name.outputs.services-existed == 'true' }}
         uses: hashicorp/setup-terraform@v1
 
       # Provision lambda and ApiGateway
       - name: Provision Lambda and ApiGateway
-        if: ${{ steps.get-services-name.outputs.services-existed == 'true' }}
+        if: ${{ steps.get-deployment-services-name.outputs.services-existed == 'true' }}
         run: |
           ./scripts/aws_deploy.sh ${{ secrets.BUILD_ENV }} destroy

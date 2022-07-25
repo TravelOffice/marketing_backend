@@ -1,7 +1,7 @@
 #!/bin/bash
 
-if [ -z "${CHANGED_SERVICES}" ]; then
-  echo "Missing CHANGED_SERVICES"
+if [ -z "${DEPLOYMENT_SERVICES}" ]; then
+  echo "Missing DEPLOYMENT_SERVICES"
   exit 1
 fi
 
@@ -83,14 +83,14 @@ if [ "${SKIP_INSTALL}" != "true" ]; then
   echo "Building dependencies"
   cd ${CUR_DIR}
   ./scripts/build_dependencies.sh
-  for dir in ${CHANGED_SERVICES}
+  for dir in ${DEPLOYMENT_SERVICES}
   do
     install_module ${dir}
   done
 fi
 
 echo "Lint checking..."
-for dir in ${CHANGED_SERVICES}
+for dir in ${DEPLOYMENT_SERVICES}
 do
   lint_check ${dir}
 done

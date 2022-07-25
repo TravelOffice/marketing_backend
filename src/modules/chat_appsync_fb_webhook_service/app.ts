@@ -2,8 +2,8 @@ import cors from 'cors';
 import express, { Request, Response } from 'express';
 import compression from 'compression';
 import { getAwsSecretValue } from 'get-env';
-import { appSyncRepository } from './repositories';
 import logger from './utils/logger';
+import { receiveWebhookUseCase } from './useCases';
 
 const app = express();
 app.use(compression());
@@ -49,9 +49,9 @@ app.post('/chat-fb-webhook', async (req: Request, res: Response) => {
         // Gets the message. entry.messaging is an array, but
         // will only ever contain one message, so we get index 0
         const webhookEvent = entry.messaging[0];
-        logger.log(`[POST /chat-fb-webhook] Received webhook event ${webhookEvent}`);
+        logger.log(`[POST /chat-fb-webhook] Received webhook event ${JSON.stringify(webhookEvent, null, 2)}`);
 
-        await appSyncRepository.sendReceivedMessageCommand(webhookEvent);
+        await receiveWebhookUseCase.invoke(webhookEvent);
       });
 
       // Handle batch items

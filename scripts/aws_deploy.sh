@@ -1,7 +1,7 @@
 #!/bin/bash
 printHelp() {
   echo "Usage:"
-  echo 'export CHANGED_SERVICES="xxx yyy"'
+  echo 'export DEPLOYMENT_SERVICES="xxx yyy"'
   echo 'export ACTOR_NAME='
   echo 'export PR_NUMBER='
   echo 'export TF_BUCKET='
@@ -32,8 +32,8 @@ if [ -z ${TF_BUCKET} ]; then
   exit 1
 fi
 
-if [ -z "${CHANGED_SERVICES}" ]; then
-  echo "Missing CHANGED_SERVICES"
+if [ -z "${DEPLOYMENT_SERVICES}" ]; then
+  echo "Missing DEPLOYMENT_SERVICES"
   exit 1
 fi
 
@@ -46,6 +46,9 @@ if [ -z ${PR_NUMBER} ]; then
   echo "Missing PR_NUMBER"
   exit 1
 fi
+
+# Downcase ACTOR_NAME
+ACTOR_NAME=${ACTOR_NAME,,}
 
 DEPLOY_DIR=${CUR_DIR}/deploy2aws/environments/${ENV}
 mkdir -p ${DEPLOY_DIR}
@@ -103,7 +106,7 @@ variable "LAMBDA_LAYERS" {
   default = {
 EOF
 
-for SERVICENAME in ${CHANGED_SERVICES}; do
+for SERVICENAME in ${DEPLOYMENT_SERVICES}; do
   echo "    ${SERVICENAME} = {" >> ${SERVERLESS_DEF_FILE}
   echo "      path = \"src/layers/${SERVICENAME}\"" >>  ${SERVERLESS_DEF_FILE}
   echo "    }," >> ${SERVERLESS_DEF_FILE}
@@ -120,7 +123,7 @@ variable "LAMBDA_FUNCTIONS" {
   default = {
 EOF
 
-for SERVICENAME in ${CHANGED_SERVICES}; do
+for SERVICENAME in ${DEPLOYMENT_SERVICES}; do
 cat <<EOF >>  ${SERVERLESS_DEF_FILE}
     "${SERVICENAME}" = {
       path     = "src/modules/${SERVICENAME}/dist"
@@ -156,7 +159,7 @@ variable "API_ENDPOINTS" {
   default = {
 EOF
 
-for SERVICENAME in ${CHANGED_SERVICES}; do
+for SERVICENAME in ${DEPLOYMENT_SERVICES}; do
   APP_FILE="${CUR_DIR}/src/modules/${SERVICENAME}/app.ts"
   RAW_APIS=$(test -f ${APP_FILE} && grep -rE "^app" ${APP_FILE} | grep -vE "app.use")
 
@@ -199,7 +202,7 @@ variable "LAMBDA_ENV" {
   default = {
 EOF
 
-for SERVICENAME in ${CHANGED_SERVICES}; do
+for SERVICENAME in ${DEPLOYMENT_SERVICES}; do
   ENV_FILE="${CUR_DIR}/src/modules/${SERVICENAME}/.env.development"
   LAMBDA_ENV=$(test -f ${ENV_FILE} && grep -vE "NODE_ENV|PORT|AWS_REGION" ${ENV_FILE})
   echo "    ${SERVICENAME} = {" >> ${SERVERLESS_DEF_FILE}

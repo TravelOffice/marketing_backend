@@ -26,39 +26,27 @@ env:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  run-lint-check:
+  general-requirements:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
     if: ${{ !github.event.pull_request.draft }}
 
     # Map a step output to a job output
     outputs:
-      change-services: ${{ steps.get-change-services-name.outputs.change-services }}
-      services-existed: ${{ steps.get-change-services-name.outputs.services-existed }}
-
-    strategy:
-      matrix:
-        node-version: [14.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+      deployment-services: ${{ steps.get-deployment-services-name.outputs.deployment-services }}
+      services-existed: ${{ steps.get-deployment-services-name.outputs.services-existed }}
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - name: downcase ACTOR_NAME
+      # Validate pull request
+      - name: Validate Pull Request
+        id: validate-pull-request
         run: |
-          echo "ACTOR_NAME=${ACTOR_NAME,,}" >> $GITHUB_ENV
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v3
+          if [ -z ${{ github.event.pull_request.assignee }} ]; then
+            echo "::error::PullRequestValidation Missing assignee!" && exit 1
+          fi
 
-      # Install nodejs
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-
-      # Install TypeScript
-      - name: Install TypeScript
-        run: npm install -g typescript
-
+      # Get all changed files to get changed services
       - id: get-changed-files
         uses: Ana06/get-changed-files@v2.1.0
 
@@ -75,46 +63,40 @@ jobs:
             fi
           done
           if [ -z "${REMOVED_SERVICES}" ]; then
-            echo "Not found any services removed!"
+            echo "::notice::GetRemovedServices Not found any removed services!!"
           else
             echo "Removed service: ${REMOVED_SERVICES}"
+            echo "::notice::GetRemovedServices Removed service: ${REMOVED_SERVICES}"
           fi
           echo ::set-output name=services-removed::"${REMOVED_SERVICES}"
 
-      - name: Get the change service name
-        id: get-change-services-name
+      - name: Get the deployment service name
+        id: get-deployment-services-name
         run: |
           REMOVED_SERVICES="${{ steps.get-removed-services-name.outputs.services-removed }}"
-          CHANGED_SERVICES=
+          DEPLOYMENT_SERVICES=
           for changed_file in ${{ steps.get-changed-files.outputs.all }}; do
             SERVICE=$(echo ${changed_file} | grep -oE "src/modules/.*" | sed -E 's/src\/modules\///g' | sed -E 's/\/.*//g')
             if [ ! -z ${SERVICE} ]; then
-              if [[ "${CHANGED_SERVICES}" != *"${SERVICE}"* && "${REMOVED_SERVICES}" != *"${SERVICE}"* ]]; then
-                CHANGED_SERVICES="${SERVICE} ${CHANGED_SERVICES}"
+              if [[ "${DEPLOYMENT_SERVICES}" != *"${SERVICE}"* && "${REMOVED_SERVICES}" != *"${SERVICE}"* ]]; then
+                DEPLOYMENT_SERVICES="${SERVICE} ${DEPLOYMENT_SERVICES}"
               fi
             fi
           done
-          if [ -z "${CHANGED_SERVICES}" ]; then
-            echo "Not found any services changed!"
+          if [ -z "${DEPLOYMENT_SERVICES}" ]; then
+            echo "::notice::GetDeploymentServices Not found any deployment services!!"
             echo ::set-output name=services-existed::false
           else
-            echo "Build service: ${CHANGED_SERVICES}"
-            echo "CHANGED_SERVICES=${CHANGED_SERVICES}" >> $GITHUB_ENV
+            echo "::notice::GetDeploymentServices Deployment service: ${DEPLOYMENT_SERVICES}"
+            echo "DEPLOYMENT_SERVICES=${DEPLOYMENT_SERVICES}" >> $GITHUB_ENV
             echo ::set-output name=services-existed::true
-            echo ::set-output name=change-services::${CHANGED_SERVICES}
+            echo ::set-output name=deployment-services::${DEPLOYMENT_SERVICES}
           fi
 
-      # Run lint check
-      - name: Run Lint
-        if: ${{ steps.get-change-services-name.outputs.services-existed == 'true' }}
-        run: |
-          echo "Run Lint check for services: ${CHANGED_SERVICES}"
-          chmod +x ./scripts/*.sh
-          ./scripts/run_lint_check.sh
-
-  provision_service_for_testing:
+  run-lint-check:
+    # The type of runner that the job will run on
     runs-on: ubuntu-latest
-    needs: ['run-lint-check']
+    needs: ['general-requirements']
 
     strategy:
       matrix:
@@ -123,14 +105,45 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - name: downcase ACTOR_NAME
-        run: |
-          echo "ACTOR_NAME=${ACTOR_NAME,,}" >> $GITHUB_ENV
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - name: downcase ACTOR_NAME
-        run: |
-          echo "ACTOR_NAME=${ACTOR_NAME,,}" >> $GITHUB_ENV
       - uses: actions/checkout@v3
+
+      # Install nodejs
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      # Install TypeScript
+      - name: Install TypeScript
+        run: npm install -g typescript
+
+      - name: Get the change service name
+        id: get-deployment-services-name
+        run: echo "DEPLOYMENT_SERVICES=${{ needs.general-requirements.outputs.deployment-services }}" >> $GITHUB_ENV
+
+      # Run lint check
+      - name: Run Lint
+        if: ${{ needs.general-requirements.outputs.services-existed == 'true' }}
+        run: |
+          echo "Run Lint check for services: ${DEPLOYMENT_SERVICES}"
+          chmod +x ./scripts/*.sh
+          ./scripts/run_lint_check.sh
+
+  provision_service_for_testing:
+    runs-on: ubuntu-latest
+    needs: [
+      'general-requirements',
+      'run-lint-check'
+    ]
+
+    strategy:
+      matrix:
+        node-version: [14.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -150,14 +163,17 @@ jobs:
         run: npm install -g typescript
 
       - name: Get the change service name
-        id: get-change-services-name
-        run: echo "CHANGED_SERVICES=${{ needs.run-lint-check.outputs.change-services }}" >> $GITHUB_ENV
+        id: get-deployment-services-name
+        run: echo "DEPLOYMENT_SERVICES=${{ needs.general-requirements.outputs.deployment-services }}" >> $GITHUB_ENV
+
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
 
       # Build serverless
       - name: Build service
-        if: ${{ needs.run-lint-check.outputs.services-existed == 'true' }}
+        if: ${{ needs.general-requirements.outputs.services-existed == 'true' }}
         run: |
-          for SERVICE in ${CHANGED_SERVICES}; do
+          for SERVICE in ${DEPLOYMENT_SERVICES}; do
             ./scripts/build_service.sh ${{ secrets.BUILD_ENV }} ${SERVICE}
           done
 
@@ -167,19 +183,19 @@ jobs:
       
       # Provision lambda and ApiGateway
       - name: Provision Lambda and ApiGateway
-        if: ${{ needs.run-lint-check.outputs.services-existed == 'true' }}
+        if: ${{ needs.general-requirements.outputs.services-existed == 'true' }}
         run: |
           ./scripts/aws_deploy.sh ${{ secrets.BUILD_ENV }} deploy
       
       # Get the invoke url of ApiGateway
       - name: Get the invoke url of ApiGateway
-        if: ${{ needs.run-lint-check.outputs.services-existed == 'true' }}
+        if: ${{ needs.general-requirements.outputs.services-existed == 'true' }}
         run: |
           cd deploy2aws/environments/dev/
           output=$(terraform output)
           echo "::add-mask::${output}"
 
-  # Run terraform to check the change in infrastructure
+  # Run terraform to check the deployment in infrastructure
   run-infrastructure-check:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
@@ -192,9 +208,6 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v3
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -211,6 +224,9 @@ jobs:
       # Install TypeScript
       - name: Install TypeScript
         run: npm install -g typescript
+
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
 
       # Build serverless
       - name: Build serverless
