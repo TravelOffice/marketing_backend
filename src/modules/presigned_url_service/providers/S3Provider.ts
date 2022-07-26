@@ -1,5 +1,6 @@
 import AWS from 'aws';
-import { getEnv } from 'get-env';
+import { getAwsSecretValue, getEnv } from 'get-env';
+import { PresignedUrl } from '../models';
 
 AWS.config.update({
   region: getEnv('AWS_REGION'),
@@ -13,20 +14,21 @@ export default class S3Provider {
    * @param key Object key after uploaded to s3
    * @param expires Expires of presigned url
    * @param fileType Only this file type is allowed to upload to s3
-   * @returns s3 object key and presigned url
+   * @returns PresginedUrl object
    */
   generatePresignedUrl = async (
     bucket: string,
     key: string,
     expires: number,
     fileType: string,
-  ): Promise<{key: string, url: string}> => {
+  ): Promise<PresignedUrl> => {
     const url = await s3.getSignedUrlPromise('putObject', {
       Bucket: bucket,
       Key: key,
       Expires: expires,
       ContentType: fileType,
     });
-    return { key, url };
+    const cdnUrl = await getAwsSecretValue('CHAT_FILE_CDN');
+    return { key, url, cdn: `${cdnUrl}/${key}` };
   };
 }
