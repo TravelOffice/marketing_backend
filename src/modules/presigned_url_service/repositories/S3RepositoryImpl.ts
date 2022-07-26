@@ -10,7 +10,7 @@ export default class S3RepositoryImpl implements S3Repository {
    * @param customerId Id of customer in social network
    * @param expires Expires of presigned url
    * @param fileType Only this file type is allowed to upload to s3
-   * @returns s3 object key and presigned url
+   * @returns PresignedUrl object
    */
   generatePresignedUrl = async (
     bucket: string,

@@ -1,3 +1,5 @@
+import { PresignedUrl } from '../../models';
+
 export interface S3Repository {
   generatePresignedUrl: (
     bucket: string,
@@ -6,5 +8,5 @@ export interface S3Repository {
     expires: number,
     fileType: string,
     fileName: string,
-  ) => Promise<{key:string, url: string}>;
+  ) => Promise<PresignedUrl>;
 }
