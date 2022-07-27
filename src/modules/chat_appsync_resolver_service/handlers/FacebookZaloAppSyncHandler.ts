@@ -1,6 +1,6 @@
 import { ChatPlatform } from 'common-models';
 import { AppSyncEvent, Message, UnknownEvent } from '../models';
-import { fbMessagePlatformRepository, zaloMessagePlatformRepository } from '../repositories';
+import { fbMessagePlatformRepository, userRepository, zaloMessagePlatformRepository } from '../repositories';
 import { AppSyncHandler } from './AppSyncHandler';
 
 /**
@@ -59,9 +59,18 @@ export default class FacebookZaloAppSyncHandler implements AppSyncHandler {
         break;
 
       case 'allFbConversations': // Fetch conversations information
-        returnedData = await fbMessagePlatformRepository.getConversations(args.pageId);
+      {
+        const { tenant, username } = event;
+        const isRootOrAdmin = await userRepository.isRootOrAdmin(tenant, username);
+        const assigned = isRootOrAdmin ? undefined : username;
+        returnedData = await fbMessagePlatformRepository.getConversations(
+          tenant,
+          args.pageId,
+          assigned,
+        );
         resolverMessage = 'The conversations has been fetched from third-party platform';
         break;
+      }
 
       case 'allFbMessages': // Fetch messages when opening Sales Web or user scroll the chat box
         returnedData = await fbMessagePlatformRepository.getMessages(
