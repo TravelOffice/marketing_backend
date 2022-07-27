@@ -1,7 +1,12 @@
 import AWS from 'aws';
 import axios, { AxiosInstance } from 'axios';
 import { getAwsSecretValue, getEnv } from 'get-env';
+import * as crypto from 'crypto';
+import path from 'path';
+import fs from 'fs';
 import logger from '../utils/logger';
+
+const fsPromises = fs.promises;
 
 export default class S3Provider {
   private readonly s3: AWS.S3;
@@ -81,5 +86,32 @@ export default class S3Provider {
     logger.log(`[S3Provider.downloadFileToS3] Downloaded file: ${bucket}/${key} from filePath: ${fileUrl}`);
     const chatFileBucketUrl = await getAwsSecretValue('CHAT_FILE_BUCKET_URL');
     return `${chatFileBucketUrl}/${key}`;
+  };
+
+  /**
+   * Download object from CDN url to local storage
+   * @param url CDN file path
+   * @returns the path of file which saved to local
+   */
+  downloadFileFromCDN = async (url: string): Promise<string> => {
+    const randomByteLength = 16;
+    const folderName = crypto.randomBytes(randomByteLength).toString('hex');
+    // In lambda we using the tmp folder to save the temporary file
+    const folderPath = path.join('/tmp/', folderName);
+
+    if (!fs.existsSync(folderPath)) {
+      fs.mkdirSync(folderPath, { recursive: true });
+    } else {
+      throw new Error('Create a directory error, directory already exists!');
+    }
+    const fileNameIndex = url.lastIndexOf('/') + 1;
+    const fileName = url.substring(fileNameIndex);
+    const filePath = path.join(folderPath, fileName);
+
+    logger.log(`[S3Provider.downloadFileFromCDN] Downloading ${url}`);
+    const file = await this.get(url);
+    await fsPromises.writeFile(filePath, file.data as Buffer);
+    logger.log(`[S3Provider.downloadFileFromCDN] Downloaded ${url}`);
+    return filePath;
   };
 }
