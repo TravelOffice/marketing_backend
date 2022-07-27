@@ -59,6 +59,7 @@ export default class MessageRepositoryImpl implements MessageRepository {
     if (conversation) {
       newConversation = {
         ...conversation,
+        info: fbConversation,
         lastMessage: message,
       };
       // Update the last message

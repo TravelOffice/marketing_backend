@@ -17,6 +17,8 @@ type ReceivedMessageEvent = {
 // Facebook event
 type AllFbConversationsEvent = {
   field: 'allFbConversations',
+  username: string,
+  tenant: string,
   arguments: {
     pageId: string
   }
