@@ -38,12 +38,13 @@ export default class MessageRepositoryImpl implements MessageRepository {
 
   /**
    * Send received message command to AppSync
-   * @param tenantId Tenant ID
+   * @param assignee The tenant user assigned to conversation
    * @param platform chat platform
    * @param message The chat message
    */
   sendReceivedMessageCommand = async (
     platform: ChatPlatform,
+    assignee: string,
     message: TelegramMessageContent,
   ): Promise<void> => {
     // Delete message_id attribute, mid will be appeared in ReceiveMessageCommandArgs
@@ -60,7 +61,7 @@ export default class MessageRepositoryImpl implements MessageRepository {
       timestamp: message.date,
       messageData: JSON.stringify(messageData),
       chatPlatform: platform,
-      username: UNKNOWN_USER, // TODO: Need to implement filter subscription by username later
+      username: assignee,
     };
 
     // Send the message command to AppSync

@@ -11,6 +11,7 @@ export default class SendMessageUseCaseImpl implements SendMessageUseCase {
    * - Step 3: Save the chat message to dynamo DB
    * - Step 4: Save the last message to conversation
    * @param tenantId Tenant identifier
+   * @param username Tenant user identifier
    * @param botId Telegram bot id
    * @param chatId Telegram chat id
    * @param text Content of message
@@ -19,6 +20,7 @@ export default class SendMessageUseCaseImpl implements SendMessageUseCase {
    */
   invoke = async (
     tenantId: string,
+    username: string,
     botId: string,
     chatId: string,
     data: TelegramSendMessageData,
@@ -36,7 +38,7 @@ export default class SendMessageUseCaseImpl implements SendMessageUseCase {
     const platform = ChatPlatform.telegram;
 
     // Send received message command to AppSync
-    await messageRepository.sendReceivedMessageCommand(platform, { ...sentMessage });
+    await messageRepository.sendReceivedMessageCommand(platform, username, { ...sentMessage });
 
     // Save the chat message to dynamo DB
     await messageRepository.saveChatMessage(tenantId, platform, botId, sentMessage);

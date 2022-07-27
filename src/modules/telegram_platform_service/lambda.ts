@@ -51,6 +51,7 @@ const handleAppSyncEvent = async (event: AppSyncEvent) => {
     case 'sendMessage': {
       const sentMessage = await sendMessageUseCase.invoke(
         event.tenant,
+        event.username,
         event.arguments.sender,
         event.arguments.recipient,
         event.arguments.messageData,

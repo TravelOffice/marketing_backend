@@ -4,10 +4,11 @@ import {
 } from 'common-models';
 import { getAwsSecretValue } from 'get-env';
 import { MessageGroupType } from '../models/Message';
+import { RestrictedTelegramConversation, TelegramConversationWithAssignee } from '../models/RestrictedTelegramModels';
 import { appSyncProvider, dynamoProvider } from '../providers';
 import {
   ASSIGNEE_INDEX,
-  CONVERSATION_INDEX, MESSAGE_INDEX, TENANT_INDEX, UNKNOWN_USER,
+  CONVERSATION_INDEX, MESSAGE_INDEX, PARTITION_KEY_DELIMITER, TENANT_INDEX, UNKNOWN_USER,
 } from '../utils/constants';
 import logger from '../utils/logger';
 import { MessageRepository } from './interfaces/MessageRepository';
@@ -35,11 +36,13 @@ export default class MessageRepositoryImpl implements MessageRepository {
   /**
    * Send received message command to AppSync
    * @param tenantId Tenant ID
+   * @param username Tenant user ID
    * @param platform chat platform
    * @param message The chat message
    */
   sendReceivedMessageCommand = async (
     tenantId: string,
+    username: string,
     platform: ChatPlatform,
     message: TelegramMessageContent,
   ): Promise<void> => {
@@ -54,7 +57,7 @@ export default class MessageRepositoryImpl implements MessageRepository {
       timestamp: message.date,
       messageData: JSON.stringify(messageData),
       chatPlatform: platform,
-      username: UNKNOWN_USER, // TODO: Need to implement filter subscription by username later
+      username,
     };
 
     // Send the message command to AppSync
@@ -118,32 +121,48 @@ export default class MessageRepositoryImpl implements MessageRepository {
     const pk = `${TENANT_INDEX}#${tenantId}#${CONVERSATION_INDEX}#${chatPlatformIndex}#${page.id}`;
     const sk = `${CONVERSATION_INDEX}#${conversationId}`;
     const currentTime = Date.now();
+    let newConversation: RestrictedTelegramConversation;
 
     const conversation = await dynamoProvider.getItem<DDBConversation>(table, pk, sk);
     if (conversation) {
-      // Update the last message
-      await dynamoProvider.putItem(table, pk, sk, {
+      newConversation = {
         ...conversation,
         lastMessage: message,
-        updatedAt: currentTime,
-      });
-    } else {
-      // Create new conversation with unknown user
-      const typeLsi = `${ASSIGNEE_INDEX}#${UNKNOWN_USER}`;
-      const newConversation: Omit<DDBConversation, 'pk' | 'sk'> = {
-        info: message.chat,
-        lastMessage: message,
-        typeLsi,
       };
+      // Update the last message
       await dynamoProvider.putItem(table, pk, sk, {
         ...newConversation,
-        createdAt: currentTime,
         updatedAt: currentTime,
       });
+      logger.log(`[MessageRepository.saveConversation] saved conversation: ${JSON.stringify({
+        pk, sk, newConversation,
+      }, null, 2)}`);
+      const assignee = conversation.typeLsi
+        ? conversation.typeLsi.split(PARTITION_KEY_DELIMITER)[1]
+        : UNKNOWN_USER;
+      return {
+        ...newConversation,
+        assignee,
+      } as TelegramConversationWithAssignee;
     }
-
-    logger.log(`[MessageRepository.saveLastMessage] saved message: ${JSON.stringify({
-      pk, sk, lastMessage: message,
+    // Create new conversation with unknown user
+    const typeLsi = `${ASSIGNEE_INDEX}#${UNKNOWN_USER}`;
+    newConversation = {
+      info: message.chat,
+      lastMessage: message,
+    };
+    await dynamoProvider.putItem(table, pk, sk, {
+      ...newConversation,
+      typeLsi,
+      createdAt: currentTime,
+      updatedAt: currentTime,
+    });
+    logger.log(`[MessageRepository.saveConversation] saved conversation: ${JSON.stringify({
+      pk, sk, newConversation,
     }, null, 2)}`);
+    return {
+      ...newConversation,
+      assignee: UNKNOWN_USER,
+    } as TelegramConversationWithAssignee;
   };
 }
