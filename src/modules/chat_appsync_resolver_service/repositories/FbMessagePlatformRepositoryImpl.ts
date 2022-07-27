@@ -1,10 +1,13 @@
+import { ChatPlatform, FacebookConversation } from 'common-models';
 import { getAwsSecretValue } from 'get-env';
 import {
   FacebookMessageResponsePayload, FacebookUserProfile, Message, toSendFbMessagePayload,
 } from '../models';
 import { dynamoProvider, fbMessagePlatformProvider } from '../providers';
+import {
+  ASSIGNEE_INDEX, CONVERSATION_INDEX, FACEBOK_PAGE_INDEX, TENANT_INDEX,
+} from '../utils/constants';
 import logger from '../utils/logger';
-import { FACEBOK_PAGE_INDEX } from '../utils/constants';
 import { FbMessagePlatformRepository } from './interfaces/FbMessagePlatformRepository';
 
 export default class FbMessagePlatformRepositoryImpl implements FbMessagePlatformRepository {
@@ -61,20 +64,54 @@ export default class FbMessagePlatformRepositoryImpl implements FbMessagePlatfor
 
   /**
    * Get conversations for page
+   * @param tenantId The Tenant ID
    * @param pageId Page id
+   * @param assigneeId Employee id assigned to conversations
    * @returns
    */
   getConversations = async (
+    tenantId: string,
     pageId: string,
+    assigneeId?: string,
   ): Promise<FacebookMessageResponsePayload | undefined> => {
-    try {
-      // Get page token that stored in DynamoDB table by `pageIdAsSender`
-      const pageToken = await this.getFbMessagePlatformToken(pageId);
-      return fbMessagePlatformProvider.getConversations(pageToken, pageId);
-    } catch (error) {
-      logger.log(`[FbMessagePlatformRepositoryImpl.getConversations] Generated an error ${error}`);
-      return undefined;
+    const travelTable = await getAwsSecretValue('DYNAMO_CHAT_TABLE');
+    const facebookPlatformStr = ChatPlatform.facebook.toUpperCase(); // Platform unique code
+    // Combination of ASSIGNEE#<username>
+    const assigneeIndex = assigneeId ? `${ASSIGNEE_INDEX}#${assigneeId}` : `${ASSIGNEE_INDEX}#`;
+    const params = {
+      TableName: travelTable,
+      IndexName: 'TypeIndex',
+      KeyConditionExpression: '#pk = :pk AND begins_with ( #lsi, :lsi_filter_value )',
+      ExpressionAttributeNames: {
+        '#pk': 'pk',
+        '#lsi': 'typeLsi',
+      },
+      ExpressionAttributeValues: {
+        ':pk': `${TENANT_INDEX}#${tenantId}#${CONVERSATION_INDEX}#${facebookPlatformStr}#${pageId}`,
+        ':lsi_filter_value': assigneeIndex,
+      },
+    };
+
+    const { Items: items } = await dynamoProvider.query(params);
+    if (items) {
+      const conversations = items.map(
+        (conversation) => conversation.info as FacebookConversation,
+      );
+      logger.log(
+        `[FbMessagePlatformRepositoryImpl.getConversations] Conversations of page ${pageId}`,
+        JSON.stringify(conversations, null, 2),
+      );
+      return {
+        data: conversations,
+        paging: {
+          cursors: {
+            before: '',
+            after: '',
+          },
+        },
+      } as FacebookMessageResponsePayload;
     }
+    return undefined;
   };
 
   /**

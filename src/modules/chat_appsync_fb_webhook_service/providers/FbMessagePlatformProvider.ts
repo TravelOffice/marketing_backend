@@ -34,6 +34,7 @@ export default class FbMessagePlatformProvider {
     const params = {
       access_token: pageToken,
       user_id: pageUserId,
+      fields: 'snippet,senders,participants,message_count,updated_time',
     };
     const response = await this.axiosInstance.get(`${pageId}/conversations`, { params });
     const { data } = response.data as FacebookMessageResponsePayload;
