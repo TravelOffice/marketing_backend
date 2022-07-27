@@ -15,6 +15,7 @@
     "aws": "file:../../libs/aws-sdk",
     "axios": "^0.26.0",
     "common-models": "file:../../libs/common-models",
+    "form-data": "^4.0.0",
     "get-env": "file:../../libs/get-env",
     "object-assign": "^4.1.1",
     "reflect-metadata": "^0.1.13",

@@ -7,8 +7,11 @@ import {
   SendVideoOptions,
   TelegramMessage,
 } from 'common-models';
+import * as fs from 'fs';
+import FormData from 'form-data';
 import { TelegramAttachmentContent } from '../models/send-message/SendMessageOptions';
 import logger from '../utils/logger';
+import { s3Provider } from '.';
 
 export default class TelegramPlatformProvider {
   // Fill telegram bot api endpoint here
@@ -186,13 +189,24 @@ export default class TelegramPlatformProvider {
     options?: SendVideoOptions,
     fileOptions?: FileOptions,
   ): Promise<TelegramMessage> => {
-    const params = {
-      chat_id: chatId,
-      document,
-      options,
-      fileOptions,
-    };
-    return this.get(`bot${accessToken}/sendDocument`, params);
+    // Download file from CDN url
+    const downloadedFilePath = await s3Provider.downloadFileFromCDN(document.toString());
+
+    // Pass all params to form data
+    const form = new FormData();
+    const stream = fs.createReadStream(downloadedFilePath);
+    form.append('chat_id', chatId);
+    form.append('document', stream);
+    if (options) {
+      Object.entries(options).forEach(([key, val]) => form.append(key, val));
+    }
+    if (fileOptions) {
+      Object.entries(fileOptions).forEach(([key, val]) => form.append(key, val));
+    }
+
+    return this.axiosInstance.post(`bot${accessToken}/sendDocument`, form, {
+      headers: form.getHeaders(),
+    });
   };
 
   /**
