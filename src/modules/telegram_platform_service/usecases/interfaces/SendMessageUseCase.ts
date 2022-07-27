@@ -4,6 +4,7 @@ import { TelegramSendMessageData } from '../../models/send-message/SendMessageDa
 export interface SendMessageUseCase {
   invoke: (
     tenantId: string,
+    username: string,
     botId: string,
     chatId: string,
     data: TelegramSendMessageData,

@@ -2,6 +2,7 @@ import {
   ChatPlatform, TelegramWebhookMessageEvent,
 } from 'common-models';
 import { messageRepository, pageRepository } from '../repositories';
+import { UNKNOWN_USER } from '../utils/constants';
 import { ReceiveTelegramWebhookUseCase } from './interfaces/ReceiveTelegramWebhookUseCase';
 
 export default class ReceiveTelegramWebhookUseCaseImpl implements ReceiveTelegramWebhookUseCase {
@@ -45,13 +46,24 @@ export default class ReceiveTelegramWebhookUseCaseImpl implements ReceiveTelegra
       throw new Error('Only non-bot commands are supported');
     }
 
-    // Send received message command to AppSync
-    await messageRepository.sendReceivedMessageCommand(tenantId, platform, { ...message });
-
     // Save the chat message
     await messageRepository.saveChatMessage(tenantId, platform, page, message);
 
     // Save the last message to conversation
-    await messageRepository.saveConversation(tenantId, platform, page, message);
+    const conversation = await messageRepository.saveConversation(
+      tenantId,
+      platform,
+      page,
+      message,
+    );
+
+    const assignee = conversation.assignee ?? UNKNOWN_USER;
+    // Send received message command to AppSync
+    await messageRepository.sendReceivedMessageCommand(
+      tenantId,
+      assignee,
+      platform,
+      message,
+    );
   };
 }

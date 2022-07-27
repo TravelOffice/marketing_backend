@@ -5,6 +5,7 @@ import {
 export interface MessageRepository {
   sendReceivedMessageCommand: (
     platform: ChatPlatform,
+    assignee: string,
     message: TelegramMessageContent,
   ) => Promise<void>
 
