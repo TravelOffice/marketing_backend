@@ -17,11 +17,13 @@
 #set( $indentity = [] )
 #set( $tenant = "" )
 #set( $username = "" )
+#set( $role = "" )
 #set( $USERNAME_DELIMITER = "#" )
 
 #if( $context.identity )
     #set( $indentity = $context.identity.username.split("[$USERNAME_DELIMITER]") )
     #set( $indentitySize = $indentity.size() )
+    #set( $role = $context.identity.claims.get("custom:role") )
     #if( $indentitySize < 1 || $indentitySize > 2 )
       $util.error('GetTenantInfo: Invalid authenticated username!')
     #else
@@ -34,33 +36,45 @@
 #end
 
 #*
- * Setting up subscription filtering
+ * Setting up subscription filtering.
  * Each web client that represent individual user can only received the conversation which was assigned before
  * - Tenant root account can receive all the conversation related to tenant pages
  * - Employee user can only received assigned conversations
  * The subscription filter is combined by two conditions with OR operator as below
  *#
-$extensions.setSubscriptionFilter({
-  "filterGroup": [
-    {
-      "filters": [
-        {
-          "fieldName" : "username",
-          "operator" : "eq",
-          "value" : $username
-        }
-      ]
-    },
-    {
-      "filters": [
-        {
-          "fieldName" : "username",
-          "operator" : "eq",
-          "value" : $tenant
-        }
-      ]
-    }
-  ]
-})
+#if( $role == "ADMIN" || $role == "ROOT" )
+    ## Root or admin can get all the messages related to tenant
+    $extensions.setSubscriptionFilter({
+        "filterGroup": [{
+            "filters" : [
+                {
+                    "fieldName" : "tenant",
+                    "operator" : "eq",
+                    "value" : $tenant
+                }
+            ]
+
+        }]
+    })
+#else
+    ## Message information should matches both tenant and username
+    $extensions.setSubscriptionFilter({
+        "filterGroup": [{
+            "filters" : [
+                {
+                    "fieldName" : "tenant",
+                    "operator" : "eq",
+                    "value" : $tenant
+                },
+                {
+                    "fieldName" : "username",
+                    "operator" : "eq",
+                    "value" : $username
+                }
+            ]
+
+        }]
+    })
+#end
 
 $utils.toJson($context.result)

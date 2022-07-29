@@ -49,6 +49,7 @@ export default class ReceiveWebhookUseCaseImpl implements ReceiveWebhookUseCase 
       recipient,
       customerId,
       username: conversation.assignee ?? UNKNOWN_USER,
+      tenant: page.tenantId,
       timestamp: webhookEvent.timestamp,
       messageData: JSON.stringify(messageData),
       chatPlatform: ChatPlatform.facebook,
