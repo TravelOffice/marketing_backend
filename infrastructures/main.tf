@@ -1,7 +1,9 @@
 variable "LAMBDA_LAYERS" {}
 variable "LAMBDA_FUNCTIONS" {}
 variable "API_ENDPOINTS" {}
+variable "API_GATEWAY_RESPONSES" {}
 variable "LAMBDA_TRIGGERS" {}
+variable "LAMBDA_AUTHORIZERS" {}
 variable "LAMBDA_CRONS" {}
 variable "TF_BUCKET" {}
 variable "APPSYNC_FUNCTIONS" {}
@@ -67,6 +69,8 @@ module "API_GATEWAY" {
   source                 = "TravelOffice/apigateway/aws"
   LAMBDA_ARNS            = module.LAMBDA_FUNCTION.lambda_arns
   API_ENDPOINTS          = var.API_ENDPOINTS
+  LAMBDA_AUTHORIZERS     = var.LAMBDA_AUTHORIZERS
+  API_GATEWAY_RESPONSES  = var.API_GATEWAY_RESPONSES
   AWS_REGION             = var.AWS_REGION
   FEATURE_NAME           = var.FEATURE_NAME
   DOMAIN_NAME            = module.REMOTE_STATE.STATE.COMMON_CONFIG.route53.hosted_zone.domain.name

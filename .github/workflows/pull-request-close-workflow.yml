@@ -98,9 +98,7 @@ jobs:
       - name: Build service
         if: ${{ steps.get-deployment-services-name.outputs.services-existed == 'true' }}
         run: |
-          for SERVICE in ${{ env.DEPLOYMENT_SERVICES }}; do
-            ./scripts/build_service.sh ${{ secrets.BUILD_ENV }} ${SERVICE}
-          done
+          ./scripts/build_serverless.sh ${{ secrets.BUILD_ENV }}
 
       # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
       - name: Setup Terraform
