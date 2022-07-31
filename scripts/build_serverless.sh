@@ -60,7 +60,12 @@ build_service() {
 }
 
 cd ${CUR_DIR}/src/modules
-MODULES_DIR=$(ls -d */ | cut -f1 -d'/')
+if [ -z "${DEPLOYMENT_SERVICES}" ]; then
+  MODULES_DIR=$(ls -d */ | cut -f1 -d'/')
+else
+  MODULES_DIR="${DEPLOYMENT_SERVICES}"
+fi
+
 for dir in $MODULES_DIR
 do
   build_service ${dir}
