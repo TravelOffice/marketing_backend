@@ -25,14 +25,14 @@
     #set( $indentitySize = $indentity.size() )
     #set( $role = $context.identity.claims.get("custom:role") )
     #if( $indentitySize < 1 || $indentitySize > 2 )
-      $util.error('GetTenantInfo: Invalid authenticated username!')
+      $util.error('OnReceivedMessage: Invalid authenticated username!')
     #else
       #set( $tenant = $indentity.get(0) )
       #set( $username_index = $indentitySize - 1 )
       #set( $username = $indentity.get( $username_index ) )
     #end
 #else
-  $util.error('GetTenantInfo: Missing identifying information!')
+  $util.error('OnReceivedMessage: Missing identifying information!')
 #end
 
 #*

@@ -1,4 +1,5 @@
 import {
+  adminGetTelegramConversationsUseCase,
   getFileInfoUseCase,
   getTelegramConversationsUseCase,
   getTelegramMessagesUseCase,
@@ -72,6 +73,17 @@ const handleAppSyncEvent = async (event: AppSyncEvent) => {
       resolverMessage = 'The file information has been fetched from Telegram platform';
       returnedData = fileInfo;
       logger.log(`Fetched file for [${event.tenant}#${event.arguments.conversationId}]: successfully: ${JSON.stringify(returnedData, null, 2)}`);
+      break;
+    }
+
+    case 'adminAllTelegramConversations': {
+      const conversations = await adminGetTelegramConversationsUseCase.invoke(
+        event.tenant,
+        event.arguments.pageId,
+      );
+      resolverMessage = 'The conversations has been fetched from Telegram platform';
+      returnedData = conversations;
+      logger.log(`Fetched conversations for admin ${JSON.stringify(conversations, null, 2)}`);
       break;
     }
 
