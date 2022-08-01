@@ -1,0 +1,19 @@
+#if( $context.identity )
+    #set( $role = $context.identity.claims.get("custom:role") )
+    #if( $role != "ADMIN" && $role != "ROOT" )
+      $util.error('VerifyRole: Invalid authenticated role!')
+    #end
+#else
+  $util.error('VerifyRole: Missing identifying information!')
+#end
+
+#**
+    Resolvers with None data sources can locally publish events
+    that fire subscriptions without hitting a backend data source.
+    The value of 'payload' after the template has been evaluated
+    will be directly forwarded to the response.
+*#
+{
+    "version": "2017-02-28",
+    "payload": {}
+}

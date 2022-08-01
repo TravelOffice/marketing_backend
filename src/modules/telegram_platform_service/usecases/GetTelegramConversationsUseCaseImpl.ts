@@ -1,4 +1,4 @@
-import { telegramPlatformRepository, userRepository } from '../repositories';
+import { telegramPlatformRepository } from '../repositories';
 import { GetTelegramConversationsUseCase } from './interfaces/GetTelegramConversationsUseCase';
 
 // eslint-disable-next-line max-len
@@ -14,11 +14,5 @@ export default class GetTelegramConversationsUseCaseImpl implements GetTelegramC
     tenantId: string,
     botId: string,
     assigneeId: string,
-  ) => {
-    const isRootOrAdmin = await userRepository.isRootOrAdmin(tenantId, assigneeId);
-    if (isRootOrAdmin) {
-      return telegramPlatformRepository.getConversations(tenantId, botId);
-    }
-    return telegramPlatformRepository.getConversations(tenantId, botId, assigneeId);
-  };
+  ) => telegramPlatformRepository.getConversations(tenantId, botId, assigneeId);
 }
