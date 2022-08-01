@@ -7,10 +7,11 @@ export interface ReceiveMessageCommandResponse {
     sender: string,
     recipient: string,
     customerId: string,
-    timestamp:number,
+    timestamp: number,
     messageData: AppSyncReceiveMessageData,
     chatPlatform: ChatPlatform,
   }, // GraphQL model
   message: string, // Query result as string,
-  username: string
+  username: string,
+  tenant: string,
 }

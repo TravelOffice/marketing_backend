@@ -38,7 +38,12 @@ export default class SendMessageUseCaseImpl implements SendMessageUseCase {
     const platform = ChatPlatform.telegram;
 
     // Send received message command to AppSync
-    await messageRepository.sendReceivedMessageCommand(platform, username, { ...sentMessage });
+    await messageRepository.sendReceivedMessageCommand(
+      platform,
+      tenantId,
+      username,
+      { ...sentMessage },
+    );
 
     // Save the chat message to dynamo DB
     await messageRepository.saveChatMessage(tenantId, platform, botId, sentMessage);

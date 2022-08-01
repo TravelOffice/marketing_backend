@@ -14,7 +14,7 @@ import logger from '../utils/logger';
 import { MessageRepository } from './interfaces/MessageRepository';
 
 export default class MessageRepositoryImpl implements MessageRepository {
-  private readonly getMessageType = (message: TelegramMessageContent) : MessageGroupType => {
+  private readonly getMessageType = (message: TelegramMessageContent): MessageGroupType => {
     if (message.text) {
       const messageEntities = message.entities;
       if (messageEntities
@@ -58,6 +58,7 @@ export default class MessageRepositoryImpl implements MessageRepository {
       messageData: JSON.stringify(messageData),
       chatPlatform: platform,
       username,
+      tenant: tenantId,
     };
 
     // Send the message command to AppSync

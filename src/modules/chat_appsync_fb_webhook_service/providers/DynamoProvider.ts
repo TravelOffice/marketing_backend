@@ -4,7 +4,7 @@ import { getEnv } from 'get-env';
 export type PutItemInput = AWS.DynamoDB.PutItemInput;
 export type GetItemInput = AWS.DynamoDB.GetItemInput;
 export type QueryInput = AWS.DynamoDB.QueryInput;
-export type DeleteItemInput = AWS.DynamoDB.DeleteItemInput
+export type DeleteItemInput = AWS.DynamoDB.DeleteItemInput;
 const dynamoDB: AWS.DynamoDB = new AWS.DynamoDB({ region: getEnv('AWS_REGION') });
 
 export default class DynamoProvider {
@@ -16,7 +16,7 @@ export default class DynamoProvider {
     return dynamoDB.putItem(params).promise();
   };
 
-  getItem = async <T = any>(table: string, pk: string, sk: string) : Promise< T | undefined> => {
+  getItem = async <T = any>(table: string, pk: string, sk: string): Promise<T | undefined> => {
     const params: GetItemInput = {
       TableName: table,
       Key: AWS.DynamoDB.Converter.marshall({ pk, sk }),
@@ -28,7 +28,7 @@ export default class DynamoProvider {
     return AWS.DynamoDB.Converter.unmarshall(Item) as T;
   };
 
-  query = async <T = any> (params: QueryInput): Promise<T[]> => {
+  query = async <T = any>(params: QueryInput): Promise<T[]> => {
     const { Items } = await dynamoDB.query(params).promise();
     if (Items) {
       return Items.map((item: any) => AWS.DynamoDB.Converter.unmarshall(item) as T);
@@ -41,7 +41,7 @@ export default class DynamoProvider {
     pk: string,
     sk: string,
     updateExpression: string,
-    expressionAttributeValues: {[key: string]: any},
+    expressionAttributeValues: { [key: string]: any },
     expressionAttributeNames?: AWS.DynamoDB.ExpressionAttributeNameMap,
   ) => {
     const params: AWS.DynamoDB.DocumentClient.UpdateItemInput = {

@@ -5,6 +5,7 @@ import {
   ReceiveMessageCommandResponse, receiveMessageQuery, ZaloWebhookMessageEvent,
 } from 'common-models';
 import { getAwsSecretValue } from 'get-env';
+import { pageRepository } from '.';
 import { UNKNOWN_USER } from '../utils/constants';
 import { AppSyncRepository } from './interfaces/AppSyncRepository';
 
@@ -18,6 +19,12 @@ export default class AppSyncRepositoryImpl implements AppSyncRepository {
     // Initialize AppSync arguments
     const messageId = message.msg_id;
     const messageData: AppSyncZaloReceivedMessageData = Object.assign(message, {});
+    // Get the linked page information
+    const pageId = webhookEvent.recipient.id;
+    const page = await pageRepository.get(pageId);
+    if (!page) {
+      throw new Error('This page is not linked yet!');
+    }
     // Delete mid attribute, mid will be appeared in ReceiveMessageCommandArgs
     delete messageData.msg_id;
     const args: ReceiveMessageCommandArgs = {
@@ -29,6 +36,7 @@ export default class AppSyncRepositoryImpl implements AppSyncRepository {
       messageData: JSON.stringify(messageData),
       chatPlatform: ChatPlatform.zalo,
       username: UNKNOWN_USER, // TODO: Need to implement filter subscription by username later
+      tenant: page.tenantId,
     };
 
     // Send command `receivedMessage` to AppSync graphql endpoint

@@ -10,4 +10,5 @@ export interface ReceiveMessageCommandArgs {
   messageData: string,
   chatPlatform: ChatPlatform,
   username: string,
+  tenant: string,
 }
