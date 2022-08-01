@@ -6,12 +6,15 @@ import SendMessageUseCaseImpl from './SendMessageUseCaseImpl';
 import { SendMessageUseCase } from './interfaces/SendMessageUseCase';
 import GetFileInfoUseCaseImpl from './GetFileInfoUseCaseImpl';
 import { GetFileInfoUseCase } from './interfaces/GetFileInfoUseCase';
+import { AdminGetTelegramConversationsUseCase } from './interfaces/AdminGetTelegramConversationsUseCase';
+import AdminGetTelegramConversationsUseCaseImpl from './AdminGetTelegramConversationsUseCaseImpl';
 
 interface UseCases {
   getTelegramConversationsUseCase: GetTelegramConversationsUseCase,
   getTelegramMessagesUseCase: GetTelegramMessagesUseCase,
   sendMessageUseCase: SendMessageUseCase,
   getFileInfoUseCase: GetFileInfoUseCase,
+  adminGetTelegramConversationsUseCase: AdminGetTelegramConversationsUseCase,
 }
 
 const useCases: UseCases = {
@@ -19,6 +22,7 @@ const useCases: UseCases = {
   getTelegramMessagesUseCase: new GetTelegramMessagesUseCaseImpl(),
   sendMessageUseCase: new SendMessageUseCaseImpl(),
   getFileInfoUseCase: new GetFileInfoUseCaseImpl(),
+  adminGetTelegramConversationsUseCase: new AdminGetTelegramConversationsUseCaseImpl(),
 };
 
 // eslint-disable-next-line import/prefer-default-export
@@ -27,4 +31,5 @@ export const {
   getTelegramMessagesUseCase,
   sendMessageUseCase,
   getFileInfoUseCase,
+  adminGetTelegramConversationsUseCase,
 } = useCases;

@@ -34,6 +34,15 @@ type AllFbMessagesEvent = {
   }
 }
 
+type AdminAllFbConversationsEvent = {
+  field: 'adminAllFbConversations',
+  username: string,
+  tenant: string,
+  arguments: {
+    pageId: string
+  }
+}
+
 // Zalo event
 type AllZaloConversationsEvent = {
   field: 'allZaloConversations',
@@ -54,6 +63,15 @@ type AllZaloMessageEvent = {
   }
 }
 
+type AdminAllZaloConversationsEvent = {
+  field: 'adminAllZaloConversations',
+  arguments: {
+    pageId: string,
+    offset?: number,
+    count?: number
+  }
+}
+
 type UserProfileEvent = {
   field: 'userProfile',
   arguments: {
@@ -69,4 +87,4 @@ export type UnknownEvent = {
 }
 
 // eslint-disable-next-line max-len
-export type AppSyncEvent = SendMessageEvent | ReceivedMessageEvent | AllFbConversationsEvent | AllFbMessagesEvent | AllZaloConversationsEvent | AllZaloMessageEvent | UserProfileEvent | UnknownEvent;
+export type AppSyncEvent = SendMessageEvent | ReceivedMessageEvent | AllFbConversationsEvent | AllFbMessagesEvent | AdminAllFbConversationsEvent | AllZaloConversationsEvent | AllZaloMessageEvent | AdminAllZaloConversationsEvent | UserProfileEvent | UnknownEvent;

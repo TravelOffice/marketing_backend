@@ -1,6 +1,6 @@
 import { ChatPlatform } from 'common-models';
 import { AppSyncEvent, Message, UnknownEvent } from '../models';
-import { fbMessagePlatformRepository, userRepository, zaloMessagePlatformRepository } from '../repositories';
+import { fbMessagePlatformRepository, zaloMessagePlatformRepository } from '../repositories';
 import { AppSyncHandler } from './AppSyncHandler';
 
 /**
@@ -61,12 +61,10 @@ export default class FacebookZaloAppSyncHandler implements AppSyncHandler {
       case 'allFbConversations': // Fetch conversations information
       {
         const { tenant, username } = event;
-        const isRootOrAdmin = await userRepository.isRootOrAdmin(tenant, username);
-        const assigned = isRootOrAdmin ? undefined : username;
         returnedData = await fbMessagePlatformRepository.getConversations(
           tenant,
           args.pageId,
-          assigned,
+          username,
         );
         resolverMessage = 'The conversations has been fetched from third-party platform';
         break;
@@ -79,7 +77,7 @@ export default class FacebookZaloAppSyncHandler implements AppSyncHandler {
           args.after,
           args.limit,
         );
-        resolverMessage = 'The messages has been fetched from third-party platform';
+        resolverMessage = 'The messages has been fetched from Facebook platform';
         break;
 
       case 'allZaloConversations':
@@ -109,6 +107,17 @@ export default class FacebookZaloAppSyncHandler implements AppSyncHandler {
         );
         resolverMessage = `User profile has been fetched from ${args.platform} platform`;
         break;
+
+      case 'adminAllFbConversations': // Fetch conversations information
+      {
+        const { tenant } = event;
+        returnedData = await fbMessagePlatformRepository.getConversations(
+          tenant,
+          args.pageId,
+        );
+        resolverMessage = 'The conversations has been fetched from Facebook platform';
+        break;
+      }
 
       default:
         throw new Error(`Unknown field, unable to resolve ${(event as UnknownEvent).field}`);
