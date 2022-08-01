@@ -2,8 +2,8 @@ import { print } from 'graphql';
 import { gql } from 'graphql-tag';
 
 const receiveMessageGql = gql`
-  mutation ReceivedMessageMutation($id: String!, $sender: String!, $recipient: String!, $customerId: String!, $username: String!, $timestamp: AWSTimestamp, $messageData: AWSJSON!, $chatPlatform: String!) {
-    receivedMessage(id: $id, sender: $sender, recipient: $recipient, customerId: $customerId, username: $username, timestamp: $timestamp, messageData: $messageData, chatPlatform: $chatPlatform) {
+  mutation ReceivedMessageMutation($id: String!, $sender: String!, $recipient: String!, $customerId: String!, $username: String!, $tenant: String!, $timestamp: AWSTimestamp, $messageData: AWSJSON!, $chatPlatform: String!) {
+    receivedMessage(id: $id, sender: $sender, recipient: $recipient, customerId: $customerId, username: $username, tenant: $tenant, timestamp: $timestamp, messageData: $messageData, chatPlatform: $chatPlatform) {
       data {
         id
         sender
@@ -15,6 +15,7 @@ const receiveMessageGql = gql`
       }
       message
       username
+      tenant
     }
   }
 `;

@@ -44,6 +44,7 @@ export default class MessageRepositoryImpl implements MessageRepository {
    */
   sendReceivedMessageCommand = async (
     platform: ChatPlatform,
+    tenant: string,
     assignee: string,
     message: TelegramMessageContent,
   ): Promise<void> => {
@@ -62,6 +63,7 @@ export default class MessageRepositoryImpl implements MessageRepository {
       messageData: JSON.stringify(messageData),
       chatPlatform: platform,
       username: assignee,
+      tenant,
     };
 
     // Send the message command to AppSync
