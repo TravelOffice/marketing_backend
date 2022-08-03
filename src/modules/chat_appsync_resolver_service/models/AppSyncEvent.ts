@@ -77,7 +77,8 @@ type UserProfileEvent = {
   arguments: {
     platform: ChatPlatform,
     pageId: string,
-    pageUserId: string
+    pageUserId: string,
+    chatId?: string,
   }
 }
 

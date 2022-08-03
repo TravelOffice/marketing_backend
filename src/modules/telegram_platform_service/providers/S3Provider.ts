@@ -84,7 +84,7 @@ export default class S3Provider {
     logger.log(`[S3Provider.downloadFileToS3] Downloading file: ${bucket}/${key} from filePath: ${fileUrl}`);
     await this.s3.putObject(objectParams).promise();
     logger.log(`[S3Provider.downloadFileToS3] Downloaded file: ${bucket}/${key} from filePath: ${fileUrl}`);
-    const chatFileBucketUrl = await getAwsSecretValue('CHAT_FILE_BUCKET_URL');
+    const chatFileBucketUrl = await getAwsSecretValue('CHAT_FILE_CDN');
     return `${chatFileBucketUrl}/${key}`;
   };
 

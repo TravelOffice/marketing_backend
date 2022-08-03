@@ -23,4 +23,12 @@ export interface TelegramConversationWithAssignee extends RestrictedTelegramConv
   assignee: string
 }
 
-export interface RestrictedTelegramFile extends RestrictedDDBModel<DDBFile> { }
+export interface TelegramFileInformation {
+  file_id: string,
+  file_path: string,
+  file_size: number,
+  file_unique_id: string,
+}
+export interface RestrictedTelegramFile extends RestrictedDDBModel<DDBFile> {
+  fileInfo: TelegramFileInformation,
+}

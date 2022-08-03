@@ -47,3 +47,5 @@ export const PAGE_INDEX = 'PAGE';
 export const FILE_INDEX = 'FILE';
 
 export const UNKNOWN_USER = 'unknown';
+
+export const TELEGRAM_PAGE_INDEX = 'PAGE#TELEGRAM';

@@ -4,6 +4,7 @@ import {
   getTelegramConversationsUseCase,
   getTelegramMessagesUseCase,
   sendMessageUseCase,
+  getTelegramUserProfileUseCase,
 } from './usecases';
 import logger from './utils/logger';
 
@@ -75,7 +76,6 @@ const handleAppSyncEvent = async (event: AppSyncEvent) => {
       logger.log(`Fetched file for [${event.tenant}#${event.arguments.conversationId}]: successfully: ${JSON.stringify(returnedData, null, 2)}`);
       break;
     }
-
     case 'adminAllTelegramConversations': {
       const conversations = await adminGetTelegramConversationsUseCase.invoke(
         event.tenant,
@@ -86,7 +86,20 @@ const handleAppSyncEvent = async (event: AppSyncEvent) => {
       logger.log(`Fetched conversations for admin ${JSON.stringify(conversations, null, 2)}`);
       break;
     }
-
+    case 'userProfile': {
+      logger.log(`Receive getTelegramUserProfile event ${event}`);
+      const { pageId: botId, pageUserId: userId, chatId } = event.arguments;
+      const userProfile = await getTelegramUserProfileUseCase.invoke(
+        event.tenant,
+        botId,
+        chatId,
+        userId,
+      );
+      resolverMessage = 'The user profile information has been fetched from Telegram platform';
+      returnedData = userProfile;
+      logger.log(`Fetched user profile for [${event.tenant}#${event.arguments.userId}]: successfully: ${JSON.stringify(returnedData, null, 2)}`);
+      break;
+    }
     default:
       throw new Error(`Event field ${field} is not supported yet.`);
   }

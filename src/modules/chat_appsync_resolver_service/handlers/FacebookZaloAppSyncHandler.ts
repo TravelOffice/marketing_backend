@@ -101,7 +101,7 @@ export default class FacebookZaloAppSyncHandler implements AppSyncHandler {
 
       case 'userProfile':
         returnedData = await this.getUserProfile(
-          args.platform,
+          args.chatPlatform,
           args.pageId,
           args.pageUserId,
         );
