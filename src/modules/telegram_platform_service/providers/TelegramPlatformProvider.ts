@@ -69,10 +69,47 @@ export default class TelegramPlatformProvider {
   };
 
   /**
-   * Get user profile information
+   * Get user profile photos
+   * @param accessToken Telegram bot token
+   * @param userId The id of user
+   * @param offset Sequential number of the first photo to be returned
+   * @param limit Limits the number of photos to be retrieved (1-100)
+   * @returns User profile photos as object
    */
-  getUserProfile = async () => {
-    throw new Error('Method is not implemented yet.');
+  getUserProfilePhotos = async (
+    accessToken: string,
+    userId: string,
+    offset?: number,
+    limit?: number,
+  ) => {
+    // Prepare params to get user profile photos by Telegram bot api
+    const params = {
+      user_id: userId,
+      offset,
+      limit,
+    };
+    // Get user profile photos by Telegram bot api
+    return this.get(`${this.messagePlatformBaseUrl}/bot${accessToken}/getUserProfilePhotos`, params);
+  };
+
+  /**
+   * Get user profile information
+   * @param accessToken Telegram bot token
+   * @param chatId ID of conversation
+   * @param userId ID of user
+   * @returns The user profle and user profile photos as object
+   */
+  getUserProfile = async (accessToken: string, chatId: string, userId: string) => {
+    // Prepare params to get user info by Telegram bot api
+    const params = {
+      chat_id: chatId,
+      user_id: userId,
+    };
+    // Get user infomation by Telegram bot api
+    const { user } = await this.get(`${this.messagePlatformBaseUrl}/bot${accessToken}/getChatMember`, params);
+    // Get user profile photos
+    const avatars = await this.getUserProfilePhotos(accessToken, userId);
+    return { user, avatars };
   };
 
   /**

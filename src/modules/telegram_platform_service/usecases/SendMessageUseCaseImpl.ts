@@ -26,7 +26,7 @@ export default class SendMessageUseCaseImpl implements SendMessageUseCase {
     data: TelegramSendMessageData,
   ) => {
     // Get Telegram Bot token
-    const accessToken = await telegramPlatformRepository.getAccessToken(tenantId, botId);
+    const accessToken = await telegramPlatformRepository.getAccessToken(botId);
 
     // Send message by Telegram bot
     const sentMessage = await telegramPlatformRepository.sendMessage(
