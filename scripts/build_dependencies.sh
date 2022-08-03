@@ -10,7 +10,7 @@ do
   echo ${DEPENDENCIES_DIR}/${dir}
   cd ${DEPENDENCIES_DIR}/${dir}
   rm -rf node_modules
-  npm install
-  npm run build
+  yarn install
+  yarn build
 done
 cd ${CUR_DIR}

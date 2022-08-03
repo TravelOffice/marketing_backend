@@ -5,8 +5,6 @@
 *.tfstate
 *.tfstate.*
 
-# lock file
-*.lock*
 infrastructures/environments/**/main.tf
 infrastructures/environments/**/output.tf
 infrastructures/environments/**/serverless.auto.tfvars
@@ -28,5 +26,4 @@ infrastructures/environments/**/serverless.auto.tfvars
 **/dist/*
 
 temp
-**/package-lock*
 **.idea/*

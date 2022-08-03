@@ -1,5 +1,4 @@
-import { APIGatewayAuthorizerResultContext } from 'aws-lambda';
-import { ClaimVerifyRequest } from '../models';
+import { ClaimVerifyRequest, APIGatewayAuthorizerResultContext } from '../models';
 import { authPolicyProvider, cognitoProvider } from '../providers';
 import { AuthorizationRepository } from './interfaces/AuthorizationRepository';
 

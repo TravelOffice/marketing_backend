@@ -27,5 +27,5 @@ if ! test -f "$FILE"; then
 fi
 
 cd ${SERVICE_DIR}
-npm install
+yarn install
 nodemon app.local.ts

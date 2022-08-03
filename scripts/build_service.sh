@@ -39,10 +39,9 @@ if [ ! -f "package.json" ]; then
 fi
 rm -rf ${SERVICE_DIR}/dist
 rm -rf ${SERVICE_DIR}/node_modules
-rm -rf ${SERVICE_DIR}/package-lock.json
-npm install
+yarn install
 echo "Install successfully"
-npm run build || exit 0
+yarn build || exit 0
 echo "Build"
 
 retVal=$?
@@ -52,9 +51,8 @@ if [ $retVal -ne 0 ]; then
 fi
 
 rm -rf ${SERVICE_DIR}/node_modules
-rm -rf ${SERVICE_DIR}/package-lock.json
 echo "Install production dependencies"
-npm install --production
+yarn install --production
 echo "Finished installing production"
 LAYER_DIR=${CUR_DIR}/src/layers/${SERVICENAME}/nodejs
 mkdir -p ${LAYER_DIR}
@@ -68,7 +66,7 @@ cd $CUR_DIR
 # Clean aws-sdk
 cd ${CUR_DIR}/src/libs/aws-sdk
 rm -rf node_modules
-npm install --production
+yarn install --production
 
 echo "Zipping function and layer..."
 mkdir -p ${CUR_DIR}/temp

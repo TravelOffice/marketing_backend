@@ -183,7 +183,9 @@ for SERVICENAME in ${DEPLOYMENT_SERVICES}; do
       METHOD=$(echo $method | tr 'a-z' 'A-Z')
       echo "      \"${METHOD}\" = {" >>  ${SERVERLESS_DEF_FILE}
       echo "        lambda_name   = \"${SERVICENAME}\"" >>  ${SERVERLESS_DEF_FILE}
-      echo "        authorization = true" >>  ${SERVERLESS_DEF_FILE}
+      echo "        authorization = {" >>  ${SERVERLESS_DEF_FILE}
+      echo "          type = \"COGNITO\"" >>  ${SERVERLESS_DEF_FILE}
+      echo "        }" >>  ${SERVERLESS_DEF_FILE}
       echo "      }" >>  ${SERVERLESS_DEF_FILE}
     done
     echo "    }," >>  ${SERVERLESS_DEF_FILE}
