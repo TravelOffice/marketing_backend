@@ -20,6 +20,7 @@ phases:
   
   build:
     commands:
+      -  yarn config set cache-folder /root/.yarn-cache
       - ./scripts/build_serverless.sh dev
       - ./scripts/execute_terraform.sh $BUILD_ENV plan -var="TF_BUCKET=$TF_BUCKET" -var="ENV=$BUILD_ENV"
 
@@ -29,4 +30,4 @@ artifacts:
 
 cache:
   paths:
-    - '/root/.npm/**/*'
+    - '/root/.yarn-cache/**/*'

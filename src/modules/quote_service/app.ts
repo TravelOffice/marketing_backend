@@ -47,7 +47,7 @@ app.get('/quotes', getlatestQuotesByAssigneeValidator(), async (req: Request, re
   }
 });
 
-app.post('/', async (req: Request, res: Response) => {
+app.post('/quotes', async (req: Request, res: Response) => {
   try {
     // TODO: Validate request body if needed
     const quote = await createQuoteUseCase.invoke(req.body);
@@ -58,7 +58,7 @@ app.post('/', async (req: Request, res: Response) => {
   }
 });
 
-app.get('/:id', async (req: Request, res: Response) => {
+app.get('/quotes/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     // TODO: Convert the `id` to integer if needed
@@ -70,7 +70,7 @@ app.get('/:id', async (req: Request, res: Response) => {
   }
 });
 
-app.put('/:id', async (req: Request, res: Response) => {
+app.put('/quotes/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     // TODO: Convert the `id` to integer if needed
@@ -83,7 +83,7 @@ app.put('/:id', async (req: Request, res: Response) => {
   }
 });
 
-app.delete('/:id', async (req: Request, res: Response) => {
+app.delete('/quotes/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     // TODO: Convert the `id` to integer if needed

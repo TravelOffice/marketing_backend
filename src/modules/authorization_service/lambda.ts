@@ -1,4 +1,4 @@
-import { APIGatewayTokenAuthorizerEvent } from 'aws-lambda';
+import { APIGatewayTokenAuthorizerEvent } from './models';
 import { authorizationRepository } from './repositories';
 import logger from './utils/logger';
 

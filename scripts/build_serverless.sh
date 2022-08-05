@@ -32,12 +32,10 @@ build_service() {
     echo "Missing requirement for ${ENV}!" >&2
     return 1
   fi
-  rm -rf ${SERVICE_DIR}/dist
-  rm -rf ${SERVICE_DIR}/node_modules
-  rm -rf ${SERVICE_DIR}/package-lock.json
-  npm install
+  rm -rf ${SERVICE_DIR}/{dist,node_modules}
+  yarn install
   echo "Install successfully"
-  npm run build
+  yarn build
   if [ $? -ne 0 ]; then
       echo "Failed to build service ${SERVICENAME}!"
       exit 1
@@ -45,9 +43,8 @@ build_service() {
   echo "Build"
 
   rm -rf ${SERVICE_DIR}/node_modules
-  rm -rf ${SERVICE_DIR}/package-lock.json
   echo "Install production dependencies"
-  npm install --production
+  yarn install --production
   echo "Finished installing production"
   LAYER_DIR=${CUR_DIR}/src/layers/${SERVICENAME}/nodejs
   mkdir -p ${LAYER_DIR}
@@ -74,4 +71,4 @@ done
 # Clean aws-sdk
 cd ${CUR_DIR}/src/libs/aws-sdk
 rm -rf node_modules
-npm install --production
+yarn install --production

@@ -51,11 +51,11 @@ app.post('/leads/:leadId/opportunities', createOpportunityValidator(), async (re
   }
 });
 
-app.get('/leads/:leadId/opportunities/:id', async (req: Request, res: Response) => {
+app.get('/leads/:leadId/opportunities/:oppId', async (req: Request, res: Response) => {
   try {
-    const { leadId, id } = req.params;
+    const { leadId, oppId } = req.params;
     const { username } = getCurrentUserInfo(req.headers.authorization!);
-    const opportunity = await getOpportunityUseCase.invoke(id, username, leadId);
+    const opportunity = await getOpportunityUseCase.invoke(oppId, username, leadId);
     res.json(wrapResponse(SUCCESS, opportunity));
   } catch (error: any) {
     logger.log(error);
@@ -97,12 +97,12 @@ app.get('/opportunities', getMyOpportunitiesValidator(), async (req: Request, re
   }
 });
 
-app.put('/leads/:leadId/opportunities/:id', updateOpportunityValidator(), async (req: Request, res: Response) => {
+app.put('/leads/:leadId/opportunities/:oppId', updateOpportunityValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
-    const { leadId, id } = req.params;
+    const { leadId, oppId } = req.params;
     const { username } = getCurrentUserInfo(req.headers.authorization!);
-    const opportunity = await updateOpportunityUseCase.invoke(id, username, leadId, req.body);
+    const opportunity = await updateOpportunityUseCase.invoke(oppId, username, leadId, req.body);
     res.json(wrapResponse(SUCCESS, opportunity));
   } catch (error: any) {
     logger.log(error);
@@ -110,13 +110,13 @@ app.put('/leads/:leadId/opportunities/:id', updateOpportunityValidator(), async 
   }
 });
 
-app.delete('/opportunities/:id', async (req: Request, res: Response) => {
+app.delete('/opportunities/:oppId', async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const { oppId } = req.params;
     const { username } = getCurrentUserInfo(req.headers.authorization!);
     // TODO: Check condition before delete opportunity.
     // Example: only draft oppotunity can be deleted
-    await deleteOpportunityUseCase.invoke(id, username);
+    await deleteOpportunityUseCase.invoke(oppId, username);
     res.json(wrapResponse(SUCCESS));
   } catch (error: any) {
     res.json(wrapResponse(FAILED, undefined, error.message));

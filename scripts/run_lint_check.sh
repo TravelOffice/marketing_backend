@@ -46,8 +46,7 @@ install_module() {
   fi
   rm -rf ${SERVICE_DIR}/dist
   rm -rf ${SERVICE_DIR}/node_modules
-  rm -rf ${SERVICE_DIR}/package-lock.json
-  npm install
+  yarn install
   retVal=$?
   if [ $retVal -ne 0 ]; then
       echo "Service ${SERVICENAME} build failed!"

@@ -1,5 +1,4 @@
-import { APIGatewayAuthorizerResult } from 'aws-lambda';
-import { ClaimVerifyResult } from '../../models';
+import { ClaimVerifyResult, APIGatewayAuthorizerResult } from '../../models';
 
 export interface AuthorizationRepository {
   generateAllowPolicy: (principalId: string, resource: string) => APIGatewayAuthorizerResult
