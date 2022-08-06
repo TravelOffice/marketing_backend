@@ -17,6 +17,7 @@
     "axios": "^0.26.0",
     "common-models": "link:../../libs/common-models",
     "get-env": "link:../../libs/get-env",
+    "decode-token": "link:../../libs/decode-token",
     "jsonwebtoken": "^8.5.1",
     "jwk-to-pem": "^2.0.5",
     "object-assign": "^4.1.1",
