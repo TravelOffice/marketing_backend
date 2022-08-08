@@ -19,7 +19,6 @@ export default class AuthProvider {
       lastName: user.lastName,
       phoneNumber: user.phoneNumber,
       email: user.email,
-      role: user.role,
     };
     const params : AWS.CognitoIdentityServiceProvider.AdminCreateUserRequest = {
       UserPoolId: await getAwsSecretValue('COGNITO_USER_POOL_ID') || '',
@@ -44,7 +43,6 @@ export default class AuthProvider {
       lastName: user.lastName,
       email: user.email,
       phoneNumber: user.phoneNumber,
-      role: user.role,
     };
     const params: AWS.CognitoIdentityServiceProvider.AdminUpdateUserAttributesRequest = {
       UserPoolId: await getAwsSecretValue('COGNITO_USER_POOL_ID') || '',

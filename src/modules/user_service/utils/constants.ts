@@ -24,6 +24,8 @@ export const VALIDATE_USERNAME_SYNTAX_STRING_MSG = 'username must not contain # 
 
 export const VALIDATE_USERNAME_RESERVED_STRING_MSG = 'Invalid username';
 
+export const VALIDATE_ARRAY_MSG = 'property must be an array';
+
 export const TENANT_INDEX = 'TENANT';
 
 export const LEAD_INDEX = 'LEAD';
@@ -39,3 +41,5 @@ export const LATEST_QUOTE_INDEX = 'LATEST_QUOTE';
 export const USERNAME_DELIMITER = '#';
 
 export const PAGE_INDEX = 'PAGE';
+
+export const ROLE_INDEX = 'ROLE';

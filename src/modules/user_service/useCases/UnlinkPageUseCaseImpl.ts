@@ -1,5 +1,5 @@
 import { ChatPlatform } from 'common-models';
-import { pageRepository, telegramRepository, userRepository } from '../repositories';
+import { pageRepository, telegramRepository } from '../repositories';
 import { UnlinkPageUseCase } from './interfaces/UnlinkPageUseCase';
 
 export default class UnlinkPageUseCaseImpl implements UnlinkPageUseCase {
@@ -10,21 +10,12 @@ export default class UnlinkPageUseCaseImpl implements UnlinkPageUseCase {
    * - Step 2: TODO Check current user has permission to delete the linked page
    * - Step 3: Get the current tenant from authenticated user
    * - Step 4: Delete the linked page from dynamodb
-   * @param username The username of retrieve user
+   * @param tenantId The tenant ID
    * @param pageId The id of page
    * @param platform The platform of page
    * @returns void
    */
-  invoke = async (username: string, platform: ChatPlatform, pageId: string) => {
-    const userAttributes = await userRepository.getUserAttributes(username);
-    if (!userAttributes) throw new Error(`Your account [${username}] not existed!`);
-
-    // TODO: Need check user permission before delete linked pages
-
-    // Get the current tenant from authenticated user
-    const tenantId = userAttributes.tenant;
-    if (!tenantId) throw new Error(`User [${username}] is missing tenant attribute`);
-
+  invoke = async (tenantId: string, platform: ChatPlatform, pageId: string) => {
     // Delete webhook in case unlink Telegram Bot
     if (platform === ChatPlatform.telegram) {
       const telegramBot = await telegramRepository.get(tenantId, pageId);
