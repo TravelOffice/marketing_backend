@@ -1,5 +1,5 @@
 import { ChatPlatform } from 'common-models';
 
 export interface UnlinkPageUseCase {
-  invoke: (username: string, platform: ChatPlatform, pageId: string) => Promise<void>;
+  invoke: (tenantId: string, platform: ChatPlatform, pageId: string) => Promise<void>;
 }

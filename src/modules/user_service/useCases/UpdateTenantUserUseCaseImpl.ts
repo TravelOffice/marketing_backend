@@ -10,20 +10,14 @@ export default class UpdateTenantUserUseCaseImpl implements UpdateTenantUserUseC
    * - Step 2: Get the current tenant from authenticated user
    * - Step 3: Check whether user to be updated exists or not
    * - Step 4: Update the user
-   * @param authenticatedUserName The id of the authenticated user
+   * @param tenantId The id of the tenant
    * @param userId The id of user to be updated
    * @param user The user information to be updated
    * @returns Promise<User> All information of updated user
    */
-  invoke = async (authenticatedUserName: string, userId: string, user: User) => {
-    const userAttributes = await userRepository.getUserAttributes(authenticatedUserName);
-    if (!userAttributes) throw new Error(`Your account [${authenticatedUserName}] not existed!`);
-
-    const tenantId = userAttributes.tenant;
-    if (!tenantId) throw new Error(`User [${authenticatedUserName}] is missing tenant attribute`);
-
+  invoke = async (tenantId: string, userId: string, user: User) => {
     // Confirm user does not exist
-    const oldUser = await userRepository.getUserAttributes(userId);
+    const oldUser = await userRepository.getUserAttributes(tenantId, userId);
     if (!oldUser) throw new Error(`Tenant [${tenantId}] User [${userId}] does not exist!`);
 
     const newUser: User = {
@@ -31,6 +25,7 @@ export default class UpdateTenantUserUseCaseImpl implements UpdateTenantUserUseC
       ...user,
       username: userId,
       tenant: tenantId,
+      roles: user.roles,
       createdAt: oldUser.createdAt,
       settings: {
         language: user.settings?.language || oldUser.settings?.language,

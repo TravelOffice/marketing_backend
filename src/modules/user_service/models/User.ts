@@ -17,7 +17,7 @@ export interface User {
   lastName?: string,
   email: string,
   tenant: string,
-  role: ROLES_TYPE,
+  roles: Array<string>,
   address?: string,
   phoneNumber: string,
   avatar?: string,
@@ -27,4 +27,8 @@ export interface User {
   },
   createdAt: number,
   updatedAt: number,
+}
+
+export interface UserWithPermission extends User {
+  permissions: Array<string>
 }

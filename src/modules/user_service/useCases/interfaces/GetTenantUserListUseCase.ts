@@ -1,5 +1,5 @@
 import { User } from '../../models/User';
 
 export interface GetTenantUserListUseCase {
-  invoke: (authenticatedUserName: string) => Promise<Array<User>>;
+  invoke: (tenantId: string) => Promise<Array<User>>;
 }
