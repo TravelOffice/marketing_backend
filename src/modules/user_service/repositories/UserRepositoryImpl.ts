@@ -1,31 +1,29 @@
 import AWS from 'aws';
 import { getAwsSecretValue } from 'get-env';
-import { dynamoProvider, authProvider } from '../providers';
-import { UserRepository } from './interfaces/UserRepository';
-import { User } from '../models/User';
+import { Role } from '../models/RolePermission';
+import { User, UserWithPermission } from '../models/User';
+import { authProvider, dynamoProvider } from '../providers';
 import { QueryInput } from '../providers/DynamoProvider';
 import {
-  EMPLOYEE_INDEX, ENABLED, TENANT_INDEX, USERNAME_DELIMITER,
+  EMPLOYEE_INDEX, ENABLED, ROLE_INDEX, TENANT_INDEX, USERNAME_DELIMITER,
 } from '../utils/constants';
 import logger from '../utils/logger';
+import { UserRepository } from './interfaces/UserRepository';
 
 export default class UserRepositoryImpl implements UserRepository {
-  getUserAttributes = async (userId: string) => {
-    const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
-    const query: QueryInput = {
-      TableName: table,
-      IndexName: 'ReverseIndex',
-      KeyConditionExpression: 'sk = :sk_employee AND begins_with(pk, :pk_filter)',
-      ExpressionAttributeValues: {
-        ':pk_filter': { S: `${TENANT_INDEX}#` },
-        ':sk_employee': { S: `${EMPLOYEE_INDEX}#${userId}` },
-      },
-    };
-    const queryResult = await dynamoProvider.rawQuery(query);
-    if (!queryResult.Items || queryResult.Items.length === 0) {
-      return undefined;
-    }
-    return AWS.DynamoDB.Converter.unmarshall(queryResult.Items[0]) as User;
+  /**
+   * Function used to get user object from userId
+   * @param tenantId Tenant ID
+   * @param userId User ID
+   * @returns Promise of User
+   */
+  getUserAttributes = async (tenantId: string, userId: string) => {
+    const ddbTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    return dynamoProvider.getItem<User>(
+      ddbTable,
+      `${TENANT_INDEX}#${tenantId}`,
+      `${EMPLOYEE_INDEX}#${userId}`,
+    );
   };
 
   /**
@@ -80,6 +78,36 @@ export default class UserRepositoryImpl implements UserRepository {
     } = item;
 
     return user;
+  };
+
+  /**
+   * Method to get single use belong to Tenant which determine by userId with permission
+   * @param tenantId The id of the Tenant which the user should belong to
+   * @param userId The id of the user
+   * @returns Promise<User> All information of User object with permission
+   */
+  getWithPermission = async (tenantId: string, userId: string) => {
+    logger.log(`Tenant: ${tenantId}, User: ${userId}`);
+    const table = await getAwsSecretValue('DYNAMO_ROLE_PERMISSION_TABLE');
+    const user : User = await this.get(tenantId, userId);
+    const { roles } = user;
+    let permissions : Array<string> = [];
+    await Promise.all(roles.map(async (role) => {
+      const item = await dynamoProvider.getItem<Role>(
+        table,
+        `${TENANT_INDEX}#${tenantId}`,
+        `${ROLE_INDEX}#${role}`,
+      );
+      if (!item) { throw new Error(`Role [${role}] not found`); }
+      item.permissions.forEach((permission) => {
+        if (permission.name) permissions.push(permission.name);
+      });
+    }));
+
+    // Remove dupplicated permission
+    permissions = [...new Set(permissions)];
+
+    return { ...user, permissions } as UserWithPermission;
   };
 
   /**

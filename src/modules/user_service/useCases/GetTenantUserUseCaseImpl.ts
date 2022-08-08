@@ -8,16 +8,11 @@ export default class GetTenantUserUseCaseImpl implements GetTenantUserUseCase {
    * - Step 1: Confirm the user information existed in Dynamo DB
    * - Step 2: Get the current tenant from authenticated user
    * - Step 3: Get the tenant user
+   * @param tenantId The id of tenant
    * @param userId The id of retrieve user
    * @returns Promise<User> All information of tenant user
    */
-  invoke = async (userId: string) => {
-    const userAttributes = await userRepository.getUserAttributes(userId);
-    if (!userAttributes) throw new Error(`Your account [${userId}] not existed!`);
-
-    const tenantId = userAttributes.tenant;
-    if (!tenantId) throw new Error(`User [${userId}] is missing tenant attribute`);
-
+  invoke = async (tenantId: string, userId: string) => {
     const user = await userRepository.get(tenantId, userId);
     if (!user) throw new Error(`Tenant [${tenantId}] User [${userId}] does not exist!`);
 

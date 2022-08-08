@@ -4,9 +4,10 @@ import {
   body,
   query, ValidationError, validationResult,
 } from 'express-validator';
-import { LANGUAGES_TYPE, ROLES_TYPE, THEMES_TYPE } from '../models/User';
+import { LANGUAGES_TYPE, THEMES_TYPE } from '../models/User';
 import {
   USERNAME_DELIMITER,
+  VALIDATE_ARRAY_MSG,
   VALIDATE_EMAIL_MSG,
   VALIDATE_NON_EMPTY_STRING_MSG,
   VALIDATE_USERNAME_RESERVED_STRING_MSG,
@@ -75,9 +76,9 @@ export function createTenantUserValidator() {
       .notEmpty()
       .isString(),
 
-    body('role')
+    body('roles')
       .notEmpty()
-      .isIn(Object.values(ROLES_TYPE)).withMessage(`allow only in ${Object.values(ROLES_TYPE)}`),
+      .isArray().withMessage(VALIDATE_ARRAY_MSG),
   ];
 }
 
@@ -121,7 +122,7 @@ export function updateTenantUserValidator() {
 
     body('role')
       .optional()
-      .isIn(Object.values(ROLES_TYPE)).withMessage(`allow only in ${Object.values(ROLES_TYPE)}`),
+      .isArray().withMessage(VALIDATE_ARRAY_MSG),
 
     body('avatar', VALIDATE_NON_EMPTY_STRING_MSG)
       .optional()

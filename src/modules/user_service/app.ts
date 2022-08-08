@@ -9,6 +9,7 @@ import {
   getLinkedPageUseCase,
   getTenantUserListUseCase,
   getTenantUserUseCase,
+  getTenantUserWithPermissionUseCase,
   unlinkPageUsecase,
   updateTenantUserUseCase,
 } from './useCases';
@@ -38,8 +39,8 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
 
 app.get('/users', async (req: Request, res: Response) => {
   try {
-    const { username: authenticatedUserName } = getCurrentUserInfo(req.headers.authorization!);
-    const users = await getTenantUserListUseCase.invoke(authenticatedUserName);
+    const { tenant } = getCurrentUserInfo(req.headers.authorization!);
+    const users = await getTenantUserListUseCase.invoke(tenant);
     res.json(wrapResponse(SUCCESS, users));
   } catch (error: any) {
     logger.log(`[app.get] Error ${error}`);
@@ -50,12 +51,8 @@ app.get('/users', async (req: Request, res: Response) => {
 app.post('/users', createTenantUserValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
-    const {
-      username: authenticatedUserName,
-    } = getCurrentUserInfo(req.headers.authorization!);
-
-    const user = await createTenantUserUseCase.invoke(authenticatedUserName, req.body);
-
+    const { tenant } = getCurrentUserInfo(req.headers.authorization!);
+    const user = await createTenantUserUseCase.invoke(tenant, req.body);
     res.json(wrapResponse(SUCCESS, user));
   } catch (error: any) {
     logger.log(`[app.post] Error ${error}`);
@@ -66,7 +63,8 @@ app.post('/users', createTenantUserValidator(), async (req: Request, res: Respon
 app.get('/users/:userId', async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
-    const user = await getTenantUserUseCase.invoke(userId);
+    const { tenant } = getCurrentUserInfo(req.headers.authorization!);
+    const user = await getTenantUserUseCase.invoke(tenant, userId);
     res.json(wrapResponse(SUCCESS, user));
   } catch (error: any) {
     logger.log(`[app.get] Error ${error}`);
@@ -76,8 +74,8 @@ app.get('/users/:userId', async (req: Request, res: Response) => {
 
 app.get('/me', async (req: Request, res: Response) => {
   try {
-    const { username: authenticatedUserName } = getCurrentUserInfo(req.headers.authorization!);
-    const user = await getTenantUserUseCase.invoke(authenticatedUserName);
+    const { tenant, username } = getCurrentUserInfo(req.headers.authorization!);
+    const user = await getTenantUserWithPermissionUseCase.invoke(tenant, username);
     res.json(wrapResponse(SUCCESS, user));
   } catch (error: any) {
     logger.log(`[app.get] Error ${error}`);
@@ -89,9 +87,8 @@ app.put('/users/:userId', updateTenantUserValidator(), async (req: Request, res:
   try {
     validate(req);
     const { userId } = req.params;
-    const { username: authenticatedUserName } = getCurrentUserInfo(req.headers.authorization!);
-
-    const user = await updateTenantUserUseCase.invoke(authenticatedUserName, userId, req.body);
+    const { tenant } = getCurrentUserInfo(req.headers.authorization!);
+    const user = await updateTenantUserUseCase.invoke(tenant, userId, req.body);
     res.json(wrapResponse(SUCCESS, user));
   } catch (error: any) {
     logger.log(`[app.put] Error ${error}`);
@@ -102,11 +99,10 @@ app.put('/users/:userId', updateTenantUserValidator(), async (req: Request, res:
 app.put('/me', updateTenantUserValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
-    const { username: authenticatedUserName } = getCurrentUserInfo(req.headers.authorization!);
-
+    const { tenant, username } = getCurrentUserInfo(req.headers.authorization!);
     const user = await updateTenantUserUseCase.invoke(
-      authenticatedUserName,
-      authenticatedUserName,
+      tenant,
+      username,
       req.body,
     );
     res.json(wrapResponse(SUCCESS, user));
@@ -119,8 +115,8 @@ app.put('/me', updateTenantUserValidator(), async (req: Request, res: Response) 
 app.delete('/users/:userId', async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
-    const { username: authenticatedUserName } = getCurrentUserInfo(req.headers.authorization!);
-    await deleteTenantUserUseCase.invoke(authenticatedUserName, userId);
+    const { tenant } = getCurrentUserInfo(req.headers.authorization!);
+    await deleteTenantUserUseCase.invoke(tenant, userId);
     res.json(wrapResponse(SUCCESS));
   } catch (error: any) {
     logger.log(`[DELETE /users/:userId] Error ${error}`);
@@ -128,10 +124,10 @@ app.delete('/users/:userId', async (req: Request, res: Response) => {
   }
 });
 
-app.get('/me/linked_pages', async (req: Request, res: Response) => {
+app.get('/admin/linked_pages', async (req: Request, res: Response) => {
   try {
-    const { username } = getCurrentUserInfo(req.headers.authorization!);
-    const pages = await getLinkedPageUseCase.invoke(username);
+    const { tenant } = getCurrentUserInfo(req.headers.authorization!);
+    const pages = await getLinkedPageUseCase.invoke(tenant);
     res.json(wrapResponse(SUCCESS, pages));
   } catch (error:any) {
     logger.log(`[GET /me/linked_pages] Error ${error}`);
@@ -139,12 +135,12 @@ app.get('/me/linked_pages', async (req: Request, res: Response) => {
   }
 });
 
-app.delete('/me/linked_pages', unlinkPageValidator(), async (req: Request, res: Response) => {
+app.delete('/admin/linked_pages', unlinkPageValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
-    const { username } = getCurrentUserInfo(req.headers.authorization!);
+    const { tenant } = getCurrentUserInfo(req.headers.authorization!);
     const { platform, pageId } = req.query;
-    await unlinkPageUsecase.invoke(username, platform as ChatPlatform, pageId as string);
+    await unlinkPageUsecase.invoke(tenant, platform as ChatPlatform, pageId as string);
     res.json(wrapResponse(SUCCESS, undefined));
   } catch (error:any) {
     logger.log(`[DELETE /me/linked_pages] Error ${error}`);
