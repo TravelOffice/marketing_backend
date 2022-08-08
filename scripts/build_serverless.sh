@@ -68,7 +68,6 @@ do
   build_service ${dir}
 done
 
-# Clean aws-sdk
-cd ${CUR_DIR}/src/libs/aws-sdk
-rm -rf node_modules
-yarn install --production
+# Clean resource
+cd ${CUR_DIR}
+./scripts/build_dependencies.sh --production

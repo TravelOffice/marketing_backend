@@ -1,5 +1,7 @@
+import { saleAssignmentRepository } from 'auto-assign-utilities';
 import {
-  ChatPlatform, TelegramWebhookMessageEvent,
+  ChatPlatform,
+  TelegramWebhookMessageEvent,
 } from 'common-models';
 import { messageRepository, pageRepository } from '../repositories';
 import { UNKNOWN_USER } from '../utils/constants';
@@ -65,5 +67,13 @@ export default class ReceiveTelegramWebhookUseCaseImpl implements ReceiveTelegra
       platform,
       message,
     );
+
+    // Send to SQS message to process auto assignment
+    await saleAssignmentRepository.notifyNewIncomingConversation({
+      tenant: page.tenantId,
+      pageId: page.id.toString(),
+      chatPlatform: page.platform,
+      conversationId: conversation.conversationId || '',
+    });
   };
 }

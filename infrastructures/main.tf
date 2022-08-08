@@ -8,6 +8,9 @@ variable "LAMBDA_CRONS" {}
 variable "TF_BUCKET" {}
 variable "APPSYNC_FUNCTIONS" {}
 variable "APPSYNC_RESOLVERS" {}
+
+data "aws_caller_identity" "current" {}
+
 locals {
   remote_feature_name = "base_infrastructure"
   tags = {
@@ -32,6 +35,11 @@ locals {
       SECRET_MANAGER_ID    = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
       ZALO_CALLBACK_URL    = "www.traveloffice.shop/zalo/callback"
       TELEGRAM_WEBHOOK_URL = "https://${var.ENV}-marketing-backend.traveloffice.shop/chat-telegram-webhook"
+    },
+    sqs_auto_assign_trigger_lambda_vars = {
+      NODE_ENV            = var.ENV
+      SECRET_MANAGER_ID   = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
+      AUTO_ASSIGN_SFN_ARN = "arn:aws:states:${var.AWS_REGION}:${data.aws_caller_identity.current.account_id}:stateMachine:${var.ENV}-auto-assign-chat"
     }
   }
 }
@@ -102,4 +110,13 @@ module "APPSYNC_CONFIGURATION" {
   DYNAMODB_ARN      = module.REMOTE_STATE.STATE.MARKETING.backend.dynamodb.travel_table.arn
   DYNAMODB_NAME     = module.REMOTE_STATE.STATE.MARKETING.backend.dynamodb.travel_table.name
   TAGS              = local.tags
+}
+
+module "AUTO_ASSIGN_MODULE_CONFIGURATION" {
+  source                      = "../../modules/application/auto_assign_chat"
+  ENV                         = var.ENV
+  FEATURE_NAME                = var.FEATURE_NAME
+  NEW_CONVERSATION_LAMBDA_ARN = module.LAMBDA_FUNCTION.lambda_arns["new_conversation_sqs_trigger_service"]
+  NEW_CONVERSATION_QUEUE_ARN  = module.REMOTE_STATE.STATE.MARKETING.queue.auto_assign_chat_queue
+  TAGS                        = local.tags
 }

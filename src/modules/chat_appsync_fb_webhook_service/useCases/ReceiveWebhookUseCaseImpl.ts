@@ -1,5 +1,8 @@
+import { saleAssignmentRepository } from 'auto-assign-utilities';
 import {
-  ChatPlatform, FacebookWebhookMessageEvent, ReceiveMessageCommandArgs,
+  ChatPlatform,
+  FacebookWebhookMessageEvent,
+  ReceiveMessageCommandArgs,
 } from 'common-models';
 import { messageRepository, pageRepository } from '../repositories';
 import { UNKNOWN_USER } from '../utils/constants';
@@ -57,5 +60,13 @@ export default class ReceiveWebhookUseCaseImpl implements ReceiveWebhookUseCase 
 
     // Send received message command to AppSync
     await messageRepository.sendReceivedMessageCommand(commandArgs);
+
+    // Send to SQS message to process auto assignment
+    await saleAssignmentRepository.notifyNewIncomingConversation({
+      tenant: page.tenantId,
+      pageId: page.id,
+      chatPlatform: page.platform,
+      conversationId: conversation.conversationId || '',
+    });
   };
 }
