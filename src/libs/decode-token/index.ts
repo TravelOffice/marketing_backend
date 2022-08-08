@@ -28,10 +28,12 @@ export function getCurrentUserInfo(jwtToken: string) {
   const cognitoUsername: string = decoded['cognito:username'];
   const usernameArr = cognitoUsername.split(USERNAME_DELIMITER);
 
-  if(usernameArr.length > 2) throw new Error('The authenticated username invalid!');
+  if (usernameArr.length > 2) throw new Error('The authenticated username invalid!');
+  const [tenant, username] = usernameArr;
 
   return {
-    username: usernameArr.length === 1 ? usernameArr[0] : usernameArr[1],
+    tenant: tenant,
+    username: usernameArr.length === 1 ? tenant : username,
     name: decoded.name,
   };
 }
