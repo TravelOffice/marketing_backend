@@ -1,5 +1,5 @@
-import { APIGatewayTokenAuthorizerEvent } from './models';
-import { authorizationRepository } from './repositories';
+import AuthorizerHandlerFactory from './handlers/AuthorizerHandlerFactory';
+import { AuthorizerEvent } from './models';
 import logger from './utils/logger';
 
 /**
@@ -9,24 +9,16 @@ import logger from './utils/logger';
  * @param callback Invocation callback
  */
 export const handler = async (
-  event: APIGatewayTokenAuthorizerEvent,
+  event: AuthorizerEvent,
   context: any,
   callback: any,
 ) => {
-  const { methodArn, authorizationToken } = event;
   try {
-    logger.log(`Receive ApiGateway event ${JSON.stringify(event)}`);
-    const verifyTokenResult = await authorizationRepository.verifyAuthorizationToken(
-      authorizationToken,
-    );
-    // TODO: Currently allow all request
-    const authResponse = authorizationRepository.generateAllowPolicy(
-      verifyTokenResult.claim.sub,
-      methodArn,
-    );
+    const authorizerHandler = AuthorizerHandlerFactory.get(event);
+    const authResponse = await authorizerHandler.handle(event);
     callback(undefined, authResponse);
   } catch (error: any) {
-    logger.log(`Generated an error: ${JSON.stringify(error)}`);
+    logger.log(`Generated an error: ${error.message}`);
     callback('Unauthorized');
   }
 };
