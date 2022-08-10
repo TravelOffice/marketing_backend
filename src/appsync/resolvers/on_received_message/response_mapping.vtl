@@ -1,38 +1,16 @@
-#*
- * Get tenant user information from identifying information
- * The format of tenant username as following:
- *  - Tenant root user: username
- *  - Tenant employee id: tenantName#username
- * EX: Tenant root user: pys
- *      Tenant employee user: pys#binhnv
- *      Invalid username: pys#binhnv#xxxx
- * To get the tenant user information, there are steps need to do:
- * - Step 1: Check the identifying information
- * - Step 2: Get the username of the authenticated user
- * - Step 3: Check whether the username follow rule or not
- * - Step 4: Check whether the user is a root tenant user or not
- * - Step 5: Append tenant information to context arguments
- *#
-
 #set( $indentity = [] )
 #set( $tenant = "" )
 #set( $username = "" )
-#set( $role = "" )
-#set( $USERNAME_DELIMITER = "#" )
+#set( $roles = [] )
 
-#if( $context.identity )
-    #set( $indentity = $context.identity.username.split("[$USERNAME_DELIMITER]") )
-    #set( $indentitySize = $indentity.size() )
-    #set( $role = $context.identity.claims.get("custom:role") )
-    #if( $indentitySize < 1 || $indentitySize > 2 )
-      $util.error('OnReceivedMessage: Invalid authenticated username!')
-    #else
-      #set( $tenant = $indentity.get(0) )
-      #set( $username_index = $indentitySize - 1 )
-      #set( $username = $indentity.get( $username_index ) )
-    #end
+## Get tenant user information from identifying information
+#if( $context.identity.resolverContext )
+    ## Lambda authorizer
+    #set( $tenant = $context.identity.resolverContext.tenant )
+    #set( $username = $context.identity.resolverContext.username )
+    #set( $roles = $util.parseJson($context.identity.resolverContext.roles) )
 #else
-  $util.error('OnReceivedMessage: Missing identifying information!')
+    $util.error('OnReceivedMessage: Missing identifying information!')
 #end
 
 #*
@@ -42,7 +20,7 @@
  * - Employee user can only received assigned conversations
  * The subscription filter is combined by two conditions with OR operator as below
  *#
-#if( $role == "ADMIN" || $role == "ROOT" )
+#if( $roles.contains("ADMIN") || $roles.contains("ROOT") )
     ## Root or admin can get all the messages related to tenant
     $extensions.setSubscriptionFilter({
         "filterGroup": [{

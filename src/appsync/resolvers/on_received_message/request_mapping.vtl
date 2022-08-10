@@ -8,7 +8,7 @@
     "version": "2017-02-28",
     "payload": {
         "body": "${context.arguments.body}",
-        "from": "${context.identity.username}",
+        "from": "${context.identity.resolverContext.username}",
         "to":  "${context.arguments.to}",
         "sentAt": "$util.time.nowISO8601()"
     }

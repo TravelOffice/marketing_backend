@@ -1,5 +1,7 @@
 import { getCurrentUserInfo } from 'decode-token';
-import { APIGatewayRequestAuthorizerEvent, AuthorizerReponse, Permission } from '../models';
+import {
+  ApiGatewayPolicyRequest, APIGatewayRequestAuthorizerEvent, AuthorizerReponse, Permission,
+} from '../models';
 import { authorizationRepository, rolePermissionRepository, userRepository } from '../repositories';
 import { DEFAULT_DENY_MESSAGE } from '../utils/constants';
 import logger from '../utils/logger';
@@ -18,14 +20,12 @@ class APIGatewayRequestEventHandler extends AuthorizerHandler<APIGatewayRequestA
     logger.log(`APIGatewayRequestEventHandler: Receive event ${JSON.stringify(this.event)}`);
     const { methodArn, path, httpMethod } = this.event;
     const authorizationToken = this.event.headers.authorization;
-    if (!authorizationToken) {
-      throw new Error('APIGatewayRequestEventHandler: Authorization Token not found!');
-    }
+
     const verifyTokenResult = await authorizationRepository.verifyAuthorizationToken(
       authorizationToken,
     );
 
-    const { tenant, username } = getCurrentUserInfo(authorizationToken);
+    const { tenant, username } = getCurrentUserInfo(authorizationToken!);
     const userAttributes = await userRepository.getUserAttributes(tenant, username);
     if (!userAttributes) throw new Error(`APIGatewayRequestEventHandler: Your account [${username}] not existed!`);
 
@@ -36,18 +36,16 @@ class APIGatewayRequestEventHandler extends AuthorizerHandler<APIGatewayRequestA
     };
 
     const hasPermission = await rolePermissionRepository.hasPermission(tenant, roles, permisson);
+    const policy : ApiGatewayPolicyRequest = {
+      type: 'API',
+      principalId: verifyTokenResult.claim.sub,
+      resource: methodArn,
+    };
     if (hasPermission) {
-      return authorizationRepository.generateAllowPolicy(
-        verifyTokenResult.claim.sub,
-        methodArn,
-      );
+      return authorizationRepository.generateAllowPolicy(policy);
     }
 
-    return authorizationRepository.generateDenyPolicy(
-      verifyTokenResult.claim.sub,
-      methodArn,
-      DEFAULT_DENY_MESSAGE,
-    );
+    return authorizationRepository.generateDenyPolicy(policy, DEFAULT_DENY_MESSAGE);
   };
 }
 
