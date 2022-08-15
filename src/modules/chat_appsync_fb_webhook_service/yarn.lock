@@ -434,6 +434,10 @@ atomic-batcher@^1.0.2:
   resolved "https://registry.yarnpkg.com/atomic-batcher/-/atomic-batcher-1.0.2.tgz#d16901d10ccec59516c197b9ccd8930689b813b4"
   integrity sha512-EFGCRj4kLX1dHv1cDzTk+xbjBFj1GnJDpui52YmEcxxHHEWjYyT6l51U7n6WQ28osZH4S9gSybxe56Vm7vB61Q==
 
+"auto-assign-utilities@link:../../libs/auto-assign-utilities":
+  version "0.0.0"
+  uid ""
+
 aws-xray-sdk-core@^3.3.5:
   version "3.3.6"
   resolved "https://registry.yarnpkg.com/aws-xray-sdk-core/-/aws-xray-sdk-core-3.3.6.tgz#57315496e13d41f15decae047bea6b2248e5d767"

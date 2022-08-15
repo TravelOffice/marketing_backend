@@ -20,11 +20,8 @@ fi
 
 echo "Starting service ${SERVICENAME}..."
 
-# Check if dependecies has been built. If not make a build
-FILE=${CUR_DIR}/src/libs/get-env/dist/index.js
-if ! test -f "$FILE"; then
-    ${CUR_DIR}/scripts/build_dependencies.sh
-fi
+# Build dependencies
+${CUR_DIR}/scripts/build_dependencies.sh
 
 cd ${SERVICE_DIR}
 yarn install

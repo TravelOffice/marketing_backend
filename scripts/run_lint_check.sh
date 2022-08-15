@@ -93,4 +93,3 @@ for dir in ${DEPLOYMENT_SERVICES}
 do
   lint_check ${dir}
 done
-

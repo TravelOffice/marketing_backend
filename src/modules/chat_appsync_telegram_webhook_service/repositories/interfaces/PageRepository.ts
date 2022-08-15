@@ -1,5 +1,6 @@
-import { ChatPlatform, TelegramBot } from 'common-models';
+import { ChatPlatform } from 'common-models';
+import { TenantTelegramPage } from '../../models/TenantTelegramPage';
 
 export interface PageRepository {
-  get: (tenantId: string, platform: ChatPlatform) => Promise<TelegramBot>
+  get: (tenantId: string, platform: ChatPlatform) => Promise<TenantTelegramPage>
 }

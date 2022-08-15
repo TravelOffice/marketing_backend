@@ -1,0 +1,1 @@
+export const SQS_ID_DELIMITER = '-';
