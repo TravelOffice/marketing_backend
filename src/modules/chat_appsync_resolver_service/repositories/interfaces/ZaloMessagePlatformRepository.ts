@@ -1,7 +1,10 @@
-import { Message, ZaloMessageResponsePayload } from '../../models';
+import {
+  SendMessageMutationArgs,
+  ZaloMessageResponsePayload,
+} from '../../models';
 
 export interface ZaloMessagePlatformRepository {
-  sendMessage: (message: Message) => Promise<any>;
+  sendMessage: (message: SendMessageMutationArgs) => Promise<any>;
   getConversations: (
     pageId: string,
     offset?: number,

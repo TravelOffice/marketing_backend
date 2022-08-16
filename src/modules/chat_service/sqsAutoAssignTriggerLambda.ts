@@ -1,11 +1,27 @@
 import { saleAssignmentRepository } from 'auto-assign-utilities';
-import AWS from 'aws';
+import { getAwsSecretValue, getEnv } from 'get-env';
 import { ConversationQueryParams } from './models/ConversationQueryParams';
 import { SQSEvent, SQSHandler } from './models/types/lambda/sqs';
 import { SFN_NAME_DELIMITER } from './utils/constants';
+import { PAGE_INDEX, TASK_TOKEN_INDEX, TENANT_INDEX } from './utils/dynamodbConstants';
 import logger from './utils/logger';
 
-const stepfunctions = new AWS.StepFunctions();
+let sfnEnvironment: { dynamoTravelTable: string, assignChatLambdaFn: string };
+
+/**
+ * Get environment information for auto assign StepFunctions workflows
+ * Environment data can be reuse for the other Lambda invocations
+ */
+const getSfnEnv = async () => {
+  if (!sfnEnvironment) {
+    const dynamoTravelTable = await getAwsSecretValue('DYNAMO_CHAT_TABLE');
+    const assignChatLambdaFn = getEnv('ASSIGN_CHAT_LAMBDA_FUNCTION_ARN');
+    sfnEnvironment = {
+      dynamoTravelTable,
+      assignChatLambdaFn,
+    };
+  }
+};
 
 // eslint-disable-next-line import/prefer-default-export
 export const handler: SQSHandler = async (event: SQSEvent) => {
@@ -15,17 +31,29 @@ export const handler: SQSHandler = async (event: SQSEvent) => {
 
   // Handle SQS records
   const promises = records.map(async (record) => {
-    let conversation;
     try {
-      conversation = JSON.parse(record.body) as ConversationQueryParams;
-      const { chatPlatform, pageId, conversationId } = conversation;
-      const data = await stepfunctions.startExecution({
-        stateMachineArn: process.env.AUTO_ASSIGN_SFN_ARN as string,
-        name: `${chatPlatform}${SFN_NAME_DELIMITER}${pageId}${SFN_NAME_DELIMITER}${conversationId}`,
-        input: record.body,
-      }).promise();
-
-      logger.log(`[sqsAutoAssignTriggerLambda] Started AWS StepFunctions with information ${JSON.stringify(data, null, 2)}`);
+      await getSfnEnv();
+      const conversation = JSON.parse(record.body) as ConversationQueryParams;
+      const {
+        tenant, chatPlatform,
+        pageId, conversationId,
+      } = conversation;
+      const sfnInput = {
+        conversation,
+        env: {
+          ...sfnEnvironment,
+          tenant: `${TENANT_INDEX}#${tenant}`,
+          conversationTaskToken: {
+            pk: `${TENANT_INDEX}#${tenant}#${PAGE_INDEX}#${chatPlatform.toUpperCase()}#${pageId}`,
+            sk: `${TASK_TOKEN_INDEX}#${conversationId}`,
+          },
+        },
+      };
+      await saleAssignmentRepository.startSaleAssignmentSfnWorkflow(
+        process.env.AUTO_ASSIGN_SFN_ARN as string,
+        `${chatPlatform}${SFN_NAME_DELIMITER}${pageId}${SFN_NAME_DELIMITER}${conversationId}`,
+        JSON.stringify(sfnInput),
+      );
     } catch (error: any) {
       logger.log(`[sqsAutoAssignTriggerLambda] Error occurred ${error}`);
     } finally {
