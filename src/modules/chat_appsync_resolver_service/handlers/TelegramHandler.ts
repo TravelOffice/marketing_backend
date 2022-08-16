@@ -1,14 +1,14 @@
 import AWS from 'aws';
+import { getEnv } from 'get-env';
 import { AppSyncEvent } from '../models';
 import { AppSyncHandler } from './AppSyncHandler';
-import { TELEGRAM_SERVICE_NAME } from '../utils/environments';
 
 const lambda = new AWS.Lambda();
 
 export default class TelegramHandler implements AppSyncHandler {
   handle = async (event: AppSyncEvent) => {
     const invokeParams: AWS.Lambda.Types.InvocationRequest = {
-      FunctionName: TELEGRAM_SERVICE_NAME,
+      FunctionName: getEnv('TELEGRAM_SERVICE_NAME'),
       InvocationType: 'RequestResponse',
       LogType: 'Tail',
       Payload: JSON.stringify(event),

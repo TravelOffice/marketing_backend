@@ -49,7 +49,7 @@ cd ${CUR_DIR}
 
 for dir in ${LIBS_DIR}
 do
-  if [[ "${PRE_BUILD_DEPENDENCIES}" != "${dir}" ]]; then
+  if [[ "${PRE_BUILD_DEPENDENCIES}" != *"${dir}"* ]]; then
     build_lib ${dir}
   fi
 done

@@ -1,10 +1,19 @@
+import AWS from 'aws';
 import { DDBConversation } from 'common-models';
 import { getAwsSecretValue } from 'get-env';
+import { NewConversationInfo } from 'auto-assign-utilities/models';
 import { ConversationQueryParams } from '../models/ConversationQueryParams';
 import { dynamoProvider } from '../providers';
-import { ASSIGNEE_INDEX, CONVERSATION_INDEX, TENANT_INDEX } from '../utils/dynamodbConstants';
+import {
+  ASSIGNEE_INDEX,
+  CONVERSATION_ASSSIGNEE_INDEX,
+  CONVERSATION_INDEX,
+  PARTITION_KEY_DELIMITER, TENANT_INDEX,
+} from '../utils/dynamodbConstants';
 import logger from '../utils/logger';
 import { ChatRepository } from './interfaces/ChatRepository';
+import { QueryInput } from '../providers/DynamoProvider';
+import { UNKNOWN_USER } from '../utils/constants';
 
 export default class ChatRepositoryImpl implements ChatRepository {
   /**
@@ -18,6 +27,76 @@ export default class ChatRepositoryImpl implements ChatRepository {
     const pk = `${TENANT_INDEX}#${params.tenant}#${CONVERSATION_INDEX}#${chatPlatformIndex}#${params.pageId}`;
     const sk = `${CONVERSATION_INDEX}#${params.conversationId}`;
     return dynamoProvider.getItem<DDBConversation>(table, pk, sk);
+  };
+
+  /**
+   * Get list unassigned conversation of platform page
+   * @param tenant The tenant ID
+   * @returns Conversation data
+   */
+  getUnassignedConversation = async (tenant: string) => {
+    const table = await getAwsSecretValue('DYNAMO_CHAT_TABLE');
+    const query: QueryInput = {
+      TableName: table,
+      IndexName: CONVERSATION_ASSSIGNEE_INDEX,
+      ExpressionAttributeNames: {
+        '#kn0': 'typeLsi',
+        '#kn1': 'pk',
+      },
+      ExpressionAttributeValues: {
+        ':kv0': { S: `${ASSIGNEE_INDEX}#${UNKNOWN_USER}` },
+        ':kv1': { S: `${TENANT_INDEX}#${tenant}` },
+      },
+      KeyConditionExpression: '#kn0 = :kv0 AND begins_with(#kn1, :kv1)',
+    };
+    const { Items: unassignConversations } = await dynamoProvider.rawQuery(query);
+    if (!unassignConversations || unassignConversations.length === 0) {
+      throw new Error(`Tenant [${tenant}]: Not found any unassign conversations!`);
+    }
+    return unassignConversations.map((element) => {
+      const conversation = AWS.DynamoDB.Converter.unmarshall(element);
+      const [,,, chatPlatform, pageId] = conversation.pk.split(PARTITION_KEY_DELIMITER);
+      const [, conversationId] = conversation.sk.split(PARTITION_KEY_DELIMITER);
+      return {
+        tenant,
+        pageId,
+        chatPlatform,
+        conversationId,
+      } as NewConversationInfo;
+    });
+  };
+
+  /**
+   * Get list tenant name which has unassigned conversation
+   * @returns List tenant name which has unassigned conversation
+   */
+  getListTenantHasUnassignedConversations = async () => {
+    const table = await getAwsSecretValue('DYNAMO_CHAT_TABLE');
+    const query: QueryInput = {
+      TableName: table,
+      IndexName: CONVERSATION_ASSSIGNEE_INDEX,
+      ExpressionAttributeNames: {
+        '#kn0': 'typeLsi',
+        '#kn1': 'pk',
+      },
+      ExpressionAttributeValues: {
+        ':kv0': { S: `${ASSIGNEE_INDEX}#${UNKNOWN_USER}` },
+        ':kv1': { S: `${TENANT_INDEX}#` },
+      },
+      KeyConditionExpression: '#kn0 = :kv0 AND begins_with(#kn1, :kv1)',
+    };
+    const { Items: unassignConversations } = await dynamoProvider.rawQuery(query);
+    if (!unassignConversations || unassignConversations.length === 0) {
+      throw new Error('Not found any unassign conversations!');
+    }
+    const tenants = unassignConversations.map((element) => {
+      const conversation = AWS.DynamoDB.Converter.unmarshall(element);
+      const [, tenant] = conversation.pk.split(PARTITION_KEY_DELIMITER);
+      return tenant as string;
+    });
+
+    // Remove dupplicated tenant
+    return [...new Set(tenants)];
   };
 
   /**

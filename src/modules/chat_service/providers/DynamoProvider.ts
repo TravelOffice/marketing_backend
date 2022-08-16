@@ -5,7 +5,7 @@ import logger from '../utils/logger';
 
 type PutItemInput = AWS.DynamoDB.PutItemInput;
 type GetItemInput = AWS.DynamoDB.GetItemInput;
-type QueryInput = AWS.DynamoDB.QueryInput;
+export type QueryInput = AWS.DynamoDB.QueryInput;
 type DeleteItemInput = AWS.DynamoDB.DeleteItemInput
 const dynamoDB: AWS.DynamoDB = new AWS.DynamoDB({ region: getEnv('AWS_REGION') });
 
