@@ -1,11 +1,9 @@
-import { ClaimVerifyResult, APIGatewayAuthorizerResult } from '../../models';
+import { AuthorizerPolicyRequest, AuthorizerReponse, ClaimVerifyResult } from '../../models';
 
 export interface AuthorizationRepository {
-  generateAllowPolicy: (principalId: string, resource: string) => APIGatewayAuthorizerResult
+  generateAllowPolicy: (policy: AuthorizerPolicyRequest) => AuthorizerReponse
   generateDenyPolicy: (
-    principalId: string,
-    resource: string,
-    errorMessage: string,
-  ) => APIGatewayAuthorizerResult
-  verifyAuthorizationToken: (token: string) => Promise<ClaimVerifyResult>
+    policy: AuthorizerPolicyRequest, errorMessage: string,
+  ) => AuthorizerReponse
+  verifyAuthorizationToken: (token?: string) => Promise<ClaimVerifyResult>
 }

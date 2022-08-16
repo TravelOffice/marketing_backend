@@ -5,7 +5,8 @@ variable "ENV" {}
 variable "TAGS" {}
 
 module "eventbridge" {
-  source = "terraform-aws-modules/eventbridge/aws"
+  source  = "terraform-aws-modules/eventbridge/aws"
+  version = "1.14.1"
 
   for_each   = var.LAMBDA_CRONS
   create_bus = false

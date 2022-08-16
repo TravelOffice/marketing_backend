@@ -8,9 +8,10 @@ variable "LAMBDA_CRONS" {}
 variable "TF_BUCKET" {}
 variable "APPSYNC_FUNCTIONS" {}
 variable "APPSYNC_RESOLVERS" {}
+variable "APPSYNC_LAMBDA_AUTHORIZER" {}
+variable "APPSYNC_LAMBDA_RESOLVER" {}
 
 data "aws_caller_identity" "current" {}
-
 locals {
   remote_feature_name = "base_infrastructure"
   tags = {
@@ -100,16 +101,20 @@ module "LAMBDA_CRON" {
 }
 
 module "APPSYNC_CONFIGURATION" {
-  source            = "../../modules/application/appsync"
-  ENV               = var.ENV
-  FEATURE_NAME      = var.FEATURE_NAME
-  APPSYNC_API_ID    = module.REMOTE_STATE.STATE.MARKETING.backend.appsync.id
-  APPSYNC_FUNCTIONS = var.APPSYNC_FUNCTIONS
-  APPSYNC_RESOLVERS = var.APPSYNC_RESOLVERS
-  LAMBDA_ARN        = module.LAMBDA_FUNCTION.lambda_arns["chat_appsync_resolver_service"] #TODO: Need update correct lambda resolver name
-  DYNAMODB_ARN      = module.REMOTE_STATE.STATE.MARKETING.backend.dynamodb.travel_table.arn
-  DYNAMODB_NAME     = module.REMOTE_STATE.STATE.MARKETING.backend.dynamodb.travel_table.name
-  TAGS              = local.tags
+  source                    = "../../modules/application/appsync"
+  ENV                       = var.ENV
+  FEATURE_NAME              = var.FEATURE_NAME
+  APPSYNC_API_ID            = module.REMOTE_STATE.STATE.MARKETING.backend.appsync.id
+  APPSYNC_API_ARN           = module.REMOTE_STATE.STATE.MARKETING.backend.appsync.arn
+  APPSYNC_API_NAME          = module.REMOTE_STATE.STATE.MARKETING.backend.appsync.name
+  APPSYNC_FUNCTIONS         = var.APPSYNC_FUNCTIONS
+  APPSYNC_RESOLVERS         = var.APPSYNC_RESOLVERS
+  APPSYNC_LAMBDA_AUTHORIZER = var.APPSYNC_LAMBDA_AUTHORIZER
+  APPSYNC_LAMBDA_RESOLVER   = var.APPSYNC_LAMBDA_RESOLVER
+  LAMBDA_ARNS               = module.LAMBDA_FUNCTION.lambda_arns
+  DYNAMODB_ARN              = module.REMOTE_STATE.STATE.MARKETING.backend.dynamodb.travel_table.arn
+  DYNAMODB_NAME             = module.REMOTE_STATE.STATE.MARKETING.backend.dynamodb.travel_table.name
+  TAGS                      = local.tags
 }
 
 module "AUTO_ASSIGN_MODULE_CONFIGURATION" {

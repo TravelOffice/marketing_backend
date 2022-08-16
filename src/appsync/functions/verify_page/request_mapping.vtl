@@ -1,7 +1,14 @@
 #set( $pageId = "" )
 #set( $platform = "" )
-#set( $tenant = $context.stash.tenant )
+#set( $tenant = "" )
 #set( $fieldName = $context.info.fieldName.toLowerCase() )
+
+#if( $context.identity.resolverContext )
+  ## Lambda authorizer
+  #set( $tenant = $context.identity.resolverContext.tenant )
+#else
+  $util.error('VerifyPage: Missing identifying information!')
+#end
 
 #if( $context.info.fieldName == "sendMessage" )
   #set( $pageId = $context.arguments.sender )

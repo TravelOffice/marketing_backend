@@ -1,7 +1,8 @@
 variable "ENV" {}
 variable "FEATURE_NAME" {}
 variable "APPSYNC_API_ID" {}
-variable "LAMBDA_ARN" {}
+variable "APPSYNC_LAMBDA_RESOLVER" {}
+variable "LAMBDA_ARNS" {}
 variable "DYNAMODB_ARN" {}
 variable "DYNAMODB_NAME" {}
 variable "TAGS" {}
@@ -34,7 +35,7 @@ resource "aws_iam_role_policy" "role_policy" {
       {
         "Effect" : "Allow",
         "Action" : "lambda:InvokeFunction",
-        "Resource" : "${var.LAMBDA_ARN}"
+        "Resource" : "${var.LAMBDA_ARNS[var.APPSYNC_LAMBDA_RESOLVER.lambda_name]}"
       },
       {
         "Effect" : "Allow",
@@ -58,7 +59,7 @@ resource "aws_appsync_datasource" "lambda_datasource" {
   service_role_arn = aws_iam_role.iam_role.arn
 
   lambda_config {
-    function_arn = var.LAMBDA_ARN
+    function_arn = var.LAMBDA_ARNS[var.APPSYNC_LAMBDA_RESOLVER.lambda_name]
   }
 }
 
