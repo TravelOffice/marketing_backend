@@ -9,3 +9,5 @@ export const CONVERSATION_INDEX = 'CONVERSATION';
 export const ASSIGNEE_INDEX = 'ASSIGNEE';
 
 export const EMPLOYEE_INDEX = 'EMPLOYEE';
+
+export const CONVERSATION_ASSSIGNEE_INDEX = 'ConversationAsssigneeIndex';
