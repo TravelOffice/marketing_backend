@@ -12,7 +12,7 @@ module "eventbridge" {
   create_bus = false
 
   rules = {
-    crons = {
+    "${var.ENV}-${var.FEATURE_NAME}-${each.key}" = {
       name                = "${var.ENV}-${var.FEATURE_NAME}-${each.key}"
       description         = "Trigger for a Lambda ${each.value.lambda_name}"
       schedule_expression = "${each.value.schedule_expression}"
@@ -20,7 +20,7 @@ module "eventbridge" {
   }
 
   targets = {
-    crons = [
+    "${var.ENV}-${var.FEATURE_NAME}-${each.key}" = [
       {
         name  = "${var.ENV}-${var.FEATURE_NAME}-${each.key}"
         arn   = "${var.LAMBDA_ARNS[each.value.lambda_name]}"
@@ -30,4 +30,12 @@ module "eventbridge" {
   }
 
   tags = var.TAGS
+}
+
+resource "aws_lambda_permission" "eventbridge" {
+  for_each      = var.LAMBDA_CRONS
+  action        = "lambda:InvokeFunction"
+  function_name = var.LAMBDA_ARNS[each.value.lambda_name]
+  principal     = "events.amazonaws.com"
+  source_arn    = module.eventbridge[each.key].eventbridge_rule_arns["${var.ENV}-${var.FEATURE_NAME}-${each.key}"]
 }

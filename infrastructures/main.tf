@@ -41,6 +41,16 @@ locals {
       NODE_ENV            = var.ENV
       SECRET_MANAGER_ID   = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
       AUTO_ASSIGN_SFN_ARN = "arn:aws:states:${var.AWS_REGION}:${data.aws_caller_identity.current.account_id}:stateMachine:${var.ENV}-auto-assign-chat"
+    },
+    appsync_resolver_vars = {
+      NODE_ENV              = var.ENV
+      SECRET_MANAGER_ID     = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
+      TELEGRAM_SERVICE_NAME = "${var.ENV}-${var.FEATURE_NAME}-telegram_platform_service"
+    },
+    handler_unassigned_conversations_vars = {
+      NODE_ENV                                           = var.ENV
+      SECRET_MANAGER_ID                                  = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
+      TENANT_HANDLE_UNASSIGNED_CONVERSATION_SERVICE_NAME = "${var.ENV}-${var.FEATURE_NAME}-handle_tenant_unassigned_conversations"
     }
   }
 }
