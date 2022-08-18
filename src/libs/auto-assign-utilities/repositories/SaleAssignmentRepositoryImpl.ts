@@ -1,7 +1,7 @@
 import { getAwsSecretValue } from 'get-env';
 import { NewConversationInfo } from '../models';
-import { sqsProvider } from '../providers';
-import { SQS_ID_DELIMITER } from '../utils/constants';
+import { dynamoProvider, sfnProvider, sqsProvider } from '../providers';
+import { PAGE_INDEX, SQS_ID_DELIMITER, TASK_TOKEN_INDEX, TENANT_INDEX } from '../utils/constants';
 import logger from '../utils/logger';
 import { SaleAssignmentRepository } from './interfaces/SaleAssignmentRepository';
 
@@ -43,8 +43,8 @@ export default class SaleAssignmentRepositoryImpl implements SaleAssignmentRepos
       /**
        * This parameter applies only to FIFO (first-in-first-out) queues.
        */
-      MessageGroupId: `${pageId}${SQS_ID_DELIMITER}${chatPlatform}`,
-    }
+      MessageGroupId: `${pageId}${SQS_ID_DELIMITER}${chatPlatform.toUpperCase()}`,
+    };
     const queueMessage = await sqsProvider.sendMessage(sendMessageRequest);
     logger.log(`A new SQS message has been pushed with data ${JSON.stringify(queueMessage, null, 4)}`);
   };
@@ -60,5 +60,53 @@ export default class SaleAssignmentRepositoryImpl implements SaleAssignmentRepos
   ) => {
     const queueUrl = await getAwsSecretValue('NEW_CONVERSATION_QUEUE_ENDPOINT');
     await sqsProvider.deleteMessage(queueUrl, receiptHandler);
-  }
+  };
+
+  /**
+   * Start auto assignment workflows by triggering AWS StepFunctions
+   * @param stateMachineArn Sfn arn
+   * @param name Name of execution
+   * @param payload Execution payload data JSON
+   */
+  startSaleAssignmentSfnWorkflow = async (
+    stateMachineArn: string,
+    name: string,
+    payload: string,
+  ) => {
+    const input = { stateMachineArn, name, input: payload };
+    await sfnProvider.startExecution(input);
+  };
+
+  /**
+   * Handle on sent message to customer
+   * This function do following steps:
+   * 1. Get conversation with task token stored at DynamoDB
+   * 2. Send task success api to AWS StepFunctions
+   * @param tenant Tenant id
+   * @param chatPlatform Chat platform
+   * @param conversationId Conversation id
+   */
+  onSentMessageToCustomer = async (
+    tenant: string,
+    chatPlatform: string,
+    pageId: string,
+    conversationId: string,
+  ) => {
+    // Chat table
+    const ddbChatTable = await getAwsSecretValue('DYNAMO_CHAT_TABLE');
+
+    // Get task token attached to conversation
+    const taskTokenItem = await dynamoProvider.getItem(
+      ddbChatTable,
+      `${TENANT_INDEX}#${tenant}#${PAGE_INDEX}#${chatPlatform.toUpperCase()}#${pageId}`,
+      `${TASK_TOKEN_INDEX}#${conversationId}`,
+    );
+
+    // Send task success if needed
+    if (taskTokenItem) {
+      const { taskToken } = taskTokenItem;
+      const input = { taskToken, output: '{}' };
+      await sfnProvider.sendTaskSuccess(input);
+    }
+  };
 }

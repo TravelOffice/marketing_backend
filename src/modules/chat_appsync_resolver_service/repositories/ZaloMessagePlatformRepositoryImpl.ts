@@ -1,10 +1,12 @@
-import AWS from 'aws';
 import { getAwsSecretValue } from 'get-env';
-import { Message, toSendZaloMessagePayload, ZaloMessageResponsePayload } from '../models';
+import AWS from 'aws';
+import { SendMessageMutationArgs, toSendZaloMessagePayload, ZaloMessageResponsePayload } from '../models';
 import { dynamoProvider, zaloMessagePlatformProvider } from '../providers';
-import logger from '../utils/logger';
 import { ZALO_PAGE_INDEX } from '../utils/constants';
+import logger from '../utils/logger';
 import { ZaloMessagePlatformRepository } from './interfaces/ZaloMessagePlatformRepository';
+
+type DDBUpdateItemInput = AWS.DynamoDB.DocumentClient.UpdateItemInput;
 
 export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePlatformRepository {
   /**
@@ -45,7 +47,7 @@ export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePla
       );
       if (refreshTokenResponse) {
         const expireIn = new Date(Date.now() + refreshTokenResponse.expires_in * 1000);
-        const updateParams: AWS.DynamoDB.DocumentClient.UpdateItemInput = {
+        const updateParams: DDBUpdateItemInput = {
           TableName: travelTable,
           Key: {
             pk: dynamoItem.pk, // pk and sk can be unmarshall
@@ -72,7 +74,7 @@ export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePla
    * Send message to customer from Fb page
    * @param message Message data
    */
-  sendMessage = async (message: Message): Promise<any> => {
+  sendMessage = async (message: SendMessageMutationArgs): Promise<any> => {
     try {
       // Get page token that stored in DynamoDB table by `pageIdAsSender`
       const pageToken = await this.getZaloMessagePlatformToken(message.sender);

@@ -1,7 +1,11 @@
-import { FacebookMessageResponsePayload, FacebookUserProfile, Message } from '../../models';
+import {
+  FacebookMessageResponsePayload,
+  FacebookUserProfile,
+  SendMessageMutationArgs,
+} from '../../models';
 
 export interface FbMessagePlatformRepository {
-  sendMessage: (message: Message) => Promise<any>;
+  sendMessage: (message: SendMessageMutationArgs) => Promise<any>;
   getConversations: (
     tenantId: string,
     pageId: string,
