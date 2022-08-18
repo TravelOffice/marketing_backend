@@ -51,6 +51,10 @@ locals {
       NODE_ENV                                           = var.ENV
       SECRET_MANAGER_ID                                  = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
       TENANT_HANDLE_UNASSIGNED_CONVERSATION_SERVICE_NAME = "${var.ENV}-${var.FEATURE_NAME}-handle_tenant_unassigned_conversations"
+    },
+    auto_assign_chat_lambda_vars = {
+      NODE_ENV            = var.ENV
+      SECRET_MANAGER_ID   = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
     }
   }
 }

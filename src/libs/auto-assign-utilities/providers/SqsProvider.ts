@@ -21,7 +21,7 @@ export default class SQSProvider {
     logger.log(`Message ${data.MessageId} placed in the Queue: ${sendMessageRequest.QueueUrl}`);
 
     return data;
-  }
+  };
 
   /**
    * Delete message from queue
@@ -35,7 +35,7 @@ export default class SQSProvider {
     };
 
     await this.sqs.deleteMessage(deleteParams).promise();
-  }
+  };
 
   /**
    * Get messsages from SQS queue from given queue url
@@ -49,7 +49,7 @@ export default class SQSProvider {
       MessageAttributeNames: ['All'],
       QueueUrl: queueUrl,
       VisibilityTimeout: 20,
-      WaitTimeSeconds: 0
+      WaitTimeSeconds: 0,
     };
 
     // Get messages
@@ -75,5 +75,5 @@ export default class SQSProvider {
 
     logger.log(`Get queue messages for queue ${queueUrl}, data ${JSON.stringify(messages, null, 3)}`);
     return messages;
-  }
+  };
 }

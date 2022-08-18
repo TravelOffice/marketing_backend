@@ -8,15 +8,13 @@ import {
 import { SendFacebookMessageRequestPayload } from './facebook/SendFacebookMessageRequestPayload';
 import { SendZaloMessageRequestPayload } from './zalo/SendZaloMessageRequestPayload';
 
-export interface Message {
+export interface BaseMessageMutationArgs {
   // Message id
   id?: string,
   // Sender id
   sender: string,
   // Recipient id
   recipient: string,
-  // Sending time
-  timestamp: number,
   /**
    * AppSyncReceiveMessageData for receive message mutation
    * AppSyncSendMessageData for send message muatation
@@ -24,6 +22,21 @@ export interface Message {
   messageData: AppSyncReceiveMessageData | AppSyncSendMessageData,
   // Chat platform such as fb / zalo / telegram
   chatPlatform: ChatPlatform,
+}
+
+export interface SendMessageMutationArgs extends BaseMessageMutationArgs {
+  conversationId: string,
+}
+
+export interface ReceiveMessageMutationArgs extends BaseMessageMutationArgs {
+  // Message id
+  id: string,
+  // Sending time
+  timestamp: number,
+  // Username
+  username: string,
+  // Tenant
+  tenant: string,
 }
 
 export interface MessageForSend {

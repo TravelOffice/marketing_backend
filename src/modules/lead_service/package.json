@@ -21,11 +21,7 @@
     "get-env": "link:../../libs/get-env",
     "decode-token": "link:../../libs/decode-token",
     "jwt-decode": "^3.1.2",
-    "mongoose": "^6.1.4",
-    "mysql2": "^2.3.3",
-    "reflect-metadata": "^0.1.13",
-    "sequelize": "^6.12.4",
-    "sequelize-typescript": "^2.1.1"
+    "reflect-metadata": "^0.1.13"
   },
   "devDependencies": {
     "@types/compression": "^1.7.2",

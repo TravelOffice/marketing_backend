@@ -1,17 +1,17 @@
 import { ChatPlatform } from 'common-models';
-import { Message } from './Message';
+import { ReceiveMessageMutationArgs, SendMessageMutationArgs } from './Message';
 
 type EventField = 'sendMessage' | 'receivedMessage' | 'allFbConversations' | 'allFbMessages' | 'allZaloConversations' | 'allZaloMessages';
 type UnknownEventField<T> = T extends EventField ? never : T & EventField extends T ? never : T;
 
 type SendMessageEvent = {
   field: 'sendMessage',
-  arguments: Message
+  arguments: SendMessageMutationArgs
 }
 
 type ReceivedMessageEvent = {
   field: 'receivedMessage',
-  arguments: Message
+  arguments: ReceiveMessageMutationArgs
 }
 
 // Facebook event
@@ -88,4 +88,15 @@ export type UnknownEvent = {
 }
 
 // eslint-disable-next-line max-len
-export type AppSyncEvent = SendMessageEvent | ReceivedMessageEvent | AllFbConversationsEvent | AllFbMessagesEvent | AdminAllFbConversationsEvent | AllZaloConversationsEvent | AllZaloMessageEvent | AdminAllZaloConversationsEvent | UserProfileEvent | UnknownEvent;
+export type AppSyncEvent = (
+  SendMessageEvent
+  | ReceivedMessageEvent
+  | AllFbConversationsEvent
+  | AllFbMessagesEvent
+  | AdminAllFbConversationsEvent
+  | AllZaloConversationsEvent
+  | AllZaloMessageEvent
+  | AdminAllZaloConversationsEvent
+  | UserProfileEvent
+  | UnknownEvent
+) & { tenant: string, username: string };

@@ -1,11 +1,17 @@
 import { ChatPlatform, FacebookConversation } from 'common-models';
 import { getAwsSecretValue } from 'get-env';
 import {
-  FacebookMessageResponsePayload, FacebookUserProfile, Message, toSendFbMessagePayload,
+  FacebookMessageResponsePayload,
+  FacebookUserProfile,
+  SendMessageMutationArgs,
+  toSendFbMessagePayload,
 } from '../models';
 import { dynamoProvider, fbMessagePlatformProvider } from '../providers';
 import {
-  ASSIGNEE_INDEX, CONVERSATION_INDEX, FACEBOK_PAGE_INDEX, TENANT_INDEX,
+  ASSIGNEE_INDEX,
+  CONVERSATION_INDEX,
+  FACEBOK_PAGE_INDEX,
+  TENANT_INDEX,
 } from '../utils/constants';
 import logger from '../utils/logger';
 import { FbMessagePlatformRepository } from './interfaces/FbMessagePlatformRepository';
@@ -49,7 +55,7 @@ export default class FbMessagePlatformRepositoryImpl implements FbMessagePlatfor
    * Send message to customer from Fb page
    * @param message Message data
    */
-  sendMessage = async (message: Message): Promise<any> => {
+  sendMessage = async (message: SendMessageMutationArgs): Promise<any> => {
     try {
       // Get page token that stored in DynamoDB table by `pageIdAsSender`
       const pageToken = await this.getFbMessagePlatformToken(message.sender);

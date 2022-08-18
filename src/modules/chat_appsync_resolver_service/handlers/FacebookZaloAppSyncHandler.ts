@@ -1,5 +1,5 @@
 import { ChatPlatform } from 'common-models';
-import { AppSyncEvent, Message, UnknownEvent } from '../models';
+import { AppSyncEvent, SendMessageMutationArgs } from '../models';
 import { fbMessagePlatformRepository, zaloMessagePlatformRepository } from '../repositories';
 import { AppSyncHandler } from './AppSyncHandler';
 
@@ -13,7 +13,7 @@ export default class FacebookZaloAppSyncHandler implements AppSyncHandler {
    * @param message Message information
    * @returns Created message returned from chat platform
    */
-  sendMessage = async (message: Message) => {
+  sendMessage = async (message: SendMessageMutationArgs) => {
     switch (message.chatPlatform) {
       case ChatPlatform.facebook:
         return fbMessagePlatformRepository.sendMessage(message);
@@ -120,7 +120,10 @@ export default class FacebookZaloAppSyncHandler implements AppSyncHandler {
       }
 
       default:
-        throw new Error(`Unknown field, unable to resolve ${(event as UnknownEvent).field}`);
+      {
+        const { field } = event;
+        throw new Error(`Unknown field, unable to resolve ${field}`);
+      }
     }
     return {
       message: resolverMessage,

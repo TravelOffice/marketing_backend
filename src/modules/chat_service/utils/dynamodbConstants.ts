@@ -11,3 +11,7 @@ export const ASSIGNEE_INDEX = 'ASSIGNEE';
 export const EMPLOYEE_INDEX = 'EMPLOYEE';
 
 export const CONVERSATION_ASSSIGNEE_INDEX = 'ConversationAsssigneeIndex';
+
+export const TASK_TOKEN_INDEX = 'SFNTOKEN';
+
+export const PAGE_INDEX = 'PAGE';
