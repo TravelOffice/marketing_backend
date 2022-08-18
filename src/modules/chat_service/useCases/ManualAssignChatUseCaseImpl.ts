@@ -1,5 +1,6 @@
 import { ConversationQueryParams } from '../models/ConversationQueryParams';
 import { chatRepository, userRepository } from '../repositories';
+import { UNKNOWN_USER } from '../utils/constants';
 import { PARTITION_KEY_DELIMITER } from '../utils/dynamodbConstants';
 import { ManualAssignChatUseCase } from './interfaces/ManualAssignChatUseCase';
 
@@ -34,6 +35,22 @@ export default class ManualAssignChatUseCaseImpl implements ManualAssignChatUseC
       }
       // Update assignee for conversation
       await chatRepository.saveConversationWithNewAssignee(conversation, assignee);
+
+      // Increase number of assigned chats for new assignee
+      await userRepository.updateNumberOfAssignedChats(
+        employee,
+        (employee.nacs || 0) + 1,
+      );
+
+      // Decrease number of assigned chats for old assignee
+      if (currentAssignee !== UNKNOWN_USER) {
+        const oldAssignedEmployee = await userRepository.getEmployee(tenant, currentAssignee);
+        if (oldAssignedEmployee && oldAssignedEmployee.nacs) {
+          let nAssignedChats = (oldAssignedEmployee.nacs || 0) - 1;
+          nAssignedChats = nAssignedChats < 0 ? 0 : nAssignedChats;
+          await userRepository.updateNumberOfAssignedChats(oldAssignedEmployee, nAssignedChats);
+        }
+      }
     }
 
     // TODO: Send notification via AppSync endpoint

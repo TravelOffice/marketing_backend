@@ -5,8 +5,10 @@ import logger from '../utils/logger';
 
 type PutItemInput = AWS.DynamoDB.PutItemInput;
 type GetItemInput = AWS.DynamoDB.GetItemInput;
+type DeleteItemInput = AWS.DynamoDB.DeleteItemInput;
+export type AttributeValues = AWS.DynamoDB.AttributeMap;
 export type QueryInput = AWS.DynamoDB.QueryInput;
-type DeleteItemInput = AWS.DynamoDB.DeleteItemInput
+
 const dynamoDB: AWS.DynamoDB = new AWS.DynamoDB({ region: getEnv('AWS_REGION') });
 
 export default class DynamoProvider {
@@ -104,4 +106,6 @@ export default class DynamoProvider {
     };
     await dynamoDB.deleteItem(params).promise();
   };
+
+  unmarshallValues = (obj: AttributeValues) => AWS.DynamoDB.Converter.unmarshall(obj);
 }

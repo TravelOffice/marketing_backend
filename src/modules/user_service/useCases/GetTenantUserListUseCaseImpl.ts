@@ -1,4 +1,6 @@
+import omit from 'lodash/omit';
 import { userRepository } from '../repositories';
+import { OMITTED_USER_ATTRIBUTES } from '../utils/constants';
 import { GetTenantUserListUseCase } from './interfaces/GetTenantUserListUseCase';
 
 export default class GetTenantUserListUseCaseImpl implements GetTenantUserListUseCase {
@@ -11,5 +13,8 @@ export default class GetTenantUserListUseCaseImpl implements GetTenantUserListUs
    * @param tenantId The id of the Tenant
    * @returns Promise<User> All information of list tenant user
    */
-  invoke = async (tenantId: string) => userRepository.list(tenantId);
+  invoke = async (tenantId: string) => {
+    const users = await userRepository.list(tenantId);
+    return users.map((user) => omit(user, OMITTED_USER_ATTRIBUTES));
+  };
 }

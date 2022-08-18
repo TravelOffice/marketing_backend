@@ -37,7 +37,7 @@ locals {
       ZALO_CALLBACK_URL    = "www.traveloffice.shop/zalo/callback"
       TELEGRAM_WEBHOOK_URL = "https://${var.ENV}-marketing-backend.traveloffice.shop/chat-telegram-webhook"
     },
-    sqs_auto_assign_trigger_lambda_vars = {
+    auto_assign_sqs_trigger_lambda_vars = {
       NODE_ENV            = var.ENV
       SECRET_MANAGER_ID   = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
       AUTO_ASSIGN_SFN_ARN = "arn:aws:states:${var.AWS_REGION}:${data.aws_caller_identity.current.account_id}:stateMachine:${var.ENV}-auto-assign-chat"
@@ -55,6 +55,11 @@ locals {
     auto_assign_chat_lambda_vars = {
       NODE_ENV            = var.ENV
       SECRET_MANAGER_ID   = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
+    },
+    auto_assign_send_notification_vars = {
+      NODE_ENV            = var.ENV
+      SECRET_MANAGER_ID   = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
+      SEND_NOTIFICATION_SERVICE_NAME = "${var.ENV}-${var.FEATURE_NAME}-send_notification"
     }
   }
 }

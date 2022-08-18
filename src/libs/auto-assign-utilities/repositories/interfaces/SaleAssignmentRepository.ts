@@ -16,4 +16,12 @@ export interface SaleAssignmentRepository {
     pageId: string,
     conversationId: string,
   ) => Promise<void>
+
+  storeSfnTaskToken: (
+    tenant: string,
+    chatPlatform: string,
+    pageId: string,
+    conversationId: string,
+    taskToken: string,
+  ) => Promise<void>
 }
