@@ -20,6 +20,7 @@ module "AUTO_ASSIGN_STEP_FUNCTION_CONFIGURATION" {
   CUSTOM_POLICIES = [
     "StandardStepFunction",
     "DynamoTableReadWrite",
-    "SESSendMail"
+    "SESSendMail",
+    "LambdaInvokeAsync"
   ]
 }
