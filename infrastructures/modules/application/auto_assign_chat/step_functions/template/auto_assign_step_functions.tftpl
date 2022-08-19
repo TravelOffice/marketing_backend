@@ -1,71 +1,253 @@
 {
   "Comment": "A Hello World example demonstrating various state types of the Amazon States Language",
-  "StartAt": "Pass",
+  "StartAt": "Query Admins Information",
   "States": {
-    "Pass": {
-      "Comment": "A Pass state passes its input to its output, without performing work. Pass states are useful when constructing and debugging state machines.",
-      "Type": "Pass",
-      "Next": "Hello World example?"
+    "Auto assign notification service - Handle error": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "Payload.$": "$",
+        "FunctionName.$": "$.env.notifyChatLambdaFn"
+      },
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 6,
+          "BackoffRate": 2
+        }
+      ],
+      "Next": "No"
     },
-    "Hello World example?": {
-      "Comment": "A Choice state adds branching logic to a state machine. Choice rules can implement 16 different comparison operators, and can be combined using And, Or, and Not",
+    "Query Admins Information": {
+      "Type": "Task",
+      "Next": "Check admins information",
+      "Parameters": {
+        "TableName.$": "$.dynamoTravelTable",
+        "KeyConditionExpression": "#pk = :pk AND begins_with(#sk, :sk)",
+        "ExpressionAttributeNames": {
+          "#pk": "pk",
+          "#sk": "sk",
+          "#roles": "rolesStr"
+        },
+        "ExpressionAttributeValues": {
+          ":pk": {
+            "S.$": "$.tenant"
+          },
+          ":sk": {
+            "S": "EMPLOYEE"
+          },
+          ":role": {
+            "S": "ADMIN"
+          }
+        },
+        "FilterExpression": "contains(#roles, :role)"
+      },
+      "Resource": "arn:aws:states:::aws-sdk:dynamodb:query",
+      "ResultPath": "$.admins",
+      "InputPath": "$.env"
+    },
+    "Check admins information": {
       "Type": "Choice",
       "Choices": [
         {
-          "Variable": "$.IsHelloWorldExample",
-          "BooleanEquals": true,
-          "Next": "Yes"
-        },
-        {
-          "Variable": "$.IsHelloWorldExample",
-          "BooleanEquals": false,
-          "Next": "No"
+          "Variable": "$.admins.Count",
+          "NumericEquals": 0,
+          "Next": "Auto assign notification service - Handle error"
         }
       ],
-      "Default": "Yes"
+      "Default": "Get emails of all admins"
     },
-    "Yes": {
+    "Get emails of all admins": {
+      "Type": "Map",
+      "Next": "Query Available Sales",
+      "Iterator": {
+        "StartAt": "Get email of admin",
+        "States": {
+          "Get email of admin": {
+            "Type": "Pass",
+            "End": true,
+            "OutputPath": "$.email.S"
+          }
+        }
+      },
+      "ItemsPath": "$.Items",
+      "ResultPath": "$.admins.emails",
+      "InputPath": "$.admins"
+    },
+    "Query Available Sales": {
+      "Type": "Task",
+      "Next": "Check available sales",
+      "Parameters": {
+        "TableName.$": "$.dynamoTravelTable",
+        "IndexName": "TypeIndex",
+        "KeyConditionExpression": "#pk = :pk AND #lsi = :lsi",
+        "ExpressionAttributeNames": {
+          "#pk": "pk",
+          "#lsi": "typeLsi"
+        },
+        "ExpressionAttributeValues": {
+          ":pk": {
+            "S.$": "$.tenant"
+          },
+          ":lsi": {
+            "S": "EMPLOYEE#ENABLED"
+          },
+          ":wct": {
+            "Bool": true
+          }
+        },
+        "FilterExpression": "wct = :wct"
+      },
+      "Resource": "arn:aws:states:::aws-sdk:dynamodb:query",
+      "InputPath": "$.env",
+      "ResultPath": "$.sales"
+    },
+    "Check available sales": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.sales.Count",
+          "NumericEquals": 0,
+          "Next": "Generate no available sale error code"
+        }
+      ],
+      "Default": "Auto assign service"
+    },
+    "Generate no available sale error code": {
       "Type": "Pass",
-      "Next": "Wait 3 sec"
+      "Next": "Auto assign notification service - Handle error",
+      "Result": {
+        "code": "AUTO_ASSIGN_NO_AVAILABLE_SALE"
+      },
+      "ResultPath": "$.assignment"
+    },
+    "Auto assign notification service - Waiting sale reply": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
+      "Parameters": {
+        "FunctionName.$": "$.env.notifyChatLambdaFn",
+        "Payload": {
+          "conversation.$": "$.conversation",
+          "assignment.$": "$.assignment",
+          "taskToken.$": "$$.Task.Token"
+        }
+      },
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 6,
+          "BackoffRate": 2
+        }
+      ],
+      "Next": "Delete task token after sale response to new chat",
+      "TimeoutSeconds": 300,
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.Timeout"
+          ],
+          "Next": "Generate sale not response error code",
+          "ResultPath": "$.error",
+          "Comment": "Sale must reply to new chat in 5 minutes"
+        }
+      ],
+      "ResultPath": null
+    },
+    "Generate sale not response error code": {
+      "Type": "Pass",
+      "Next": "Delete task token when sale not response",
+      "Parameters": {
+        "env.$": "$.env",
+        "conversation.$": "$.conversation",
+        "assignment": {
+          "code": "AUTO_ASSIGN_NOT_RESPONSE_NEW_CHAT",
+          "assignedSale.$": "$.assignment.assignedSale"
+        }
+      }
+    },
+    "Delete task token when sale not response": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::dynamodb:deleteItem",
+      "Parameters": {
+        "TableName.$": "$.dynamoChatTable",
+        "Key": {
+          "pk": {
+            "S.$": "$.conversationTaskToken.pk"
+          },
+          "sk": {
+            "S.$": "$.conversationTaskToken.sk"
+          }
+        }
+      },
+      "Next": "Auto assign notification service - Handle error",
+      "InputPath": "$.env",
+      "ResultPath": null
+    },
+    "Delete task token after sale response to new chat": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::dynamodb:deleteItem",
+      "Parameters": {
+        "TableName.$": "$.dynamoChatTable",
+        "Key": {
+          "pk": {
+            "S.$": "$.conversationTaskToken.pk"
+          },
+          "sk": {
+            "S.$": "$.conversationTaskToken.sk"
+          }
+        }
+      },
+      "Next": "Success",
+      "InputPath": "$.env",
+      "ResultPath": null
     },
     "No": {
       "Type": "Fail",
-      "Cause": "Not Hello World"
+      "Cause": "Failed auto assign"
     },
-    "Wait 3 sec": {
-      "Comment": "A Wait state delays the state machine from continuing for a specified time.",
-      "Type": "Wait",
-      "Seconds": 3,
-      "Next": "Parallel State"
-    },
-    "Parallel State": {
-      "Comment": "A Parallel state can be used to create parallel branches of execution in your state machine.",
-      "Type": "Parallel",
-      "Next": "Success",
-      "Branches": [
-        {
-          "StartAt": "Hello",
-          "States": {
-            "Hello": {
-              "Type": "Pass",
-              "End": true
-            }
-          }
-        },
-        {
-          "StartAt": "World",
-          "States": {
-            "World": {
-              "Type": "Pass",
-              "End": true
-            }
-          }
+    "Auto assign service": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName.$": "$.env.assignChatLambdaFn",
+        "Payload": {
+          "conversation.$": "$.conversation",
+          "sales.$": "$.sales.Items"
         }
-      ]
+      },
+      "Next": "Generate assigning sale successfully code",
+      "ResultPath": "$.assignment",
+      "TimeoutSeconds": 3,
+      "ResultSelector": {
+        "assignedSale.$": "$.Payload.body.assignedSale"
+      }
+    },
+    "Generate assigning sale successfully code": {
+      "Type": "Pass",
+      "Next": "Auto assign notification service - Waiting sale reply",
+      "Parameters": {
+        "env.$": "$.env",
+        "conversation.$": "$.conversation",
+        "assignment": {
+          "code": "AUTO_ASSIGN_NEW_CHAT_SUCCESSFULLY",
+          "assignedSale.$": "$.assignment.assignedSale"
+        }
+      }
     },
     "Success": {
       "Type": "Pass",
-      "End": true
+      "End": true,
+      "Comment": "Assign chat to sale successfully"
     }
   }
 }
