@@ -1,8 +1,14 @@
 import { getAwsSecretValue } from 'get-env';
 import { NewConversationInfo } from '../models';
 import { dynamoProvider, sfnProvider, sqsProvider } from '../providers';
-import { PAGE_INDEX, SQS_ID_DELIMITER, TASK_TOKEN_INDEX, TENANT_INDEX } from '../utils/constants';
+import {
+  PAGE_INDEX,
+  SQS_ID_DELIMITER,
+  TASK_TOKEN_INDEX,
+  TENANT_INDEX
+} from '../utils/constants';
 import logger from '../utils/logger';
+import stringToHash from '../utils/string';
 import { SaleAssignmentRepository } from './interfaces/SaleAssignmentRepository';
 
 export default class SaleAssignmentRepositoryImpl implements SaleAssignmentRepository {
@@ -39,7 +45,7 @@ export default class SaleAssignmentRepositoryImpl implements SaleAssignmentRepos
        * This parameter applies only to FIFO (first-in-first-out) queues.
        * The token used for deduplication of sent messages.
        */
-      MessageDeduplicationId: conversationInfor.conversationId,
+      MessageDeduplicationId: stringToHash(conversationInfor.conversationId),
       /**
        * This parameter applies only to FIFO (first-in-first-out) queues.
        */
@@ -135,7 +141,7 @@ export default class SaleAssignmentRepositoryImpl implements SaleAssignmentRepos
       ddbChatTable,
       `${TENANT_INDEX}#${tenant}#${PAGE_INDEX}#${chatPlatform.toUpperCase()}#${pageId}`,
       `${TASK_TOKEN_INDEX}#${conversationId}`,
-      { taskToken }
+      { taskToken },
     );
 
     logger.log(`Stored task token successfully, result is ${JSON.stringify(taskTokenItem, null, 2)}`);
