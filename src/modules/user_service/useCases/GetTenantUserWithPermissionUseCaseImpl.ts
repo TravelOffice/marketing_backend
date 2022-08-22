@@ -1,4 +1,6 @@
+import omit from 'lodash/omit';
 import { userRepository } from '../repositories';
+import { OMITTED_USER_ATTRIBUTES } from '../utils/constants';
 import { GetTenantUserWithPermissionUseCase } from './interfaces/GetTenantUserWithPermissionUseCase';
 
 export default class GetTenantUserWithPermissionUseCaseImpl
@@ -16,6 +18,6 @@ implements GetTenantUserWithPermissionUseCase {
   invoke = async (tenantId: string, userId: string) => {
     const user = await userRepository.getWithPermission(tenantId, userId);
     if (!user) throw new Error(`Tenant [${tenantId}] User [${userId}] does not exist!`);
-    return user;
+    return omit(user, OMITTED_USER_ATTRIBUTES);
   };
 }

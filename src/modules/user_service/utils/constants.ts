@@ -43,3 +43,5 @@ export const USERNAME_DELIMITER = '#';
 export const PAGE_INDEX = 'PAGE';
 
 export const ROLE_INDEX = 'ROLE';
+
+export const OMITTED_USER_ATTRIBUTES = ['tenant', 'pk', 'sk', 'typeLsi', 'wct', 'nacs'];

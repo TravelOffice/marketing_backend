@@ -11,7 +11,7 @@ export function toUserAttributeName(name: string): string {
 }
 
 export function toUserAttributes(user: Partial<User>): Array<any> {
-  const userAttributes : Array<any> = [];
+  const userAttributes: Array<any> = [];
   Object.entries(user).forEach((userValue) => {
     const [name, value] = userValue;
     if (name && name !== 'username' && value) {

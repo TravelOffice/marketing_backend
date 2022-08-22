@@ -1,7 +1,12 @@
+import omit from 'lodash/omit';
 import {
-  LANGUAGES_TYPE, ROLES_TYPE, THEMES_TYPE, User,
+  LANGUAGES_TYPE,
+  ROLES_TYPE,
+  THEMES_TYPE,
+  User,
 } from '../models/User';
 import { userRepository } from '../repositories';
+import { OMITTED_USER_ATTRIBUTES } from '../utils/constants';
 import { CreateTenantUserUseCase } from './interfaces/CreateTenantUserUseCase';
 
 export default class CreateTenantUserUseCaseImpl implements CreateTenantUserUseCase {
@@ -33,6 +38,7 @@ export default class CreateTenantUserUseCaseImpl implements CreateTenantUserUseC
       },
     };
 
-    return userRepository.create(tenantId, newUser);
+    const ddbUser = await userRepository.create(tenantId, newUser);
+    return omit(ddbUser, OMITTED_USER_ATTRIBUTES);
   };
 }

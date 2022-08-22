@@ -15,3 +15,5 @@ export const CONVERSATION_ASSSIGNEE_INDEX = 'ConversationAsssigneeIndex';
 export const TASK_TOKEN_INDEX = 'SFNTOKEN';
 
 export const PAGE_INDEX = 'PAGE';
+
+export const EMAIL_TEMPLATE_INDEX = `MAIL${PARTITION_KEY_DELIMITER}TEMPLATE`;
