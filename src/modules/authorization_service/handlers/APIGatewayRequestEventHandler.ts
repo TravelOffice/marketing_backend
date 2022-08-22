@@ -18,7 +18,7 @@ class APIGatewayRequestEventHandler extends AuthorizerHandler<APIGatewayRequestA
    */
   handle = async (): Promise<AuthorizerReponse> => {
     logger.log(`APIGatewayRequestEventHandler: Receive event ${JSON.stringify(this.event)}`);
-    const { methodArn, path, httpMethod } = this.event;
+    const { methodArn, resource, httpMethod } = this.event;
     const authorizationToken = this.event.headers.authorization;
 
     const verifyTokenResult = await authorizationRepository.verifyAuthorizationToken(
@@ -31,7 +31,7 @@ class APIGatewayRequestEventHandler extends AuthorizerHandler<APIGatewayRequestA
 
     const { roles } = userAttributes;
     const permisson: Permission = {
-      path,
+      path: resource,
       action: httpMethod,
     };
 
