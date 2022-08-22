@@ -1,5 +1,7 @@
+import omit from 'lodash/omit';
 import { User } from '../models/User';
 import { userRepository } from '../repositories';
+import { OMITTED_USER_ATTRIBUTES } from '../utils/constants';
 import { UpdateTenantUserUseCase } from './interfaces/UpdateTenantUserUseCase';
 
 export default class UpdateTenantUserUseCaseImpl implements UpdateTenantUserUseCase {
@@ -34,10 +36,7 @@ export default class UpdateTenantUserUseCaseImpl implements UpdateTenantUserUseC
     };
 
     const updatedUser = await userRepository.update(tenantId, newUser);
-    const {
-      pk, sk, typeLsi, ...rest
-    } = updatedUser as any;
 
-    return rest as User;
+    return omit(updatedUser, OMITTED_USER_ATTRIBUTES);
   };
 }

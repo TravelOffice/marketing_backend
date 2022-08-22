@@ -133,6 +133,7 @@
         "FunctionName.$": "$.env.notifyChatLambdaFn",
         "Payload": {
           "conversation.$": "$.conversation",
+          "admins.$": "$.admins",
           "assignment.$": "$.assignment",
           "taskToken.$": "$$.Task.Token"
         }
@@ -237,6 +238,7 @@
       "Next": "Auto assign notification service - Waiting sale reply",
       "Parameters": {
         "env.$": "$.env",
+        "admins.$": "$.admins",
         "conversation.$": "$.conversation",
         "assignment": {
           "code": "AUTO_ASSIGN_NEW_CHAT_SUCCESSFULLY",

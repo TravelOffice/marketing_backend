@@ -1,4 +1,6 @@
+import omit from 'lodash/omit';
 import { userRepository } from '../repositories';
+import { OMITTED_USER_ATTRIBUTES } from '../utils/constants';
 import { GetTenantUserUseCase } from './interfaces/GetTenantUserUseCase';
 
 export default class GetTenantUserUseCaseImpl implements GetTenantUserUseCase {
@@ -16,6 +18,6 @@ export default class GetTenantUserUseCaseImpl implements GetTenantUserUseCase {
     const user = await userRepository.get(tenantId, userId);
     if (!user) throw new Error(`Tenant [${tenantId}] User [${userId}] does not exist!`);
 
-    return user;
+    return omit(user, OMITTED_USER_ATTRIBUTES);
   };
 }

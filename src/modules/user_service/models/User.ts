@@ -27,6 +27,10 @@ export interface User {
   },
   createdAt: number,
   updatedAt: number,
+  // Number of assigned chats
+  nacs?: number,
+  // Flag to check whether user is in waiting for response chat state
+  wct?: boolean,
 }
 
 export interface UserWithPermission extends User {

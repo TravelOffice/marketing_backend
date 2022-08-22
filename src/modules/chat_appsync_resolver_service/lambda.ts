@@ -8,7 +8,7 @@ export const handler = async (event: AppSyncEvent) => {
   const { field: eventField, tenant } = event;
   const { chatPlatform, conversationId, recipient } = event.arguments as SendMessageMutationArgs;
 
-  await appSyncHandler.handle(event);
+  const data = await appSyncHandler.handle(event);
   // Post-handle send message event
   // Send task token to StepFunctions to stop auto assignment process
   if (eventField === 'sendMessage') {
@@ -19,4 +19,5 @@ export const handler = async (event: AppSyncEvent) => {
       conversationId,
     );
   }
+  return data;
 };
