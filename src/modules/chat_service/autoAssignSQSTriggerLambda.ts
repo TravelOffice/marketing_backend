@@ -6,7 +6,12 @@ import { SFN_NAME_DELIMITER } from './utils/constants';
 import { PAGE_INDEX, TASK_TOKEN_INDEX, TENANT_INDEX } from './utils/dynamodbConstants';
 import logger from './utils/logger';
 
-let sfnEnvironment: { dynamoTravelTable: string, assignChatLambdaFn: string };
+let sfnEnvironment: {
+  dynamoTravelTable: string,
+  dynamoChatTable: string,
+  assignChatLambdaFn: string,
+  notifyChatLambdaFn: string,
+};
 
 /**
  * Get environment information for auto assign StepFunctions workflows
@@ -14,11 +19,15 @@ let sfnEnvironment: { dynamoTravelTable: string, assignChatLambdaFn: string };
  */
 const getSfnEnv = async () => {
   if (!sfnEnvironment) {
-    const dynamoTravelTable = await getAwsSecretValue('DYNAMO_CHAT_TABLE');
+    const dynamoTravelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const dynamoChatTable = await getAwsSecretValue('DYNAMO_CHAT_TABLE');
     const assignChatLambdaFn = getEnv('ASSIGN_CHAT_LAMBDA_FUNCTION_ARN');
+    const notifyChatLambdaFn = getEnv('NOTIFY_AUTO_ASSIGN_CHAT_RESULT_LAMBDA_FUNCTION_ARN');
     sfnEnvironment = {
       dynamoTravelTable,
+      dynamoChatTable,
       assignChatLambdaFn,
+      notifyChatLambdaFn,
     };
   }
 };
@@ -49,9 +58,10 @@ export const handler: SQSHandler = async (event: SQSEvent) => {
           },
         },
       };
+      const executionId = `${chatPlatform}${SFN_NAME_DELIMITER}${pageId}${SFN_NAME_DELIMITER}${conversationId}${SFN_NAME_DELIMITER}${Date.now()}`;
       await saleAssignmentRepository.startSaleAssignmentSfnWorkflow(
         process.env.AUTO_ASSIGN_SFN_ARN as string,
-        `${chatPlatform}${SFN_NAME_DELIMITER}${pageId}${SFN_NAME_DELIMITER}${conversationId}`,
+        executionId,
         JSON.stringify(sfnInput),
       );
     } catch (error: any) {
