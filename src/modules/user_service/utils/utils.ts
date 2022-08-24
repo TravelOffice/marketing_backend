@@ -1,4 +1,4 @@
-import { User } from '../models/User';
+import { User } from '../models';
 
 export function toUserAttributeName(name: string): string {
   switch (name) {

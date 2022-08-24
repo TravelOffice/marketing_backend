@@ -1,24 +1,24 @@
 import CreateTenantRoleUseCaseImpl from './CreateTenantRoleUseCaseImpl';
-import GetListPermissionsUseCaseImpl from './GetListPermissionsUseCaseImpl';
+import GetListGroupPermissionsUseCaseImpl from './GetListGroupPermissionsUseCaseImpl';
 import GetListTenantRolesUseCaseImpl from './GetListTenantRolesUseCaseImpl';
 import { CreateTenantRoleUseCase } from './interfaces/CreateTenantRoleUseCase';
-import { GetListPermissionsUseCase } from './interfaces/GetListPermissionsUseCase';
+import { GetListGroupPermissionsUseCase } from './interfaces/GetListGroupPermissionsUseCase';
 import { GetListTenantRolesUseCase } from './interfaces/GetListTenantRolesUseCase';
 
 interface UseCases {
   getListTenantRolesUseCase: GetListTenantRolesUseCase,
   createTenantRoleUseCase: CreateTenantRoleUseCase,
-  getListPermissionsUseCase: GetListPermissionsUseCase,
+  getListGroupPermissionsUseCase: GetListGroupPermissionsUseCase,
 }
 
 const useCases: UseCases = {
   getListTenantRolesUseCase: new GetListTenantRolesUseCaseImpl(),
   createTenantRoleUseCase: new CreateTenantRoleUseCaseImpl(),
-  getListPermissionsUseCase: new GetListPermissionsUseCaseImpl(),
+  getListGroupPermissionsUseCase: new GetListGroupPermissionsUseCaseImpl(),
 };
 
 export const {
   getListTenantRolesUseCase,
   createTenantRoleUseCase,
-  getListPermissionsUseCase,
+  getListGroupPermissionsUseCase,
 } = useCases;

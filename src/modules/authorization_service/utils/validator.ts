@@ -36,7 +36,6 @@ export function createRoleValidator() {
 
   const reservedRoleNames = [
     'ROOT',
-    'EMPLOYEE',
     'ADMIN',
     'SALE',
   ];

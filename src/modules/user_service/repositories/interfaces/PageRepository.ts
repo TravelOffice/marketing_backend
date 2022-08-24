@@ -1,7 +1,7 @@
 import {
   ChatPlatform,
 } from 'common-models';
-import { Page } from '../../models/Page';
+import { Page } from '../../models';
 
 export interface PageRepository {
   list: (tenantId: string) => Promise<Array<Page>>
