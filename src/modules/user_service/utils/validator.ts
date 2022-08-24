@@ -4,7 +4,7 @@ import {
   body,
   query, ValidationError, validationResult,
 } from 'express-validator';
-import { LANGUAGES_TYPE, THEMES_TYPE } from '../models/User';
+import { LANGUAGES_TYPE, THEMES_TYPE } from '../models';
 import {
   USERNAME_DELIMITER,
   VALIDATE_ARRAY_MSG,

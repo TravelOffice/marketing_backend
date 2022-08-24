@@ -40,8 +40,12 @@ export const LATEST_QUOTE_INDEX = 'LATEST_QUOTE';
 
 export const USERNAME_DELIMITER = '#';
 
+export const ROLE_STRING_DELIMITER = '#';
+
+export const PARTITION_KEY_DELIMITER = '#';
+
 export const PAGE_INDEX = 'PAGE';
 
 export const ROLE_INDEX = 'ROLE';
 
-export const OMITTED_USER_ATTRIBUTES = ['tenant', 'pk', 'sk', 'typeLsi', 'wct', 'nacs'];
+export const OMITTED_USER_ATTRIBUTES = ['tenant', 'pk', 'sk', 'typeLsi', 'wct', 'nacs', 'roleStr'];

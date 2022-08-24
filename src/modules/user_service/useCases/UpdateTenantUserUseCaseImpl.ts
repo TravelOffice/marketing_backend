@@ -1,6 +1,6 @@
 import omit from 'lodash/omit';
-import { User } from '../models/User';
-import { userRepository } from '../repositories';
+import { User } from '../models';
+import { rolePermissionRepository, userRepository } from '../repositories';
 import { OMITTED_USER_ATTRIBUTES } from '../utils/constants';
 import { UpdateTenantUserUseCase } from './interfaces/UpdateTenantUserUseCase';
 
@@ -8,10 +8,9 @@ export default class UpdateTenantUserUseCaseImpl implements UpdateTenantUserUseC
   /**
    * Method to update Tenant user
    * To update Tenant user, there are steps need to do:
-   * - Step 1: Confirm the authenticated user information exists in Dynamo DB
-   * - Step 2: Get the current tenant from authenticated user
-   * - Step 3: Check whether user to be updated exists or not
-   * - Step 4: Update the user
+   * - Step 1: Confirm the update user information exists in Dynamo DB
+   * - Step 2: Verify whether input user roles existed or not
+   * - Step 3: Update the user
    * @param tenantId The id of the tenant
    * @param userId The id of user to be updated
    * @param user The user information to be updated
@@ -22,12 +21,22 @@ export default class UpdateTenantUserUseCaseImpl implements UpdateTenantUserUseC
     const oldUser = await userRepository.getUserAttributes(tenantId, userId);
     if (!oldUser) throw new Error(`Tenant [${tenantId}] User [${userId}] does not exist!`);
 
+    // Verify whether input user roles existed or not
+    if (user.roles) {
+      const roles = await rolePermissionRepository.listRoles(tenantId);
+      user.roles.map((userRole) => {
+        const ret = roles.some((role) => role.name === userRole);
+        if (!ret) throw new Error(`Role [${userRole}] is not existed!`);
+        return ret;
+      });
+    }
+
     const newUser: User = {
       ...oldUser,
       ...user,
       username: userId,
       tenant: tenantId,
-      roles: user.roles,
+      roles: user.roles || oldUser.roles,
       createdAt: oldUser.createdAt,
       settings: {
         language: user.settings?.language || oldUser.settings?.language,

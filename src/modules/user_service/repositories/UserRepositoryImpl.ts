@@ -1,11 +1,10 @@
 import AWS from 'aws';
 import { getAwsSecretValue } from 'get-env';
-import { Role } from '../models/RolePermission';
-import { User, UserWithPermission } from '../models/User';
+import { Role, User, UserWithPermission } from '../models';
 import { authProvider, dynamoProvider } from '../providers';
 import { QueryInput } from '../providers/DynamoProvider';
 import {
-  EMPLOYEE_INDEX, ENABLED, ROLE_INDEX, TENANT_INDEX, USERNAME_DELIMITER,
+  EMPLOYEE_INDEX, ENABLED, ROLE_INDEX, ROLE_STRING_DELIMITER, TENANT_INDEX, USERNAME_DELIMITER,
 } from '../utils/constants';
 import logger from '../utils/logger';
 import { UserRepository } from './interfaces/UserRepository';
@@ -100,7 +99,7 @@ export default class UserRepositoryImpl implements UserRepository {
       );
       if (!item) { throw new Error(`Role [${role}] not found`); }
       item.permissions.forEach((permission) => {
-        if (permission.name) permissions.push(permission.name);
+        permissions.push(permission.name);
       });
     }));
 
@@ -132,9 +131,11 @@ export default class UserRepositoryImpl implements UserRepository {
     const sk = `${EMPLOYEE_INDEX}#${user.username}`;
     // TODO: Need to be implement more user status to filter
     const typeLsi = `${EMPLOYEE_INDEX}#${ENABLED}`;
+    const roleStr = `${ROLE_STRING_DELIMITER}${user.roles.join(ROLE_STRING_DELIMITER)}${ROLE_STRING_DELIMITER}`;
     const currentTime = Date.now();
     await dynamoProvider.putItem(table, pk, sk, {
       ...user,
+      roleStr,
       createdAt: currentTime,
       updatedAt: currentTime,
       typeLsi,
@@ -160,12 +161,14 @@ export default class UserRepositoryImpl implements UserRepository {
     });
 
     const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const roleStr = `${ROLE_STRING_DELIMITER}${user.roles.join(ROLE_STRING_DELIMITER)}${ROLE_STRING_DELIMITER}`;
     await dynamoProvider.putItem(
       table,
       `${TENANT_INDEX}#${tenantId}`,
       `${EMPLOYEE_INDEX}#${user.username}`,
       {
         ...user,
+        roleStr,
         updatedAt: Date.now(),
       },
     );

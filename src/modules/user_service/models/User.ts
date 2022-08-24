@@ -18,6 +18,8 @@ export interface User {
   email: string,
   tenant: string,
   roles: Array<string>,
+  //  Used for check role in auto-assignment chat
+  roleStr: string,
   address?: string,
   phoneNumber: string,
   avatar?: string,

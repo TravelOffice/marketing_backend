@@ -1,6 +1,6 @@
 import AWS from 'aws';
 import { getEnv, getAwsSecretValue } from 'get-env';
-import { User } from '../models/User';
+import { User } from '../models';
 import logger from '../utils/logger';
 import { toUserAttributes } from '../utils/utils';
 

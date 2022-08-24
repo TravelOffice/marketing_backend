@@ -1,6 +1,6 @@
 import { getCurrentUserInfo } from 'decode-token';
 import {
-  ApiGatewayPolicyRequest, APIGatewayRequestAuthorizerEvent, AuthorizerReponse, Permission,
+  ApiGatewayPolicyRequest, APIGatewayRequestAuthorizerEvent, AuthorizerReponse, PermissionStatement,
 } from '../models';
 import { authorizationRepository, rolePermissionRepository, userRepository } from '../repositories';
 import { DEFAULT_DENY_MESSAGE } from '../utils/constants';
@@ -30,13 +30,17 @@ class APIGatewayRequestEventHandler extends AuthorizerHandler<APIGatewayRequestA
     if (!userAttributes) throw new Error(`APIGatewayRequestEventHandler: Your account [${username}] not existed!`);
 
     const { roles } = userAttributes;
-    const permisson: Permission = {
+    const permissionStatement: PermissionStatement = {
       path: resource,
       action: httpMethod,
     };
 
-    const hasPermission = await rolePermissionRepository.hasPermission(tenant, roles, permisson);
-    const policy : ApiGatewayPolicyRequest = {
+    const hasPermission = await rolePermissionRepository.hasPermission(
+      tenant,
+      roles,
+      permissionStatement,
+    );
+    const policy: ApiGatewayPolicyRequest = {
       type: 'API',
       principalId: verifyTokenResult.claim.sub,
       resource: methodArn,

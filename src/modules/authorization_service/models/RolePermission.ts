@@ -16,12 +16,22 @@ export type RestrictedDDBModel<T extends BaseDdbModel> = Omit<T, 'pk' | 'sk' | '
 // Type of sk is string
 type TypeOfSk = BaseDdbModel['sk'];
 
-export interface DDBPermission extends BaseDdbModel {
+export interface PermissionStatement {
   path: string,
   action?: HTTP_VERB,
 }
 
-export interface Permission extends RestrictedDDBModel<DDBPermission> {
+export interface Permission {
+  name: string,
+  title: string,
+  statements: Array<PermissionStatement>,
+}
+
+export interface DDBGroupPermission extends BaseDdbModel {
+  permissions: Array<Permission>
+}
+
+export interface GroupPermission extends RestrictedDDBModel<DDBGroupPermission> {
   name?: TypeOfSk,
 }
 

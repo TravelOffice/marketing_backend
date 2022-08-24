@@ -1,10 +1,12 @@
 import AWS from 'aws';
 import { getAwsSecretValue } from 'get-env';
-import { DDBRole, Permission, Role } from '../models';
+import {
+  DDBRole, GroupPermission, Permission, PermissionStatement, Role,
+} from '../models';
 import { dynamoProvider } from '../providers';
 import { QueryInput } from '../providers/DynamoProvider';
 import {
-  PARTITION_KEY_DELIMITER, PERMISSION_INDEX, ROLE_INDEX, TENANT_INDEX,
+  PARTITION_KEY_DELIMITER, PERMISSION_INDEX, ROLE_INDEX, TENANT_INDEX, WHITELIST_INDEX,
 } from '../utils/constants';
 import logger from '../utils/logger';
 import { RolePermissionRepository } from './interfaces/RolePermissionRepository';
@@ -98,16 +100,38 @@ export default class RolePermissionRepositoryImpl implements RolePermissionRepos
 
   /**
    * Get all permissions information
-   * @returns Promise of all Permission
+   * @returns Promise of all Permissions
    */
   listPermissions = async () => {
     logger.log('Get list permission infomation');
+    const groupPermissions = await this.listGroupPermissions();
+    return groupPermissions.map((groupPermission) => groupPermission.permissions).flat();
+  };
+
+  /**
+   * Get all whitelist permissions information
+   * @returns Promise of all Permissions
+   */
+  listWhitelistPermissions = async () => {
+    logger.log('Get list permission infomation');
+    const groupPermissions = await this.listGroupPermissions(true);
+    return groupPermissions.map((groupPermission) => groupPermission.permissions).flat();
+  };
+
+  /**
+   * Get all permissions information
+   * @param whitelist Flag to check whether to get the list whitelist permission or not
+   * @returns Promise of all Permissions
+   */
+  listGroupPermissions = async (whitelist?: boolean) => {
+    logger.log('Get list group permission infomation');
     const table = await getAwsSecretValue('DYNAMO_ROLE_PERMISSION_TABLE');
+    const pkFilter = whitelist ? `${PERMISSION_INDEX}#${WHITELIST_INDEX}` : `${PERMISSION_INDEX}`;
     const query: QueryInput = {
       TableName: table,
       KeyConditionExpression: 'pk = :pk_filter AND begins_with(sk, :sk_filter)',
       ExpressionAttributeValues: {
-        ':pk_filter': { S: `${PERMISSION_INDEX}` },
+        ':pk_filter': { S: pkFilter },
         ':sk_filter': { S: `${PERMISSION_INDEX}#` },
       },
     };
@@ -117,19 +141,19 @@ export default class RolePermissionRepositoryImpl implements RolePermissionRepos
       return [];
     }
 
-    const permission = items.map((item) => {
-      const role = AWS.DynamoDB.Converter.unmarshall(item);
+    const groupPermissions = items.map((item) => {
+      const groupPermission = AWS.DynamoDB.Converter.unmarshall(item);
       const {
         pk, sk, typeLsi, ...rest
-      } = role;
-      const [, permissionName] = sk.split(PARTITION_KEY_DELIMITER);
+      } = groupPermission;
+      const [, groupPermissionName] = sk.split(PARTITION_KEY_DELIMITER);
       return {
         ...rest,
-        name: permissionName,
-      } as Permission;
+        name: groupPermissionName,
+      } as GroupPermission;
     });
-    logger.log(`Get list permission infomation: Found ${permission.length} permissions`);
-    return permission;
+    logger.log(`Get list group permissions infomation: Found ${groupPermissions.length} permissions`);
+    return groupPermissions;
   };
 
   /**
@@ -139,9 +163,26 @@ export default class RolePermissionRepositoryImpl implements RolePermissionRepos
    * @param permission The permission use to check
    * @returns boolean True if the user has permission or vice versa
    */
-  hasPermission = async (tenantId: string, roles: Array<string>, permission: Permission) => {
-    logger.log(`Check permission: Tenant ${tenantId}, Role: ${roles}, Permission: ${JSON.stringify(permission)}`);
+  hasPermission = async (
+    tenantId: string,
+    roles: Array<string>,
+    permissionStatement: PermissionStatement,
+  ) => {
+    logger.log(`Check permission: Tenant ${tenantId}, Role: ${roles}, Permission: ${JSON.stringify(permissionStatement)}`);
     const table = await getAwsSecretValue('DYNAMO_ROLE_PERMISSION_TABLE');
+
+    const includedStatement = (
+      statements: PermissionStatement[],
+    ) => statements.some(
+      (statement) => statement.path === permissionStatement.path
+          && statement.action === permissionStatement.action,
+    );
+
+    // Check the whitelist permission
+    const whitelistPermissions = await this.listWhitelistPermissions();
+    if (whitelistPermissions.some(
+      (element) => includedStatement(element.statements),
+    )) { return true; }
 
     return new Promise<boolean>((resolve) => {
       const promises = roles.map(async (role) => {
@@ -152,7 +193,7 @@ export default class RolePermissionRepositoryImpl implements RolePermissionRepos
         );
         if (!item) { throw new Error(`Role [${role}] not found`); }
         if (item.permissions.some(
-          (element) => element.path === permission.path && element.action === permission.action,
+          (element) => includedStatement(element.statements),
         )) {
           resolve(true);
         }

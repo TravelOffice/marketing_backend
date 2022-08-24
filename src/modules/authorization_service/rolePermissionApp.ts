@@ -4,7 +4,7 @@ import { getCurrentUserInfo } from 'decode-token';
 import express, { NextFunction, Request, Response } from 'express';
 import {
   createTenantRoleUseCase,
-  getListPermissionsUseCase,
+  getListGroupPermissionsUseCase,
   getListTenantRolesUseCase,
 } from './useCases';
 import { FAILED, SUCCESS } from './utils/constants';
@@ -57,7 +57,7 @@ app.post('/admin/roles', createRoleValidator(), async (req: Request, res: Respon
 
 app.get('/admin/permissions', async (req: Request, res: Response) => {
   try {
-    const roles = await getListPermissionsUseCase.invoke();
+    const roles = await getListGroupPermissionsUseCase.invoke();
     res.json(wrapResponse(SUCCESS, roles));
   } catch (error: any) {
     logger.log(`[rolePermissionApp.getPermission] Error ${error}`);
