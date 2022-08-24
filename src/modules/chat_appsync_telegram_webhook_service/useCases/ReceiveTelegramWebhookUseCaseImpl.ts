@@ -73,7 +73,7 @@ export default class ReceiveTelegramWebhookUseCaseImpl implements ReceiveTelegra
       tenant: page.tenantId,
       pageId: page.id.toString(),
       chatPlatform: page.platform,
-      conversationId: conversation.conversationId || '',
+      conversationId: conversation.info.id.toString(),
     });
   };
 }

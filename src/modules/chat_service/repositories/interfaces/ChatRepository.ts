@@ -7,7 +7,7 @@ export interface ChatRepository {
     conversationQueryParams: ConversationQueryParams,
   ) => Promise<DDBConversation | undefined>
 
-  getUnassignedConversation: (
+  getUnassignedConversations: (
     tenant: string,
   ) => Promise<Array<NewConversationInfo>>
 
