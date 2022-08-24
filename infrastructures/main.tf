@@ -41,6 +41,8 @@ locals {
       NODE_ENV            = var.ENV
       SECRET_MANAGER_ID   = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
       AUTO_ASSIGN_SFN_ARN = "arn:aws:states:${var.AWS_REGION}:${data.aws_caller_identity.current.account_id}:stateMachine:${var.ENV}-auto-assign-chat"
+      ASSIGN_CHAT_LAMBDA_FUNCTION_ARN = "${var.ENV}-${var.FEATURE_NAME}-auto_assign_chat_service"
+      NOTIFY_AUTO_ASSIGN_CHAT_RESULT_LAMBDA_FUNCTION_ARN = "${var.ENV}-${var.FEATURE_NAME}-auto_assign_send_notification"
     },
     appsync_resolver_vars = {
       NODE_ENV              = var.ENV

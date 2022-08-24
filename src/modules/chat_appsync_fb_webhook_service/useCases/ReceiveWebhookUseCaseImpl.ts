@@ -66,7 +66,7 @@ export default class ReceiveWebhookUseCaseImpl implements ReceiveWebhookUseCase 
       tenant: page.tenantId,
       pageId: page.id,
       chatPlatform: page.platform,
-      conversationId: conversation.conversationId || '',
+      conversationId: conversation.info.id.toString(),
     });
   };
 }

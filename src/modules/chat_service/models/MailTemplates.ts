@@ -11,7 +11,7 @@ export interface MailTemplate {
 }
 
 /**
- * All the templates are JSON string contains:
+ * All the templates are object contains:
  * - toAddresses
  * - ccAddresses
  * - subject
@@ -20,11 +20,11 @@ export interface MailTemplate {
  */
 export interface MailTemplates {
   // Template for assign chat success
-  aancs: string,
+  aancs: MailTemplate,
   // Template for assign chat no available sale
-  aanas: string,
+  aanas: MailTemplate,
   // Templaye for assign chat not response chat conversation
-  aanrnc: string,
+  aanrnc: MailTemplate,
 }
 
 export type MailKey = keyof MailTemplates;

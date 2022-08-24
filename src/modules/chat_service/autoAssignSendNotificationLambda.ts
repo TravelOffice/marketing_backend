@@ -15,6 +15,7 @@ export enum ProcessResultCode {
   SUCCESS = 'AUTO_ASSIGN_NEW_CHAT_SUCCESSFULLY',
   NO_AVAILABLE_SALE = 'AUTO_ASSIGN_NO_AVAILABLE_SALE',
   NOT_RESPONSE_CHAT = 'AUTO_ASSIGN_NOT_RESPONSE_NEW_CHAT',
+  NO_ADMINS = 'AUTO_ASSIGN_NO_ADMINS',
 }
 
 export interface AutoAssignSendNotificationEvent {
@@ -155,6 +156,11 @@ export const handler = async (event: AutoAssignSendNotificationEvent) => {
         throw new Error(`Parameters are incorrect, assignedSale ${JSON.stringify(assignedSale, null, 2)}`);
       }
 
+      break;
+    }
+
+    case ProcessResultCode.NO_ADMINS: {
+      logger.log(`Does not have admins to continue auto assign process for conversation ${JSON.stringify(conversation, null, 2)}`);
       break;
     }
 

@@ -57,10 +57,18 @@
         {
           "Variable": "$.admins.Count",
           "NumericEquals": 0,
-          "Next": "Auto assign notification service - Handle error"
+          "Next": "Generate no admins error code"
         }
       ],
       "Default": "Get emails of all admins"
+    },
+    "Generate no admins error code": {
+      "Type": "Pass",
+      "Next": "Auto assign notification service - Handle error",
+      "Result": {
+        "code": "AUTO_ASSIGN_NO_ADMINS"
+      },
+      "ResultPath": "$.assignment"
     },
     "Get emails of all admins": {
       "Type": "Map",
@@ -98,7 +106,7 @@
             "S": "EMPLOYEE#ENABLED"
           },
           ":wct": {
-            "Bool": true
+            "Bool": false
           }
         },
         "FilterExpression": "wct = :wct"
@@ -247,8 +255,7 @@
       }
     },
     "Success": {
-      "Type": "Pass",
-      "End": true,
+      "Type": "Succeed",
       "Comment": "Assign chat to sale successfully"
     }
   }
