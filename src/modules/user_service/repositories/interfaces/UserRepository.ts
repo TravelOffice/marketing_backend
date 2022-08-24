@@ -1,4 +1,4 @@
-import { User, UserWithPermission } from '../../models/User';
+import { User, UserWithPermission } from '../../models';
 
 export interface UserRepository {
   getUserAttributes: (tenantId: string, userId: string) => Promise<User | undefined>,

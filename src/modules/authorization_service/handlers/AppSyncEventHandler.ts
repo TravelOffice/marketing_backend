@@ -4,7 +4,7 @@ import {
   AppSyncPolicyRequest,
   AppSyncWhiteListOperation,
   AuthorizerReponse,
-  Permission,
+  PermissionStatement,
 } from '../models';
 import { appSyncProvider } from '../providers';
 import { authorizationRepository, rolePermissionRepository, userRepository } from '../repositories';
@@ -53,11 +53,15 @@ export default class AppSyncEventHandler extends AuthorizerHandler<AppSyncAuthor
     }
     const { roles } = userAttributes;
     const queryOperation = appSyncProvider.parseQueryString(queryString);
-    const permisson: Permission = {
+    const permissionStatement: PermissionStatement = {
       path: queryOperation.queryName,
     };
 
-    const hasPermission = await rolePermissionRepository.hasPermission(tenant, roles, permisson);
+    const hasPermission = await rolePermissionRepository.hasPermission(
+      tenant,
+      roles,
+      permissionStatement,
+    );
     if (hasPermission) {
       return authorizationRepository.generateAllowPolicy(policy);
     }

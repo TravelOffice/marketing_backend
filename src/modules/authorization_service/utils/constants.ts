@@ -8,6 +8,8 @@ export const ROLE_INDEX = 'ROLE';
 
 export const PERMISSION_INDEX = 'PERMISSION';
 
+export const WHITELIST_INDEX = 'WHITELIST';
+
 export const DEFAULT_DENY_MESSAGE = 'User does not have permission to access this resource!';
 
 export const VALIDATE_NON_EMPTY_STRING_MSG = 'property must be a non-empty string';
