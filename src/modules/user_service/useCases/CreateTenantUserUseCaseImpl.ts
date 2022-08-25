@@ -25,8 +25,10 @@ export default class CreateTenantUserUseCaseImpl implements CreateTenantUserUseC
     if (existingUser) throw new Error(`User [${user.username}] already existed!`);
 
     // Verify whether input user roles existed or not
-    const roles = await rolePermissionRepository.listRoles(tenantId);
-    user.roles.map((userRole) => {
+    const customRoles = await rolePermissionRepository.listRoles(tenantId);
+    const defaultRoles = await rolePermissionRepository.listDefaultRoles();
+    const roles = customRoles.concat(defaultRoles);
+    user.roles.forEach((userRole) => {
       const ret = roles.some((role) => role.name === userRole);
       if (!ret) throw new Error(`Role [${userRole}] is not existed!`);
       return ret;

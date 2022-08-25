@@ -6,6 +6,7 @@ import {
 import { dynamoProvider } from '../providers';
 import { QueryInput } from '../providers/DynamoProvider';
 import {
+  DEFAULT_ROLES,
   PARTITION_KEY_DELIMITER, PERMISSION_INDEX, ROLE_INDEX, TENANT_INDEX, WHITELIST_INDEX,
 } from '../utils/constants';
 import logger from '../utils/logger';
@@ -63,12 +64,54 @@ export default class RolePermissionRepositoryImpl implements RolePermissionRepos
   };
 
   /**
+ * Method to update Tenant role
+ * @param tenantId The id of the Tenant which the user should belong to
+ * @param roleName The role name to be updated
+ * @param permissions The permissions which belong to a role to be updated
+ * @returns Promise<Role> All information of updated role
+ */
+  updateRole = async (tenantId: string, roleName: string, permissions: Permission[]) => {
+    logger.log(`Update role infomation Tenant: ${tenantId}, Role ${roleName}, Permissions: ${JSON.stringify(permissions)}`);
+    const table = await getAwsSecretValue('DYNAMO_ROLE_PERMISSION_TABLE');
+    const pk = `${TENANT_INDEX}#${tenantId}`;
+    const sk = `${ROLE_INDEX}#${roleName}`;
+    const currentTime = Date.now();
+    await dynamoProvider.updateItemWithSetExpression(
+      table,
+      pk,
+      sk,
+      {
+        permissions,
+        updatedAt: currentTime,
+      },
+    );
+    return {
+      name: roleName,
+      permissions,
+    };
+  };
+
+  /**
+ * Method to delete Tenant role
+ * @param tenantId The id of the Tenant which the user should belong to
+ * @param roleName The role name to be deleted
+ * @returns Promise<void>
+ */
+  deleteRole = async (tenantId: string, roleName: string) => {
+    logger.log(`Delete role infomation Tenant: ${tenantId}, Role ${roleName}`);
+    const table = await getAwsSecretValue('DYNAMO_ROLE_PERMISSION_TABLE');
+    const pk = `${TENANT_INDEX}#${tenantId}`;
+    const sk = `${ROLE_INDEX}#${roleName}`;
+    await dynamoProvider.deleteItem(table, pk, sk);
+  };
+
+  /**
    * Get the list Tenant Role information
    * @param tenantId The Tenant ID
    * @returns Promise of list Role
    */
   listRoles = async (tenantId: string) => {
-    logger.log(`Get list role infomation: Tenant ${tenantId}}`);
+    logger.log(`Get list role infomation: Tenant ${tenantId}`);
     const table = await getAwsSecretValue('DYNAMO_ROLE_PERMISSION_TABLE');
     const query: QueryInput = {
       TableName: table,
@@ -99,13 +142,50 @@ export default class RolePermissionRepositoryImpl implements RolePermissionRepos
   };
 
   /**
+ * Get the list Default Role information
+ * @returns Promise of list default Role
+ */
+  listDefaultRoles = async () => {
+    logger.log('Get list default roles infomation');
+    const table = await getAwsSecretValue('DYNAMO_ROLE_PERMISSION_TABLE');
+    const query: QueryInput = {
+      TableName: table,
+      KeyConditionExpression: 'pk = :pk_filter AND begins_with(sk, :sk_filter)',
+      ExpressionAttributeValues: {
+        ':pk_filter': { S: `${ROLE_INDEX}` },
+        ':sk_filter': { S: `${ROLE_INDEX}#` },
+      },
+    };
+    const { Items: items } = await dynamoProvider.rawQuery(query);
+    if (!items || items.length === 0) {
+      return [];
+    }
+
+    const roles = items.map((item) => {
+      const role = AWS.DynamoDB.Converter.unmarshall(item);
+      const {
+        pk, sk, typeLsi, ...rest
+      } = role;
+      const [, roleName] = sk.split(PARTITION_KEY_DELIMITER);
+      return {
+        ...rest,
+        name: roleName,
+      } as Role;
+    });
+    logger.log(`Get list default roles infomation: Found ${roles.length} roles`);
+    return roles;
+  };
+
+  /**
    * Get all permissions information
    * @returns Promise of all Permissions
    */
   listPermissions = async () => {
     logger.log('Get list permission infomation');
     const groupPermissions = await this.listGroupPermissions();
-    return groupPermissions.map((groupPermission) => groupPermission.permissions).flat();
+    return groupPermissions
+      .map((groupPermission: GroupPermission) => groupPermission.permissions)
+      .flat();
   };
 
   /**
@@ -115,7 +195,9 @@ export default class RolePermissionRepositoryImpl implements RolePermissionRepos
   listWhitelistPermissions = async () => {
     logger.log('Get list permission infomation');
     const groupPermissions = await this.listGroupPermissions(true);
-    return groupPermissions.map((groupPermission) => groupPermission.permissions).flat();
+    return groupPermissions
+      .map((groupPermission: GroupPermission) => groupPermission.permissions)
+      .flat();
   };
 
   /**
@@ -175,20 +257,21 @@ export default class RolePermissionRepositoryImpl implements RolePermissionRepos
       statements: PermissionStatement[],
     ) => statements.some(
       (statement) => statement.path === permissionStatement.path
-          && statement.action === permissionStatement.action,
+        && statement.action === permissionStatement.action,
     );
 
     // Check the whitelist permission
     const whitelistPermissions = await this.listWhitelistPermissions();
     if (whitelistPermissions.some(
-      (element) => includedStatement(element.statements),
+      (element: Permission) => includedStatement(element.statements),
     )) { return true; }
 
     return new Promise<boolean>((resolve) => {
-      const promises = roles.map(async (role) => {
+      const promises = roles.map(async (role: string) => {
+        const pk = DEFAULT_ROLES.includes(role) ? ROLE_INDEX : `${TENANT_INDEX}#${tenantId}`;
         const item = await dynamoProvider.getItem<DDBRole>(
           table,
-          `${TENANT_INDEX}#${tenantId}`,
+          pk,
           `${ROLE_INDEX}#${role}`,
         );
         if (!item) { throw new Error(`Role [${role}] not found`); }
