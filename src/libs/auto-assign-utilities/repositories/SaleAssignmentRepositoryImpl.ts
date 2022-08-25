@@ -103,11 +103,10 @@ export default class SaleAssignmentRepositoryImpl implements SaleAssignmentRepos
     const ddbChatTable = await getAwsSecretValue('DYNAMO_CHAT_TABLE');
 
     // Get task token attached to conversation
-    const taskTokenItem = await dynamoProvider.getItem(
-      ddbChatTable,
-      `${TENANT_INDEX}#${tenant}#${PAGE_INDEX}#${chatPlatform.toUpperCase()}#${pageId}`,
-      `${TASK_TOKEN_INDEX}#${conversationId}`,
-    );
+    const pk = `${TENANT_INDEX}#${tenant}#${PAGE_INDEX}#${chatPlatform.toUpperCase()}#${pageId}`;
+    const sk = `${TASK_TOKEN_INDEX}#${conversationId}`;
+    const taskTokenItem = await dynamoProvider.getItem(ddbChatTable, pk, sk);
+    logger.log(`Fetched task token item ${JSON.stringify(taskTokenItem, null, 2)}`);
 
     // Send task success if needed
     if (taskTokenItem) {
