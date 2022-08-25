@@ -19,7 +19,7 @@ export default class AutoAssignChatUseCaseImpl implements AutoAssignChatUseCase 
       }
       return saleObj as DDBUser;
     });
-    logger.log(`Starting assign conversation ${conversationQueryParams} with sales list ${JSON.stringify(sales, null, 2)}`);
+    logger.log(`Starting assign conversation ${JSON.stringify(conversationQueryParams, null, 2)} with sales list ${JSON.stringify(sales, null, 2)}`);
 
     // Pick sale user to assign chat
     const nextAssignedUser = saleDistributionProvider.getAssignedUser(sales);
@@ -45,7 +45,7 @@ export default class AutoAssignChatUseCaseImpl implements AutoAssignChatUseCase 
       true, // Waiting for chat response flag
     );
 
-    logger.log(`Conversation ${conversationQueryParams} has be assigned to employee ${JSON.stringify(nextAssignedUser, null, 2)}`);
+    logger.log(`Conversation ${JSON.stringify(conversationQueryParams, null, 2)} has be assigned to employee ${JSON.stringify(nextAssignedUser, null, 2)}`);
 
     return nextAssignedUser;
   };

@@ -21,14 +21,14 @@ export interface SendNotificationEvent {
  */
 export const handler = async (event: SendNotificationEvent) => {
   try {
-    logger.log(`Received event ${event}`);
+    logger.log(`Received notification event ${JSON.stringify(event, null, 3)}`);
     const { type, data } = event;
     switch (type) {
       case NotificationType.EMAIL: {
         const {
           fromAddress, toAddresses, ccAddresses, html, text, subject,
         } = data;
-        return notificationRepository.sendEmail(
+        const returnedData = await notificationRepository.sendEmail(
           fromAddress,
           toAddresses,
           ccAddresses,
@@ -36,6 +36,8 @@ export const handler = async (event: SendNotificationEvent) => {
           text,
           subject,
         );
+        logger.log(`A notification has been sent with data ${JSON.stringify(data, null, 2)}, result is ${JSON.stringify(returnedData, null, 3)}`);
+        return returnedData;
       }
 
       default:
