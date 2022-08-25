@@ -42,7 +42,7 @@ export interface AutoAssignSendNotificationEvent {
  */
 const sendEmail = async (fromAddress: string, mailTemplate: MailTemplate) => {
   const sendMailData = {
-    type: 'MAIL',
+    type: 'EMAIL',
     data: {
       fromAddress,
       ...mailTemplate,
