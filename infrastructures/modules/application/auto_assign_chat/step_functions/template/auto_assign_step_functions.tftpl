@@ -32,7 +32,7 @@
         "ExpressionAttributeNames": {
           "#pk": "pk",
           "#sk": "sk",
-          "#roles": "rolesStr"
+          "#roles": "roleStr"
         },
         "ExpressionAttributeValues": {
           ":pk": {
@@ -42,7 +42,7 @@
             "S": "EMPLOYEE"
           },
           ":role": {
-            "S": "ADMIN"
+            "S": "#ADMIN#"
           }
         },
         "FilterExpression": "contains(#roles, :role)"
@@ -107,9 +107,12 @@
           },
           ":wct": {
             "Bool": false
+          },
+          ":role": {
+            "S": "#SALE#"
           }
         },
-        "FilterExpression": "wct = :wct"
+        "FilterExpression": "wct = :wct and contains(roleStr, :role)"
       },
       "Resource": "arn:aws:states:::aws-sdk:dynamodb:query",
       "InputPath": "$.env",
@@ -238,7 +241,7 @@
       "ResultPath": "$.assignment",
       "TimeoutSeconds": 3,
       "ResultSelector": {
-        "assignedSale.$": "$.Payload.body.assignedSale"
+        "assignedSale.$": "$.Payload.assignedSale"
       }
     },
     "Generate assigning sale successfully code": {
