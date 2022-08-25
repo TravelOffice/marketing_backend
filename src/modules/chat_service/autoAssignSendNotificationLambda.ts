@@ -142,7 +142,7 @@ export const handler = async (event: AutoAssignSendNotificationEvent) => {
     switch (code) {
       case ProcessResultCode.SUCCESS: {
         if (taskToken && assignedSale) {
-          onSuccess(conversation, assignedSale, taskToken);
+          await onSuccess(conversation, assignedSale, taskToken);
         } else {
           throw new Error(`Parameters are incorrect, taskToken ${taskToken} assignedSale ${JSON.stringify(assignedSale, null, 2)}`);
         }
@@ -151,12 +151,12 @@ export const handler = async (event: AutoAssignSendNotificationEvent) => {
       }
 
       case ProcessResultCode.NO_AVAILABLE_SALE:
-        onFailedWithNoSaleAvailable(conversation);
+        await onFailedWithNoSaleAvailable(conversation);
         break;
 
       case ProcessResultCode.NOT_RESPONSE_CHAT: {
         if (assignedSale) {
-          onFailedWithNotResponseChat(conversation, assignedSale);
+          await onFailedWithNotResponseChat(conversation, assignedSale);
         } else {
           throw new Error(`Parameters are incorrect, assignedSale ${JSON.stringify(assignedSale, null, 2)}`);
         }
