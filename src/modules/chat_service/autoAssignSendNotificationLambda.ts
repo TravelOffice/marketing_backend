@@ -81,6 +81,7 @@ const onSuccess = async (
     text: formatString(mailTemplate.text, params),
   };
   await sendEmail(NO_REPLY_DEFAULT_EMAIL, mailTemplate);
+  logger.log(`An email notification has been sent with template ${mailTemplate}`);
 
   // Store task token. Task token will be used to send to StepFunctions later
   await saleAssignmentRepository.storeSfnTaskToken(
@@ -90,6 +91,7 @@ const onSuccess = async (
     conversation.conversationId,
     taskToken,
   );
+  logger.log(`Task token has been stored ${taskToken}`);
 };
 
 const onFailedWithNoSaleAvailable = async (conversation: ConversationQueryParams) => {
@@ -107,6 +109,7 @@ const onFailedWithNoSaleAvailable = async (conversation: ConversationQueryParams
     text: formatString(mailTemplate.text, params),
   };
   await sendEmail(NO_REPLY_DEFAULT_EMAIL, mailTemplate);
+  logger.log(`An email notification has been sent with template ${mailTemplate}`);
 };
 
 const onFailedWithNotResponseChat = async (
@@ -127,44 +130,49 @@ const onFailedWithNotResponseChat = async (
     text: formatString(mailTemplate.text, params),
   };
   await sendEmail(NO_REPLY_DEFAULT_EMAIL, mailTemplate);
+  logger.log(`An email notification has been sent with template ${mailTemplate}`);
 };
 
 export const handler = async (event: AutoAssignSendNotificationEvent) => {
-  logger.log(`Received event from AWS StepFunctions, payload ${event}`);
-  const { assignment, taskToken, conversation } = event;
-  const { code, assignedSale } = assignment;
+  logger.log(`Received event from AWS StepFunctions, payload ${JSON.stringify(event, null, 3)}`);
+  try {
+    const { assignment, taskToken, conversation } = event;
+    const { code, assignedSale } = assignment;
 
-  switch (code) {
-    case ProcessResultCode.SUCCESS: {
-      if (taskToken && assignedSale) {
-        onSuccess(conversation, assignedSale, taskToken);
-      } else {
-        throw new Error(`Parameters are incorrect, taskToken ${taskToken} assignedSale ${JSON.stringify(assignedSale, null, 2)}`);
+    switch (code) {
+      case ProcessResultCode.SUCCESS: {
+        if (taskToken && assignedSale) {
+          onSuccess(conversation, assignedSale, taskToken);
+        } else {
+          throw new Error(`Parameters are incorrect, taskToken ${taskToken} assignedSale ${JSON.stringify(assignedSale, null, 2)}`);
+        }
+
+        break;
       }
 
-      break;
-    }
+      case ProcessResultCode.NO_AVAILABLE_SALE:
+        onFailedWithNoSaleAvailable(conversation);
+        break;
 
-    case ProcessResultCode.NO_AVAILABLE_SALE:
-      onFailedWithNoSaleAvailable(conversation);
-      break;
+      case ProcessResultCode.NOT_RESPONSE_CHAT: {
+        if (assignedSale) {
+          onFailedWithNotResponseChat(conversation, assignedSale);
+        } else {
+          throw new Error(`Parameters are incorrect, assignedSale ${JSON.stringify(assignedSale, null, 2)}`);
+        }
 
-    case ProcessResultCode.NOT_RESPONSE_CHAT: {
-      if (assignedSale) {
-        onFailedWithNotResponseChat(conversation, assignedSale);
-      } else {
-        throw new Error(`Parameters are incorrect, assignedSale ${JSON.stringify(assignedSale, null, 2)}`);
+        break;
       }
 
-      break;
-    }
+      case ProcessResultCode.NO_ADMINS: {
+        logger.log(`Does not have admins to continue auto assign process for conversation ${JSON.stringify(conversation, null, 2)}`);
+        break;
+      }
 
-    case ProcessResultCode.NO_ADMINS: {
-      logger.log(`Does not have admins to continue auto assign process for conversation ${JSON.stringify(conversation, null, 2)}`);
-      break;
+      default:
+        throw new Error(`Result code ${code} is not supported yet.`);
     }
-
-    default:
-      throw new Error(`Result code ${code} is not supported yet.`);
+  } catch (error: any) {
+    logger.log(`Generated an error: ${error.message}`);
   }
 };
