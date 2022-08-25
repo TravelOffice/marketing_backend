@@ -49,3 +49,5 @@ export const PAGE_INDEX = 'PAGE';
 export const ROLE_INDEX = 'ROLE';
 
 export const OMITTED_USER_ATTRIBUTES = ['tenant', 'pk', 'sk', 'typeLsi', 'wct', 'nacs', 'roleStr'];
+
+export const DEFAULT_ROLES = ['ROOT', 'ADMIN', 'SALE'];

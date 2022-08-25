@@ -1,4 +1,4 @@
-import app from './rolePermissionApp';
+import app from './app';
 import logger from './utils/logger';
 
 const port = process.env.PORT || 5005;

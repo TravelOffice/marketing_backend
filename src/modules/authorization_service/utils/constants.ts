@@ -27,3 +27,7 @@ export const SUCCESS = 'Successfully!';
 export const FAILED = 'Failed!';
 
 export const PARTITION_KEY_DELIMITER = '#';
+
+export const DEFAULT_ROLES = ['ROOT', 'ADMIN', 'SALE'];
+
+export const UPDATE_SET_EXPRESSION = 'SET'; // eslint-disable-line

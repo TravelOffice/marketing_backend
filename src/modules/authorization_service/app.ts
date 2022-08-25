@@ -4,12 +4,14 @@ import { getCurrentUserInfo } from 'decode-token';
 import express, { NextFunction, Request, Response } from 'express';
 import {
   createTenantRoleUseCase,
+  updateTenantRoleUseCase,
+  deleteTenantRoleUseCase,
   getListGroupPermissionsUseCase,
   getListTenantRolesUseCase,
 } from './useCases';
 import { FAILED, SUCCESS } from './utils/constants';
 import logger from './utils/logger';
-import validate, { createRoleValidator } from './utils/validator';
+import validate, { createRoleValidator, deleteRoleValidator, updateRoleValidator } from './utils/validator';
 import wrapResponse from './utils/wrapResponse';
 
 const app = express();
@@ -55,6 +57,32 @@ app.post('/admin/roles', createRoleValidator(), async (req: Request, res: Respon
   }
 });
 
+app.put('/admin/roles/:roleName', updateRoleValidator(), async (req: Request, res: Response) => {
+  try {
+    validate(req);
+    const { tenant } = getCurrentUserInfo(req.headers.authorization!);
+    const { roleName } = req.params;
+    const { permissions } = req.body;
+    const role = await updateTenantRoleUseCase.invoke(tenant, roleName, permissions);
+    res.json(wrapResponse(SUCCESS, role));
+  } catch (error: any) {
+    logger.log(`[rolePermissionApp.post] Error ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.delete('/admin/roles/:roleName', deleteRoleValidator(), async (req: Request, res: Response) => {
+  try {
+    validate(req);
+    const { tenant } = getCurrentUserInfo(req.headers.authorization!);
+    const { roleName } = req.params;
+    const role = await deleteTenantRoleUseCase.invoke(tenant, roleName);
+    res.json(wrapResponse(SUCCESS, role));
+  } catch (error: any) {
+    logger.log(`[rolePermissionApp.post] Error ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
 app.get('/admin/permissions', async (req: Request, res: Response) => {
   try {
     const roles = await getListGroupPermissionsUseCase.invoke();

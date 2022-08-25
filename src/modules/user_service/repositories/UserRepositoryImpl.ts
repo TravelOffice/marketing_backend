@@ -4,6 +4,7 @@ import { Role, User, UserWithPermission } from '../models';
 import { authProvider, dynamoProvider } from '../providers';
 import { QueryInput } from '../providers/DynamoProvider';
 import {
+  DEFAULT_ROLES,
   EMPLOYEE_INDEX, ENABLED, ROLE_INDEX, ROLE_STRING_DELIMITER, TENANT_INDEX, USERNAME_DELIMITER,
 } from '../utils/constants';
 import logger from '../utils/logger';
@@ -92,9 +93,10 @@ export default class UserRepositoryImpl implements UserRepository {
     const { roles } = user;
     let permissions : Array<string> = [];
     await Promise.all(roles.map(async (role) => {
+      const pk = DEFAULT_ROLES.includes(role) ? ROLE_INDEX : `${TENANT_INDEX}#${tenantId}`;
       const item = await dynamoProvider.getItem<Role>(
         table,
-        `${TENANT_INDEX}#${tenantId}`,
+        pk,
         `${ROLE_INDEX}#${role}`,
       );
       if (!item) { throw new Error(`Role [${role}] not found`); }

@@ -7,5 +7,9 @@ export default class GetListTenantRolesUseCaseImpl implements GetListTenantRoles
    * @param tenantId The id of the Tenant
    * @returns Promise<User> All information of list tenant roles
    */
-  invoke = async (tenantId: string) => rolePermissionRepository.listRoles(tenantId);
+  invoke = async (tenantId: string) => {
+    const tenantRoles = await rolePermissionRepository.listRoles(tenantId);
+    const defaultRoles = await rolePermissionRepository.listDefaultRoles();
+    return tenantRoles.concat(defaultRoles);
+  };
 }
