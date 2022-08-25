@@ -14,7 +14,7 @@ export default class StepFunctionsProvider {
   startExecution = async (input: AWSSfnStartExecutionInput) => {
     const data = await stepfunctions.startExecution(input).promise();
 
-    logger.log(`[sqsAutoAssignTriggerLambda] Started AWS StepFunctions with information ${JSON.stringify(data, null, 2)}`);
+    logger.log(`[StepFunctionsProvider] Started AWS StepFunctions with information ${JSON.stringify(data, null, 2)}`);
   };
 
   /**
@@ -24,6 +24,6 @@ export default class StepFunctionsProvider {
   sendTaskSuccess = async (input: AWSSfnSendTaskSuccessInput) => {
     const data = await stepfunctions.sendTaskSuccess(input).promise();
 
-    logger.log(`[sqsAutoAssignTriggerLambda] Sent task success with response data ${JSON.stringify(data, null, 2)}`);
+    logger.log(`[StepFunctionsProvider] Sent task success with response data ${JSON.stringify(data, null, 2)}`);
   };
 }

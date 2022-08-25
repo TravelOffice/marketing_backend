@@ -1,6 +1,7 @@
 import { saleAssignmentRepository } from 'auto-assign-utilities';
 import AppSyncHandlerFactory from './handlers/AppSyncHandlerFactory';
 import { AppSyncEvent, SendMessageMutationArgs } from './models';
+import logger from './utils/logger';
 
 // eslint-disable-next-line import/prefer-default-export
 export const handler = async (event: AppSyncEvent) => {
@@ -12,6 +13,7 @@ export const handler = async (event: AppSyncEvent) => {
   // Post-handle send message event
   // Send task token to StepFunctions to stop auto assignment process
   if (eventField === 'sendMessage') {
+    logger.log('Start sending task token to StepFunctions to stop auto assignment process if needed');
     await saleAssignmentRepository.onSentMessageToCustomer(
       tenant,
       chatPlatform,
@@ -19,5 +21,6 @@ export const handler = async (event: AppSyncEvent) => {
       conversationId,
     );
   }
+  logger.log(`Executed AWS AppSync event, returned data ${JSON.stringify(data, null, 2)}`);
   return data;
 };
