@@ -41,4 +41,5 @@ export interface DDBRole extends BaseDdbModel {
 
 export interface Role extends RestrictedDDBModel<DDBRole> {
   name: TypeOfSk,
+  isDefault?: boolean
 }

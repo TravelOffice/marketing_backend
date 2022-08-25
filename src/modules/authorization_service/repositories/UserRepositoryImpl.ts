@@ -21,4 +21,28 @@ export default class UserRepositoryImpl implements UserRepository {
       `${EMPLOYEE_INDEX}#${userId}`,
     );
   };
+
+  /**
+   * Function used to get users by role
+   * @param tenantId  Tenant ID
+   * @param roleName Role name that will be filted
+   * @returns
+   */
+  getUsersByRole = async (tenantId: string, roleName: string) => {
+    const ddbTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const params = {
+      TableName: ddbTable,
+      KeyConditionExpression: 'pk = :pk AND begins_with(sk, :sk_filter_value)',
+      ExpressionAttributeValues: {
+        // Given page id
+        ':pk': { S: `${TENANT_INDEX}#${tenantId}` },
+        // Prefix to Facebook item
+        ':sk_filter_value': { S: EMPLOYEE_INDEX },
+        ':role_filter_value': { S: `#${roleName}#` },
+      },
+      FilterExpression: 'contains(roleStr, :role_filter_value)',
+      ProjectionExpression: 'username',
+    };
+    return dynamoProvider.query(params);
+  };
 }

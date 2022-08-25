@@ -1,5 +1,5 @@
 import serverlessExpress from '@vendia/serverless-express';
-import app from './rolePermissionApp';
+import app from './app';
 
 let serverlessExpressInstance: any;
 
