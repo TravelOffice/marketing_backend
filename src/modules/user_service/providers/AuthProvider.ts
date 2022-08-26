@@ -20,10 +20,22 @@ export default class AuthProvider {
       phoneNumber: user.phoneNumber,
       email: user.email,
     };
+    // Currently mark email and phone number is verified
+    const userAttributes = [
+      {
+        Name: 'phone_number_verified',
+        Value: 'true',
+      }, {
+        Name: 'email_verified',
+        Value: 'true',
+      },
+      ...toUserAttributes(newUser),
+    ];
+
     const params : AWS.CognitoIdentityServiceProvider.AdminCreateUserRequest = {
       UserPoolId: await getAwsSecretValue('COGNITO_USER_POOL_ID') || '',
       Username: user.username,
-      UserAttributes: toUserAttributes(newUser),
+      UserAttributes: userAttributes,
       DesiredDeliveryMediums: ['EMAIL'],
     };
     logger.log(`params: , ${JSON.stringify(params)}`);
