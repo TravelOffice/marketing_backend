@@ -201,8 +201,32 @@
           }
         }
       },
-      "Next": "Auto assign notification service - Handle error",
+      "Next": "Update waiting for chat state after sale not response",
       "InputPath": "$.env",
+      "ResultPath": null
+    },
+    "Update waiting for chat state after sale not response": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::dynamodb:updateItem",
+      "Parameters": {
+        "TableName.$": "$.env.dynamoTravelTable",
+        "Key": {
+          "pk": {
+            "S.$": "$.assignment.assignedSale.pk"
+          },
+          "sk": {
+            "S.$": "$.assignment.assignedSale.sk"
+          }
+        },
+        "UpdateExpression": "SET wct = :wct",
+        "ExpressionAttributeValues": {
+          ":wct": {
+            "BOOL": false
+          }
+        },
+        "ReturnValues": "UPDATED_NEW"
+      },
+      "Next": "Auto assign notification service - Handle error",
       "ResultPath": null
     },
     "Delete task token after sale response to new chat": {
@@ -219,8 +243,32 @@
           }
         }
       },
-      "Next": "Success",
+      "Next": "Update waiting for chat state after sale response",
       "InputPath": "$.env",
+      "ResultPath": null
+    },
+    "Update waiting for chat state after sale response": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::dynamodb:updateItem",
+      "Parameters": {
+        "TableName.$": "$.env.dynamoTravelTable",
+        "Key": {
+          "pk": {
+            "S.$": "$.assignment.assignedSale.pk"
+          },
+          "sk": {
+            "S.$": "$.assignment.assignedSale.sk"
+          }
+        },
+        "UpdateExpression": "SET wct = :wct",
+        "ExpressionAttributeValues": {
+          ":wct": {
+            "BOOL": false
+          }
+        },
+        "ReturnValues": "UPDATED_NEW"
+      },
+      "Next": "Success",
       "ResultPath": null
     },
     "No": {
