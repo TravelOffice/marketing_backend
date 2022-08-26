@@ -21,6 +21,6 @@ export const handler = async (event: AppSyncEvent) => {
       conversationId,
     );
   }
-  logger.log(`Executed AWS AppSync event with arguments ${JSON.stringify(event.arguments, null, 2)}, returned data ${JSON.stringify(data, null, 2)}`);
+  logger.log(`Executed AWS AppSync event with arguments ${JSON.stringify(event.arguments, null, 2)}`);
   return data;
 };
