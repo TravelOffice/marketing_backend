@@ -7,7 +7,7 @@ import logger from './utils/logger';
 export const handler = async (event: AppSyncEvent) => {
   const appSyncHandler = AppSyncHandlerFactory.get(event);
   const { field: eventField, tenant } = event;
-  const { chatPlatform, conversationId, recipient } = event.arguments as SendMessageMutationArgs;
+  const { chatPlatform, conversationId, sender } = event.arguments as SendMessageMutationArgs;
 
   const data = await appSyncHandler.handle(event);
   // Post-handle send message event
@@ -17,10 +17,10 @@ export const handler = async (event: AppSyncEvent) => {
     await saleAssignmentRepository.onSentMessageToCustomer(
       tenant,
       chatPlatform,
-      recipient,
+      sender,
       conversationId,
     );
   }
-  logger.log(`Executed AWS AppSync event, returned data ${JSON.stringify(data, null, 2)}`);
+  logger.log(`Executed AWS AppSync event with arguments ${JSON.stringify(event.arguments, null, 2)}, returned data ${JSON.stringify(data, null, 2)}`);
   return data;
 };
