@@ -4,10 +4,13 @@ import {
   body,
   query, ValidationError, validationResult,
 } from 'express-validator';
-import { LANGUAGES_TYPE, THEMES_TYPE } from '../models';
+import {
+  LANGUAGES_TYPE, SexEnum, THEMES_TYPE, UserStatusEnum,
+} from '../models';
 import {
   USERNAME_DELIMITER,
   VALIDATE_ARRAY_MSG,
+  VALIDATE_DATE_MSG,
   VALIDATE_EMAIL_MSG,
   VALIDATE_NON_EMPTY_STRING_MSG,
   VALIDATE_USERNAME_RESERVED_STRING_MSG,
@@ -37,7 +40,11 @@ export function createTenantUserValidator() {
     'lastName',
     'email',
     'phoneNumber',
-    'role',
+    'roles',
+    'sex',
+    'birthday',
+    'address',
+    'status',
   ];
 
   const reservedUsernames = [
@@ -79,6 +86,25 @@ export function createTenantUserValidator() {
     body('roles')
       .notEmpty()
       .isArray().withMessage(VALIDATE_ARRAY_MSG),
+
+    body('birthday', VALIDATE_DATE_MSG)
+      .if(body('birthday').notEmpty())
+      .custom((value: string) => {
+        const date = Date.parse(value);
+        return !Number.isNaN(date);
+      }),
+
+    body('address', VALIDATE_NON_EMPTY_STRING_MSG)
+      .optional()
+      .isString(),
+
+    body('sex')
+      .optional()
+      .isIn(Object.values(SexEnum)).withMessage(`allow only in ${Object.values(SexEnum)}`),
+
+    body('status')
+      .optional()
+      .isIn(Object.values(UserStatusEnum)).withMessage(`allow only in ${Object.values(UserStatusEnum)}`),
   ];
 }
 
@@ -89,10 +115,14 @@ export function updateTenantUserValidator() {
     'avatar',
     'email',
     'phoneNumber',
-    'role',
+    'roles',
     'settings',
     'createdAt',
     'updatedAt',
+    'sex',
+    'birthday',
+    'address',
+    'status',
   ];
   const settingsAllowedkeys = [
     'theme',
@@ -120,13 +150,32 @@ export function updateTenantUserValidator() {
       .optional()
       .isString(),
 
-    body('role')
+    body('roles')
       .optional()
       .isArray().withMessage(VALIDATE_ARRAY_MSG),
+
+    body('birthday', VALIDATE_DATE_MSG)
+      .optional()
+      .custom((value: string) => {
+        const date = Date.parse(value);
+        return !Number.isNaN(date);
+      }),
+
+    body('address', VALIDATE_NON_EMPTY_STRING_MSG)
+      .optional()
+      .isString(),
+
+    body('sex')
+      .optional()
+      .isIn(Object.values(SexEnum)).withMessage(`allow only in ${Object.values(SexEnum)}`),
 
     body('avatar', VALIDATE_NON_EMPTY_STRING_MSG)
       .optional()
       .isString(),
+
+    body('status')
+      .optional()
+      .isIn(Object.values(UserStatusEnum)).withMessage(`allow only in ${Object.values(UserStatusEnum)}`),
 
     body('settings').optional()
       .isObject().withMessage('Settings must be Object')
