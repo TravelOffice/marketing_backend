@@ -6,9 +6,19 @@ export enum LANGUAGES_TYPE {
   ENGLISH = 'en',
   VIETNAMESE = 'vi'
 }
-export enum ROLES_TYPE {
-  ADMIN = 'ADMIN',
-  EMPLOYEE = 'EMPLOYEE'
+
+export enum SexEnum {
+  MALE = 'MALE',
+  FEMALE = 'FEMALE',
+  OTHER = 'OTHER',
+}
+
+export enum UserStatusEnum {
+  online = 'online',
+  offline = 'offline',
+  busy = 'busy',
+  away = 'away',
+  inactive = 'inactive',
 }
 
 export interface User {
@@ -33,6 +43,9 @@ export interface User {
   nacs?: number,
   // Flag to check whether user is in waiting for response chat state
   wct?: boolean,
+  sex: SexEnum
+  birthday: string,
+  status?: UserStatusEnum,
 }
 
 export interface UserWithPermission extends User {
