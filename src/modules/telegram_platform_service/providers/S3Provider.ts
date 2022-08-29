@@ -22,11 +22,11 @@ export default class S3Provider {
       return this.axiosInstance.get(url, { params });
     } catch (e: any) {
       if (axios.isAxiosError(e)) {
-        logger.log(`[S3Provider.get] Error: ${JSON.stringify(e)}`);
+        logger.log(`[S3Provider.get] Error: ${JSON.stringify(e.toJSON)}`);
         if (e.response) {
           // The request was made and the server responded with a status code
           // that falls out of the range of 2xx
-          logger.log(`[S3Provider.get] Server response an error with data ${JSON.stringify(e.response)}`);
+          logger.log(`[S3Provider.get] Server response an error with data ${e.response}`);
         } else if (e.request) {
           // The request was made but no response was received
           // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
