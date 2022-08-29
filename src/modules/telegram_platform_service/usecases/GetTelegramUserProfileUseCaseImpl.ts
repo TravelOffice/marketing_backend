@@ -1,3 +1,4 @@
+import { TelegramChat } from 'common-models';
 import { telegramPlatformRepository } from '../repositories';
 import { GetTelegramUserProfileUseCase } from './interfaces/GetTelegramUserProfileUseCase';
 
@@ -16,5 +17,12 @@ export default class GetTelegramUserProfileUseCaseImpl implements GetTelegramUse
     botId: string,
     chatId: string,
     userId: string,
-  ) => telegramPlatformRepository.getUserProfile(tenantId, botId, chatId, userId);
+  ) => {
+    const conversation = await telegramPlatformRepository.getChat(tenantId, botId, chatId);
+    const conversationInfo = conversation.info as TelegramChat;
+    if (conversationInfo.type === 'group') {
+      return telegramPlatformRepository.getGroupProfile(tenantId, botId, chatId);
+    }
+    return telegramPlatformRepository.getUserProfile(tenantId, botId, chatId, userId);
+  };
 }

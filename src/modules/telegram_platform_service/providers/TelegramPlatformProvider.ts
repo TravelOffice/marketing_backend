@@ -5,6 +5,7 @@ import {
   SendMessageOptions,
   SendPhotoOptions,
   SendVideoOptions,
+  TelegramChat,
   TelegramMessage,
 } from 'common-models';
 import * as fs from 'fs';
@@ -110,6 +111,21 @@ export default class TelegramPlatformProvider {
     // Get user profile photos
     const avatars = await this.getUserProfilePhotos(accessToken, userId);
     return { user, avatars };
+  };
+
+  /**
+   * Get chat aka conversation profile information
+   * @param accessToken Telegram bot token
+   * @param chatId ID of conversation
+   * @returns The chat profle and user profile photos as object
+   */
+  getChatProfile = async (accessToken: string, chatId: string): Promise<TelegramChat> => {
+    // Prepare params to get user info by Telegram bot api
+    const params = {
+      chat_id: chatId,
+    };
+    // Get user infomation by Telegram bot api
+    return this.get(`${this.messagePlatformBaseUrl}/bot${accessToken}/getChat`, params);
   };
 
   /**

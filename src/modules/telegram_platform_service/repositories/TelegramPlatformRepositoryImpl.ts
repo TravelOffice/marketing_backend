@@ -3,7 +3,7 @@ import {
   ChatPlatform,
   ChatPlatformFile,
   ChatPlatformStrings,
-  User,
+  TelegramUser as User,
   UserProfilePhotos,
 } from 'common-models';
 import { getAwsSecretValue } from 'get-env';
@@ -148,6 +148,34 @@ export default class TelegramPlatformRepositoryImpl implements TelegramPlatformR
 
     // Also check if user dont have avatar
     return { ...user };
+  };
+
+  /**
+   * Get chat profile information
+   * @param tenantId The id of the Tenant
+   * @param botId The id of telegram bot
+   * @param chatId The id of the conversation
+   * @returns User information and avatar path
+   */
+  getGroupProfile = async (tenantId: string, botId: string, chatId: string) => {
+    // Get telegram bot access token
+    const accessToken = await this.getAccessToken(botId);
+    // Get chat information
+    const chatProfile = await telegramProvider.getChatProfile(
+      accessToken,
+      chatId,
+    );
+    const { photo } = chatProfile;
+    if (photo) {
+      // Telegram stored all the avatars of chat
+      // In addition, Telegram system treats smallest avatar as current user avatar
+      const { small_file_id: fileId } = photo; // Get the smallest size
+      const { fileInfo: avatar } = await this.getFileInfo(tenantId, accessToken, chatId, fileId);
+      return { ...chatProfile, avatar };
+    }
+
+    // Also check if user dont have avatar
+    return { ...chatProfile };
   };
 
   getConversations = async (tenantId: string, botId: string, assigneeId?: string) => {

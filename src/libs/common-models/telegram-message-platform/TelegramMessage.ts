@@ -1,5 +1,5 @@
 import { TelegramChat } from './TelegramChat';
-import { User } from './TelegramUser';
+import { TelegramUser as User } from './TelegramUser';
 import * as MessageContents from './message-contents';
 
 export interface TelegramMessage {
