@@ -1,5 +1,5 @@
 import { TelegramPagingMessage } from '../models';
-import { telegramPlatformRepository, userRepository } from '../repositories';
+import { telegramPlatformRepository } from '../repositories';
 import logger from '../utils/logger';
 import { GetTelegramMessagesUseCase } from './interfaces/GetTelegramMessagesUseCase';
 
@@ -20,10 +20,9 @@ export default class GetTelegramMessagesUseCaseImpl implements GetTelegramMessag
     nextToken?: string,
     limit?: number,
   ) => {
-    const isRootOrAdmin = await userRepository.isRootOrAdmin(tenantId, assigneeId);
     const conversation = await telegramPlatformRepository.getChat(tenantId, botId, chatId);
 
-    if (!isRootOrAdmin && conversation.assignee !== assigneeId) {
+    if (conversation.assignee !== assigneeId) {
       logger.log(`User [${assigneeId}] not have permission to get conversation [${chatId}]!`);
       return {
         messages: [],
