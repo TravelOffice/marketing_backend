@@ -51,7 +51,7 @@ export default class MessageRepositoryImpl implements MessageRepository {
     // Delete message_id attribute, mid will be appeared in ReceiveMessageCommandArgs
     const { message_id: messageId, ...messageData } = message;
     const sender = message.from?.id.toString() || '';
-    const customerId = message.chat.username || `${message.chat.id}` || '';
+    const customerId = `${message.chat.id}` || message.chat.username || '';
     const recipient = customerId;
 
     const commandArgs: ReceiveMessageCommandArgs = {

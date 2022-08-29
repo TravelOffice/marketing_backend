@@ -1,4 +1,4 @@
-import { User, UserProfilePhotos } from 'common-models';
+import { GroupWithAvatar, UserWithAvatar } from '../../models';
 
 export interface GetTelegramUserProfileUseCase {
   invoke: (
@@ -6,5 +6,5 @@ export interface GetTelegramUserProfileUseCase {
     botId: string,
     chatId: string,
     userId: string,
-  ) => Promise<User | { user: User, avatars: UserProfilePhotos }>;
+  ) => Promise<UserWithAvatar | GroupWithAvatar>;
 }

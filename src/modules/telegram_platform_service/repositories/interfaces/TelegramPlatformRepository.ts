@@ -1,9 +1,13 @@
-import { TelegramMessage, User, UserProfilePhotos } from 'common-models';
 import {
+  TelegramMessage,
+} from 'common-models';
+import {
+  GroupWithAvatar,
   RestrictedTelegramConversation,
   RestrictedTelegramFile,
   TelegramConversationWithAssignee,
   TelegramPagingMessage,
+  UserWithAvatar,
 } from '../../models';
 import { TelegramSendMessageData } from '../../models/send-message/SendMessageData';
 
@@ -27,7 +31,13 @@ export interface TelegramPlatformRepository {
     botId: string,
     chatId: string,
     userId: string,
-  ) => Promise<User | { user: User, avatars: UserProfilePhotos }>,
+  ) => Promise<UserWithAvatar>,
+
+  getGroupProfile: (
+    tenantId: string,
+    botId: string,
+    chatId: string,
+  ) => Promise<GroupWithAvatar>,
 
   getAccessToken: (
     botId: string,

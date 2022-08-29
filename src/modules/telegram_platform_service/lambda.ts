@@ -97,7 +97,7 @@ const handleAppSyncEvent = async (event: AppSyncEvent) => {
       );
       resolverMessage = 'The user profile information has been fetched from Telegram platform';
       returnedData = userProfile;
-      logger.log(`Fetched user profile for [${event.tenant}#${event.arguments.userId}]: successfully: ${JSON.stringify(returnedData, null, 2)}`);
+      logger.log(`Fetched user profile for [${event.tenant}#${userId}]: successfully: ${JSON.stringify(returnedData, null, 2)}`);
       break;
     }
     default:
