@@ -1,6 +1,6 @@
 import { MessageEntityType } from '../TelegramTypes';
 import { PhotoSize } from './FileBasedModels';
-import { User } from '../TelegramUser';
+import { TelegramUser as User } from '../TelegramUser';
 
 /// MESSAGE CONTENT MODELS ///
 export interface MessageEntity {

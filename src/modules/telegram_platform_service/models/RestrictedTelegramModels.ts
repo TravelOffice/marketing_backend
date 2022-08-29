@@ -1,5 +1,5 @@
 import {
-  DDBConversation, DDBMessage, BaseDdbModel, DDBFile,
+  DDBConversation, DDBMessage, BaseDdbModel, DDBFile, TelegramChat, TelegramUser,
 } from 'common-models';
 
 // Type of sk is string
@@ -31,4 +31,12 @@ export interface TelegramFileInformation {
 }
 export interface RestrictedTelegramFile extends RestrictedDDBModel<DDBFile> {
   fileInfo: TelegramFileInformation,
+}
+
+export interface UserWithAvatar extends TelegramUser {
+  avatar?: TelegramFileInformation;
+}
+
+export interface GroupWithAvatar extends TelegramChat {
+  avatar?: TelegramFileInformation;
 }
