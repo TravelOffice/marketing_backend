@@ -2,6 +2,7 @@
 #set( $tenant = "" )
 #set( $username = "" )
 #set( $roles = [] )
+#set( $permissions = [] )
 
 ## Get tenant user information from identifying information
 #if( $context.identity.resolverContext )
@@ -9,6 +10,7 @@
     #set( $tenant = $context.identity.resolverContext.tenant )
     #set( $username = $context.identity.resolverContext.username )
     #set( $roles = $util.parseJson($context.identity.resolverContext.roles) )
+    #set( $permissions = $util.parseJson($context.identity.resolverContext.permissions) )
 #else
     $util.error('OnReceivedMessage: Missing identifying information!')
 #end
@@ -20,7 +22,7 @@
  * - Employee user can only received assigned conversations
  * The subscription filter is combined by two conditions with OR operator as below
  *#
-#if( $roles.contains("ADMIN") || $roles.contains("ROOT") )
+#if( $permissions.contains("view_all_conversations"))
     ## Root or admin can get all the messages related to tenant
     $extensions.setSubscriptionFilter({
         "filterGroup": [{

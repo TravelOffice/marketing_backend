@@ -32,7 +32,7 @@ export default class AppSyncEventHandler extends AuthorizerHandler<AppSyncAuthor
 
     const { tenant, username } = getCurrentUserInfo(authorizationToken);
     const userAttributes = await userRepository.getUserAttributes(tenant, username);
-    if (!userAttributes) throw new Error(`APIGatewayRequestEventHandler: Your account [${username}] not existed!`);
+    if (!userAttributes) throw new Error(`AppSyncEventHandler: Your account [${username}] not existed!`);
 
     const policy: AppSyncPolicyRequest = {
       type: 'APPSYNC',
@@ -46,8 +46,9 @@ export default class AppSyncEventHandler extends AuthorizerHandler<AppSyncAuthor
     };
     // Always allow AppSync WhiteList Operation
     const { operationName, queryString } = requestContext;
-    if (operationName
-        && AppSyncWhiteListOperation.includes(operationName)
+    if (
+      operationName
+      && AppSyncWhiteListOperation.includes(operationName)
     ) {
       return authorizationRepository.generateAllowPolicy(policy);
     }

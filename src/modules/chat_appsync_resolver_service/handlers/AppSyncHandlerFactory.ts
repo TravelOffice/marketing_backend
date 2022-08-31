@@ -2,6 +2,7 @@ import { ChatPlatform } from 'common-models';
 import { AppSyncEvent } from '../models/AppSyncEvent';
 import FacebookZaloAppSyncHandler from './FacebookZaloAppSyncHandler';
 import ReceiveMessageHandler from './ReceiveMessageHandler';
+import SendNotificationHandler from './SendNotificationHandler';
 import TelegramHandler from './TelegramHandler';
 
 export default class AppSyncHandlerFactory {
@@ -12,6 +13,11 @@ export default class AppSyncHandlerFactory {
     // Handle receive message event
     if (eventField === 'receivedMessage') {
       return new ReceiveMessageHandler();
+    }
+
+    // Handle send notification event
+    if (eventField === 'sendNotification') {
+      return new SendNotificationHandler();
     }
 
     // Check whether platform is telegram

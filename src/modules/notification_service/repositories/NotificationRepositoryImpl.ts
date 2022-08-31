@@ -1,4 +1,4 @@
-import { mailProvider, SESSendEmailRequest } from '../providers';
+import { appSyncProvider, mailProvider, SESSendEmailRequest } from '../providers';
 import { MAIL_DEFAULT_CHARSET } from '../utils/constants';
 import { NotificationRepository } from './interfaces/NotificationRepository';
 
@@ -38,4 +38,12 @@ export default class NotificationRepositoryImpl implements NotificationRepositor
     };
     return mailProvider.sendMail(request);
   };
+
+  sendAppSyncNotification = async (
+    notificationtype: string,
+    data: string, // AWSJSON string
+    timestamp: number,
+    tenant?: string,
+    username?: string,
+  ) => appSyncProvider.executeSendNotification(notificationtype, data, timestamp, tenant, username);
 }

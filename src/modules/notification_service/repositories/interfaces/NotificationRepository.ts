@@ -9,4 +9,11 @@ export interface NotificationRepository {
     text: string,
     subject: string,
   ) => Promise<SESSendEmailResponse>
+  sendAppSyncNotification: (
+    notificationtype: string,
+    data: string,
+    timestamp: number,
+    tenant?: string,
+    username?: string,
+  ) => Promise<any>
 }
