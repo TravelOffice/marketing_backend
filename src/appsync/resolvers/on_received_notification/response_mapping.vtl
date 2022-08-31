@@ -1,0 +1,29 @@
+#set( $indentity = [] )
+#set( $tenant = "" )
+#set( $username = "" )
+#set( $roles = [] )
+
+## Get tenant user information from identifying information
+#if( $context.identity.resolverContext )
+    ## Lambda authorizer
+    #set( $tenant = $context.identity.resolverContext.tenant )
+    #set( $username = $context.identity.resolverContext.username )
+    #set( $roles = $util.parseJson($context.identity.resolverContext.roles) )
+#else
+    $util.error('OnReceivedMessage: Missing identifying information!')
+#end
+
+## Filter notifications related to tenant
+$extensions.setSubscriptionFilter({
+    "filterGroup": [{
+        "filters" : [
+            {
+                "fieldName" : "tenant",
+                "operator" : "eq",
+                "value" : $tenant
+            }
+        ]
+    }]
+})
+
+$utils.toJson($context.result)

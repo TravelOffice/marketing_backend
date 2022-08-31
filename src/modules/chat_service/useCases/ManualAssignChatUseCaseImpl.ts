@@ -1,7 +1,10 @@
+import { getEnv } from 'get-env';
 import { ConversationQueryParams } from '../models/ConversationQueryParams';
 import { chatRepository, userRepository } from '../repositories';
 import { UNKNOWN_USER } from '../utils/constants';
 import { PARTITION_KEY_DELIMITER } from '../utils/dynamodbConstants';
+import invokeFunction from '../utils/lambda';
+import { CHAT_NEW_CONVERSATION_ASSIGNED } from '../utils/notificationTypeConstants';
 import { ManualAssignChatUseCase } from './interfaces/ManualAssignChatUseCase';
 
 export default class ManualAssignChatUseCaseImpl implements ManualAssignChatUseCase {
@@ -53,8 +56,24 @@ export default class ManualAssignChatUseCaseImpl implements ManualAssignChatUseC
       }
     }
 
-    // TODO: Send notification via AppSync endpoint
+    // Send notification via AppSync endpoint
     // Client should be notified that he/she is assigned new conversation
+    const sendNotificationData = {
+      type: 'APPSYNC',
+      data: {
+        type: CHAT_NEW_CONVERSATION_ASSIGNED,
+        tenant,
+        assignee,
+        data: conversationQueryParams,
+        timestamp: Date.now(),
+      },
+    };
+    await invokeFunction({
+      FunctionName: getEnv('SEND_NOTIFICATION_SERVICE_NAME'),
+      InvocationType: 'RequestResponse',
+      LogType: 'Tail',
+      Payload: JSON.stringify(sendNotificationData),
+    });
 
     const {
       pk, sk, typeLsi, ...restrictedData

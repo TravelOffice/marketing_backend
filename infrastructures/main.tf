@@ -62,6 +62,11 @@ locals {
       NODE_ENV            = var.ENV
       SECRET_MANAGER_ID   = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
       SEND_NOTIFICATION_SERVICE_NAME = "${var.ENV}-${var.FEATURE_NAME}-send_notification"
+    },
+    chat_service_lambda_vars = {
+      NODE_ENV            = var.ENV
+      SECRET_MANAGER_ID   = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
+      SEND_NOTIFICATION_SERVICE_NAME = "${var.ENV}-${var.FEATURE_NAME}-send_notification"
     }
   }
 }
