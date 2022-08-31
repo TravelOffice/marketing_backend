@@ -1,6 +1,4 @@
-export interface AppSyncReponse<T extends any = any> {
-  message: string,
-  data: T,
-  username?: string,
-  tenant?: string,
-}
+import { AppSyncMessageHandlingReponse } from './AppSyncMessageHandlingResponse';
+import { AppSyncNotificationResponse } from './AppSyncNotificationResponse';
+
+export type AppSyncReponse = AppSyncMessageHandlingReponse | AppSyncNotificationResponse;

@@ -87,6 +87,23 @@ export type UnknownEvent = {
   arguments: any
 }
 
+export type NotificationData = any;
+
+export type SendNotificationEvent<T extends any = any> = {
+  field: 'sendNotification',
+  arguments: {
+    tenant?: string,
+    // Username identifier to filter subscription
+    username?: string,
+    // Notification type
+    type: string,
+    // Timestamp
+    timestamp: number,
+    // Notification data
+    data: T,
+  }
+}
+
 // eslint-disable-next-line max-len
 export type AppSyncEvent = (
   SendMessageEvent
@@ -99,4 +116,5 @@ export type AppSyncEvent = (
   | AdminAllZaloConversationsEvent
   | UserProfileEvent
   | UnknownEvent
+  | SendNotificationEvent<NotificationData>
 ) & { tenant: string, username: string };
