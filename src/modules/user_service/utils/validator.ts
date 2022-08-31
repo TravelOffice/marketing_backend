@@ -8,11 +8,13 @@ import {
   LANGUAGES_TYPE, SexEnum, THEMES_TYPE, UserStatusEnum,
 } from '../models';
 import {
+  ROOT_ROLE,
   USERNAME_DELIMITER,
   VALIDATE_ARRAY_MSG,
   VALIDATE_DATE_MSG,
   VALIDATE_EMAIL_MSG,
   VALIDATE_NON_EMPTY_STRING_MSG,
+  VALIDATE_ROLE_MSG,
   VALIDATE_USERNAME_RESERVED_STRING_MSG,
   VALIDATE_USERNAME_SYNTAX_STRING_MSG,
 } from './constants';
@@ -85,7 +87,9 @@ export function createTenantUserValidator() {
 
     body('roles')
       .notEmpty()
-      .isArray().withMessage(VALIDATE_ARRAY_MSG),
+      .isArray().withMessage(VALIDATE_ARRAY_MSG)
+      .custom((value) => !value.includes(ROOT_ROLE))
+      .withMessage(VALIDATE_ROLE_MSG),
 
     body('birthday', VALIDATE_DATE_MSG)
       .if(body('birthday').notEmpty())
@@ -152,7 +156,9 @@ export function updateTenantUserValidator() {
 
     body('roles')
       .optional()
-      .isArray().withMessage(VALIDATE_ARRAY_MSG),
+      .isArray().withMessage(VALIDATE_ARRAY_MSG)
+      .custom((value: Array<string>) => !value.includes(ROOT_ROLE))
+      .withMessage(VALIDATE_ROLE_MSG),
 
     body('birthday', VALIDATE_DATE_MSG)
       .optional()

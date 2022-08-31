@@ -34,9 +34,7 @@ export default class UserRepositoryImpl implements UserRepository {
       TableName: ddbTable,
       KeyConditionExpression: 'pk = :pk AND begins_with(sk, :sk_filter_value)',
       ExpressionAttributeValues: {
-        // Given page id
         ':pk': { S: `${TENANT_INDEX}#${tenantId}` },
-        // Prefix to Facebook item
         ':sk_filter_value': { S: EMPLOYEE_INDEX },
         ':role_filter_value': { S: `#${roleName}#` },
       },

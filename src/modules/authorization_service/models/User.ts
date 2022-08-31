@@ -6,10 +6,6 @@ export enum LANGUAGES_TYPE {
   ENGLISH = 'en',
   VIETNAMESE = 'vi'
 }
-export enum ROLES_TYPE {
-  ADMIN = 'ADMIN',
-  EMPLOYEE = 'EMPLOYEE'
-}
 
 export interface User {
   username: string,

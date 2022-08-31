@@ -13,3 +13,14 @@ export const MESSAGE_INDEX = 'MESSAGE';
 export const ASSIGNEE_INDEX = 'ASSIGNEE';
 
 export const PARTITION_KEY_DELIMITER = '#';
+
+// The order of events must be follow ChatPlatform
+export const VALIDATION_EVENTS = ['allZaloMessages', 'allFbMessages', 'allTelegramMessages'];
+
+export const UPDATE_SET_EXPRESSION = 'SET';
+
+export const ROLE_INDEX = 'ROLE';
+
+export const PERMISSION_INDEX = 'PERMISSION';
+
+export const DEFAULT_ROLES = ['ROOT', 'ADMIN', 'SALE'];
