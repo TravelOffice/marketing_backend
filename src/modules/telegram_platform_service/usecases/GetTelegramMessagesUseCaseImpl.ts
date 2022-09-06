@@ -1,6 +1,4 @@
-import { TelegramPagingMessage } from '../models';
 import { telegramPlatformRepository } from '../repositories';
-import logger from '../utils/logger';
 import { GetTelegramMessagesUseCase } from './interfaces/GetTelegramMessagesUseCase';
 
 // eslint-disable-next-line max-len
@@ -19,21 +17,11 @@ export default class GetTelegramMessagesUseCaseImpl implements GetTelegramMessag
     chatId: string,
     nextToken?: string,
     limit?: number,
-  ) => {
-    const conversation = await telegramPlatformRepository.getChat(tenantId, botId, chatId);
-
-    if (conversation.assignee !== assigneeId) {
-      logger.log(`User [${assigneeId}] not have permission to get conversation [${chatId}]!`);
-      return {
-        messages: [],
-      } as TelegramPagingMessage;
-    }
-    return telegramPlatformRepository.getConversationMessages(
-      tenantId,
-      botId,
-      chatId,
-      nextToken,
-      limit,
-    );
-  };
+  ) => telegramPlatformRepository.getConversationMessages(
+    tenantId,
+    botId,
+    chatId,
+    nextToken,
+    limit,
+  );
 }

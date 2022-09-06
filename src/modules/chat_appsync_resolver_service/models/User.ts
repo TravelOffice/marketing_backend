@@ -6,11 +6,6 @@ export enum LANGUAGES_TYPE {
   ENGLISH = 'en',
   VIETNAMESE = 'vi'
 }
-export enum ROLES_TYPE {
-  ROOT = 'ROOT',
-  ADMIN = 'ADMIN',
-  EMPLOYEE = 'EMPLOYEE'
-}
 
 export interface User {
   username: string,
@@ -18,7 +13,7 @@ export interface User {
   lastName?: string,
   email: string,
   tenant: string,
-  role: ROLES_TYPE,
+  roles: Array<string>,
   address?: string,
   phoneNumber: string,
   avatar?: string,

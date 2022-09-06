@@ -72,6 +72,31 @@ type AdminAllZaloConversationsEvent = {
   }
 }
 
+// Telegram event
+type AllTelegramConversationsEvent = {
+  field: 'allTelegramConversations',
+  arguments: {
+    pageId: string,
+  }
+}
+
+type AllTelegramMessageEvent = {
+  field: 'allTelegramMessages',
+  arguments: {
+    pageId: string,
+    conversationId: string,
+    nextToken: string,
+    limit: number
+  }
+}
+
+type AdminAllTelegramConversationsEvent = {
+  field: 'adminAllTelegramConversations',
+  arguments: {
+    pageId: string
+  }
+}
+
 type UserProfileEvent = {
   field: 'userProfile',
   arguments: {
@@ -114,6 +139,9 @@ export type AppSyncEvent = (
   | AllZaloConversationsEvent
   | AllZaloMessageEvent
   | AdminAllZaloConversationsEvent
+  | AllTelegramConversationsEvent
+  | AllTelegramMessageEvent
+  | AdminAllTelegramConversationsEvent
   | UserProfileEvent
   | UnknownEvent
   | SendNotificationEvent<NotificationData>

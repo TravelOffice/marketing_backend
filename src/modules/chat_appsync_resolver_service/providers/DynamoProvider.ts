@@ -28,4 +28,6 @@ export default class DynamoProvider {
     }
     return Item as T;
   };
+
+  rawQuery = async (input: QueryInput) => docClient.query(input).promise();
 }
