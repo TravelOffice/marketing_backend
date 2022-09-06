@@ -26,6 +26,8 @@ export const VALIDATE_USERNAME_RESERVED_STRING_MSG = 'Invalid username';
 
 export const VALIDATE_ARRAY_MSG = 'property must be an array';
 
+export const VALIDATE_ROLE_MSG = 'property cant not contains ROOT role';
+
 export const TENANT_INDEX = 'TENANT';
 
 export const LEAD_INDEX = 'LEAD';
@@ -51,3 +53,5 @@ export const ROLE_INDEX = 'ROLE';
 export const OMITTED_USER_ATTRIBUTES = ['tenant', 'pk', 'sk', 'typeLsi', 'wct', 'nacs', 'roleStr'];
 
 export const DEFAULT_ROLES = ['ROOT', 'ADMIN', 'SALE'];
+
+export const ROOT_ROLE = 'ROOT';

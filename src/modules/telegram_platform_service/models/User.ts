@@ -18,7 +18,7 @@ export interface User {
   lastName?: string,
   email: string,
   tenant: string,
-  role: ROLES_TYPE,
+  roles: Array<string>,
   address?: string,
   phoneNumber: string,
   avatar?: string,
