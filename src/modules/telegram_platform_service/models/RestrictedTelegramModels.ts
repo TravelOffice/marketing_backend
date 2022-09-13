@@ -10,6 +10,7 @@ export type RestrictedDDBModel<T extends BaseDdbModel> = Omit<T, 'pk' | 'sk' | '
 
 export interface RestrictedTelegramConversation extends RestrictedDDBModel<DDBConversation> {
   conversationId: TypeOfSk,
+  assignee?: string,
 }
 
 export interface RestrictedTelegramMessage extends RestrictedDDBModel<DDBMessage> { }
