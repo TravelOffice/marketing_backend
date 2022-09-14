@@ -1,5 +1,6 @@
-import { ChatPlatform, FacebookConversation } from 'common-models';
+import { ChatPlatform, DDBConversation } from 'common-models';
 import { getAwsSecretValue } from 'get-env';
+import omit from 'lodash/omit';
 import {
   FacebookMessageResponsePayload,
   FacebookUserProfile,
@@ -11,6 +12,8 @@ import {
   ASSIGNEE_INDEX,
   CONVERSATION_INDEX,
   FACEBOK_PAGE_INDEX,
+  OMITTED_CONVERSATION_ATTRIBUTES,
+  PARTITION_KEY_DELIMITER,
   TENANT_INDEX,
 } from '../utils/constants';
 import logger from '../utils/logger';
@@ -98,10 +101,26 @@ export default class FbMessagePlatformRepositoryImpl implements FbMessagePlatfor
       },
     };
 
-    const { Items: items } = await dynamoProvider.query(params);
+    const { Items: items } = await dynamoProvider.query(params) as { Items: DDBConversation[] };
     if (items) {
       const conversations = items.map(
-        (conversation) => conversation.info as FacebookConversation,
+        (conversation) => {
+          const { typeLsi, sk } = conversation;
+          const [, conversationId] = sk.split(PARTITION_KEY_DELIMITER);
+          const restrictedConversation = omit(conversation, OMITTED_CONVERSATION_ATTRIBUTES);
+          if (typeLsi) {
+            const [, assignee] = typeLsi.split(PARTITION_KEY_DELIMITER);
+            return {
+              ...restrictedConversation,
+              assignee,
+              conversationId,
+            };
+          }
+          return {
+            ...restrictedConversation,
+            conversationId,
+          };
+        },
       );
       logger.log(
         `[FbMessagePlatformRepositoryImpl.getConversations] Conversations of page ${pageId}`,
