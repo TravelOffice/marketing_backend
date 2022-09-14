@@ -202,6 +202,14 @@ export default class TelegramPlatformRepositoryImpl implements TelegramPlatformR
           sk, pk, typeLsi, ...rest
         } = conversation;
         const [, conversationId] = sk.split(PARTITION_KEY_DELIMITER);
+        if (typeLsi) {
+          const [, assignee] = typeLsi.split(PARTITION_KEY_DELIMITER);
+          return {
+            ...rest,
+            assignee,
+            conversationId,
+          } as RestrictedTelegramConversation;
+        }
         return {
           ...rest,
           conversationId,
