@@ -63,8 +63,11 @@ export default class ManualAssignChatUseCaseImpl implements ManualAssignChatUseC
       data: {
         type: CHAT_NEW_CONVERSATION_ASSIGNED,
         tenant,
-        assignee,
-        data: conversationQueryParams,
+        username: assignee,
+        data: {
+          ...conversationQueryParams,
+          assignee,
+        },
         timestamp: Date.now(),
       },
     };
