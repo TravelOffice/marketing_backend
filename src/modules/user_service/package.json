@@ -24,6 +24,7 @@
     "get-env": "link:../../libs/get-env",
     "jwt-decode": "^3.1.2",
     "lodash": "^4.17.21",
+    "meilisearch": "^0.28.0",
     "reflect-metadata": "^0.1.13"
   },
   "devDependencies": {

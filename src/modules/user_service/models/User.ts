@@ -46,6 +46,7 @@ export interface User {
   sex: SexEnum
   birthday: string,
   status?: UserStatusEnum,
+  searchApiKey?: string,
 }
 
 export interface UserWithPermission extends User {
