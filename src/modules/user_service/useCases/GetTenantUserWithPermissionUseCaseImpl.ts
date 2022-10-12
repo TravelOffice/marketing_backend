@@ -1,5 +1,5 @@
 import omit from 'lodash/omit';
-import { userRepository } from '../repositories';
+import { searchRepository, userRepository } from '../repositories';
 import { OMITTED_USER_ATTRIBUTES } from '../utils/constants';
 import { GetTenantUserWithPermissionUseCase } from './interfaces/GetTenantUserWithPermissionUseCase';
 
@@ -13,11 +13,13 @@ implements GetTenantUserWithPermissionUseCase {
    * - Step 3: Get the tenant user
    * @param tenantId The id of tenant
    * @param userId The id of retrieve user
-   * @returns Promise<User> All information of tenant user with permission
+   * @returns Promise<User> All information of tenant user with permission and search token
    */
   invoke = async (tenantId: string, userId: string) => {
     const user = await userRepository.getWithPermission(tenantId, userId);
     if (!user) throw new Error(`Tenant [${tenantId}] User [${userId}] does not exist!`);
-    return omit(user, OMITTED_USER_ATTRIBUTES);
+    const apiKey = await searchRepository.getApiKeys(user);
+    const searchToken = await searchRepository.generateSearchToken(apiKey);
+    return omit({ ...user, searchToken }, OMITTED_USER_ATTRIBUTES);
   };
 }
