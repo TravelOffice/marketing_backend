@@ -50,7 +50,11 @@ export const PAGE_INDEX = 'PAGE';
 
 export const ROLE_INDEX = 'ROLE';
 
-export const OMITTED_USER_ATTRIBUTES = ['tenant', 'pk', 'sk', 'typeLsi', 'wct', 'nacs', 'roleStr'];
+export const USER_INDEX = 'USER';
+
+export const MAIL_ACCOUT_INDEX = 'MAIL_ACCOUNT';
+
+export const OMITTED_USER_ATTRIBUTES = ['tenant', 'pk', 'sk', 'typeLsi', 'wct', 'nacs', 'roleStr', 'searchApiKey'];
 
 export const DEFAULT_ROLES = ['ROOT', 'ADMIN', 'SALE'];
 
