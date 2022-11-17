@@ -1,14 +1,16 @@
 import AWS from 'aws';
-import { getEnv } from 'get-env';
 import { AppSyncEvent } from '../models';
+import getSocialPlatformService from '../utils/platformServices';
 import { AppSyncHandler } from './AppSyncHandler';
 
 const lambda = new AWS.Lambda();
 
-export default class TelegramHandler implements AppSyncHandler {
+export default class SocialPlatformHandler implements AppSyncHandler {
+  // Handle events for Social platform such as Facebook, Zalo, Telegram
   handle = async (event: AppSyncEvent) => {
+    const socialPlatformService = getSocialPlatformService(event);
     const invokeParams: AWS.Lambda.Types.InvocationRequest = {
-      FunctionName: getEnv('TELEGRAM_SERVICE_NAME'),
+      FunctionName: socialPlatformService,
       InvocationType: 'RequestResponse',
       LogType: 'Tail',
       Payload: JSON.stringify(event),
