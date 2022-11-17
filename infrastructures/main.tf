@@ -48,6 +48,8 @@ locals {
       NODE_ENV              = var.ENV
       SECRET_MANAGER_ID     = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
       TELEGRAM_SERVICE_NAME = "${var.ENV}-${var.FEATURE_NAME}-telegram_platform_service"
+      FACEBOOK_SERVICE_NAME = "${var.ENV}-${var.FEATURE_NAME}-facebook_platform_service"
+      ZALO_SERVICE_NAME = "${var.ENV}-${var.FEATURE_NAME}-zalo_platform_service"
     },
     handler_unassigned_conversations_vars = {
       NODE_ENV                                           = var.ENV
