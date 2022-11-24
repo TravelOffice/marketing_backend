@@ -1,8 +1,17 @@
 import { getAwsSecretValue } from 'get-env';
 import AWS from 'aws';
+import { ChatPlatform, DDBConversation } from 'common-models';
+import omit from 'lodash/omit';
 import { SendMessageMutationArgs, toSendZaloMessagePayload, ZaloMessageResponsePayload } from '../models';
 import { dynamoProvider, zaloMessagePlatformProvider } from '../providers';
-import { ZALO_PAGE_INDEX } from '../utils/constants';
+import {
+  ASSIGNEE_INDEX,
+  CONVERSATION_INDEX,
+  OMITTED_CONVERSATION_ATTRIBUTES,
+  PARTITION_KEY_DELIMITER,
+  TENANT_INDEX,
+  ZALO_PAGE_INDEX,
+} from '../utils/constants';
 import logger from '../utils/logger';
 import { ZaloMessagePlatformRepository } from './interfaces/ZaloMessagePlatformRepository';
 
@@ -88,23 +97,71 @@ export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePla
   };
 
   /**
-   * Get conversations for page
-   * @param pageId Page id
-   * @returns
+   * Get Zalo conversation from dynamodb
+   * @param tenantId Tenant ID
+   * @param pageId Zalo Page ID
+   * @param assigneeId Assigned employee ID
+   * @returns ZaloMessageResponsePayload
    */
   getConversations = async (
+    tenantId: string,
     pageId: string,
-    offset?: number,
-    count?: number,
+    assigneeId?: string,
   ): Promise<ZaloMessageResponsePayload | undefined> => {
-    try {
-      // Get page token that stored in DynamoDB table by `pageIdAsSender`
-      const pageToken = await this.getZaloMessagePlatformToken(pageId);
-      return zaloMessagePlatformProvider.getConversations(pageToken, offset, count);
-    } catch (error) {
-      logger.log(`[ZaloMessagePlatformRepositoryImpl.getConversations] Generated an error ${error}`);
-      throw error;
+    const travelTable = await getAwsSecretValue('DYNAMO_CHAT_TABLE');
+    const zaloPlatformStr = ChatPlatform.zalo.toUpperCase(); // Platform unique code
+    // Combination of ASSIGNEE#<username>
+    const assigneeIndex = assigneeId ? `${ASSIGNEE_INDEX}#${assigneeId}` : `${ASSIGNEE_INDEX}#`;
+    const params = {
+      TableName: travelTable,
+      IndexName: 'TypeIndex',
+      KeyConditionExpression: '#pk = :pk AND begins_with ( #lsi, :lsi_filter_value )',
+      ExpressionAttributeNames: {
+        '#pk': 'pk',
+        '#lsi': 'typeLsi',
+      },
+      ExpressionAttributeValues: {
+        ':pk': `${TENANT_INDEX}#${tenantId}#${CONVERSATION_INDEX}#${zaloPlatformStr}#${pageId}`,
+        ':lsi_filter_value': assigneeIndex,
+      },
+    };
+
+    const { Items: items } = await dynamoProvider.query(params) as { Items: DDBConversation[] };
+    if (items) {
+      const conversations = items.map(
+        (conversation) => {
+          const { typeLsi, sk } = conversation;
+          const [, conversationId] = sk.split(PARTITION_KEY_DELIMITER);
+          const restrictedConversation = omit(conversation, OMITTED_CONVERSATION_ATTRIBUTES);
+          if (typeLsi) {
+            const [, assignee] = typeLsi.split(PARTITION_KEY_DELIMITER);
+            return {
+              ...restrictedConversation,
+              assignee,
+              conversationId,
+            };
+          }
+          return {
+            ...restrictedConversation,
+            conversationId,
+          };
+        },
+      );
+      logger.log(
+        `[ZaloMessagePlatformRepositoryImpl.getConversations] Conversations of page ${pageId}`,
+        JSON.stringify(conversations, null, 2),
+      );
+      return {
+        data: conversations,
+        paging: {
+          cursors: {
+            before: '',
+            after: '',
+          },
+        },
+      } as ZaloMessageResponsePayload;
     }
+    return undefined;
   };
 
   /**
