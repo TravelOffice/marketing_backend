@@ -36,7 +36,7 @@ export default class ZaloApiProvider {
     if (response.data.error) {
       throw new Error(response.data.error_name);
     } else {
-      logger.log(`[ZaloApiProvider.getAccessToken] Get access token successfully: ${response.data}`);
+      logger.log(`[ZaloApiProvider.getAccessToken] Get access token successfully: ${JSON.stringify(response.data, null, 2)}`);
       return response.data;
     }
   };
@@ -59,7 +59,7 @@ export default class ZaloApiProvider {
     if (response.data.error !== 0) {
       throw new Error(response.data.message);
     } else {
-      logger.log(`[ZaloApiProvider.getOfficialAccountInfo] Get official account successfully: ${response.data}`);
+      logger.log(`[ZaloApiProvider.getOfficialAccountInfo] Get official account successfully: ${JSON.stringify(response.data, null, 2)}`);
       return response.data.data;
     }
   };
