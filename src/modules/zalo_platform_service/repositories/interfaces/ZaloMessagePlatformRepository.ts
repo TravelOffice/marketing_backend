@@ -6,9 +6,9 @@ import {
 export interface ZaloMessagePlatformRepository {
   sendMessage: (message: SendMessageMutationArgs) => Promise<any>;
   getConversations: (
+    tenantId: string,
     pageId: string,
-    offset?: number,
-    count?: number,
+    assigneeId?: string,
   ) => Promise<ZaloMessageResponsePayload | undefined>;
   getMessages: (
     pageId: string,

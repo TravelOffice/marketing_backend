@@ -1,8 +1,9 @@
 export interface ZaloMessageResponsePayload {
-  data: {
-    message_id: string,
-    user_id: string
+  data: any;
+  paging: {
+    cursors: {
+      before: string,
+      after: string
+    }
   };
-  error: number,
-  message: string
 }
