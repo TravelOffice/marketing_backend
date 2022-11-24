@@ -48,8 +48,11 @@ export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePla
     if (rs.Items && rs.Items?.length > 0) {
       const dynamoItem = rs.Items[0];
       logger.log('[ZaloMessagePlatformRepositoryImpl.getZaloMessagePlatformToken] DynamoDB item', dynamoItem);
-      if (dynamoItem.expireIn > Date.now()) {
+      if (dynamoItem.accessTokenExpireIn > Date.now()) {
         return dynamoItem.accessToken;
+      }
+      if (dynamoItem.refreshTokenExpireIn < Date.now()) {
+        throw new Error('Refresh token is expired');
       }
       const refreshTokenResponse = await zaloMessagePlatformProvider.refreshToken(
         dynamoItem.refreshToken,

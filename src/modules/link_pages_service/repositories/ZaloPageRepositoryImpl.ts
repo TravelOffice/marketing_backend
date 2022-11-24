@@ -3,7 +3,13 @@ import { getAwsSecretValue, getEnv } from 'get-env';
 import { generateChallenge } from 'pkce-challenge';
 import * as randomstring from 'randomstring';
 import { dynamoProvider, zaloApiProvider } from '../providers';
-import { PAGE_INDEX, TENANT_INDEX, ZALO_CODE_VERIFIER_INDEX } from '../utils/constants';
+import {
+  PAGE_INDEX,
+  TENANT_INDEX,
+  ZALO_CODE_VERIFIER_INDEX,
+  ZALO_CODE_VERIFIER_TTL,
+  ZALO_REFRESH_TOKEN_TTL,
+} from '../utils/constants';
 import { ZaloPageRepository } from './interfaces/ZaloPageRepository';
 
 export default class ZaloPageRepositoryImpl implements ZaloPageRepository {
@@ -63,7 +69,8 @@ export default class ZaloPageRepositoryImpl implements ZaloPageRepository {
       id: pageId,
       accessToken: getTokenResponse.access_token,
       refreshToken: getTokenResponse.refresh_token,
-      expireIn: (new Date(Date.now() + getTokenResponse.expires_in * 1000)).getTime(),
+      accessTokenExpireIn: (new Date(Date.now() + getTokenResponse.expires_in * 1000)).getTime(),
+      refreshTokenExpireIn: (new Date(Date.now() + ZALO_REFRESH_TOKEN_TTL)).getTime(),
       name: getOAInfo.name,
       description: getOAInfo.description,
       avatar: getOAInfo.avatar,
@@ -80,7 +87,14 @@ export default class ZaloPageRepositoryImpl implements ZaloPageRepository {
    */
   saveCodeVerifierToDynamo = async (codeVerifier: string, state: string) => {
     const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
-    await dynamoProvider.putItem(travelTable, ZALO_CODE_VERIFIER_INDEX, state, { codeVerifier });
+    const expireTime = new Date(Date.now() + ZALO_CODE_VERIFIER_TTL);
+    const ttl = Math.round(expireTime.getTime() / 1000);
+    await dynamoProvider.putItem(
+      travelTable,
+      ZALO_CODE_VERIFIER_INDEX,
+      state,
+      { codeVerifier, ttl },
+    );
   };
 
   /**

@@ -21,3 +21,7 @@ export const TELEGRAM_WEBHOOK_MAX_CONNECTION = 100;
 export const TELEGRAM_WEBHOOK_ALLOWED_UPDATES = ['message'];
 
 export const TELEGRAM_WEBHOOK_DROP_PENDING_UPDATES = true;
+
+export const ZALO_CODE_VERIFIER_TTL = 5 * 60000; // Will be delete from database after 5 minutes
+
+export const ZALO_REFRESH_TOKEN_TTL = 30 * 24 * 60 * 60000; // Expire after 30 days
