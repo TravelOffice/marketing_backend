@@ -15,6 +15,7 @@ interface AppSyncEvent {
  */
 const handleAppSyncEvent = async (event: AppSyncEvent) => {
   const args = event.arguments; // Args from AppSync
+  const { tenant, username } = event;
   let resolverMessage: string; // Resolved result as a message
   let returnedData: any; // Resolved data
   // Handle each case of resolver type
@@ -25,10 +26,11 @@ const handleAppSyncEvent = async (event: AppSyncEvent) => {
       break;
 
     case 'allZaloConversations':
+      // Fetch conversations information
       returnedData = await zaloMessagePlatformRepository.getConversations(
+        tenant,
         args.pageId,
-        args.offset,
-        args.count,
+        username,
       );
       resolverMessage = 'The conversations has been fetched from Zalo platform';
       break;
@@ -48,6 +50,15 @@ const handleAppSyncEvent = async (event: AppSyncEvent) => {
       resolverMessage = `User profile has been fetched from ${args.platform} platform`;
       break;
 
+    // Fetch conversations information
+    case 'adminAllZaloConversations': {
+      returnedData = await zaloMessagePlatformRepository.getConversations(
+        tenant,
+        args.pageId,
+      );
+      resolverMessage = 'The conversations has been fetched from Zalo platform';
+      break;
+    }
     default: {
       const { field } = event;
       throw new Error(`Unknown field, unable to resolve ${field}`);
