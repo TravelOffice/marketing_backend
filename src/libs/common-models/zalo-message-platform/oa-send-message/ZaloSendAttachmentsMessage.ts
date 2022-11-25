@@ -5,6 +5,8 @@
  * - ZaloSendFileMessage
  */
 
+import { BasedZaloSendMessage } from './BasedZaloSendMessage';
+
 export type ZaloSendImageMessage = {
   payload: {
     template_type: 'media', // Display image
@@ -37,7 +39,7 @@ export type ZaloSendFileMessage = {
 }
 
 export type ZaloSendAttachment = ZaloSendImageMessage | ZaloSendGIFMessage | ZaloSendFileMessage
-export type ZaloSendAttachmentMessage = {
+export type ZaloSendAttachmentMessage = BasedZaloSendMessage & {
   text?: string,
   attachments: ZaloSendAttachment
 }

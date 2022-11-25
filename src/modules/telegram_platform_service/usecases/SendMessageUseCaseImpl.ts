@@ -42,7 +42,7 @@ export default class SendMessageUseCaseImpl implements SendMessageUseCase {
       platform,
       tenantId,
       username,
-      { ...sentMessage },
+      { metadata: data.metadata, ...sentMessage },
     );
 
     // Save the chat message to dynamo DB

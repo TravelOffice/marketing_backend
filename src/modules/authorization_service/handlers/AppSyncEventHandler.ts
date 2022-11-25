@@ -33,6 +33,7 @@ export default class AppSyncEventHandler extends AuthorizerHandler<AppSyncAuthor
     const { tenant, username } = getCurrentUserInfo(authorizationToken);
     const userAttributes = await userRepository.getUserAttributes(tenant, username);
     if (!userAttributes) throw new Error(`AppSyncEventHandler: Your account [${username}] not existed!`);
+    const permissions = await userRepository.getUserPermissions(tenant, userAttributes);
 
     const policy: AppSyncPolicyRequest = {
       type: 'APPSYNC',
@@ -42,6 +43,7 @@ export default class AppSyncEventHandler extends AuthorizerHandler<AppSyncAuthor
         tenant,
         username,
         roles: JSON.stringify(userAttributes.roles),
+        permissions: JSON.stringify(permissions),
       },
     };
     // Always allow AppSync WhiteList Operation

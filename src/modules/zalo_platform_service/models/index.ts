@@ -1,7 +1,4 @@
 export * from './AppSyncEvent';
-export * from './facebook/FacebookMessageResponsePayload';
-export * from './facebook/FacebookUserProfile';
-export * from './facebook/SendFacebookMessageRequestPayload';
 export * from './Message';
 export * from './zalo/SendZaloMessageRequestPayload';
 export * from './zalo/ZaloMessageResponsePayload';
