@@ -1,14 +1,20 @@
 import { getAwsSecretValue } from 'get-env';
 import AWS from 'aws';
-import { ChatPlatform, DDBConversation } from 'common-models';
+import { AppSyncSendMessageData, ChatPlatform, DDBConversation } from 'common-models';
 import omit from 'lodash/omit';
-import { SendMessageMutationArgs, toSendZaloMessagePayload, ZaloMessageResponsePayload } from '../models';
+import {
+  SendMessageMutationArgs,
+  SendZaloMessageResponsePayload,
+  toSendZaloMessagePayload,
+  ZaloMessageResponsePayload,
+} from '../models';
 import { dynamoProvider, zaloMessagePlatformProvider } from '../providers';
 import {
   ASSIGNEE_INDEX,
   CONVERSATION_INDEX,
   OMITTED_CONVERSATION_ATTRIBUTES,
   PARTITION_KEY_DELIMITER,
+  TEMPORARY_MESSAGE_INDEX,
   TENANT_INDEX,
   ZALO_PAGE_INDEX,
 } from '../utils/constants';
@@ -83,16 +89,36 @@ export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePla
   };
 
   /**
-   * Send message to customer from Fb page
+   * Send message to customer from Zalo OA
    * @param message Message data
    */
-  sendMessage = async (message: SendMessageMutationArgs): Promise<any> => {
+  sendMessage = async (
+    tenantId: string,
+    message: SendMessageMutationArgs,
+  ): Promise<SendZaloMessageResponsePayload> => {
     try {
       // Get page token that stored in DynamoDB table by `pageIdAsSender`
-      const pageToken = await this.getZaloMessagePlatformToken(message.sender);
+      const pageId = message.sender;
+      const pageToken = await this.getZaloMessagePlatformToken(pageId);
       // Send message
       const payload = toSendZaloMessagePayload(message);
-      return zaloMessagePlatformProvider.sendMessage(pageToken, payload);
+      const sendResponse = await zaloMessagePlatformProvider.sendMessage(pageToken, payload);
+      /**
+       * Save the temporary metadata of this message to database to mark message
+       * sent by webhook later. Data will visible only 3 minutes
+      */
+      const ttl = Math.floor(Date.now() / 1000) + 3 * 60;
+      const travelTable = await getAwsSecretValue('DYNAMO_CHAT_TABLE');
+      const zaloPlatformStr = ChatPlatform.zalo.toUpperCase(); // Platform unique code
+      const pk = `${TENANT_INDEX}#${tenantId}#${CONVERSATION_INDEX}#${zaloPlatformStr}#${pageId}`;
+      const sk = `${CONVERSATION_INDEX}#${message.recipient}#${TEMPORARY_MESSAGE_INDEX}#${sendResponse.data.message_id}`;
+
+      await dynamoProvider.put(travelTable, pk, sk, {
+        metadata: (message.messageData as AppSyncSendMessageData).metadata,
+        ttl,
+      });
+
+      return sendResponse;
     } catch (error) {
       logger.log(`[ZaloMessagePlatformRepositoryImpl.sendMessage] Generated an error ${error}`);
       throw error;

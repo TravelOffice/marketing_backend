@@ -1,18 +1,19 @@
-// TODO: Declare repository objects which can be used in this service here
-
-import AppSyncRepositoryImpl from './AppSyncRepositoryImpl';
-import { AppSyncRepository } from './interfaces/AppSyncRepository';
+import { MessageRepository } from './interfaces/MessageRepository';
+import MessageRepositoryImpl from './MessageRepositoryImpl';
 import { PageRepository } from './interfaces/PageRepository';
 import PageRepositoryImpl from './PageRepositoryImpl';
 
 interface Repositories {
-  appSyncRepository: AppSyncRepository,
+  messageRepository: MessageRepository,
   pageRepository: PageRepository,
 }
 
 const repositories: Repositories = {
-  appSyncRepository: new AppSyncRepositoryImpl(),
+  messageRepository: new MessageRepositoryImpl(),
   pageRepository: new PageRepositoryImpl(),
 };
 
-export const { appSyncRepository, pageRepository } = repositories;
+export const {
+  messageRepository,
+  pageRepository,
+} = repositories;

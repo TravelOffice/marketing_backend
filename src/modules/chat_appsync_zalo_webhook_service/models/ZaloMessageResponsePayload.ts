@@ -1,4 +1,4 @@
-export interface FacebookMessageResponsePayload {
+export interface ZaloMessageResponsePayload {
   data: any;
   paging: {
     cursors: {
