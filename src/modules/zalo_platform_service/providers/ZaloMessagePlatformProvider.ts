@@ -2,6 +2,7 @@ import axios, { AxiosInstance } from 'axios';
 import { getAwsSecretValue } from 'get-env';
 import {
   SendZaloMessageRequestPayload,
+  SendZaloMessageResponsePayload,
   ZaloMessageResponsePayload,
   ZaloRefreshTokenResponsePayload,
 } from '../models';
@@ -62,7 +63,7 @@ export default class ZaloMessagePlatformProvider {
   sendMessage = async (
     pageToken: string,
     messagePayload: SendZaloMessageRequestPayload,
-  ): Promise<void> => {
+  ): Promise<SendZaloMessageResponsePayload> => {
     const response = await this.axiosInstance.post(
       `${this.messagePlatformBaseUrl}/oa/message`,
       messagePayload,
@@ -78,9 +79,9 @@ export default class ZaloMessagePlatformProvider {
         `[ZaloMessagePlatformProvider.sendMessage] The message from page ${pageToken} has been sent, response message from Message Platform`,
         response.data,
       );
-    } else {
-      throw new Error(response.data.message);
+      return response.data;
     }
+    throw new Error(response.data.message);
   };
 
   /**

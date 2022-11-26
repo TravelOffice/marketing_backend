@@ -21,6 +21,7 @@
     "express": "^4.17.2",
     "get-env": "link:../../libs/get-env",
     "common-models": "link:../../libs/common-models",
+    "auto-assign-utilities": "link:../../libs/auto-assign-utilities",
     "object-assign": "^4.1.1",
     "reflect-metadata": "^0.1.13"
   },

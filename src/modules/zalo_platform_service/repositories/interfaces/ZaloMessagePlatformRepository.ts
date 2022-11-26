@@ -4,7 +4,10 @@ import {
 } from '../../models';
 
 export interface ZaloMessagePlatformRepository {
-  sendMessage: (message: SendMessageMutationArgs) => Promise<any>;
+  sendMessage: (
+    tenantId: string,
+    message: SendMessageMutationArgs
+  ) => Promise<any>;
   getConversations: (
     tenantId: string,
     pageId: string,

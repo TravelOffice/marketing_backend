@@ -21,7 +21,10 @@ const handleAppSyncEvent = async (event: AppSyncEvent) => {
   // Handle each case of resolver type
   switch (event.field) {
     case 'sendMessage': // TravelOffice user send message from Sales web application. Message will be received from AppSync and send to 3rd-party API
-      returnedData = await zaloMessagePlatformRepository.sendMessage(event.arguments);
+      returnedData = await zaloMessagePlatformRepository.sendMessage(
+        tenant,
+        event.arguments,
+      );
       resolverMessage = 'One message is created by Sales System';
       break;
 
@@ -38,7 +41,7 @@ const handleAppSyncEvent = async (event: AppSyncEvent) => {
     case 'allZaloMessages':
       returnedData = await zaloMessagePlatformRepository.getMessages(
         args.pageId,
-        args.userId,
+        args.conversationId,
         args.offset,
         args.count,
       );

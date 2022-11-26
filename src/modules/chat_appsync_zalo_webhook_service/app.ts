@@ -2,26 +2,15 @@ import cors from 'cors';
 import express, { Request, Response } from 'express';
 import compression from 'compression';
 import { getAwsSecretValue } from 'get-env';
-import { appSyncRepository } from './repositories';
 import logger from './utils/logger';
+import { sendDataEvents } from './utils/constants';
+import { receiveWebhookUseCase } from './useCases';
 
 const app = express();
 app.use(compression());
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-const userSendDataEvents = [
-  'user_send_text',
-  'user_send_image',
-  'user_send_link',
-  'user_send_audio',
-  'user_send_video',
-  'user_send_sticker',
-  'user_send_location',
-  'user_send_business_card',
-  'user_send_file',
-];
 
 /* eslint-disable max-len */
 /**
@@ -37,10 +26,12 @@ app.post('/chat-zalo-webhook', async (req: Request, res: Response) => {
 
     // Checks this is an event from a page subscription
     if (body.app_id === zaloAppId) {
-      console.info('[app.post] Received webhook event', body);
+      logger.log(`[POST /chat-zalo-webhook] Received webhook event ${JSON.stringify(body)}`);
       // Check this is user sent message event
-      if (userSendDataEvents.includes(body.event_name)) {
-        await appSyncRepository.sendReceivedMessageCommand(body);
+      if (sendDataEvents.includes(body.event_name)) {
+        await receiveWebhookUseCase.invoke(body);
+      } else {
+        logger.log(`[POST /chat-zalo-webhook] Unsupported webhook event ${body.event_name}`);
       }
 
       // Returns a '200 OK' response to all requests

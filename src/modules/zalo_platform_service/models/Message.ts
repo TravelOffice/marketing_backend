@@ -1,11 +1,9 @@
 import {
-  AppsyncFacebookSendMessageData,
   AppSyncReceiveMessageData,
   AppSyncSendMessageData,
   AppsyncZaloSendMessageData,
   ChatPlatform,
 } from 'common-models';
-import { SendFacebookMessageRequestPayload } from './facebook/SendFacebookMessageRequestPayload';
 import { SendZaloMessageRequestPayload } from './zalo/SendZaloMessageRequestPayload';
 
 export interface BaseMessageMutationArgs {
@@ -44,15 +42,6 @@ export interface MessageForSend {
   chatPlatform: ChatPlatform,
   messageData: AppSyncSendMessageData
 }
-
-export const toSendFbMessagePayload = (
-  message: MessageForSend,
-): SendFacebookMessageRequestPayload => ({
-  recipient: { id: message.recipient },
-  message: message.messageData as AppsyncFacebookSendMessageData,
-  messaging_type: 'MESSAGE_TAG',
-  tag: 'ACCOUNT_UPDATE',
-});
 
 export const toSendZaloMessagePayload = (
   message: MessageForSend,

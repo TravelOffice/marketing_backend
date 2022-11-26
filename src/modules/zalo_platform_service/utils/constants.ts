@@ -8,6 +8,8 @@ export const CONVERSATION_INDEX = 'CONVERSATION';
 
 export const MESSAGE_INDEX = 'MESSAGE';
 
+export const TEMPORARY_MESSAGE_INDEX = 'TEMPORARY_MESSAGE';
+
 export const ASSIGNEE_INDEX = 'ASSIGNEE';
 
 export const PARTITION_KEY_DELIMITER = '#';

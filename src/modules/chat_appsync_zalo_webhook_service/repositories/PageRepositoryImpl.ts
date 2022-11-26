@@ -15,7 +15,7 @@ export default class PageRepositoryImpl implements PageRepository {
    */
   get = async (pageId: string) => {
     const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
-    const chatPlatformIndex = ChatPlatform.facebook.toUpperCase();
+    const chatPlatformIndex = ChatPlatform.zalo.toUpperCase();
     const query: QueryInput = {
       TableName: table,
       IndexName: 'ReverseIndex',

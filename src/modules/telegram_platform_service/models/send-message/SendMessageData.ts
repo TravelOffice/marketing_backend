@@ -7,6 +7,7 @@ export interface TelegramSendMessageData {
   messageType: SendMessageType,
   // Text message content
   text?: string,
+  metadata?: string,
   /**
    * Content to send
    * - string (url) | Buffer | Stream for file message
