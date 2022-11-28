@@ -2,9 +2,11 @@ import AWS from 'aws';
 import { getAwsSecretValue } from 'get-env';
 import { ZaloUploadFileResponsePayload } from '../models';
 import { dynamoProvider, zaloMessagePlatformProvider } from '../providers';
-import { SupportedFileType } from '../utils/constants';
+import { SupportedFileType, ZALO_PAGE_INDEX } from '../utils/constants';
 import logger from '../utils/logger';
 import { ZaloMessagePlatformRepository } from './interfaces/ZaloMessagePlatformRepository';
+
+type DDBUpdateItemInput = AWS.DynamoDB.DocumentClient.UpdateItemInput;
 
 export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePlatformRepository {
   /**
@@ -22,21 +24,21 @@ export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePla
         '#pageId': 'id',
         '#sk': 'sk',
       },
-      // Filter the item startwith `PAGE_zalo_` to make sure the item is Zalo token
+      // Filter the item startwith `PAGE#ZALO#` to make sure the item is Zalo token
       // Prevent the same token with other providers such as Facebook, Telegram
       FilterExpression: 'begins_with(#sk, :sk_filter_value)',
       ExpressionAttributeValues: {
         // Given page id
         ':id': pageId,
         // Prefix to Zalo item
-        ':sk_filter_value': 'PAGE_zalo_',
+        ':sk_filter_value': ZALO_PAGE_INDEX,
       },
       ProjectionExpression: 'pk,sk,accessToken,refreshToken,id,expireIn',
     };
     const rs = await dynamoProvider.query(params);
     if (rs.Items && rs.Items?.length > 0) {
       const dynamoItem = rs.Items[0];
-      console.info('[ZaloMessagePlatformRepositoryImpl.getZaloMessagePlatformToken] DynamoDB item', dynamoItem);
+      logger.log('[ZaloMessagePlatformRepositoryImpl.getZaloMessagePlatformToken] DynamoDB item', dynamoItem);
       if (dynamoItem.accessTokenExpireIn > Date.now()) {
         return dynamoItem.accessToken;
       }
@@ -48,7 +50,7 @@ export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePla
       );
       if (refreshTokenResponse) {
         const expireIn = new Date(Date.now() + refreshTokenResponse.expires_in * 1000);
-        const updateParams: AWS.DynamoDB.DocumentClient.UpdateItemInput = {
+        const updateParams: DDBUpdateItemInput = {
           TableName: travelTable,
           Key: {
             pk: dynamoItem.pk, // pk and sk can be unmarshall

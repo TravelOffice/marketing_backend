@@ -153,7 +153,15 @@ export default class ZaloMessagePlatformProvider {
         `[ZaloMessagePlatformProvider.getMessages] Return messages of user ${userId} with data`,
         response.data,
       );
-      return response.data;
+      return {
+        ...response.data,
+        paging: {
+          cursors: {
+            before: offset.toString(),
+            after: (offset + count).toString(),
+          },
+        },
+      };
     }
     throw new Error(response.data.message);
   };

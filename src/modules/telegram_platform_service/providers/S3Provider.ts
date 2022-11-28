@@ -1,6 +1,6 @@
 import AWS from 'aws';
 import axios, { AxiosInstance } from 'axios';
-import { getAwsSecretValue, getEnv } from 'get-env';
+import { getEnv } from 'get-env';
 import * as crypto from 'crypto';
 import path from 'path';
 import fs from 'fs';
@@ -84,8 +84,7 @@ export default class S3Provider {
     logger.log(`[S3Provider.downloadFileToS3] Downloading file: ${bucket}/${key} from filePath: ${fileUrl}`);
     await this.s3.putObject(objectParams).promise();
     logger.log(`[S3Provider.downloadFileToS3] Downloaded file: ${bucket}/${key} from filePath: ${fileUrl}`);
-    const chatFileBucketUrl = await getAwsSecretValue('CHAT_FILE_CDN');
-    return `${chatFileBucketUrl}/${key}`;
+    return key;
   };
 
   /**
