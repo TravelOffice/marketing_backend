@@ -19,4 +19,11 @@ export interface ZaloMessagePlatformRepository {
     offset?: number,
     count?: number,
   ) => Promise<ZaloMessageResponsePayload | undefined>;
+  getZaloAudio: (
+    tenantId: string,
+    pageId: string,
+    conversationId: string,
+    messageId: string,
+    fileUrl: string,
+  ) => Promise<ZaloMessageResponsePayload | undefined>;
 }

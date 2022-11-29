@@ -2,16 +2,21 @@ import { getAwsSecretValue } from 'get-env';
 import AWS from 'aws';
 import { AppSyncSendMessageData, ChatPlatform, DDBConversation } from 'common-models';
 import omit from 'lodash/omit';
+import * as crypto from 'crypto';
+import amrToMp3 from 'amrToMp3';
+import path from 'path';
+import fs from 'fs';
 import {
   SendMessageMutationArgs,
   SendZaloMessageResponsePayload,
   toSendZaloMessagePayload,
   ZaloMessageResponsePayload,
 } from '../models';
-import { dynamoProvider, zaloMessagePlatformProvider } from '../providers';
+import { dynamoProvider, s3Provider, zaloMessagePlatformProvider } from '../providers';
 import {
   ASSIGNEE_INDEX,
   CONVERSATION_INDEX,
+  FILE_INDEX,
   OMITTED_CONVERSATION_ATTRIBUTES,
   PARTITION_KEY_DELIMITER,
   TEMPORARY_MESSAGE_INDEX,
@@ -212,6 +217,86 @@ export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePla
       return zaloMessagePlatformProvider.getMessages(pageToken, userId, offset, count);
     } catch (error) {
       logger.log(`[ZaloMessagePlatformRepositoryImpl.getMessages] Generated an error ${error}`);
+      throw error;
+    }
+  };
+
+  /**
+   * Convert Zalo audio to MP3 file
+   * @param fileUrl Zalo arm file path
+   * @param fileName output file name
+   * @returns
+   */
+  convertArmToMp3 = async (
+    filePath: string,
+    fileName: string,
+  ): Promise<string> => {
+    const randomByteLength = 16;
+    const outputFolderName = crypto.randomBytes(randomByteLength).toString('hex');
+    // In lambda we using the tmp folder to save the temporary file
+    const outputFolderPath = path.join('/tmp/', outputFolderName);
+    if (!fs.existsSync(outputFolderPath)) {
+      fs.mkdirSync(outputFolderPath);
+    }
+    return amrToMp3(filePath, outputFolderPath, fileName);
+  };
+
+  /**
+   * Get Zalo audio file
+   * @param tenantId tenant id
+   * @param pageId Page id
+   * @param userId Conversation id
+   * @param messageId Message id of the audio file
+   * @param fileUrl Zalo audio url file
+   * @returns
+   */
+  getZaloAudio = async (
+    tenantId: string,
+    pageId: string,
+    conversationId: string,
+    messageId: string,
+    fileUrl: string,
+  ): Promise<ZaloMessageResponsePayload | undefined> => {
+    try {
+      const table = await getAwsSecretValue('DYNAMO_CHAT_TABLE');
+      const zaloPlatformStr = ChatPlatform.zalo.toUpperCase();
+      const chatFileBucketUrl = await getAwsSecretValue('CHAT_FILE_CDN');
+      const filePk = `${TENANT_INDEX}#${tenantId}#${CONVERSATION_INDEX}#${conversationId}#${zaloPlatformStr}#${pageId}`;
+      const fileSk = `${FILE_INDEX}#${messageId}`;
+
+      // Get the file information from database
+      const item = await dynamoProvider.get(table, filePk, fileSk);
+
+      if (item) {
+        const {
+          sk, pk, typeLsi, ...rest
+        } = item;
+        const { filePath } = rest;
+        return {
+          data: `${chatFileBucketUrl}/${filePath}`,
+        } as ZaloMessageResponsePayload;
+      }
+
+      // Convert arm to mp3
+      const outputFileName = `${fileUrl.substring(fileUrl.lastIndexOf('/') + 1).replace(/\.[^/.]+$/, '')}.mp3`;
+      const chatFileBucket = await getAwsSecretValue('CHAT_FILE_BUCKET');
+
+      // Dowload arm file to local storage
+      const armFilePath = await s3Provider.downloadFileFromCDN(fileUrl);
+      const mp3FilePath = await this.convertArmToMp3(armFilePath, outputFileName);
+
+      const filePath = await s3Provider.saveFile(
+        chatFileBucket,
+        `${tenantId}/${messageId}/${outputFileName}`,
+        mp3FilePath,
+      );
+
+      await dynamoProvider.put(table, filePk, fileSk, { filePath });
+      return {
+        data: `${chatFileBucketUrl}/${filePath}`,
+      } as ZaloMessageResponsePayload;
+    } catch (error) {
+      logger.log(`[ZaloMessagePlatformRepositoryImpl.getZaloAudio] Generated an error ${error}`);
       throw error;
     }
   };
