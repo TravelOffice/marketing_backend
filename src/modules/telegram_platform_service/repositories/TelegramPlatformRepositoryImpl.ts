@@ -336,6 +336,8 @@ export default class TelegramPlatformRepositoryImpl implements TelegramPlatformR
   ) => {
     const table = await getAwsSecretValue('DYNAMO_CHAT_TABLE');
     const telegramPlatformStr = ChatPlatform.telegram.toUpperCase();
+    const chatFileBucket = await getAwsSecretValue('CHAT_FILE_BUCKET');
+    const chatFileBucketUrl = await getAwsSecretValue('CHAT_FILE_CDN');
 
     // Get the file information from database
     const item = await dynamoProvider.getItem(
@@ -348,7 +350,9 @@ export default class TelegramPlatformRepositoryImpl implements TelegramPlatformR
       const {
         sk, pk, typeLsi, ...rest
       } = item;
-      return rest as RestrictedTelegramFile;
+      const info = rest as RestrictedTelegramFile;
+      info.fileInfo.file_path = `${chatFileBucketUrl}/${info.fileInfo.file_path}`;
+      return info;
     }
 
     // Check whether file id with other conversation have information or not
@@ -364,14 +368,15 @@ export default class TelegramPlatformRepositoryImpl implements TelegramPlatformR
     const { Items: files } = await dynamoProvider.rawQuery(params);
     if (files && files?.length > 0) {
       const { fileInfo } = AWS.DynamoDB.Converter.unmarshall(files[0]);
-      return this.saveFileInfo(tenantId, chatId, fileId, fileInfo);
+      const info = await this.saveFileInfo(tenantId, chatId, fileId, fileInfo);
+      info.fileInfo.file_path = `${chatFileBucketUrl}/${info.fileInfo.file_path}`;
+      return info;
     }
     // Get the original file information from Telegram CDN
     const originalFile = await telegramProvider.getFile(accessToken, fileId);
 
     if (!originalFile || !originalFile.file_path) throw new Error(`Cannot get original file ${fileId} from Telegram`);
 
-    const chatFileBucket = await getAwsSecretValue('CHAT_FILE_BUCKET');
     // Save file to S3
     const filePath = await s3Provider.downloadFileToS3FromUrl(
       `${chatFileBucket}`,
@@ -383,6 +388,8 @@ export default class TelegramPlatformRepositoryImpl implements TelegramPlatformR
       ...originalFile,
       file_path: filePath,
     };
-    return this.saveFileInfo(tenantId, chatId, fileId, fileInfo);
+    const info = await this.saveFileInfo(tenantId, chatId, fileId, fileInfo);
+    info.fileInfo.file_path = `${chatFileBucketUrl}/${info.fileInfo.file_path}`;
+    return info;
   };
 }
