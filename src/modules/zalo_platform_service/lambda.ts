@@ -62,6 +62,16 @@ const handleAppSyncEvent = async (event: AppSyncEvent) => {
       resolverMessage = 'The conversations has been fetched from Zalo platform';
       break;
     }
+    case 'getZaloAudio':
+      returnedData = await zaloMessagePlatformRepository.getZaloAudio(
+        tenant,
+        args.pageId,
+        args.conversationId,
+        args.messageId,
+        args.fileUrl,
+      );
+      resolverMessage = 'The message has been converted from Zalo platform';
+      break;
     default: {
       const { field } = event;
       throw new Error(`Unknown field, unable to resolve ${field}`);
