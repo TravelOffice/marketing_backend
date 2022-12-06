@@ -35,6 +35,8 @@ export default class ReceiveWebhookUseCaseImpl implements ReceiveWebhookUseCase 
       customerId = recipient;
     }
     message.time = parseInt(webhookEvent.timestamp, 10);
+    message.from_id = sender;
+    message.to_id = recipient;
 
     // Get the linked page information
     const page = await pageRepository.get(pageId);
