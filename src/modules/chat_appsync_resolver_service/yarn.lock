@@ -425,8 +425,11 @@ atomic-batcher@^1.0.2:
   integrity sha512-EFGCRj4kLX1dHv1cDzTk+xbjBFj1GnJDpui52YmEcxxHHEWjYyT6l51U7n6WQ28osZH4S9gSybxe56Vm7vB61Q==
 
 "auto-assign-utilities@link:../../libs/auto-assign-utilities":
-  version "0.0.0"
-  uid ""
+  version "1.0.0"
+  dependencies:
+    aws "link:../../libs/aws-sdk"
+    common-models "link:../../libs/common-models"
+    get-env "link:../../libs/get-env"
 
 aws-xray-sdk-core@^3.3.5:
   version "3.3.6"
@@ -441,8 +444,10 @@ aws-xray-sdk-core@^3.3.5:
     semver "^5.3.0"
 
 "aws@link:../../libs/aws-sdk":
-  version "0.0.0"
-  uid ""
+  version "1.0.0"
+  dependencies:
+    aws-xray-sdk-core "^3.3.5"
+    dotenv "^16.0.1"
 
 axe-core@^4.4.3:
   version "4.4.3"
@@ -552,8 +557,10 @@ color-name@~1.1.4:
   integrity sha512-dOy+3AuW3a2wNbZHIuMZpTcgjGuLU/uBL/ubcZF9OXbDo8ff4O8yVp5Bf0efS8uEoYo5q4Fx7dY9OgQGXgAsQA==
 
 "common-models@link:../../libs/common-models":
-  version "0.0.0"
-  uid ""
+  version "1.0.0"
+  dependencies:
+    graphql "^16.3.0"
+    graphql-tag "^2.12.6"
 
 compressible@~2.0.16:
   version "2.0.18"
@@ -1180,8 +1187,10 @@ functions-have-names@^1.2.2:
   integrity sha512-xckBUXyTIqT97tq2x2AMb+g163b5JFysYk0x4qxNFwbfQkmNZoiRHb6sPzI9/QV33WeuvVYBUIiD4NzNIyqaRQ==
 
 "get-env@link:../../libs/get-env":
-  version "0.0.0"
-  uid ""
+  version "1.0.0"
+  dependencies:
+    aws "link:../../libs/aws-sdk"
+    dotenv "^16.0.0"
 
 get-intrinsic@^1.0.2, get-intrinsic@^1.1.0, get-intrinsic@^1.1.1:
   version "1.1.2"
@@ -1488,9 +1497,9 @@ json-stable-stringify-without-jsonify@^1.0.1:
   integrity sha512-Bdboy+l7tA3OGW6FjyFHWkP5LuByj1Tk33Ljyq0axyzdk9//JSi2u3fP1QSmd1KNwq6VOKYGlAu87CisVir6Pw==
 
 json5@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/json5/-/json5-1.0.1.tgz#779fb0018604fa854eacbf6252180d83543e3dbe"
-  integrity sha512-aKS4WQjPenRxiQsC93MNfjx+nbF4PAdYzmd/1JIj8HYzqfbu86beTuNgXDzPknWk0n0uARlyewZo4s++ES36Ow==
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/json5/-/json5-1.0.2.tgz#63d98d60f21b313b77c4d6da18bfa69d80e1d593"
+  integrity sha512-g1MWMLBiz8FKi1e4w0UyVL3w+iJceWAFBAaBnnGKOpNa5f8TLktkbre1+s6oICydWAm+HRUGTmI+//xv2hvXYA==
   dependencies:
     minimist "^1.2.0"
 
@@ -1614,9 +1623,9 @@ minimatch@^3.0.4, minimatch@^3.1.1, minimatch@^3.1.2:
     brace-expansion "^1.1.7"
 
 minimist@^1.2.0, minimist@^1.2.6:
-  version "1.2.6"
-  resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.6.tgz#8637a5b759ea0d6e98702cfb3a9283323c93af44"
-  integrity sha512-Jsjnk4bw3YJqYzbdyBiNsPWHPfO++UGG749Cxs6peCu5Xg4nrena6OVxOYxrQTqww0Jmwt+Ref8rggumkTLz9Q==
+  version "1.2.7"
+  resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.7.tgz#daa1c4d91f507390437c6a8bc01078e7000c4d18"
+  integrity sha512-bzfL1YUZsP41gmu/qjrEk0Q6i2ix/cVeAhbCbqH9u3zYutS1cLg00qhrD0M2MVdCcx4Sc0UpP2eBWo9rotpq6g==
 
 ms@2.0.0:
   version "2.0.0"
