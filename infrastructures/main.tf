@@ -22,52 +22,61 @@ locals {
 
   env_vars = {
     standard_vars = {
+      REGION            = var.AWS_REGION
       NODE_ENV          = var.ENV
       SECRET_MANAGER_ID = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
     },
     s3_presigned_url_vars = {
+      REGION                    = var.AWS_REGION
       NODE_ENV                  = var.ENV
       SECRET_MANAGER_ID         = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
       ATTACHMENT_MESSAGE_BUCKET = module.REMOTE_STATE.STATE.MARKETING.frontend.sale_web.attachment_s3_bucket
       PRESIGNED_URL_EXPIRES     = 60
     },
     link_pages_vars = {
+      REGION               = var.AWS_REGION
       NODE_ENV             = var.ENV
       SECRET_MANAGER_ID    = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
       ZALO_CALLBACK_URL    = "www.traveloffice.shop/zalo/callback"
       TELEGRAM_WEBHOOK_URL = "https://${var.ENV}-marketing-backend.traveloffice.shop/chat-telegram-webhook"
     },
     auto_assign_sqs_trigger_lambda_vars = {
-      NODE_ENV            = var.ENV
-      SECRET_MANAGER_ID   = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
-      AUTO_ASSIGN_SFN_ARN = "arn:aws:states:${var.AWS_REGION}:${data.aws_caller_identity.current.account_id}:stateMachine:${var.ENV}-auto-assign-chat"
-      ASSIGN_CHAT_LAMBDA_FUNCTION_ARN = "${var.ENV}-${var.FEATURE_NAME}-auto_assign_chat_service"
+      REGION                                             = var.AWS_REGION
+      NODE_ENV                                           = var.ENV
+      SECRET_MANAGER_ID                                  = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
+      AUTO_ASSIGN_SFN_ARN                                = "arn:aws:states:${var.AWS_REGION}:${data.aws_caller_identity.current.account_id}:stateMachine:${var.ENV}-auto-assign-chat"
+      ASSIGN_CHAT_LAMBDA_FUNCTION_ARN                    = "${var.ENV}-${var.FEATURE_NAME}-auto_assign_chat_service"
       NOTIFY_AUTO_ASSIGN_CHAT_RESULT_LAMBDA_FUNCTION_ARN = "${var.ENV}-${var.FEATURE_NAME}-auto_assign_send_notification"
     },
     appsync_resolver_vars = {
+      REGION                = var.AWS_REGION
       NODE_ENV              = var.ENV
       SECRET_MANAGER_ID     = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
       TELEGRAM_SERVICE_NAME = "${var.ENV}-${var.FEATURE_NAME}-telegram_platform_service"
       FACEBOOK_SERVICE_NAME = "${var.ENV}-${var.FEATURE_NAME}-facebook_platform_service"
-      ZALO_SERVICE_NAME = "${var.ENV}-${var.FEATURE_NAME}-zalo_platform_service"
+      ZALO_SERVICE_NAME     = "${var.ENV}-${var.FEATURE_NAME}-zalo_platform_service"
     },
     handler_unassigned_conversations_vars = {
+      REGION                                             = var.AWS_REGION
       NODE_ENV                                           = var.ENV
       SECRET_MANAGER_ID                                  = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
       TENANT_HANDLE_UNASSIGNED_CONVERSATION_SERVICE_NAME = "${var.ENV}-${var.FEATURE_NAME}-handle_tenant_unassigned_conversations"
     },
     auto_assign_chat_lambda_vars = {
-      NODE_ENV            = var.ENV
-      SECRET_MANAGER_ID   = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
+      REGION            = var.AWS_REGION
+      NODE_ENV          = var.ENV
+      SECRET_MANAGER_ID = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
     },
     auto_assign_send_notification_vars = {
-      NODE_ENV            = var.ENV
-      SECRET_MANAGER_ID   = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
+      REGION                         = var.AWS_REGION
+      NODE_ENV                       = var.ENV
+      SECRET_MANAGER_ID              = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
       SEND_NOTIFICATION_SERVICE_NAME = "${var.ENV}-${var.FEATURE_NAME}-send_notification"
     },
     chat_service_lambda_vars = {
-      NODE_ENV            = var.ENV
-      SECRET_MANAGER_ID   = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
+      REGION                         = var.AWS_REGION
+      NODE_ENV                       = var.ENV
+      SECRET_MANAGER_ID              = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
       SEND_NOTIFICATION_SERVICE_NAME = "${var.ENV}-${var.FEATURE_NAME}-send_notification"
     }
   }
@@ -86,6 +95,7 @@ module "LAMBDA_LAYER" {
   LAMBDA_LAYERS = var.LAMBDA_LAYERS
   ENV           = var.ENV
   FEATURE_NAME  = var.FEATURE_NAME
+  S3_BUCKET     = module.REMOTE_STATE.STATE.COMMON_CONFIG.codepipeline_bucket
   TAGS          = local.tags
 }
 
@@ -112,7 +122,7 @@ module "API_GATEWAY" {
   FEATURE_NAME           = var.FEATURE_NAME
   DOMAIN_NAME            = module.REMOTE_STATE.STATE.COMMON_CONFIG.route53.hosted_zone.domain.name
   HOSTED_ZONE_ID         = module.REMOTE_STATE.STATE.COMMON_CONFIG.route53.hosted_zone.id
-  DOMAIN_CERTIFICATE_ARN = module.REMOTE_STATE.STATE.COMMON_CONFIG.route53.hosted_zone.domain.certificate.arn
+  DOMAIN_CERTIFICATE_ARN = module.REMOTE_STATE.STATE.COMMON_CONFIG.route53.hosted_zone.domain.certificate.api_gateway
   COGNITO_USER_POOL_ARN  = module.REMOTE_STATE.STATE.COMMON_CONFIG.cognito.user_pool.arn
   ENV                    = var.ENV
   TAGS                   = local.tags

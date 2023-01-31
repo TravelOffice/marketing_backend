@@ -11,12 +11,12 @@ module "NEW_CONVERSATION_QUEUE_CONFIGURATION" {
 }
 
 module "AUTO_ASSIGN_STEP_FUNCTION_CONFIGURATION" {
-  source            = "./step_functions"
-  ENV               = var.ENV
-  FEATURE_NAME      = var.FEATURE_NAME
-  NAME              = "${var.ENV}-auto-assign-chat"
-  TEMPLATE_FILE     = "auto_assign_step_functions"
-  TAGS              = var.TAGS
+  source        = "./step_functions"
+  ENV           = var.ENV
+  FEATURE_NAME  = var.FEATURE_NAME
+  NAME          = "${var.ENV}-auto-assign-chat"
+  TEMPLATE_FILE = "auto_assign_step_functions"
+  TAGS          = var.TAGS
   CUSTOM_POLICIES = [
     "StandardStepFunction",
     "DynamoTableReadWrite",
