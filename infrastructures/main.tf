@@ -86,6 +86,7 @@ module "LAMBDA_LAYER" {
   LAMBDA_LAYERS = var.LAMBDA_LAYERS
   ENV           = var.ENV
   FEATURE_NAME  = var.FEATURE_NAME
+  S3_BUCKET     = module.REMOTE_STATE.STATE.COMMON_CONFIG.codepipeline_bucket
   TAGS          = local.tags
 }
 
@@ -112,7 +113,7 @@ module "API_GATEWAY" {
   FEATURE_NAME           = var.FEATURE_NAME
   DOMAIN_NAME            = module.REMOTE_STATE.STATE.COMMON_CONFIG.route53.hosted_zone.domain.name
   HOSTED_ZONE_ID         = module.REMOTE_STATE.STATE.COMMON_CONFIG.route53.hosted_zone.id
-  DOMAIN_CERTIFICATE_ARN = module.REMOTE_STATE.STATE.COMMON_CONFIG.route53.hosted_zone.domain.certificate.arn
+  DOMAIN_CERTIFICATE_ARN = module.REMOTE_STATE.STATE.COMMON_CONFIG.route53.hosted_zone.domain.certificate.api_gateway
   COGNITO_USER_POOL_ARN  = module.REMOTE_STATE.STATE.COMMON_CONFIG.cognito.user_pool.arn
   ENV                    = var.ENV
   TAGS                   = local.tags
