@@ -14,6 +14,7 @@ variable "APPSYNC_LAMBDA_RESOLVER" {}
 data "aws_caller_identity" "current" {}
 locals {
   remote_feature_name = "base_infrastructure"
+  domain_name         = module.REMOTE_STATE.STATE.COMMON_CONFIG.route53.hosted_zone.domain.name
   tags = {
     Env       = var.ENV
     Terraform = true
@@ -37,8 +38,8 @@ locals {
       REGION               = var.AWS_REGION
       NODE_ENV             = var.ENV
       SECRET_MANAGER_ID    = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
-      ZALO_CALLBACK_URL    = "www.traveloffice.shop/zalo/callback"
-      TELEGRAM_WEBHOOK_URL = "https://${var.ENV}-marketing-backend.traveloffice.shop/chat-telegram-webhook"
+      ZALO_CALLBACK_URL    = "sso.${local.domain_name}/zalo/callback"
+      TELEGRAM_WEBHOOK_URL = "https://${var.ENV}-marketing-backend.${local.domain_name}/chat-telegram-webhook"
     },
     auto_assign_sqs_trigger_lambda_vars = {
       REGION                                             = var.AWS_REGION
