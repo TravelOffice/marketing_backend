@@ -60,7 +60,8 @@ export default class SearchRepositoryImpl implements SearchRepository {
     // Update the api key to user record
     const newUser = { ...user };
     newUser.searchApiKey = searchApiKey.key;
-    await userRepository.update(user.tenant, newUser);
+    // Update searchApiKey to database only
+    await userRepository.updateToDatabase(user.tenant, newUser);
     return searchApiKey.key;
   };
 
