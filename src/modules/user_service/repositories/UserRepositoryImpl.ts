@@ -146,22 +146,29 @@ export default class UserRepositoryImpl implements UserRepository {
   };
 
   /**
-   * Method to update Tenant user
-   * To update Tenant user, there are steps need to do:
-   * - Step 1: Update the user information in AuthProvider
-   * - Step 2: Update the user information in Dynamo DB
+   * Method to update user information to authentication provider
    * @param tenantId The id of the Tenant which the user should belong to
    * @param user The user information to be updated
    * @returns Promise<User> All information of updated user
    */
-  update = async (tenantId: string, user: User) => {
-    logger.log(`Tenant: ${tenantId}, User: ${JSON.stringify(user)}`);
+  updateToAuthenticationProvider = async (tenantId: string, user: User) => {
+    logger.log(`Update To Authentication Provider with Tenant: ${tenantId}, User: ${JSON.stringify(user)}`);
+    const username = tenantId === user.username ? tenantId : `${tenantId}${USERNAME_DELIMITER}${user.username}`;
     // Update AuthProvider user
     await authProvider.adminUpdateUser({
-      ...user,
-      username: `${tenantId}${USERNAME_DELIMITER}${user.username}`,
+      ...user, username,
     });
+    return user;
+  };
 
+  /**
+   * Method to update user information to Database
+   * @param tenantId The id of the Tenant which the user should belong to
+   * @param user The user information to be updated
+   * @returns Promise<User> All information of updated user
+   */
+  updateToDatabase = async (tenantId: string, user: User) => {
+    logger.log(`Update to database with Tenant: ${tenantId}, User: ${JSON.stringify(user)}`);
     const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
     const roleStr = `${ROLE_STRING_DELIMITER}${user.roles.join(ROLE_STRING_DELIMITER)}${ROLE_STRING_DELIMITER}`;
     await dynamoProvider.putItem(
@@ -176,6 +183,22 @@ export default class UserRepositoryImpl implements UserRepository {
     );
 
     return user;
+  };
+
+  /**
+   * Method to update Tenant user
+   * To update Tenant user, there are steps need to do:
+   * - Step 1: Update the user information in AuthProvider
+   * - Step 2: Update the user information in Dynamo DB
+   * @param tenantId The id of the Tenant which the user should belong to
+   * @param user The user information to be updated
+   * @returns Promise<User> All information of updated user
+   */
+  update = async (tenantId: string, user: User) => {
+    logger.log(`Tenant: ${tenantId}, User: ${JSON.stringify(user)}`);
+    // Update AuthProvider user
+    await this.updateToAuthenticationProvider(tenantId, user);
+    return this.updateToDatabase(tenantId, user);
   };
 
   delete = async (tenantId: string, userId: string) => {
