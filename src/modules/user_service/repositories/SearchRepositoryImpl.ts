@@ -1,10 +1,14 @@
 import AWS from 'aws';
 import { getAwsSecretValue } from 'get-env';
-import { userRepository } from '.';
-import { User } from '../models';
 import { dynamoProvider, meiliSeachProvider } from '../providers';
 import { QueryInput } from '../providers/DynamoProvider';
-import { MAIL_ACCOUT_INDEX, TENANT_INDEX, USER_INDEX } from '../utils/constants';
+import {
+  MAIL_ACCOUT_INDEX,
+  SEARCH_API_KEY_INDEX,
+  SEARCH_INDEX,
+  TENANT_INDEX,
+  USER_INDEX,
+} from '../utils/constants';
 import { SearchRepository } from './interfaces/SearchRepository';
 
 export default class SearchRepositoryImpl implements SearchRepository {
@@ -26,30 +30,62 @@ export default class SearchRepositoryImpl implements SearchRepository {
 
   /**
    * Get user search API Key
-   * @param user the user information
+   * @param tenantId Tenant ID
+   * @param page the page information
+   * @param customerId the customer ID
    * @returns The API key uid
    */
-  getApiKeys = async (user: User) => {
+  private async getApiKey(tenantId: string, userId: string) {
+    const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const pk = `${TENANT_INDEX}#${tenantId}#${USER_INDEX}#${userId}`;
+    const sk = `${SEARCH_INDEX}#${SEARCH_API_KEY_INDEX}`;
+    const item = await dynamoProvider.getItem(table, pk, sk);
+    if (!item) return undefined;
+    const { apiKey } = item;
+    return apiKey;
+  }
+
+  /**
+   * Update user search API Key
+   * @param tenantId Tenant ID
+   * @param customerId the customer ID
+   * @param apiKey the search api key information
+   */
+  private async updateApiKey(tenantId: string, userId: string, apiKey: string) {
+    const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const pk = `${TENANT_INDEX}#${tenantId}#${USER_INDEX}#${userId}`;
+    const sk = `${SEARCH_INDEX}#${SEARCH_API_KEY_INDEX}`;
+    await dynamoProvider.putItem(table, pk, sk, { apiKey });
+  }
+
+  /**
+   * Get user search API Key
+   * @param tenantId Tenant ID
+   * @param customerId the customer ID
+   * @returns The API key uid
+   */
+  generateApiKeys = async (tenantId: string, userId: string) => {
     // Create api key which allowed only search action
     const actions = ['search'];
-    const description = `Allow search for tenant [${user.tenant}] user [${user.username}]`;
+    const description = `Allow search for tenant [${tenantId}] user [${userId}]`;
 
+    const apiKey = await this.getApiKey(tenantId, userId);
     // Create search API key if not exist or expired
-    if (user.searchApiKey) {
+    if (apiKey) {
       // Check whether key exprised or not
-      const searchApiKey = await meiliSeachProvider.getApiKey(user.searchApiKey);
+      const searchApiKey = await meiliSeachProvider.getApiKey(apiKey);
       const expiresAt = new Date(searchApiKey.expiresAt).getTime();
       const current = new Date().getTime();
       if (expiresAt <= current) {
         // Delete old Api Key and create new
-        meiliSeachProvider.deleteApiKey(user.searchApiKey);
+        meiliSeachProvider.deleteApiKey(apiKey);
       } else {
-        return user.searchApiKey;
+        return apiKey;
       }
     }
     // Allow key to exprised after 1 day
     const expiresAt = new Date();
-    const searchIndex = await this.getAllIndexs(user.tenant, user.username);
+    const searchIndex = await this.getAllIndexs(tenantId, userId);
     expiresAt.setDate(expiresAt.getDate() + 1);
     const searchApiKey = await meiliSeachProvider.createApiKey(
       actions,
@@ -57,11 +93,8 @@ export default class SearchRepositoryImpl implements SearchRepository {
       searchIndex,
       expiresAt,
     );
-    // Update the api key to user record
-    const newUser = { ...user };
-    newUser.searchApiKey = searchApiKey.key;
-    // Update searchApiKey to database only
-    await userRepository.updateToDatabase(user.tenant, newUser);
+
+    await this.updateApiKey(tenantId, userId, searchApiKey.key);
     return searchApiKey.key;
   };
 

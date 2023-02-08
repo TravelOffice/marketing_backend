@@ -18,7 +18,7 @@ implements GetTenantUserWithPermissionUseCase {
   invoke = async (tenantId: string, userId: string) => {
     const user = await userRepository.getWithPermission(tenantId, userId);
     if (!user) throw new Error(`Tenant [${tenantId}] User [${userId}] does not exist!`);
-    const apiKey = await searchRepository.getApiKeys(user);
+    const apiKey = await searchRepository.generateApiKeys(tenantId, userId);
     const searchToken = await searchRepository.generateSearchToken(apiKey);
     return omit({ ...user, searchToken }, OMITTED_USER_ATTRIBUTES);
   };
