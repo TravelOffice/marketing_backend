@@ -1,6 +1,7 @@
 import omit from 'lodash/omit';
+import { User } from '../models';
 import { userRepository } from '../repositories';
-import { OMITTED_USER_ATTRIBUTES } from '../utils/constants';
+import { OMITTED_USER_ATTRIBUTES, ROOT_ROLE } from '../utils/constants';
 import { GetTenantUserListUseCase } from './interfaces/GetTenantUserListUseCase';
 
 export default class GetTenantUserListUseCaseImpl implements GetTenantUserListUseCase {
@@ -15,6 +16,8 @@ export default class GetTenantUserListUseCaseImpl implements GetTenantUserListUs
    */
   invoke = async (tenantId: string) => {
     const users = await userRepository.list(tenantId);
-    return users.map((user) => omit(user, OMITTED_USER_ATTRIBUTES));
+    // Remove root user
+    const filteredUsers = users.filter((user: User) => !user.roleStr.includes(ROOT_ROLE));
+    return filteredUsers.map((user) => omit(user, OMITTED_USER_ATTRIBUTES));
   };
 }
