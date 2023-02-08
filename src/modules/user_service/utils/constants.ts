@@ -52,6 +52,10 @@ export const ROLE_INDEX = 'ROLE';
 
 export const USER_INDEX = 'USER';
 
+export const SEARCH_INDEX = 'SEARCH';
+
+export const SEARCH_API_KEY_INDEX = 'API_KEY';
+
 export const MAIL_ACCOUT_INDEX = 'MAIL_ACCOUNT';
 
 export const OMITTED_USER_ATTRIBUTES = ['tenant', 'pk', 'sk', 'typeLsi', 'wct', 'nacs', 'roleStr', 'searchApiKey'];
