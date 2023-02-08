@@ -7,7 +7,7 @@ import { dynamoProvider } from '../providers';
 import { QueryInput } from '../providers/DynamoProvider';
 import {
   DEFAULT_ROLES,
-  PARTITION_KEY_DELIMITER, PERMISSION_INDEX, ROLE_INDEX, TENANT_INDEX, WHITELIST_INDEX,
+  PARTITION_KEY_DELIMITER, PERMISSION_INDEX, ROLE_INDEX, ROOT_ROLE, TENANT_INDEX, WHITELIST_INDEX,
 } from '../utils/constants';
 import logger from '../utils/logger';
 import { RolePermissionRepository } from './interfaces/RolePermissionRepository';
@@ -173,7 +173,8 @@ export default class RolePermissionRepositoryImpl implements RolePermissionRepos
       } as Role;
     });
     logger.log(`Get list default roles infomation: Found ${roles.length} roles`);
-    return roles;
+    // Remove ROOT role before return to web client.
+    return roles.filter((role: Role) => role.name !== ROOT_ROLE);
   };
 
   /**
