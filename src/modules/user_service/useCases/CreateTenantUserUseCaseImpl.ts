@@ -43,6 +43,7 @@ export default class CreateTenantUserUseCaseImpl implements CreateTenantUserUseC
         theme: THEMES_TYPE.LIGHT,
         language: LANGUAGES_TYPE.VIETNAMESE,
       },
+      wct: false,
     };
 
     const ddbUser = await userRepository.create(tenantId, newUser);
