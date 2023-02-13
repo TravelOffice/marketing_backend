@@ -1,11 +1,12 @@
 import compression from 'compression';
 import cors from 'cors';
+import { getCurrentUserInfo } from 'decode-token';
 import express, { NextFunction, Request, Response } from 'express';
 import { getEnv } from 'get-env';
 import { s3Repository } from './repositories';
 import { FAILED, SUCCESS } from './utils/constants';
 import logger from './utils/logger';
-import validate, { getPresignedUrlValidator } from './utils/validator';
+import validate, { getPresignedUrlValidator, getAvatarPresignedUrlValidator } from './utils/validator';
 import wrapResponse from './utils/wrapResponse';
 
 const app = express();
@@ -30,11 +31,43 @@ app.get('/presigned-url', getPresignedUrlValidator(), async (req: Request, res: 
     const {
       pageId, customerId, fileType, fileName,
     } = req.query;
-    // eslint-disable-next-line max-len
-    const rs = await s3Repository.generatePresignedUrl(bucket, String(pageId), String(customerId), expires, String(fileType), String(fileName));
+    const option = {
+      bucket,
+      pageId: String(pageId),
+      customerId: String(customerId),
+      expires,
+      fileType: String(fileType),
+      fileName: String(fileName),
+    };
+    const rs = await s3Repository.generatePresignedUrl(option);
     res.json(wrapResponse(SUCCESS, rs));
   } catch (error: any) {
     logger.log(`[GET /presigned-url] Generated an error ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.get('/me/avatar/presigned-url', getAvatarPresignedUrlValidator(), async (req: Request, res: Response) => {
+  try {
+    validate(req);
+    const { tenant, username } = getCurrentUserInfo(req.headers.authorization!);
+    const bucket = getEnv('ATTACHMENT_MESSAGE_BUCKET');
+    const expires = Number(getEnv('PRESIGNED_URL_EXPIRES'));
+    const {
+      fileType, fileName,
+    } = req.query;
+    const option = {
+      bucket,
+      tenant,
+      username,
+      fileType: String(fileType),
+      fileName: String(fileName),
+      expires,
+    };
+    const rs = await s3Repository.generateAvatarPresignedUrl(option);
+    res.json(wrapResponse(SUCCESS, rs));
+  } catch (error: any) {
+    logger.log(`[GET /me/avatar/presigned-url] Generated an error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });
