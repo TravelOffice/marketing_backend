@@ -13,6 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "aws": "link:../../libs/aws-sdk",
+    "decode-token": "link:../../libs/decode-token",
     "@vendia/serverless-express": "^4.5.2",
     "compression": "^1.7.4",
     "cors": "^2.8.5",
