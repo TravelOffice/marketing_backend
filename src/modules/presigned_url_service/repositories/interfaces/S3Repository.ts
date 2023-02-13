@@ -1,12 +1,9 @@
 import { PresignedUrl } from '../../models';
+import { GenerateAvatarPresignedUrlOption } from '../../models/GenerateAvatarPresignedUrlOption';
+import { GenerateMailPresignedUrlOption } from '../../models/GenerateMailPresignedUrlOption';
 
 export interface S3Repository {
-  generatePresignedUrl: (
-    bucket: string,
-    pageId: string,
-    customerId: string,
-    expires: number,
-    fileType: string,
-    fileName: string,
-  ) => Promise<PresignedUrl>;
+  generatePresignedUrl: (option: GenerateMailPresignedUrlOption) => Promise<PresignedUrl>;
+
+  generateAvatarPresignedUrl: (option: GenerateAvatarPresignedUrlOption) => Promise<PresignedUrl>
 }
