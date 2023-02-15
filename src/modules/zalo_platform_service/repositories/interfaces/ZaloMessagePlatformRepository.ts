@@ -13,11 +13,12 @@ export interface ZaloMessagePlatformRepository {
     pageId: string,
     assigneeId?: string,
   ) => Promise<ZaloMessageResponsePayload | undefined>;
-  getMessages: (
+  getConversationMessages: (
+    tenantId: string,
     pageId: string,
     userId: string,
-    offset?: number,
-    count?: number,
+    nextToken?: string,
+    limit?: number,
   ) => Promise<ZaloMessageResponsePayload | undefined>;
   getZaloAudio: (
     tenantId: string,

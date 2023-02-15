@@ -3,6 +3,7 @@ import {
   DDBConversation, ZaloReceivedMessageContent,
   ZaloPage, ReceiveMessageCommandArgs,
   ReceiveMessageCommandResponse,
+  DDBMessage,
 } from 'common-models';
 import { getAwsSecretValue } from 'get-env';
 import { ZaloConversationWithAssignee, RestrictedZaloConversation } from '../models/RestrictedZaloModels';
@@ -10,15 +11,45 @@ import { appSyncProvider, dynamoProvider, zaloMessagePlatformProvider } from '..
 import {
   ASSIGNEE_INDEX,
   CONVERSATION_INDEX,
+  MESSAGE_INDEX,
   PARTITION_KEY_DELIMITER,
   TEMPORARY_MESSAGE_INDEX,
   TENANT_INDEX,
   UNKNOWN_USER,
+  sendFileEvents,
+  sendLinkEvents,
+  sendMediaEvents,
+  sendTextEvents,
 } from '../utils/constants';
 import logger from '../utils/logger';
 import { MessageRepository } from './interfaces/MessageRepository';
+import { MessageGroupType } from '../models/Message';
 
 export default class MessageRepositoryImpl implements MessageRepository {
+  private readonly getMessageType = (
+    eventName: string,
+    message: ZaloReceivedMessageContent,
+  ): MessageGroupType => {
+    if (sendTextEvents.includes(eventName)) {
+      // eslint-disable-next-line no-useless-escape
+      const httpRegex = /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&\/\/=]*)/;
+      if (httpRegex.test(message.text!!)) {
+        return MessageGroupType.LINK;
+      }
+      return MessageGroupType.TEXT;
+    }
+    if (sendLinkEvents.includes(eventName)) {
+      return MessageGroupType.LINK;
+    }
+    if (sendFileEvents.includes(eventName)) {
+      return MessageGroupType.FILE;
+    }
+    if (sendMediaEvents.includes(eventName)) {
+      return MessageGroupType.MEDIA;
+    }
+    return MessageGroupType.OTHER;
+  };
+
   /**
    * Send received message command to AppSync
    * @param arg The receive message command arguments
@@ -26,6 +57,47 @@ export default class MessageRepositoryImpl implements MessageRepository {
   sendReceivedMessageCommand = async (
     arg: ReceiveMessageCommandArgs,
   ): Promise<ReceiveMessageCommandResponse> => appSyncProvider.sendReceivedMessageCommand(arg);
+
+  /**
+   * Save the chat message to DynamoDB
+   * @param tenantId Tenant ID
+   * @param platform chat platform
+   * @param page the page information
+   * @param customerId the customer ID
+   * @param message the message which received from webhook
+   * @param eventName the event name which received from webhook
+   */
+  saveChatMessage = async (
+    tenantId: string,
+    platform: ChatPlatform,
+    page: ZaloPage,
+    customerId: string,
+    message: ZaloReceivedMessageContent,
+    eventName: string,
+  ) => {
+    // Save the message to DynamoDB
+    const table = await getAwsSecretValue('DYNAMO_CHAT_TABLE');
+    const chatPlatformIndex = platform.toUpperCase();
+    const pk = `${TENANT_INDEX}#${tenantId}#${MESSAGE_INDEX}#${chatPlatformIndex}#${page.id}`;
+    const sk = `${CONVERSATION_INDEX}#${customerId}#${MESSAGE_INDEX}#${message.msg_id}`;
+    const typeLsi = this.getMessageType(eventName, message);
+    const currentTime = Date.now();
+
+    const conversationMessage: Omit<DDBMessage, 'pk' | 'sk'> = {
+      content: message,
+      typeLsi,
+    };
+
+    await dynamoProvider.putItem(table, pk, sk, {
+      ...conversationMessage,
+      createdAt: currentTime,
+      updatedAt: currentTime,
+    });
+
+    logger.log(`[MessageRepository.saveChatMessage] saved message: ${JSON.stringify({
+      pk, sk, typeLsi, content: message,
+    }, null, 2)}`);
+  };
 
   /**
    * Save the last chat message to DynamoDB
