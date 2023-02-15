@@ -26,6 +26,7 @@ export default class ReceiveWebhookUseCaseImpl implements ReceiveWebhookUseCase 
     const { message, event_name: eventName } = webhookEvent;
     let pageId: string;
     let customerId: string;
+    const chatPlatform = ChatPlatform.zalo;
 
     if (userSendDataEvents.includes(eventName) || anonymousSendDataEvents.includes(eventName)) {
       pageId = recipient;
@@ -43,6 +44,16 @@ export default class ReceiveWebhookUseCaseImpl implements ReceiveWebhookUseCase 
     if (!page) {
       throw new Error('This page is not linked yet!');
     }
+
+    // Save the chat message
+    await messageRepository.saveChatMessage(
+      page.tenantId,
+      chatPlatform,
+      page,
+      customerId,
+      message,
+      eventName,
+    );
 
     if (oaSendDataEvents.includes(eventName)) {
       // Get the metadata of the message
@@ -74,7 +85,7 @@ export default class ReceiveWebhookUseCaseImpl implements ReceiveWebhookUseCase 
       tenant: page.tenantId,
       timestamp: message.time,
       messageData: JSON.stringify(messageData),
-      chatPlatform: ChatPlatform.zalo,
+      chatPlatform,
     };
 
     // Send received message command to AppSync
@@ -84,7 +95,7 @@ export default class ReceiveWebhookUseCaseImpl implements ReceiveWebhookUseCase 
     await saleAssignmentRepository.notifyNewIncomingConversation({
       tenant: page.tenantId,
       pageId: page.id,
-      chatPlatform: page.platform,
+      chatPlatform,
       conversationId: customerId,
     });
   };

@@ -25,3 +25,5 @@ export const FILE_INDEX = 'FILE';
 export const DEFAULT_ROLES = ['ROOT', 'ADMIN', 'SALE'];
 
 export const OMITTED_CONVERSATION_ATTRIBUTES = ['pk', 'sk', 'typeLsi'];
+
+export const PAGINATION_LIMIT = 10;
