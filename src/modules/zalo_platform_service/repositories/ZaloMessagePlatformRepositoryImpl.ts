@@ -17,7 +17,9 @@ import {
   ASSIGNEE_INDEX,
   CONVERSATION_INDEX,
   FILE_INDEX,
+  MESSAGE_INDEX,
   OMITTED_CONVERSATION_ATTRIBUTES,
+  PAGINATION_LIMIT,
   PARTITION_KEY_DELIMITER,
   TEMPORARY_MESSAGE_INDEX,
   TENANT_INDEX,
@@ -199,22 +201,68 @@ export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePla
   };
 
   /**
-   * Get messages for given conversation id
-   * @param pageId Page id
-   * @param userId Conversation id
-   * @param before Before token for paging
-   * @returns
+   * Method to get conversation messages
+   * @param tenantId The id of the Tenant which the user should belong to
+   * @param botId The id of telegram bot
+   * @param chatId The id of the conversation
+   * @param nextToken The token to get next paging item
+   * @param limit The page size
+   * @returns Promise<ZaloMessageResponsePayload> All messages of the conversation
    */
-  getMessages = async (
+  getConversationMessages = async (
+    tenantId: string,
     pageId: string,
     userId: string,
-    offset?: number,
-    count?: number,
-  ): Promise<ZaloMessageResponsePayload | undefined> => {
+    nextToken?: string,
+    limit?: number,
+  ) => {
     try {
-      // Get page token that stored in DynamoDB table by `pageIdAsSender`
-      const pageToken = await this.getZaloMessagePlatformToken(pageId);
-      return zaloMessagePlatformProvider.getMessages(pageToken, userId, offset, count);
+      const dynamoTable = await getAwsSecretValue('DYNAMO_CHAT_TABLE');
+      const paginationLimit = limit || PAGINATION_LIMIT;
+      const platformStr = ChatPlatform.zalo.toUpperCase();
+      const params = {
+        TableName: dynamoTable,
+        KeyConditionExpression: '#pk = :pk AND begins_with ( #sk, :sk )',
+        ExpressionAttributeNames: {
+          '#pk': 'pk',
+          '#sk': 'sk',
+        },
+        ExpressionAttributeValues: {
+          ':pk': `${TENANT_INDEX}#${tenantId}#${MESSAGE_INDEX}#${platformStr}#${pageId}`,
+          ':sk': `${CONVERSATION_INDEX}#${userId}#${MESSAGE_INDEX}#`,
+        },
+        ScanIndexForward: false, // Sort descending
+        Limit: paginationLimit,
+        ExclusiveStartKey: nextToken ? JSON.parse(nextToken) : undefined,
+      };
+      const { LastEvaluatedKey, Items: messageItems } = await dynamoProvider.rawQuery(params);
+      if (messageItems) {
+        return {
+          data: messageItems.map((message: any) => {
+            const {
+              sk, pk, typeLsi, ...rest
+            } = message;
+            return {
+              content: rest.content,
+            };
+          }),
+          paging: {
+            cursors: {
+              before: LastEvaluatedKey ? JSON.stringify(LastEvaluatedKey) : '',
+              after: nextToken || '',
+            },
+          },
+        } as ZaloMessageResponsePayload;
+      }
+      return {
+        data: [],
+        paging: {
+          cursors: {
+            before: '',
+            after: '',
+          },
+        },
+      } as ZaloMessageResponsePayload;
     } catch (error) {
       logger.log(`[ZaloMessagePlatformRepositoryImpl.getMessages] Generated an error ${error}`);
       throw error;

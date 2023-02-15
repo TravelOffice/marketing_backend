@@ -39,11 +39,12 @@ const handleAppSyncEvent = async (event: AppSyncEvent) => {
       break;
 
     case 'allZaloMessages':
-      returnedData = await zaloMessagePlatformRepository.getMessages(
+      returnedData = await zaloMessagePlatformRepository.getConversationMessages(
+        tenant,
         args.pageId,
         args.conversationId,
-        args.offset,
-        args.count,
+        args.nextToken,
+        args.limit,
       );
       resolverMessage = 'The message has been fetched from Zalo platform';
       break;
