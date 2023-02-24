@@ -1,4 +1,6 @@
 import {
+  ChatPlatform,
+  FacebookConversation,
   FacebookMessageContent,
   FacebookPage,
   ReceiveMessageCommandArgs,
@@ -11,10 +13,23 @@ export interface MessageRepository {
     arg: ReceiveMessageCommandArgs
   ) => Promise<ReceiveMessageCommandResponse>
 
+  saveChatMessage: (
+    tenantId: string,
+    platform: ChatPlatform,
+    page: FacebookPage,
+    fbConversationId: string,
+    message: FacebookMessageContent,
+  ) => Promise<void>
+
+  getConversationInfo: (
+    page: FacebookPage,
+    customerId: string,
+  ) => Promise<FacebookConversation>
+
   saveConversation: (
     tenantId: string,
     page: FacebookPage,
-    customerId: string,
-    message: FacebookMessageContent
+    message: FacebookMessageContent,
+    fbConversation: FacebookConversation,
   ) => Promise<FacebookConversationWithAssignee>
 }

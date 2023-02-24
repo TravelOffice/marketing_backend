@@ -11,11 +11,12 @@ export interface FbMessagePlatformRepository {
     pageId: string,
     assigneeId?: string,
   ) => Promise<FacebookMessageResponsePayload | undefined>;
-  getMessages: (
-    senderAsPageId: string,
+  getConversationMessages: (
+    tenantId: string,
+    pageId: string,
     conversationId: string,
-    after?: string,
-    limit?: number
+    nextToken?: string,
+    limit?: number,
   ) => Promise<FacebookMessageResponsePayload | undefined>;
   getUserProfile: (pageId: string, userId: string) => Promise<FacebookUserProfile | undefined>;
 }

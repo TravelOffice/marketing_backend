@@ -12,7 +12,9 @@ import {
   ASSIGNEE_INDEX,
   CONVERSATION_INDEX,
   FACEBOK_PAGE_INDEX,
+  MESSAGE_INDEX,
   OMITTED_CONVERSATION_ATTRIBUTES,
+  PAGINATION_LIMIT,
   PARTITION_KEY_DELIMITER,
   TENANT_INDEX,
 } from '../utils/constants';
@@ -140,26 +142,71 @@ export default class FbMessagePlatformRepositoryImpl implements FbMessagePlatfor
   };
 
   /**
-   * Get messages for given conversation id
-   * @param senderAsPageId Page id
-   * @param conversationId Conversation id
-   * @param before Before token for paging
-   * @param limit Number of items returned from fb api
-   * @returns
+   * Method to get conversation messages
+   * @param tenantId The id of tenant
+   * @param pageId The id of Facebook page
+   * @param conversationId The id of the conversation
+   * @param nextToken The token to get next paging item
+   * @param limit The page size
+   * @returns Promise<FacebookMessageResponsePayload> All messages of the conversation
    */
-  getMessages = async (
-    senderAsPageId: string,
+  getConversationMessages = async (
+    tenantId: string,
+    pageId: string,
     conversationId: string,
-    after?: string,
+    nextToken?: string,
     limit?: number,
-  ): Promise<FacebookMessageResponsePayload | undefined> => {
+  ) => {
     try {
-      // Get page token that stored in DynamoDB table by `pageIdAsSender`
-      const pageToken = await this.getFbMessagePlatformToken(senderAsPageId);
-      return fbMessagePlatformProvider.getMessages(pageToken, conversationId, after, limit);
+      const dynamoTable = await getAwsSecretValue('DYNAMO_CHAT_TABLE');
+      const paginationLimit = limit || PAGINATION_LIMIT;
+      const platformStr = ChatPlatform.facebook.toUpperCase();
+      const params = {
+        TableName: dynamoTable,
+        KeyConditionExpression: '#pk = :pk AND begins_with ( #sk, :sk )',
+        ExpressionAttributeNames: {
+          '#pk': 'pk',
+          '#sk': 'sk',
+        },
+        ExpressionAttributeValues: {
+          ':pk': `${TENANT_INDEX}#${tenantId}#${MESSAGE_INDEX}#${platformStr}#${pageId}`,
+          ':sk': `${CONVERSATION_INDEX}#${conversationId}#${MESSAGE_INDEX}#`,
+        },
+        ScanIndexForward: false, // Sort descending
+        Limit: paginationLimit,
+        ExclusiveStartKey: nextToken ? JSON.parse(nextToken) : undefined,
+      };
+      const { LastEvaluatedKey, Items: messageItems } = await dynamoProvider.rawQuery(params);
+      if (messageItems) {
+        return {
+          data: messageItems.map((message: any) => {
+            const {
+              sk, pk, typeLsi, ...rest
+            } = message;
+            return {
+              content: rest.content,
+            };
+          }),
+          paging: {
+            cursors: {
+              before: LastEvaluatedKey ? JSON.stringify(LastEvaluatedKey) : '',
+              after: nextToken || '',
+            },
+          },
+        } as FacebookMessageResponsePayload;
+      }
+      return {
+        data: [],
+        paging: {
+          cursors: {
+            before: '',
+            after: '',
+          },
+        },
+      } as FacebookMessageResponsePayload;
     } catch (error) {
       logger.log(`[FbMessagePlatformRepositoryImpl.getMessages] Generated an error ${error}`);
-      return undefined;
+      throw error;
     }
   };
 
