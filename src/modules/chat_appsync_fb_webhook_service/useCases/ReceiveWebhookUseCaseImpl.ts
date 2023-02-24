@@ -36,12 +36,24 @@ export default class ReceiveWebhookUseCaseImpl implements ReceiveWebhookUseCase 
       throw new Error('This page is not linked yet!');
     }
 
+    // Get conversaiton infor
+    const fbConversation = await messageRepository.getConversationInfo(page, customerId);
+
+    // Save the chat message
+    await messageRepository.saveChatMessage(
+      page.tenantId,
+      ChatPlatform.facebook,
+      page,
+      fbConversation.id,
+      message,
+    );
+
     // Save the last message to conversation
     const conversation = await messageRepository.saveConversation(
       page.tenantId,
       page,
-      customerId,
       message,
+      fbConversation,
     );
 
     // Delete mid attribute, mid will be appeared in ReceiveMessageCommandArgs

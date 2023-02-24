@@ -15,3 +15,11 @@ export interface FacebookMessageResponsePayload {
 export interface TenantFacebookPage extends FacebookPage {
   tenantId: string,
 }
+
+export enum MessageGroupType {
+  TEXT = 'TEXT',
+  MEDIA = 'MEDIA',
+  LINK = 'LINK',
+  FILE = 'FILE',
+  OTHER = 'OTHER',
+}

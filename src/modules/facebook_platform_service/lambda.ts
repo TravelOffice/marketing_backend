@@ -38,10 +38,11 @@ const handleAppSyncEvent = async (event: AppSyncEvent) => {
 
     case 'allFbMessages': {
       // Fetch messages when opening Sales Web or user scroll the chat box
-      returnedData = await fbMessagePlatformRepository.getMessages(
+      returnedData = await fbMessagePlatformRepository.getConversationMessages(
+        event.tenant,
         args.pageId,
         args.conversationId,
-        args.after,
+        args.nextToken,
         args.limit,
       );
       resolverMessage = 'The messages has been fetched from Facebook platform';
