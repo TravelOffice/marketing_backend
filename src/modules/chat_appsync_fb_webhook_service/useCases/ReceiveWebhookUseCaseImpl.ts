@@ -39,20 +39,23 @@ export default class ReceiveWebhookUseCaseImpl implements ReceiveWebhookUseCase 
     // Get conversaiton infor
     const fbConversation = await messageRepository.getConversationInfo(page, customerId);
 
+    // Get message information
+    const fbMessage = await messageRepository.getMessageInfo(page, message.mid);
+
     // Save the chat message
     await messageRepository.saveChatMessage(
       page.tenantId,
       ChatPlatform.facebook,
       page,
       fbConversation.id,
-      message,
+      fbMessage,
     );
 
     // Save the last message to conversation
     const conversation = await messageRepository.saveConversation(
       page.tenantId,
       page,
-      message,
+      fbMessage,
       fbConversation,
     );
 
