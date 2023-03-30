@@ -1,10 +1,10 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Optional } from 'utility-types';
-import { FacebookMessageContent, FacebookSendMessageContent } from '../facebook-message-platform';
+import { FacebookWebhookMessageContent, FacebookSendMessageContent } from '../facebook-message-platform';
 import { ZaloReceivedMessageContent, ZaloSendMessageContent } from '../zalo-message-platform';
 import { TelegramMessageContent } from '../telegram-message-platform';
 
-export type AppSyncFacebookReceivedMessageData = Optional<FacebookMessageContent, 'mid'>;
+export type AppSyncFacebookReceivedMessageData = Optional<FacebookWebhookMessageContent, 'mid'>;
 export type AppSyncZaloReceivedMessageData = Optional<ZaloReceivedMessageContent, 'msg_id'>;
 export type AppSyncTelegramReceivedMessageData = Optional<TelegramMessageContent, 'message_id'>;
 

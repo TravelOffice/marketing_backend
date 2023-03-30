@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
-import { FacebookConversation } from 'common-models';
+import { FacebookConversation, FacebookMessage } from 'common-models';
 import { FacebookMessageResponsePayload } from '../models/Facebook';
 import logger from '../utils/logger';
 
@@ -45,5 +45,29 @@ export default class FbMessagePlatformProvider {
       `[FbMessagePlatformProvider.getConversation] Conversation of page ${pageId} ${JSON.stringify(response.data)}`,
     );
     return data[0];
+  };
+
+  /**
+   * Get message information by message ID
+   * @param pageToken Page token to access data from message platform
+   * @param messageId Id of message
+   */
+  getMessage = async (
+    pageToken: string,
+    messageId: string,
+  ): Promise<FacebookMessage> => {
+    const params = {
+      access_token: pageToken,
+      fields: 'created_time,from,id,message,to,attachments,shares',
+    };
+    const response = await this.axiosInstance.get(`${messageId}`, { params });
+    const { data } = response;
+    if (!data) {
+      throw new Error(`[FbMessagePlatformProvider.getMessage]: Message with ID ${messageId} not found!`);
+    }
+    logger.log(
+      `[FbMessagePlatformProvider.getMessage] Message with ID ${messageId} ${JSON.stringify(response.data)}`,
+    );
+    return data as FacebookMessage;
   };
 }
