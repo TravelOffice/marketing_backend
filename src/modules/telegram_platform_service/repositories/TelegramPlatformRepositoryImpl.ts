@@ -56,9 +56,9 @@ export default class TelegramPlatformRepositoryImpl implements TelegramPlatformR
     if (!item) throw new Error(`Conversation [${chatId}] not found.`);
 
     const {
-      pk, sk, typeLsi, ...conversation
+      pk, sk, lsi1, lsi2, lsi3, lsi4, lsi5, ...conversation
     } = item;
-    const [, assignee] = typeLsi.split(PARTITION_KEY_DELIMITER);
+    const [, assignee] = lsi1.split(PARTITION_KEY_DELIMITER);
     return {
       ...conversation,
       conversationId: chatId,
@@ -107,7 +107,7 @@ export default class TelegramPlatformRepositoryImpl implements TelegramPlatformR
         messages: messageItems.map((item: AWS.DynamoDB.AttributeMap) => {
           const messages = AWS.DynamoDB.Converter.unmarshall(item);
           const {
-            sk, pk, typeLsi, ...rest
+            sk, pk, lsi1, ...rest
           } = messages;
           return {
             content: rest.content,
@@ -187,7 +187,7 @@ export default class TelegramPlatformRepositoryImpl implements TelegramPlatformR
     const params: QueryInput = {
       TableName: dynamoTable,
       IndexName: 'TypeIndex',
-      KeyConditionExpression: 'pk = :pk AND begins_with(typeLsi, :lsi_filter_value)',
+      KeyConditionExpression: 'pk = :pk AND begins_with(lsi1, :lsi_filter_value)',
       ExpressionAttributeValues: {
         // Combination of TENANT#<tenant_id>#CONVERSATION#<platform>#<id>
         ':pk': { S: `${TENANT_INDEX}#${tenantId}#${CONVERSATION_INDEX}#${telegramPlatformStr.toUpperCase()}#${botId}` },
@@ -199,11 +199,11 @@ export default class TelegramPlatformRepositoryImpl implements TelegramPlatformR
       return conversationItems.map((item: AWS.DynamoDB.AttributeMap) => {
         const conversation = AWS.DynamoDB.Converter.unmarshall(item);
         const {
-          sk, pk, typeLsi, ...rest
+          sk, pk, lsi1, ...rest
         } = conversation;
         const [, conversationId] = sk.split(PARTITION_KEY_DELIMITER);
-        if (typeLsi) {
-          const [, assignee] = typeLsi.split(PARTITION_KEY_DELIMITER);
+        if (lsi1) {
+          const [, assignee] = lsi1.split(PARTITION_KEY_DELIMITER);
           return {
             ...rest,
             assignee,
@@ -348,7 +348,7 @@ export default class TelegramPlatformRepositoryImpl implements TelegramPlatformR
 
     if (item) {
       const {
-        sk, pk, typeLsi, ...rest
+        sk, pk, lsi1, ...rest
       } = item;
       const info = rest as RestrictedTelegramFile;
       info.fileInfo.file_path = `${chatFileBucketUrl}/${info.fileInfo.file_path}`;
