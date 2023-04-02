@@ -23,8 +23,8 @@ export default class LeadRepositoryImpl implements LeadRepository {
     const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
     const pk = `${TENANT_INDEX}#${tenantId}`;
     const sk = `${LEAD_INDEX}#${lead.primaryPhoneNumber}`;
-    const typeLsi = `${lead.type}#${lead.assigneeId}#${lead.enabled ? ENABLED : DISABLED}#${lead.status}`;
-    await dynamoProvider.putItem(table, pk, sk, { ...lead, typeLsi });
+    const lsi1 = `${lead.type}#${lead.assigneeId}#${lead.enabled ? ENABLED : DISABLED}#${lead.status}`;
+    await dynamoProvider.putItem(table, pk, sk, { ...lead, lsi1 });
     return lead;
   };
 
@@ -107,7 +107,7 @@ export default class LeadRepositoryImpl implements LeadRepository {
     const params: QueryInput = {
       TableName: table,
       IndexName: 'TypeIndex',
-      KeyConditionExpression: 'pk = :pk AND begins_with(typeLsi, :lsi_filter_value)',
+      KeyConditionExpression: 'pk = :pk AND begins_with(lsi1, :lsi_filter_value)',
       ExpressionAttributeValues: {
         ':pk': { S: `${TENANT_INDEX}#${tenantId}` },
         ':lsi_filter_value': { S: filterLSI },

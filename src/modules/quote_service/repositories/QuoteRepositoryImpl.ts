@@ -59,7 +59,7 @@ export default class QuoteRepositoryImpl implements QuoteRepository {
     const params: QueryInput = {
       TableName: table,
       IndexName: 'TypeIndex',
-      KeyConditionExpression: 'pk = :pk AND begins_with(typeLsi, :lsi_filter_value)',
+      KeyConditionExpression: 'pk = :pk AND begins_with(lsi1, :lsi_filter_value)',
       ExpressionAttributeValues: {
         ':pk': { S: `${TENANT_INDEX}#${tenantId}#${QUOTE_INDEX}` },
         ':lsi_filter_value': { S: filterLSI },
@@ -98,7 +98,7 @@ export default class QuoteRepositoryImpl implements QuoteRepository {
       const quotes = Items.map((item: any) => {
         const quote = AWS.DynamoDB.Converter.unmarshall(item);
         const {
-          sk, pk, typeLsi, ...rest
+          sk, pk, lsi1, lsi2, lsi3, lsi4, lsi5, ...rest
         } = quote;
         return rest as Quote;
       });

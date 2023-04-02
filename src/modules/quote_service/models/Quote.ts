@@ -34,7 +34,11 @@ export interface Attachment {
 export interface Quote {
   sk: string,
   pk: string,
-  typeLsi: string,
+  lsi1: string,
+  lsi2: string,
+  lsi3: string,
+  lsi4: string,
+  lsi5: string,
   leadId: string,
   leadName: string,
   opportunityId: string,

@@ -12,7 +12,7 @@ export enum HTTP_VERB {
 }
 
 // DDB Model without indexes
-export type RestrictedDDBModel<T extends BaseDdbModel> = Omit<T, 'pk' | 'sk' | 'typeLsi'>;
+export type RestrictedDDBModel<T extends BaseDdbModel> = Omit<T, 'pk' | 'sk' | 'lsi1' | 'lis2' | 'lis3' | 'lis4' | 'lis5'>;
 // Type of sk is string
 type TypeOfSk = BaseDdbModel['sk'];
 

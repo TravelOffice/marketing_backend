@@ -31,7 +31,7 @@ export default class PageRepositoryImpl implements PageRepository {
     }
     const pageItem = AWS.DynamoDB.Converter.unmarshall(pageItems[0]);
     const {
-      pk, sk, typeLsi, ...page
+      pk, sk, lsi1, lsi2, lsi3, lsi4, lsi5, ...page
     } = pageItem;
     return { tenantId, ...page } as TenantTelegramPage;
   };

@@ -43,7 +43,7 @@ export default class GetQuoteListByAssigneeUseCaseImpl implements GetQuoteListBy
       const opportunityId = splittedSk[3];
       const leadName = leadsAndCustomers.find((lead: Lead) => lead.createdAt === leadId)?.name || '';
       const {
-        sk, pk, typeLsi, ...returnQuote
+        sk, pk, lsi1, lsi2, lsi3, lsi4, lsi5, ...returnQuote
       } = {
         ...quote, leadId, opportunityId, leadName,
       };

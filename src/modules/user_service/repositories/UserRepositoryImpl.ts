@@ -50,7 +50,7 @@ export default class UserRepositoryImpl implements UserRepository {
     const users = items.map((item) => {
       const user = AWS.DynamoDB.Converter.unmarshall(item);
       const {
-        pk, sk, typeLsi, ...rest
+        pk, sk, lsi1, lsi2, lsi3, lsi4, lsi5, ...rest
       } = user;
       return rest as User;
     });
@@ -74,7 +74,7 @@ export default class UserRepositoryImpl implements UserRepository {
       `${EMPLOYEE_INDEX}#${userId}`,
     );
     const {
-      pk, sk, typeLsi, ...user
+      pk, sk, lsi1, lsi2, lsi3, lsi4, lsi5, ...user
     } = item;
 
     return user;
@@ -132,7 +132,7 @@ export default class UserRepositoryImpl implements UserRepository {
     const pk = `${TENANT_INDEX}#${tenantId}`;
     const sk = `${EMPLOYEE_INDEX}#${user.username}`;
     // TODO: Need to be implement more user status to filter
-    const typeLsi = `${EMPLOYEE_INDEX}#${ENABLED}`;
+    const lsi1 = `${EMPLOYEE_INDEX}#${ENABLED}`;
     const roleStr = `${ROLE_STRING_DELIMITER}${user.roles.join(ROLE_STRING_DELIMITER)}${ROLE_STRING_DELIMITER}`;
     const currentTime = Date.now();
     await dynamoProvider.putItem(table, pk, sk, {
@@ -140,7 +140,7 @@ export default class UserRepositoryImpl implements UserRepository {
       roleStr,
       createdAt: currentTime,
       updatedAt: currentTime,
-      typeLsi,
+      lsi1,
     });
     return user;
   };

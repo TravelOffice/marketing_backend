@@ -39,12 +39,12 @@ export default class OpportunityRepositoryImpl implements OpportunityRepository 
     await dynamoProvider.putItem(dynamoTable, `${TENANT_INDEX}#${tenantId}#${LEAD_INDEX}#${leadId}`, `${TENANT_INDEX}#${tenantId}#${OPPORTUNITY_INDEX}#${opportunityId}`, {
       ...opportunityToCreate,
       typeGsi: `${OPPORTUNITY_INDEX}#${TENANT_INDEX}#${tenantId}`,
-      typeLsi: `${OPPORTUNITY_INDEX}#${opportunity.status}`,
+      lsi1: `${OPPORTUNITY_INDEX}#${opportunity.status}`,
     });
     // Save to Employee partition1
     await dynamoProvider.putItem(dynamoTable, `${TENANT_INDEX}#${tenantId}#${EMPLOYEE_INDEX}#${employeeId}`, `${OPPORTUNITY_INDEX}#${opportunityId}`, {
       ...opportunityToCreate,
-      typeLsi: `${OPPORTUNITY_INDEX}#${opportunity.status}`,
+      lsi1: `${OPPORTUNITY_INDEX}#${opportunity.status}`,
     });
     return opportunityToCreate;
   };
@@ -108,7 +108,7 @@ export default class OpportunityRepositoryImpl implements OpportunityRepository 
     const opportunityAssigneeId = `${opportunity.assigneeId}`;
     const newOpportunity = {
       ...opportunity,
-      typeLsi: `${OPPORTUNITY_INDEX}#${opportunity.status}`,
+      lsi1: `${OPPORTUNITY_INDEX}#${opportunity.status}`,
       updatedAt: Date.now(),
     };
 
@@ -187,7 +187,7 @@ export default class OpportunityRepositoryImpl implements OpportunityRepository 
     const params: QueryInput = {
       TableName: dynamoTable,
       IndexName: 'TypeIndex',
-      KeyConditionExpression: 'pk = :pk AND begins_with(typeLsi, :lsi_filter_value)',
+      KeyConditionExpression: 'pk = :pk AND begins_with(lsi1, :lsi_filter_value)',
       ExpressionAttributeValues: {
         ':pk': { S: `${TENANT_INDEX}#${tenantId}#${LEAD_INDEX}#${leadId}` },
         ':lsi_filter_value': { S: filterLsi },
@@ -220,7 +220,7 @@ export default class OpportunityRepositoryImpl implements OpportunityRepository 
     const params: QueryInput = {
       TableName: dynamoTable,
       IndexName: 'TypeIndex',
-      KeyConditionExpression: 'pk = :pk AND begins_with(typeLsi, :lsi_filter_value)',
+      KeyConditionExpression: 'pk = :pk AND begins_with(lsi1, :lsi_filter_value)',
       ExpressionAttributeValues: {
         ':pk': { S: `${TENANT_INDEX}#${tenantId}#${EMPLOYEE_INDEX}#${assigneeId}` },
         ':lsi_filter_value': { S: filterLsi },

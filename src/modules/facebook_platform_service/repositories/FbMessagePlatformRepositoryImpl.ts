@@ -95,7 +95,7 @@ export default class FbMessagePlatformRepositoryImpl implements FbMessagePlatfor
       KeyConditionExpression: '#pk = :pk AND begins_with ( #lsi, :lsi_filter_value )',
       ExpressionAttributeNames: {
         '#pk': 'pk',
-        '#lsi': 'typeLsi',
+        '#lsi': 'lsi1',
       },
       ExpressionAttributeValues: {
         ':pk': `${TENANT_INDEX}#${tenantId}#${CONVERSATION_INDEX}#${facebookPlatformStr}#${pageId}`,
@@ -107,11 +107,11 @@ export default class FbMessagePlatformRepositoryImpl implements FbMessagePlatfor
     if (items) {
       const conversations = items.map(
         (conversation) => {
-          const { typeLsi, sk } = conversation;
+          const { lsi1, sk } = conversation;
           const [, conversationId] = sk.split(PARTITION_KEY_DELIMITER);
           const restrictedConversation = omit(conversation, OMITTED_CONVERSATION_ATTRIBUTES);
-          if (typeLsi) {
-            const [, assignee] = typeLsi.split(PARTITION_KEY_DELIMITER);
+          if (lsi1) {
+            const [, assignee] = lsi1.split(PARTITION_KEY_DELIMITER);
             return {
               ...restrictedConversation,
               assignee,
@@ -181,7 +181,7 @@ export default class FbMessagePlatformRepositoryImpl implements FbMessagePlatfor
         return {
           data: messageItems.map((message: any) => {
             const {
-              sk, pk, typeLsi, ...rest
+              sk, pk, lsi1, lsi2, lsi3, lsi4, lsi5, ...rest
             } = message;
             return {
               content: rest.content,

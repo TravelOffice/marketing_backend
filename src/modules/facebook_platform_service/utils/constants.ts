@@ -20,6 +20,6 @@ export const PERMISSION_INDEX = 'PERMISSION';
 
 export const DEFAULT_ROLES = ['ROOT', 'ADMIN', 'SALE'];
 
-export const OMITTED_CONVERSATION_ATTRIBUTES = ['pk', 'sk', 'typeLsi'];
+export const OMITTED_CONVERSATION_ATTRIBUTES = ['pk', 'sk', 'lsi1', 'lsi2', 'lsi3', 'lsi4', 'lsi5'];
 
 export const PAGINATION_LIMIT = 10;

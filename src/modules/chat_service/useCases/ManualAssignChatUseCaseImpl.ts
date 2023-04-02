@@ -29,7 +29,7 @@ export default class ManualAssignChatUseCaseImpl implements ManualAssignChatUseC
     }
 
     // Return conversation immediately if current assignee is same as new assignee
-    const [, currentAssignee] = conversation.typeLsi!.split(PARTITION_KEY_DELIMITER);
+    const [, currentAssignee] = conversation.lsi1!.split(PARTITION_KEY_DELIMITER);
     if (assignee !== currentAssignee) {
       // Get user to ensure that this user is existed
       const employee = await userRepository.getEmployee(tenant, assignee);
@@ -79,7 +79,7 @@ export default class ManualAssignChatUseCaseImpl implements ManualAssignChatUseC
     });
 
     const {
-      pk, sk, typeLsi, ...restrictedData
+      pk, sk, lsi1, lsi2, lsi3, lsi4, lsi5, ...restrictedData
     } = conversation;
 
     return {
