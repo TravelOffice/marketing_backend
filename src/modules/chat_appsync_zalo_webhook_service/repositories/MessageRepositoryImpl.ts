@@ -80,12 +80,12 @@ export default class MessageRepositoryImpl implements MessageRepository {
     const chatPlatformIndex = platform.toUpperCase();
     const pk = `${TENANT_INDEX}#${tenantId}#${MESSAGE_INDEX}#${chatPlatformIndex}#${page.id}`;
     const sk = `${CONVERSATION_INDEX}#${customerId}#${MESSAGE_INDEX}#${message.msg_id}`;
-    const typeLsi = this.getMessageType(eventName, message);
+    const lsi1 = this.getMessageType(eventName, message);
     const currentTime = Date.now();
 
     const conversationMessage: Omit<DDBMessage, 'pk' | 'sk'> = {
       content: message,
-      typeLsi,
+      lsi1,
     };
 
     await dynamoProvider.putItem(table, pk, sk, {
@@ -95,7 +95,7 @@ export default class MessageRepositoryImpl implements MessageRepository {
     });
 
     logger.log(`[MessageRepository.saveChatMessage] saved message: ${JSON.stringify({
-      pk, sk, typeLsi, content: message,
+      pk, sk, lsi1, content: message,
     }, null, 2)}`);
   };
 
@@ -134,8 +134,8 @@ export default class MessageRepositoryImpl implements MessageRepository {
       logger.log(`[MessageRepository.saveConversation] saved conversation: ${JSON.stringify({
         pk, sk, newConversation,
       }, null, 2)}`);
-      const assignee = conversation.typeLsi
-        ? conversation.typeLsi.split(PARTITION_KEY_DELIMITER)[1]
+      const assignee = conversation.lsi1
+        ? conversation.lsi1.split(PARTITION_KEY_DELIMITER)[1]
         : UNKNOWN_USER;
       return {
         ...newConversation,
@@ -152,14 +152,14 @@ export default class MessageRepositoryImpl implements MessageRepository {
       throw new Error(`Could not found the remote conversation of page: ${JSON.stringify(page)} and customer ${customerId}`);
     }
     // Create new conversation with unknown user
-    const typeLsi = `${ASSIGNEE_INDEX}#${UNKNOWN_USER}`;
+    const lsi1 = `${ASSIGNEE_INDEX}#${UNKNOWN_USER}`;
     newConversation = {
       info: zaloConversation,
       lastMessage: message,
     };
     await dynamoProvider.putItem(table, pk, sk, {
       ...newConversation,
-      typeLsi,
+      lsi1,
       createdAt: currentTime,
       updatedAt: currentTime,
     });

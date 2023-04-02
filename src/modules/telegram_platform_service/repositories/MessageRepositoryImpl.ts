@@ -88,12 +88,12 @@ export default class MessageRepositoryImpl implements MessageRepository {
     const chatPlatformIndex = platform.toUpperCase();
     const pk = `${TENANT_INDEX}#${tenantId}#${MESSAGE_INDEX}#${chatPlatformIndex}#${pageId}`;
     const sk = `${CONVERSATION_INDEX}#${message.chat.id}#${MESSAGE_INDEX}#${message.message_id}`;
-    const typeLsi = this.getMessageType(message);
+    const lsi1 = this.getMessageType(message);
     const currentTime = Date.now();
 
     const conversationMessage: Omit<DDBMessage, 'pk' | 'sk'> = {
       content: message,
-      typeLsi,
+      lsi1,
     };
 
     await dynamoProvider.putItem(table, pk, sk, {
@@ -103,7 +103,7 @@ export default class MessageRepositoryImpl implements MessageRepository {
     });
 
     logger.log(`[MessageRepository.saveChatMessage] saved message: ${JSON.stringify({
-      pk, sk, typeLsi, content: message,
+      pk, sk, lsi1, content: message,
     }, null, 2)}`);
   };
 
@@ -138,11 +138,11 @@ export default class MessageRepositoryImpl implements MessageRepository {
       });
     } else {
       // Create new conversation with unknown user
-      const typeLsi = `${ASSIGNEE_INDEX}#${UNKNOWN_USER}`;
+      const lsi1 = `${ASSIGNEE_INDEX}#${UNKNOWN_USER}`;
       const newConversation: Omit<DDBConversation, 'pk' | 'sk'> = {
         info: message.chat,
         lastMessage: message,
-        typeLsi,
+        lsi1,
       };
       await dynamoProvider.putItem(table, pk, sk, {
         ...newConversation,

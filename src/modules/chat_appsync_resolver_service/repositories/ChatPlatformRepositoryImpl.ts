@@ -34,8 +34,8 @@ export default class ChatPlatformRepositoryImpl implements ChatPlatformRepositor
 
     if (!item) throw new Error(`Conversation [${conversationId}] not found.`);
 
-    const { typeLsi } = item;
-    const [, assignee] = typeLsi.split(PARTITION_KEY_DELIMITER);
+    const { lsi1 } = item;
+    const [, assignee] = lsi1.split(PARTITION_KEY_DELIMITER);
     return assignee;
   };
 }

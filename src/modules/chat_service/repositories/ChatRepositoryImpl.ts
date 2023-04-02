@@ -40,7 +40,7 @@ export default class ChatRepositoryImpl implements ChatRepository {
       TableName: table,
       IndexName: CONVERSATION_ASSSIGNEE_INDEX,
       ExpressionAttributeNames: {
-        '#kn0': 'typeLsi',
+        '#kn0': 'lsi1',
         '#kn1': 'pk',
       },
       ExpressionAttributeValues: {
@@ -77,7 +77,7 @@ export default class ChatRepositoryImpl implements ChatRepository {
       TableName: table,
       IndexName: CONVERSATION_ASSSIGNEE_INDEX,
       ExpressionAttributeNames: {
-        '#kn0': 'typeLsi',
+        '#kn0': 'lsi1',
         '#kn1': 'pk',
       },
       ExpressionAttributeValues: {
@@ -118,7 +118,7 @@ export default class ChatRepositoryImpl implements ChatRepository {
       conversation.sk,
       {
         updatedAt,
-        typeLsi: `${ASSIGNEE_INDEX}#${assignee}`,
+        lsi1: `${ASSIGNEE_INDEX}#${assignee}`,
       },
     );
     logger.log(`Conversation has been updated, new data is ${updatedConversation}`);

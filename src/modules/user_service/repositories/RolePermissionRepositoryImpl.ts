@@ -32,7 +32,7 @@ export default class RolePermissionRepositoryImpl implements RolePermissionRepos
     const roles = items.map((item) => {
       const role = AWS.DynamoDB.Converter.unmarshall(item);
       const {
-        pk, sk, typeLsi, ...rest
+        pk, sk, lsi1, lsi2, lsi3, lsi4, lsi5, ...rest
       } = role;
       const [, roleName] = sk.split(PARTITION_KEY_DELIMITER);
       return {
@@ -67,7 +67,7 @@ export default class RolePermissionRepositoryImpl implements RolePermissionRepos
     const roles = items.map((item) => {
       const role = AWS.DynamoDB.Converter.unmarshall(item);
       const {
-        pk, sk, typeLsi, ...rest
+        pk, sk, lsi1, lsi2, lsi3, lsi4, lsi5, ...rest
       } = role;
       const [, roleName] = sk.split(PARTITION_KEY_DELIMITER);
       return {

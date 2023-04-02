@@ -27,7 +27,7 @@ export default class BookingRepositoryImpl implements BookingRepository {
     const params: QueryInput = {
       TableName: dynamoTable,
       IndexName: 'TypeIndex',
-      KeyConditionExpression: 'pk = :pk AND begins_with(typeLsi, :lsi_filter_value)',
+      KeyConditionExpression: 'pk = :pk AND begins_with(lsi1, :lsi_filter_value)',
       ExpressionAttributeValues: {
         ':pk': { S: `${TENANT_INDEX}#${tenantId}#${BOOKING_INDEX}` },
         ':lsi_filter_value': { S: filterLsi },
@@ -38,7 +38,7 @@ export default class BookingRepositoryImpl implements BookingRepository {
       return bookings.map((item: AWS.DynamoDB.AttributeMap) => {
         const booking = AWS.DynamoDB.Converter.unmarshall(item);
         const {
-          sk, pk, typeLsi, ...rest
+          pk, sk, lsi1, lsi2, lsi3, lsi4, lsi5, ...rest
         } = booking;
         return rest as Booking;
       });
