@@ -1,6 +1,6 @@
 import {
   ChatPlatform,
-  DDBConversation, DDBMessage, FacebookConversation, FacebookMessageContent,
+  DDBConversation, DDBMessage, FacebookConversation, FacebookMessage,
   FacebookPage, ReceiveMessageCommandArgs,
   ReceiveMessageCommandResponse,
 } from 'common-models';
@@ -19,19 +19,19 @@ import { MessageRepository } from './interfaces/MessageRepository';
 export default class MessageRepositoryImpl implements MessageRepository {
   /**
    * Get facebook message type
-   * @param message The message was received from webhook event
+   * @param message The message was received from Facebook Graph API
    * @returns MessageGroupType
    */
-  private readonly getMessageType = (message: FacebookMessageContent): MessageGroupType => {
+  private readonly getMessageType = (message: FacebookMessage): MessageGroupType => {
     if ('text' in message) {
       return MessageGroupType.TEXT;
     }
-    if ('attachments' in message && message.attachments.length) {
-      const messageType = message.attachments[0].type;
-      if (messageType === 'file') {
+    if ('attachments' in message && message.attachments?.data.length) {
+      const messageType = message.attachments.data[0].mime_type;
+      if (messageType.startsWith('file')) {
         return MessageGroupType.FILE;
       }
-      if (messageType === 'audio' || messageType === 'video' || messageType === 'image') {
+      if (messageType.startsWith('audio') || messageType.startsWith('video') || messageType.startsWith('image')) {
         return MessageGroupType.MEDIA;
       }
     }
@@ -59,13 +59,13 @@ export default class MessageRepositoryImpl implements MessageRepository {
     platform: ChatPlatform,
     page: FacebookPage,
     fbConversationId: string,
-    message: FacebookMessageContent,
+    message: FacebookMessage,
   ) => {
     // Save the message to DynamoDB
     const table = await getAwsSecretValue('DYNAMO_CHAT_TABLE');
     const chatPlatformIndex = platform.toUpperCase();
     const pk = `${TENANT_INDEX}#${tenantId}#${MESSAGE_INDEX}#${chatPlatformIndex}#${page.id}`;
-    const sk = `${CONVERSATION_INDEX}#${fbConversationId}#${MESSAGE_INDEX}#${message.mid}`;
+    const sk = `${CONVERSATION_INDEX}#${fbConversationId}#${MESSAGE_INDEX}#${message.id}`;
     const typeLsi = this.getMessageType(message);
     const currentTime = Date.now();
 
@@ -111,7 +111,7 @@ export default class MessageRepositoryImpl implements MessageRepository {
   saveConversation = async (
     tenantId: string,
     page: FacebookPage,
-    message: FacebookMessageContent,
+    message: FacebookMessage,
     fbConversation: FacebookConversation,
   ) => {
     // Get the current conversation information
@@ -165,5 +165,26 @@ export default class MessageRepositoryImpl implements MessageRepository {
       ...newConversation,
       assignee: UNKNOWN_USER,
     } as FacebookConversationWithAssignee;
+  };
+
+  /**
+   * Get message information by Facebook Graph API
+   * @param page FacebookPage object
+   * @param messageId ID of the message
+   * @returns
+   */
+  getMessageInfo = async (
+    page: FacebookPage,
+    messageId: string,
+  ): Promise<FacebookMessage> => {
+    // Get remote conversation
+    const fbMessage = await fbMessagePlatformProvider.getMessage(
+      page.accessToken,
+      messageId,
+    );
+    if (!fbMessage) {
+      throw new Error(`Could not found the message with the ID: ${messageId}`);
+    }
+    return fbMessage;
   };
 }
