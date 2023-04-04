@@ -20,6 +20,8 @@ import {
   sendLinkEvents,
   sendMediaEvents,
   sendTextEvents,
+  CREATED_TIME_INDEX,
+  MESSAGE_TYPE_INDEX,
 } from '../utils/constants';
 import logger from '../utils/logger';
 import { MessageRepository } from './interfaces/MessageRepository';
@@ -78,14 +80,17 @@ export default class MessageRepositoryImpl implements MessageRepository {
     // Save the message to DynamoDB
     const table = await getAwsSecretValue('DYNAMO_CHAT_TABLE');
     const chatPlatformIndex = platform.toUpperCase();
+    const currentTime = Date.now();
+    const messageType = this.getMessageType(eventName, message);
     const pk = `${TENANT_INDEX}#${tenantId}#${MESSAGE_INDEX}#${chatPlatformIndex}#${page.id}`;
     const sk = `${CONVERSATION_INDEX}#${customerId}#${MESSAGE_INDEX}#${message.msg_id}`;
-    const lsi1 = this.getMessageType(eventName, message);
-    const currentTime = Date.now();
+    const lsi1 = `${CONVERSATION_INDEX}#${customerId}#${MESSAGE_TYPE_INDEX}#${messageType}`; // LSI for filtering message by type
+    const lsi2 = `${CONVERSATION_INDEX}#${customerId}#${CREATED_TIME_INDEX}#${currentTime}`; // LSI for filtering message by created time
 
     const conversationMessage: Omit<DDBMessage, 'pk' | 'sk'> = {
       content: message,
       lsi1,
+      lsi2,
     };
 
     await dynamoProvider.putItem(table, pk, sk, {

@@ -11,6 +11,7 @@ import { dynamoProvider, fbMessagePlatformProvider } from '../providers';
 import {
   ASSIGNEE_INDEX,
   CONVERSATION_INDEX,
+  CREATED_TIME_INDEX,
   FACEBOK_PAGE_INDEX,
   MESSAGE_INDEX,
   OMITTED_CONVERSATION_ATTRIBUTES,
@@ -91,7 +92,7 @@ export default class FbMessagePlatformRepositoryImpl implements FbMessagePlatfor
     const assigneeIndex = assigneeId ? `${ASSIGNEE_INDEX}#${assigneeId}` : `${ASSIGNEE_INDEX}#`;
     const params = {
       TableName: travelTable,
-      IndexName: 'TypeIndex',
+      IndexName: 'Index1',
       KeyConditionExpression: '#pk = :pk AND begins_with ( #lsi, :lsi_filter_value )',
       ExpressionAttributeNames: {
         '#pk': 'pk',
@@ -163,19 +164,21 @@ export default class FbMessagePlatformRepositoryImpl implements FbMessagePlatfor
       const platformStr = ChatPlatform.facebook.toUpperCase();
       const params = {
         TableName: dynamoTable,
-        KeyConditionExpression: '#pk = :pk AND begins_with ( #sk, :sk )',
+        IndexName: 'Index2',
+        KeyConditionExpression: '#pk = :pk AND begins_with ( #lsi, :lsi_filter_value )',
         ExpressionAttributeNames: {
           '#pk': 'pk',
-          '#sk': 'sk',
+          '#lsi': 'lsi2',
         },
         ExpressionAttributeValues: {
           ':pk': `${TENANT_INDEX}#${tenantId}#${MESSAGE_INDEX}#${platformStr}#${pageId}`,
-          ':sk': `${CONVERSATION_INDEX}#${conversationId}#${MESSAGE_INDEX}#`,
+          ':lsi_filter_value': `${CONVERSATION_INDEX}#${conversationId}#${CREATED_TIME_INDEX}`,
         },
         ScanIndexForward: false, // Sort descending
         Limit: paginationLimit,
         ExclusiveStartKey: nextToken ? JSON.parse(nextToken) : undefined,
       };
+
       const { LastEvaluatedKey, Items: messageItems } = await dynamoProvider.rawQuery(params);
       if (messageItems) {
         return {

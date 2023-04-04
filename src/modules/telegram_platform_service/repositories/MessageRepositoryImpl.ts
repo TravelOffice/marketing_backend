@@ -11,7 +11,12 @@ import { MessageGroupType } from '../models/Message';
 import { appsyncProvider, dynamoProvider } from '../providers';
 import {
   ASSIGNEE_INDEX,
-  CONVERSATION_INDEX, MESSAGE_INDEX, TENANT_INDEX, UNKNOWN_USER,
+  CONVERSATION_INDEX,
+  CREATED_TIME_INDEX,
+  MESSAGE_INDEX,
+  MESSAGE_TYPE_INDEX,
+  TENANT_INDEX,
+  UNKNOWN_USER,
 } from '../utils/constants';
 import logger from '../utils/logger';
 import { MessageRepository } from './interfaces/MessageRepository';
@@ -88,12 +93,15 @@ export default class MessageRepositoryImpl implements MessageRepository {
     const chatPlatformIndex = platform.toUpperCase();
     const pk = `${TENANT_INDEX}#${tenantId}#${MESSAGE_INDEX}#${chatPlatformIndex}#${pageId}`;
     const sk = `${CONVERSATION_INDEX}#${message.chat.id}#${MESSAGE_INDEX}#${message.message_id}`;
-    const lsi1 = this.getMessageType(message);
     const currentTime = Date.now();
+    const messageType = this.getMessageType(message);
+    const lsi1 = `${CONVERSATION_INDEX}#${message.chat.id}#${MESSAGE_TYPE_INDEX}#${messageType}`; // LSI for filtering message by type
+    const lsi2 = `${CONVERSATION_INDEX}#${message.chat.id}#${CREATED_TIME_INDEX}#${currentTime}`; // LSI for filtering message by created time
 
     const conversationMessage: Omit<DDBMessage, 'pk' | 'sk'> = {
       content: message,
       lsi1,
+      lsi2,
     };
 
     await dynamoProvider.putItem(table, pk, sk, {

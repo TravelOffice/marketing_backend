@@ -10,7 +10,12 @@ import { FacebookConversationWithAssignee, RestrictedFacebookConversation } from
 import { appSyncProvider, dynamoProvider, fbMessagePlatformProvider } from '../providers';
 import {
   ASSIGNEE_INDEX,
-  CONVERSATION_INDEX, MESSAGE_INDEX, PARTITION_KEY_DELIMITER, TENANT_INDEX,
+  CONVERSATION_INDEX,
+  CREATED_TIME_INDEX,
+  MESSAGE_INDEX,
+  MESSAGE_TYPE_INDEX,
+  PARTITION_KEY_DELIMITER,
+  TENANT_INDEX,
   UNKNOWN_USER,
 } from '../utils/constants';
 import logger from '../utils/logger';
@@ -66,12 +71,15 @@ export default class MessageRepositoryImpl implements MessageRepository {
     const chatPlatformIndex = platform.toUpperCase();
     const pk = `${TENANT_INDEX}#${tenantId}#${MESSAGE_INDEX}#${chatPlatformIndex}#${page.id}`;
     const sk = `${CONVERSATION_INDEX}#${fbConversationId}#${MESSAGE_INDEX}#${message.id}`;
-    const lsi1 = this.getMessageType(message);
+    const messageType = this.getMessageType(message);
     const currentTime = Date.now();
+    const lsi1 = `${CONVERSATION_INDEX}#${fbConversationId}#${MESSAGE_TYPE_INDEX}#${messageType}`; // LSI for filtering message by type
+    const lsi2 = `${CONVERSATION_INDEX}#${fbConversationId}#${CREATED_TIME_INDEX}#${currentTime}`; // LSI for filtering message by created time
 
     const conversationMessage: Omit<DDBMessage, 'pk' | 'sk'> = {
       content: message,
       lsi1,
+      lsi2,
     };
 
     await dynamoProvider.putItem(table, pk, sk, {
@@ -81,7 +89,7 @@ export default class MessageRepositoryImpl implements MessageRepository {
     });
 
     logger.log(`[MessageRepository.saveChatMessage] saved message: ${JSON.stringify({
-      pk, sk, lsi1, content: message,
+      pk, sk, lsi1, lsi2, content: message,
     }, null, 2)}`);
   };
 
@@ -147,7 +155,7 @@ export default class MessageRepositoryImpl implements MessageRepository {
     }
 
     // Create new conversation with unknown user
-    const lsi1 = `${ASSIGNEE_INDEX}#${UNKNOWN_USER}`;
+    const lsi1 = `${ASSIGNEE_INDEX}#${UNKNOWN_USER}`; // LSI for filtering conversation by assignee
     newConversation = {
       info: fbConversation,
       lastMessage: message,

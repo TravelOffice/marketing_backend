@@ -27,6 +27,7 @@ import { dynamoProvider, s3Provider, telegramProvider } from '../providers';
 import { QueryInput } from '../providers/DynamoProvider';
 import {
   ASSIGNEE_INDEX, CONVERSATION_INDEX,
+  CREATED_TIME_INDEX,
   FILE_INDEX, MESSAGE_INDEX,
   PAGINATION_LIMIT,
   PARTITION_KEY_DELIMITER,
@@ -87,10 +88,15 @@ export default class TelegramPlatformRepositoryImpl implements TelegramPlatformR
     const telegramPlatformStr = ChatPlatform.telegram.toUpperCase();
     const params: QueryInput = {
       TableName: dynamoTable,
-      KeyConditionExpression: 'pk = :pk AND begins_with(sk, :sk)',
+      IndexName: 'Index2',
+      KeyConditionExpression: '#pk = :pk AND begins_with ( #lsi, :lsi_filter_value )',
+      ExpressionAttributeNames: {
+        '#pk': 'pk',
+        '#lsi': 'lsi2',
+      },
       ExpressionAttributeValues: {
         ':pk': { S: `${TENANT_INDEX}#${tenantId}#${MESSAGE_INDEX}#${telegramPlatformStr}#${botId}` },
-        ':sk': { S: `${CONVERSATION_INDEX}#${chatId}#${MESSAGE_INDEX}#` },
+        ':lsi_filter_value': { S: `${CONVERSATION_INDEX}#${chatId}#${CREATED_TIME_INDEX}` },
       },
       ScanIndexForward: false, // Sort descending
       Limit: paginationLimit,
@@ -186,7 +192,7 @@ export default class TelegramPlatformRepositoryImpl implements TelegramPlatformR
 
     const params: QueryInput = {
       TableName: dynamoTable,
-      IndexName: 'TypeIndex',
+      IndexName: 'Index1',
       KeyConditionExpression: 'pk = :pk AND begins_with(lsi1, :lsi_filter_value)',
       ExpressionAttributeValues: {
         // Combination of TENANT#<tenant_id>#CONVERSATION#<platform>#<id>

@@ -15,3 +15,7 @@ export const UNKNOWN_USER = 'unknown';
 export const SECRET_TOKEN_HEADER = 'x-telegram-bot-api-secret-token';
 
 export const PARTITION_KEY_DELIMITER = '#';
+
+export const CREATED_TIME_INDEX = 'CREATED_TIME';
+
+export const MESSAGE_TYPE_INDEX = 'TYPE';

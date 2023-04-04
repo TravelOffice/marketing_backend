@@ -186,7 +186,7 @@ export default class OpportunityRepositoryImpl implements OpportunityRepository 
 
     const params: QueryInput = {
       TableName: dynamoTable,
-      IndexName: 'TypeIndex',
+      IndexName: 'Index1',
       KeyConditionExpression: 'pk = :pk AND begins_with(lsi1, :lsi_filter_value)',
       ExpressionAttributeValues: {
         ':pk': { S: `${TENANT_INDEX}#${tenantId}#${LEAD_INDEX}#${leadId}` },
@@ -219,7 +219,7 @@ export default class OpportunityRepositoryImpl implements OpportunityRepository 
 
     const params: QueryInput = {
       TableName: dynamoTable,
-      IndexName: 'TypeIndex',
+      IndexName: 'Index1',
       KeyConditionExpression: 'pk = :pk AND begins_with(lsi1, :lsi_filter_value)',
       ExpressionAttributeValues: {
         ':pk': { S: `${TENANT_INDEX}#${tenantId}#${EMPLOYEE_INDEX}#${assigneeId}` },

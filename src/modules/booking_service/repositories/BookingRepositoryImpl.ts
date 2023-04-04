@@ -26,7 +26,7 @@ export default class BookingRepositoryImpl implements BookingRepository {
 
     const params: QueryInput = {
       TableName: dynamoTable,
-      IndexName: 'TypeIndex',
+      IndexName: 'Index1',
       KeyConditionExpression: 'pk = :pk AND begins_with(lsi1, :lsi_filter_value)',
       ExpressionAttributeValues: {
         ':pk': { S: `${TENANT_INDEX}#${tenantId}#${BOOKING_INDEX}` },
