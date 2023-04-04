@@ -16,6 +16,7 @@ import { dynamoProvider, s3Provider, zaloMessagePlatformProvider } from '../prov
 import {
   ASSIGNEE_INDEX,
   CONVERSATION_INDEX,
+  CREATED_TIME_INDEX,
   FILE_INDEX,
   MESSAGE_INDEX,
   OMITTED_CONVERSATION_ATTRIBUTES,
@@ -150,7 +151,7 @@ export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePla
     const assigneeIndex = assigneeId ? `${ASSIGNEE_INDEX}#${assigneeId}` : `${ASSIGNEE_INDEX}#`;
     const params = {
       TableName: travelTable,
-      IndexName: 'TypeIndex',
+      IndexName: 'Index1',
       KeyConditionExpression: '#pk = :pk AND begins_with ( #lsi, :lsi_filter_value )',
       ExpressionAttributeNames: {
         '#pk': 'pk',
@@ -222,14 +223,15 @@ export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePla
       const platformStr = ChatPlatform.zalo.toUpperCase();
       const params = {
         TableName: dynamoTable,
-        KeyConditionExpression: '#pk = :pk AND begins_with ( #sk, :sk )',
+        IndexName: 'Index2',
+        KeyConditionExpression: '#pk = :pk AND begins_with ( #lsi, :lsi_filter_value )',
         ExpressionAttributeNames: {
           '#pk': 'pk',
-          '#sk': 'sk',
+          '#lsi': 'lsi2',
         },
         ExpressionAttributeValues: {
           ':pk': `${TENANT_INDEX}#${tenantId}#${MESSAGE_INDEX}#${platformStr}#${pageId}`,
-          ':sk': `${CONVERSATION_INDEX}#${userId}#${MESSAGE_INDEX}#`,
+          ':lsi_filter_value': `${CONVERSATION_INDEX}#${userId}#${CREATED_TIME_INDEX}`,
         },
         ScanIndexForward: false, // Sort descending
         Limit: paginationLimit,

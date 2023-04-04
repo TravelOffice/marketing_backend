@@ -106,7 +106,7 @@ export default class LeadRepositoryImpl implements LeadRepository {
     }
     const params: QueryInput = {
       TableName: table,
-      IndexName: 'TypeIndex',
+      IndexName: 'Index1',
       KeyConditionExpression: 'pk = :pk AND begins_with(lsi1, :lsi_filter_value)',
       ExpressionAttributeValues: {
         ':pk': { S: `${TENANT_INDEX}#${tenantId}` },

@@ -82,3 +82,7 @@ export const sendMediaEvents = [
   'oa_send_gif',
   'oa_send_anonymous_image',
 ];
+
+export const CREATED_TIME_INDEX = 'CREATED_TIME';
+
+export const MESSAGE_TYPE_INDEX = 'TYPE';

@@ -8,7 +8,13 @@ import { RestrictedTelegramConversation, TelegramConversationWithAssignee } from
 import { appSyncProvider, dynamoProvider } from '../providers';
 import {
   ASSIGNEE_INDEX,
-  CONVERSATION_INDEX, MESSAGE_INDEX, PARTITION_KEY_DELIMITER, TENANT_INDEX, UNKNOWN_USER,
+  CONVERSATION_INDEX,
+  CREATED_TIME_INDEX,
+  MESSAGE_INDEX,
+  MESSAGE_TYPE_INDEX,
+  PARTITION_KEY_DELIMITER,
+  TENANT_INDEX,
+  UNKNOWN_USER,
 } from '../utils/constants';
 import logger from '../utils/logger';
 import { MessageRepository } from './interfaces/MessageRepository';
@@ -81,14 +87,17 @@ export default class MessageRepositoryImpl implements MessageRepository {
     // Save the message to DynamoDB
     const table = await getAwsSecretValue('DYNAMO_CHAT_TABLE');
     const chatPlatformIndex = platform.toUpperCase();
+    const currentTime = Date.now();
+    const messageType = this.getMessageType(message);
     const pk = `${TENANT_INDEX}#${tenantId}#${MESSAGE_INDEX}#${chatPlatformIndex}#${page.id}`;
     const sk = `${CONVERSATION_INDEX}#${message.chat.id}#${MESSAGE_INDEX}#${message.message_id}`;
-    const lsi1 = this.getMessageType(message);
-    const currentTime = Date.now();
+    const lsi1 = `${CONVERSATION_INDEX}#${message.chat.id}#${MESSAGE_TYPE_INDEX}#${messageType}`; // LSI for filtering message by type
+    const lsi2 = `${CONVERSATION_INDEX}#${message.chat.id}#${CREATED_TIME_INDEX}#${currentTime}`; // LSI for filtering message by created time
 
     const conversationMessage: Omit<DDBMessage, 'pk' | 'sk'> = {
       content: message,
       lsi1,
+      lsi2,
     };
 
     await dynamoProvider.putItem(table, pk, sk, {
@@ -98,7 +107,7 @@ export default class MessageRepositoryImpl implements MessageRepository {
     });
 
     logger.log(`[MessageRepository.saveChatMessage] saved message: ${JSON.stringify({
-      pk, sk, lsi1, content: message,
+      pk, sk, lsi1, lsi2, content: message,
     }, null, 2)}`);
   };
 

@@ -58,7 +58,7 @@ export default class QuoteRepositoryImpl implements QuoteRepository {
     }
     const params: QueryInput = {
       TableName: table,
-      IndexName: 'TypeIndex',
+      IndexName: 'Index1',
       KeyConditionExpression: 'pk = :pk AND begins_with(lsi1, :lsi_filter_value)',
       ExpressionAttributeValues: {
         ':pk': { S: `${TENANT_INDEX}#${tenantId}#${QUOTE_INDEX}` },
