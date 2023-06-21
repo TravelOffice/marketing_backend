@@ -1,0 +1,102 @@
+import cors from 'cors';
+import { getCurrentUserInfo } from 'decode-token';
+import express, { Request, Response, NextFunction } from 'express';
+import compression from 'compression';
+import {
+  createDepartureTourUseCase,
+  deleteDepartureTourUseCase,
+  getDepartureTourListUseCase,
+  getDepartureTourUseCase,
+  updateDepartureTourUseCase,
+} from './useCases';
+import wrapResponse from './utils/wrapResponse';
+import { FAILED, SUCCESS } from './utils/constants';
+import validate, { createOrUpdateDepartureTourValidator } from './utils/validator';
+import logger from './utils/logger';
+
+const app = express();
+
+app.use(compression());
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.use((req: Request, res: Response, next: NextFunction) => {
+  res.setHeader('Access-Control-Allow-Origin', ['*']);
+  res.setHeader('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', '*');
+  next();
+});
+
+app.use((req: Request, _res: Response, next: NextFunction) => {
+  logger.log(`Request to ${req.method}: ${req.url}`);
+  next();
+});
+
+app.get('/departure-tours', async (req: Request, res: Response) => {
+  try {
+    const { tenant } = getCurrentUserInfo(req.headers.authorization!);
+    logger.log(`[${req.method}] Request received for tenant '${tenant}' on route '${req.originalUrl}'`);
+    const departureTours = await getDepartureTourListUseCase.invoke(tenant);
+    res.json(wrapResponse(SUCCESS, departureTours));
+  } catch (error: any) {
+    logger.log(`[${req.method}] An error occurred while retrieving departure tours on route '${req.originalUrl}':`, error);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.post('/departure-tours', createOrUpdateDepartureTourValidator(), async (req: Request, res: Response) => {
+  try {
+    validate(req);
+    const { tenant, username } = getCurrentUserInfo(req.headers.authorization!);
+    logger.log(`[${req.method}] Request received for tenant '${tenant}' on route '${req.originalUrl}'`);
+    req.body.creator = username;
+    const departureTour = await createDepartureTourUseCase.invoke(tenant, req.body);
+    res.json(wrapResponse(SUCCESS, departureTour));
+  } catch (error: any) {
+    logger.log(`[${req.method}] An error occurred while creating/updating departure tour on route '${req.originalUrl}':`, error);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.get('/departure-tours/:id', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { tenant } = getCurrentUserInfo(req.headers.authorization!);
+    logger.log(`[${req.method}] Request received for tenant '${tenant}' on route '${req.originalUrl}'`);
+    const departureTour = await getDepartureTourUseCase.invoke(tenant, id);
+    res.json(wrapResponse(SUCCESS, departureTour));
+  } catch (error: any) {
+    logger.log(`[${req.method}] An error occurred while retrieving departure tour on route '${req.originalUrl}':`, error);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.put('/departure-tours/:id', createOrUpdateDepartureTourValidator(), async (req: Request, res: Response) => {
+  try {
+    validate(req);
+    const { id } = req.params;
+    const { tenant } = getCurrentUserInfo(req.headers.authorization!);
+    logger.log(`[${req.method}] Request received for tenant '${tenant}' on route '${req.originalUrl}'`);
+    const departureTour = await updateDepartureTourUseCase.invoke(tenant, id, req.body);
+    res.json(wrapResponse(SUCCESS, departureTour));
+  } catch (error: any) {
+    logger.log(`[${req.method}] An error occurred while updating departure tour on route '${req.originalUrl}':`, error);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.delete('/departure-tours/:id', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { tenant } = getCurrentUserInfo(req.headers.authorization!);
+    logger.log(`[${req.method}] Request received for tenant '${tenant}' on route '${req.originalUrl}'`);
+    const ret = await deleteDepartureTourUseCase.invoke(tenant, id);
+    res.json(wrapResponse(SUCCESS, ret));
+  } catch (error: any) {
+    logger.log(`[${req.method}] An error occurred while deleting departure tour on route '${req.originalUrl}':`, error);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+export default app;
