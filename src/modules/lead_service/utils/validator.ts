@@ -3,7 +3,7 @@ import {
   body, param, ValidationError, validationResult,
 } from 'express-validator';
 import {
-  LeadType, MaritalStatus, SexType, SourceType, LeadStatus, VocativeType,
+  SexType, LeadStatus, VocativeType,
 } from '../models/Lead';
 import {
   VALIDATE_BOOLEAN_MSG, VALIDATE_DATE_MSG,
@@ -54,10 +54,6 @@ export function createUpdateLeadValidator() {
       .if(body('sex').exists())
       .isIn(Object.values(SexType)).withMessage(`allow only in ${Object.values(SexType)}`),
 
-    body('maritalStatus')
-      .if(body('maritalStatus').notEmpty())
-      .isIn(Object.values(MaritalStatus)).withMessage(`allow only in ${Object.values(MaritalStatus)}`),
-
     body('primaryPhoneNumber', VALIDATE_PHONE_MSG)
       .notEmpty()
       .custom((value: string) => {
@@ -102,14 +98,8 @@ export function createUpdateLeadValidator() {
       .isArray()
       .custom((value: []) => value.every((tag: string) => tag !== '')),
 
-    body('source')
-      .isIn(Object.values(SourceType)).withMessage(`allow only in ${Object.values(SourceType)}`),
-
     body('enabled', VALIDATE_BOOLEAN_MSG)
       .isBoolean(),
-
-    body('type')
-      .isIn(Object.values(LeadType)).withMessage(`allow only in ${Object.values(LeadType)}`),
 
     body('status')
       .isIn(Object.values(LeadStatus)).withMessage(`allow only in ${Object.values(LeadStatus)}`),
@@ -137,9 +127,17 @@ export function getLeadValidator() {
   ];
 }
 
-export function changeStatusLeadValidator() {
+export function changeLeadStatusValidator() {
   return [
     param('leadId', VALIDATE_NON_EMPTY_STRING_MSG)
+      .notEmpty()
+      .isString(),
+  ];
+}
+
+export function cancelLeadValidator() {
+  return [
+    body('reason', VALIDATE_NON_EMPTY_STRING_MSG)
       .notEmpty()
       .isString(),
   ];

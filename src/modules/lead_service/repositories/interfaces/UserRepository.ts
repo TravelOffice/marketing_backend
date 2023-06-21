@@ -1,5 +1,5 @@
 import { User } from '../../models/User';
 
 export interface UserRepository {
-  getUserAttributes: (userId: string) => Promise<User | undefined>,
+  getUserAttributes: (tenantId: string, userId: string) => Promise<User | undefined>,
 }
