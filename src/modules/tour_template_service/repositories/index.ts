@@ -1,7 +1,7 @@
 // TODO: Declare repository objects which can be used in this service here
 
-import TourTemplateRepositoryImpl from "./TourTemplateRepositoryImpl";
-import { TourTemplateRepository } from "./interfaces/TourTemplateRepository";
+import TourTemplateRepositoryImpl from './TourTemplateRepositoryImpl';
+import { TourTemplateRepository } from './interfaces/TourTemplateRepository';
 
 interface Repositories {
   tourTemplateRepository: TourTemplateRepository;

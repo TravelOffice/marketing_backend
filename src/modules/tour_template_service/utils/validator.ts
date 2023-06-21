@@ -1,20 +1,20 @@
-import { Request } from "express";
-import { body, ValidationError, validationResult } from "express-validator";
+import { Request } from 'express';
+import { body, ValidationError, validationResult } from 'express-validator';
 import {
   VALIDATE_DATE_MSG,
   VALIDATE_NON_EMPTY_STRING_MSG,
   VALIDATE_NUMBER_MSG,
   VALIDATE_POSITIVE_NUMBER,
   VALIDATE_PRICE_ARRAY_MSG,
-} from "./constants";
-import { TourType } from "../models/TourType";
+} from './constants';
+import { TourType } from '../models/TourType';
 
 export default function validate(req: Request) {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     const errorGroups: { [key: string]: ValidationError[] } = {};
     errors.array().forEach((err) => {
-      const location = err.location || "unknown";
+      const location = err.location || 'unknown';
       const errs: ValidationError[] = errorGroups[location] || [];
       errs.push(err);
       errorGroups[location] = errs;
@@ -23,78 +23,78 @@ export default function validate(req: Request) {
       (entry) =>
         `Validate failed at ${entry[0]}: ${entry[1]
           .map((err) => `${err.param} ${err.msg}, value=${err.value}`)
-          .join("; ")}`
+          .join('; ')}`
     );
-    throw new Error(msgs.join("\n"));
+    throw new Error(msgs.join('\n'));
   }
 }
 
 export function createOrUpdateTourTemplateValidator() {
   return [
-    body("name").notEmpty().withMessage(VALIDATE_NON_EMPTY_STRING_MSG),
+    body('name').notEmpty().withMessage(VALIDATE_NON_EMPTY_STRING_MSG),
 
-    body("tourTemplate").notEmpty().withMessage(VALIDATE_NON_EMPTY_STRING_MSG),
+    body('tourTemplate').notEmpty().withMessage(VALIDATE_NON_EMPTY_STRING_MSG),
 
-    body("type")
+    body('type')
       .isIn(Object.values(TourType))
       .withMessage(`allow only in ${Object.values(TourType)}`),
 
-    body("visitorCount")
+    body('visitorCount')
       .notEmpty()
       .withMessage(VALIDATE_NUMBER_MSG)
       .isInt({ min: 1 })
       .withMessage(VALIDATE_POSITIVE_NUMBER),
 
-    body("startingLocation")
+    body('startingLocation')
       .notEmpty()
       .withMessage(VALIDATE_NON_EMPTY_STRING_MSG),
 
-    body("endingLocation")
+    body('endingLocation')
       .notEmpty()
       .withMessage(VALIDATE_NON_EMPTY_STRING_MSG),
 
-    body("durationInDays", VALIDATE_POSITIVE_NUMBER)
+    body('durationInDays', VALIDATE_POSITIVE_NUMBER)
       .notEmpty()
       .withMessage(VALIDATE_NUMBER_MSG)
       .isInt({ min: 0 }),
 
-    body("durationInNights", VALIDATE_POSITIVE_NUMBER)
+    body('durationInNights', VALIDATE_POSITIVE_NUMBER)
       .notEmpty()
       .withMessage(VALIDATE_NUMBER_MSG)
       .isInt({ min: 0 }),
 
-    body("adultPrice", VALIDATE_POSITIVE_NUMBER)
+    body('adultPrice', VALIDATE_POSITIVE_NUMBER)
       .notEmpty()
       .withMessage(VALIDATE_NUMBER_MSG)
       .isInt({ min: 0 }),
 
-    body("childUnder5Price", VALIDATE_POSITIVE_NUMBER)
+    body('childUnder5Price', VALIDATE_POSITIVE_NUMBER)
       .notEmpty()
       .withMessage(VALIDATE_NUMBER_MSG)
       .isInt({ min: 0 }),
 
-    body("child5to7Price", VALIDATE_POSITIVE_NUMBER)
+    body('child5to7Price', VALIDATE_POSITIVE_NUMBER)
       .notEmpty()
       .withMessage(VALIDATE_NUMBER_MSG)
       .isInt({ min: 0 }),
 
-    body("child8to11Price", VALIDATE_POSITIVE_NUMBER)
+    body('child8to11Price', VALIDATE_POSITIVE_NUMBER)
       .notEmpty()
       .withMessage(VALIDATE_NUMBER_MSG)
       .isInt({ min: 0 }),
 
-    body("otherPrice", VALIDATE_PRICE_ARRAY_MSG)
-      .if(body("otherPrice").exists())
+    body('otherPrice', VALIDATE_PRICE_ARRAY_MSG)
+      .if(body('otherPrice').exists())
       .isArray({ min: 1 })
       .custom((value) => {
         if (Array.isArray(value)) {
           // eslint-disable-next-line no-restricted-syntax
           for (const servicePrice of value) {
-            if (typeof servicePrice.name !== "string") {
-              throw new Error("Invalid name in service price");
+            if (typeof servicePrice.name !== 'string') {
+              throw new Error('Invalid name in service price');
             }
-            if (typeof servicePrice.price !== "number") {
-              throw new Error("Invalid price in service price");
+            if (typeof servicePrice.price !== 'number') {
+              throw new Error('Invalid price in service price');
             }
           }
           return true;
@@ -102,9 +102,9 @@ export function createOrUpdateTourTemplateValidator() {
         throw new Error(VALIDATE_PRICE_ARRAY_MSG);
       }),
 
-    body("policiesAndRegulations")
+    body('policiesAndRegulations')
       .isObject()
-      .withMessage("Policies and regulations must be an object")
+      .withMessage('Policies and regulations must be an object')
       .bail()
       .custom((value) => {
         const {
@@ -115,25 +115,25 @@ export function createOrUpdateTourTemplateValidator() {
 
         if (
           inclusionAndExclusion &&
-          typeof inclusionAndExclusion !== "string"
+          typeof inclusionAndExclusion !== 'string'
         ) {
-          throw new Error("Invalid inclusionAndExclusion");
+          throw new Error('Invalid inclusionAndExclusion');
         }
 
         if (
           policyConditionsAndExtraFee &&
-          typeof policyConditionsAndExtraFee !== "string"
+          typeof policyConditionsAndExtraFee !== 'string'
         ) {
-          throw new Error("Invalid policyConditionsAndExtraFee");
+          throw new Error('Invalid policyConditionsAndExtraFee');
         }
 
-        if (cancellationTerms && typeof cancellationTerms !== "string") {
-          throw new Error("Invalid cancellationTerms");
+        if (cancellationTerms && typeof cancellationTerms !== 'string') {
+          throw new Error('Invalid cancellationTerms');
         }
 
         return true;
       }),
 
-    body("tourPlan").notEmpty().withMessage(VALIDATE_NON_EMPTY_STRING_MSG),
+    body('tourPlan').notEmpty().withMessage(VALIDATE_NON_EMPTY_STRING_MSG),
   ];
 }

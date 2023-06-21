@@ -1,5 +1,5 @@
-import { tourTemplateRepository } from "../repositories";
-import { GetTourTemplateUseCase } from "./interfaces/GetTourTemplateUseCase";
+import { tourTemplateRepository } from '../repositories';
+import { GetTourTemplateUseCase } from './interfaces/GetTourTemplateUseCase';
 
 export default class GetTourTemplateUseCaseImpl
   implements GetTourTemplateUseCase

@@ -1,11 +1,16 @@
-import AWS from "aws";
-import { getAwsSecretValue } from "get-env";
-import { TourTemplate } from "../models/TourTemplate";
-import { dynamoProvider } from "../providers";
-import { DEPARTURE_TOUR_INDEX, TENANT_INDEX } from "../utils/constants";
-import logger from "../utils/logger";
-import { generateReadableId } from "../utils/utils";
-import { TourTemplateRepository } from "./interfaces/TourTemplateRepository";
+import AWS from 'aws';
+import { getAwsSecretValue } from 'get-env';
+import { TourTemplate } from '../models/TourTemplate';
+import { dynamoProvider } from '../providers';
+import {
+  TENANT_INDEX,
+  TOUR_TEMPLATE_INDEX,
+  TOUR_TEMPLATE_ONSALE,
+  TOUR_TEMPLATE_STATUS_INDEX,
+} from '../utils/constants';
+import logger from '../utils/logger';
+import { generateReadableId } from '../utils/utils';
+import { TourTemplateRepository } from './interfaces/TourTemplateRepository';
 
 type QueryInput = AWS.DynamoDB.QueryInput;
 
@@ -18,18 +23,18 @@ export default class TourTemplateRepositoryImpl
    * @returns A list of departure tours.
    */
   list = async (tenantId: string) => {
-    const table = await getAwsSecretValue("DYNAMO_TRAVEL_TABLE");
+    const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
     const params: QueryInput = {
       TableName: table,
-      KeyConditionExpression: "pk = :pk AND begins_with(sk, :sk_filter_value)",
+      KeyConditionExpression: 'pk = :pk AND begins_with(sk, :sk_filter_value)',
       ExpressionAttributeValues: {
-        ":pk": { S: `${TENANT_INDEX}#${tenantId}` },
-        ":sk_filter_value": { S: `${DEPARTURE_TOUR_INDEX}#` },
+        ':pk': { S: `${TENANT_INDEX}#${tenantId}` },
+        ':sk_filter_value': { S: `${TOUR_TEMPLATE_INDEX}#` },
       },
     };
 
     logger.log(`Listing departure tours for tenant ${tenantId}`);
-    logger.log("Query parameters:", params);
+    logger.log('Query parameters:', params);
 
     const items = await dynamoProvider.query(params);
 
@@ -37,7 +42,7 @@ export default class TourTemplateRepositoryImpl
     const tourTemplate = items.map((item) => {
       const { pk, sk, ...rest } = item;
       return {
-        id: sk.split("#")[1],
+        id: sk.split('#')[1],
         ...rest,
       };
     });
@@ -46,7 +51,7 @@ export default class TourTemplateRepositoryImpl
     logger.log(
       `Found ${tourTemplate.length} departure tours for tenant ${tenantId}`
     );
-    logger.log("Formatted items:", tourTemplate);
+    logger.log('Formatted items:', tourTemplate);
 
     return tourTemplate;
   };
@@ -58,9 +63,9 @@ export default class TourTemplateRepositoryImpl
    * @returns The retrieved departure tour with its assigned ID.
    */
   get = async (tenantId: string, tourTemplateId: string) => {
-    const table = await getAwsSecretValue("DYNAMO_TRAVEL_TABLE");
+    const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
     const pk = `${TENANT_INDEX}#${tenantId}`;
-    const sk = `${DEPARTURE_TOUR_INDEX}#${tourTemplateId}`;
+    const sk = `${TOUR_TEMPLATE_INDEX}#${tourTemplateId}`;
 
     logger.log(
       `Retrieving TourTemplate for tenant ${tenantId} with pk: ${pk}, sk: ${sk}`
@@ -74,7 +79,7 @@ export default class TourTemplateRepositoryImpl
     if (!tourTemplate)
       throw new Error(`Departure tour [${tourTemplateId}] not found`);
 
-    logger.log("TourTemplate retrieved:", tourTemplate);
+    logger.log('TourTemplate retrieved:', tourTemplate);
 
     return {
       id: tourTemplateId,
@@ -89,17 +94,22 @@ export default class TourTemplateRepositoryImpl
    * @returns The created TourTemplate with its assigned ID.
    */
   create = async (tenantId: string, tourTemplate: TourTemplate) => {
-    const table = await getAwsSecretValue("DYNAMO_TRAVEL_TABLE");
+    const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
     const tourTemplateId = generateReadableId();
     const pk = `${TENANT_INDEX}#${tenantId}`;
-    const sk = `${DEPARTURE_TOUR_INDEX}#${tourTemplateId}`;
+    const sk = `${TOUR_TEMPLATE_INDEX}#${tourTemplateId}`;
+    const currentTime = Date.now();
 
     logger.log(
       `Creating TourTemplate for tenant ${tenantId} with pk: ${pk}, sk: ${sk}`
     );
     logger.log(`Tenant ${tenantId} - TourTemplate:`, tourTemplate);
 
-    await dynamoProvider.putItem(table, pk, sk, tourTemplate);
+    await dynamoProvider.putItem(table, pk, sk, {
+      ...tourTemplate,
+      createdAt: currentTime,
+      updatedAt: currentTime,
+    });
 
     logger.log(`TourTemplate created successfully for tenant ${tenantId}`);
 
@@ -121,9 +131,9 @@ export default class TourTemplateRepositoryImpl
     tourTemplateId: string,
     tourTemplate: TourTemplate
   ) => {
-    const table = await getAwsSecretValue("DYNAMO_TRAVEL_TABLE");
+    const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
     const pk = `${TENANT_INDEX}#${tenantId}`;
-    const sk = `${DEPARTURE_TOUR_INDEX}#${tourTemplateId}`;
+    const sk = `${TOUR_TEMPLATE_INDEX}#${tourTemplateId}`;
 
     logger.log(
       `Updating TourTemplate for tenant ${tenantId} with pk: ${pk}, sk: ${sk}`
@@ -158,9 +168,9 @@ export default class TourTemplateRepositoryImpl
    * @returns The ID of the deleted departure tour.
    */
   delete = async (tenantId: string, tourTemplateId: string) => {
-    const table = await getAwsSecretValue("DYNAMO_TRAVEL_TABLE");
+    const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
     const pk = `${TENANT_INDEX}#${tenantId}`;
-    const sk = `${DEPARTURE_TOUR_INDEX}#${tourTemplateId}`;
+    const sk = `${TOUR_TEMPLATE_INDEX}#${tourTemplateId}`;
 
     logger.log(
       `Deleting TourTemplate for tenant ${tenantId} with pk: ${pk}, sk: ${sk}`

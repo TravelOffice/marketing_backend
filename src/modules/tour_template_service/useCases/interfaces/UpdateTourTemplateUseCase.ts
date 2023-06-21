@@ -1,4 +1,4 @@
-import { TourTemplate } from "../../models/TourTemplate";
+import { TourTemplate } from '../../models/TourTemplate';
 
 export interface UpdateTourTemplateUseCase {
   invoke: (

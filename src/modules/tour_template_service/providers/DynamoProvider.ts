@@ -1,12 +1,12 @@
-import AWS from "aws";
-import { getEnv } from "get-env";
+import AWS from 'aws';
+import { getEnv } from 'get-env';
 
 type PutItemInput = AWS.DynamoDB.PutItemInput;
 type GetItemInput = AWS.DynamoDB.GetItemInput;
 type QueryInput = AWS.DynamoDB.QueryInput;
 type DeleteItemInput = AWS.DynamoDB.DeleteItemInput;
 const dynamoDB: AWS.DynamoDB = new AWS.DynamoDB({
-  region: getEnv("AWS_REGION"),
+  region: getEnv('AWS_REGION'),
 });
 
 export default class DynamoProvider {
@@ -58,7 +58,7 @@ export default class DynamoProvider {
       UpdateExpression: updateExpression,
       ExpressionAttributeValues: expressionAttributeValues,
       ExpressionAttributeNames: expressionAttributeNames,
-      ReturnValues: "UPDATED_NEW",
+      ReturnValues: 'UPDATED_NEW',
     };
     const rs = await dynamoDB.updateItem(params).promise();
     return rs;

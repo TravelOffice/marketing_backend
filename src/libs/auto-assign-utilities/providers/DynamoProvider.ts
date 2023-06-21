@@ -105,3 +105,4 @@ export default class DynamoProvider {
     await dynamoDB.deleteItem(params).promise();
   };
 }
+

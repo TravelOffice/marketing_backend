@@ -1,5 +1,5 @@
-import { tourTemplateRepository } from "../repositories";
-import { DeleteTourTemplateUseCase } from "./interfaces/DeleteTourTemplateUseCase";
+import { tourTemplateRepository } from '../repositories';
+import { DeleteTourTemplateUseCase } from './interfaces/DeleteTourTemplateUseCase';
 
 export default class DeleteTourTemplateUseCaseImpl
   implements DeleteTourTemplateUseCase

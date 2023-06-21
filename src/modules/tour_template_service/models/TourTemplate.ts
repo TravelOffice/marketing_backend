@@ -1,6 +1,6 @@
-import { ServicePrice } from "./ TourServicePrice";
-import { TourStatus } from "./TourStatus";
-import { TourType } from "./TourType";
+import { ServicePrice } from './ TourServicePrice';
+import { TourStatus } from './TourStatus';
+import { TourType } from './TourType';
 
 export interface TourTemplate {
   name: string;
@@ -21,6 +21,10 @@ export interface TourTemplate {
     cancellationTerms?: string;
   };
   tourPlan: string;
-  lsi1: TourStatus;
-  tenant: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface TourTemplateWithId extends TourTemplate {
+  id: string;
 }

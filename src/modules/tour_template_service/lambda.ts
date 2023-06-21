@@ -15,6 +15,7 @@ async function setup(event: any, context: any) {
 
 // eslint-disable-next-line import/prefer-default-export
 export const handler = async (event: any, context: any) => {
-  if (serverlessExpressInstance) return serverlessExpressInstance(event, context);
+  if (serverlessExpressInstance)
+    return serverlessExpressInstance(event, context);
   return setup(event, context);
 };

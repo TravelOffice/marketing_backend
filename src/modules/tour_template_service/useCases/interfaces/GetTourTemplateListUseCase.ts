@@ -1,4 +1,4 @@
-import { TourTemplateWithId } from "../../models/TourTemplate";
+import { TourTemplateWithId } from '../../models/TourTemplate';
 
 export interface GetTourTemplateListUseCase {
   invoke: (tenantId: string) => Promise<Array<TourTemplateWithId>>;

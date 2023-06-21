@@ -1,4 +1,4 @@
-import { TourTemplate, TourTemplateWithId } from "../../models/TourTemplate";
+import { TourTemplate, TourTemplateWithId } from '../../models/TourTemplate';
 
 export interface TourTemplateRepository {
   list: (tenantId: string) => Promise<Array<TourTemplateWithId>>;

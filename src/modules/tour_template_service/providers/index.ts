@@ -1,13 +1,11 @@
 import DynamoProvider from './DynamoProvider';
 
 interface Providers {
-  dynamoProvider: DynamoProvider,
+  dynamoProvider: DynamoProvider;
 }
 
-const providers : Providers = {
+const providers: Providers = {
   dynamoProvider: new DynamoProvider(),
 };
 
-export const {
-  dynamoProvider,
-} = providers;
+export const { dynamoProvider } = providers;
