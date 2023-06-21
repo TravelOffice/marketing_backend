@@ -9,8 +9,11 @@ type QueryOutput = AWS.DynamoDB.DocumentClient.QueryOutput;
 type UpdateItemInput = AWS.DynamoDB.DocumentClient.UpdateItemInput;
 type UpdateItemOutput = AWS.DynamoDB.DocumentClient.UpdateItemOutput;
 type GetItemInput = AWS.DynamoDB.DocumentClient.GetItemInput;
+type PutItemInput = AWS.DynamoDB.DocumentClient.PutItemInput;
 
 export default class DynamoProvider {
+  putItem = async (params: PutItemInput) => docClient.put(params).promise();
+
   query = async (params: QueryInput): Promise<QueryOutput> => docClient.query(params).promise();
 
   update = async (

@@ -30,4 +30,15 @@ export const LEAD_INDEX = 'LEAD';
 
 export const STATUS_INDEX = 'STATUS';
 
+export const ASSIGNEE_INDEX = 'ASSIGNEE';
+export const SOURCE_INDEX = 'SOURCE';
+
+export const START_DATE_INDEX = 'START_DATE';
+
+export const TYPE_INDEX = 'TYPE';
+
 export const EMPLOYEE_INDEX = 'EMPLOYEE';
+
+export const NONE_VALUE = 'NONE';
+
+export const LEAD_COUNTER_INDEX = 'LEAD_COUNTER_INDEX';

@@ -20,5 +20,4 @@ const repositories : Repositories = {
 export const {
   leadRepository,
   userRepository,
-  cognitoUserRepository,
 } = repositories;
