@@ -1,118 +1,18 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import AWS from 'aws';
-import { getAwsSecretValue } from 'get-env';
-import { Lead, LeadType, LeadStatus } from '../models/Lead';
-import { dynamoProvider } from '../providers';
-import {
-  DISABLED,
-  ENABLED,
-  LEAD_INDEX,
-  TENANT_INDEX,
-} from '../utils/constants';
+import { Lead, LeadStatus } from '../models/Lead';
 import { LeadRepository } from './interfaces/LeadRepository';
 
-type QueryInput = AWS.DynamoDB.QueryInput;
-
 export default class LeadRepositoryImpl implements LeadRepository {
-  /**
-   * Create or update lead information in dynamo db
-   * @param tenantId Tenant ID
-   * @param lead Lead object
-   * @returns pk, sk and all atributes of Lead object
-   */
-  createOrUpdate = async (tenantId: string, lead: Lead) => {
-    const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
-    const pk = `${TENANT_INDEX}#${tenantId}`;
-    const sk = `${LEAD_INDEX}#${lead.primaryPhoneNumber}`;
-    const lsi1 = `${lead.type}#${lead.assigneeId}#${lead.enabled ? ENABLED : DISABLED}#${lead.status}`;
-    await dynamoProvider.putItem(table, pk, sk, { ...lead, lsi1 });
-    return lead;
-  };
+  get = async (tenantId: string, leadId: string) => undefined;
 
-  /**
-   * Get lead by id
-   * @param tenantId Tenant ID
-   * @param leadId Lead ID
-   * @returns Lead object
-   */
-  getById = async (tenantId: String, leadId: String) => {
-    const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
-    const pk = `${TENANT_INDEX}#${tenantId}`;
-    const sk = `${LEAD_INDEX}#${leadId}`;
-    return dynamoProvider.getItem<Lead>(table, pk, sk);
-  };
+  create = async (tenantId: string, lead: Lead) => lead;
 
-  /**
-   * Get information of a lead list by condition with a value of a field
-   * @param tenantId Tenant code
-   * @param field DynamoDB field name to query
-   * @param value The value of DynamoDB field name
-   * @returns A List of Lead object
-   */
-  getLeadListByField = async (tenantId: string, field: string, value: string) => {
-    const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
-    const params: QueryInput = {
-      TableName: table,
-      KeyConditionExpression: 'pk = :pk AND begins_with(sk, :sk_filter_value)',
-      ExpressionAttributeNames: {
-        '#field': field,
-      },
-      FilterExpression: ' #field = :value',
-      ExpressionAttributeValues: {
-        ':pk': { S: `${TENANT_INDEX}#${tenantId}` },
-        ':sk_filter_value': { S: `${LEAD_INDEX}#` },
-        ':value': { S: value },
-      },
-    };
-    return dynamoProvider.query(params);
-  };
+  update = async (tenantId: string, lead: Lead) => lead;
 
-  /**
-   * Get information of a lead list by tenantId
-   * @param tenantId Tenant code
-   * @returns A List of Lead object
-   */
-  getLeadListByTenant = async (tenantId: string) => {
-    const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
-    const params: QueryInput = {
-      TableName: table,
-      KeyConditionExpression: 'pk = :pk AND begins_with(sk, :sk_filter_value)',
-      ExpressionAttributeValues: {
-        ':pk': { S: `${TENANT_INDEX}#${tenantId}` },
-        ':sk_filter_value': { S: `${LEAD_INDEX}#` },
-      },
-    };
-    return dynamoProvider.query(params);
-  };
+  delete = async (tenantId: string, leadId: Lead) => { };
 
-  /**
-   * Get information of a enabled lead list by tenantId, assignee, and status
-   * Disabled leads will be only viewed by admin
-   * @param tenantId Tenant code
-   * @param userId Assignee of lead
-   * @param type type of Lead (Lead|Customer)
-   * @param status status of Lead
-   * @returns A List of Lead object
-   */
-  getLeadListByAssigneeAndStatus = async (
-    tenantId: string,
-    userId: string,
-    type: LeadType,
-    status?: LeadStatus,
-  ): Promise<Lead[]> => {
-    const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
-    let filterLSI = `${type}#${userId}#${ENABLED}`;
-    if (status) {
-      filterLSI = `${type}#${userId}#${ENABLED}#${status}`;
-    }
-    const params: QueryInput = {
-      TableName: table,
-      IndexName: 'Index1',
-      KeyConditionExpression: 'pk = :pk AND begins_with(lsi1, :lsi_filter_value)',
-      ExpressionAttributeValues: {
-        ':pk': { S: `${TENANT_INDEX}#${tenantId}` },
-        ':lsi_filter_value': { S: filterLSI },
-      },
-    };
-    return dynamoProvider.query(params);
-  };
+  changeAssignee = async (tenantId: string, leadId: string, saleId: string) => undefined;
+
+  changeStatus = async (tenantId: string, leadId: string, status: LeadStatus) => undefined;
 }

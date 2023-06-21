@@ -27,8 +27,8 @@ export default class UserRepositoryImpl implements UserRepository {
       },
     };
     const rs = await dynamoProvider.query(params);
-    if (rs.length) {
-      return rs[0];
+    if (rs.Items && rs.Items?.length > 0) {
+      return rs.Items[0] as User;
     }
     return undefined;
   };

@@ -1,18 +1,9 @@
 import compression from 'compression';
 import cors from 'cors';
-import { getCurrentUserInfo } from 'decode-token';
 import express, { NextFunction, Request, Response } from 'express';
-import { LeadStatus, LeadType } from './models/Lead';
-import {
-  createLeadUseCase,
-  getLeadListByAssigneeUseCase,
-  getLeadListByTenantUseCase,
-  getLeadUseCase,
-  updateLeadUseCase,
-} from './useCases';
 import { FAILED, SUCCESS } from './utils/constants';
 import logger from './utils/logger';
-import validate, { createUpdateLeadValidator, getAllLeadByAssigneeValidator, getLeadValidator } from './utils/validator';
+import validate, { changeStatusLeadValidator, createUpdateLeadValidator, getLeadValidator } from './utils/validator';
 import wrapResponse from './utils/wrapResponse';
 
 const app = express();
@@ -32,16 +23,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 app.post('/leads', createUpdateLeadValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
-    const currentTime = Date.now();
-    const { username, name } = getCurrentUserInfo(req.headers.authorization!);
-    req.body.createdAt = currentTime;
-    req.body.updatedAt = currentTime;
-    req.body.creatorId = username;
-    req.body.creatorName = name;
-    req.body.assigneeId = username;
-    req.body.assigneeName = name;
-    const lead = await createLeadUseCase.invoke(req.body, username);
-    res.json(wrapResponse(SUCCESS, lead));
+    res.json(wrapResponse(SUCCESS));
   } catch (error: any) {
     logger.log(`[POST /leads] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
@@ -51,10 +33,7 @@ app.post('/leads', createUpdateLeadValidator(), async (req: Request, res: Respon
 app.put('/leads', createUpdateLeadValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
-    req.body.updatedAt = Date.now();
-    const { username } = getCurrentUserInfo(req.headers.authorization!);
-    const lead = await updateLeadUseCase.invoke(req.body, username);
-    res.json(wrapResponse(SUCCESS, lead));
+    res.json(wrapResponse(SUCCESS));
   } catch (error: any) {
     logger.log(`[PUT /leads] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
@@ -64,40 +43,29 @@ app.put('/leads', createUpdateLeadValidator(), async (req: Request, res: Respons
 app.get('/leads/:leadId', getLeadValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
-    const { leadId } = req.params;
-    const { username } = getCurrentUserInfo(req.headers.authorization!);
-    const lead = await getLeadUseCase.invoke(leadId, username);
-    res.json(wrapResponse(SUCCESS, lead));
+    res.json(wrapResponse(SUCCESS));
   } catch (error: any) {
     logger.log(`[GET /leads/:leadId] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });
 
-app.get('/leads', getAllLeadByAssigneeValidator(), async (req: Request, res: Response) => {
+app.get('/leads', async (req: Request, res: Response) => {
   try {
     validate(req);
-    const { username } = getCurrentUserInfo(req.headers.authorization!);
-    const { type, status } = req.query;
-    const leadList = await getLeadListByAssigneeUseCase.invoke(
-      username,
-      type as LeadType,
-      status as LeadStatus,
-    );
-    res.json(wrapResponse(SUCCESS, leadList));
+    res.json(wrapResponse(SUCCESS));
   } catch (error: any) {
     logger.log(`[GET/leads] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });
 
-app.get('/admin/leads', async (req: Request, res: Response) => {
+app.put('/leads/:leadId/status', changeStatusLeadValidator(), async (req: Request, res: Response) => {
   try {
-    const { username } = getCurrentUserInfo(req.headers.authorization!);
-    const leadList = await getLeadListByTenantUseCase.invoke(username);
-    res.json(wrapResponse(SUCCESS, leadList));
+    validate(req);
+    res.json(wrapResponse(SUCCESS));
   } catch (error: any) {
-    logger.log(`[GET /admin/leads] Error ${error}`);
+    logger.log(`[PUT /leads/:leadId/status] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });
