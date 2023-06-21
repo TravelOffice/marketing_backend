@@ -1,6 +1,3 @@
-import { Note } from './Note';
-import { Task } from './Task';
-
 export enum SexType {
   MALE = 'MALE',
   FEMALE = 'FEMALE',
@@ -14,11 +11,9 @@ export enum VocativeType {
 }
 export enum LeadStatus {
   NEW = 'NEW',
-  QUALIFYING = 'QUALIFYING',
-  QUALIFIED = 'QUALIFIED',
-  TAKING_CARE = 'TAKING_CARE',
-  TRADING = 'TRADING',
-  TRADED = 'TRADED',
+  PROCESSING = 'PROCESSING',
+  CLOSED = 'CLOSED',
+  CANCEL = 'CANCEL',
 }
 export enum MaritalStatus {
   MARRIED = 'MARRIED',
@@ -63,6 +58,4 @@ export interface Lead {
   source: SourceType,
   enabled: boolean,
   type: LeadType,
-  tasks?: Task[],
-  notes?: Note[]
 }

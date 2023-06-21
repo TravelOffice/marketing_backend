@@ -1,6 +1,6 @@
 import { Request } from 'express';
 import {
-  query, body, param, ValidationError, validationResult,
+  body, param, ValidationError, validationResult,
 } from 'express-validator';
 import {
   LeadType, MaritalStatus, SexType, SourceType, LeadStatus, VocativeType,
@@ -137,13 +137,10 @@ export function getLeadValidator() {
   ];
 }
 
-export function getAllLeadByAssigneeValidator() {
+export function changeStatusLeadValidator() {
   return [
-    query('type')
+    param('leadId', VALIDATE_NON_EMPTY_STRING_MSG)
       .notEmpty()
-      .isIn(Object.values(LeadType)).withMessage(`allow only in ${Object.values(LeadType)}`),
-    query('status')
-      .if(query('status').notEmpty())
-      .isIn(Object.values(LeadStatus)).withMessage(`allow only in ${Object.values(LeadStatus)}`),
+      .isString(),
   ];
 }

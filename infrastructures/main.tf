@@ -96,7 +96,6 @@ module "LAMBDA_LAYER" {
   LAMBDA_LAYERS = var.LAMBDA_LAYERS
   ENV           = var.ENV
   FEATURE_NAME  = var.FEATURE_NAME
-  S3_BUCKET     = module.REMOTE_STATE.STATE.COMMON_CONFIG.codepipeline_bucket
   TAGS          = local.tags
 }
 
