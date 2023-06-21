@@ -6,19 +6,19 @@ export type GetItemInput = AWS.DynamoDB.GetItemInput;
 export type QueryInput = AWS.DynamoDB.QueryInput;
 export type DeleteItemInput = AWS.DynamoDB.DeleteItemInput
 
-const dynamoDB : AWS.DynamoDB = new AWS.DynamoDB({ region: getEnv('AWS_REGION') });
+const dynamoDB: AWS.DynamoDB = new AWS.DynamoDB({ region: getEnv('AWS_REGION') });
 
 export default class DynamoProvider {
   putItem = async (table: string, pk: string, sk: string, data: any) => {
-    const params : PutItemInput = {
+    const params: PutItemInput = {
       TableName: table,
       Item: AWS.DynamoDB.Converter.marshall({ pk, sk, ...data }),
     };
     return dynamoDB.putItem(params).promise();
   };
 
-  getItem = async <T = any>(table: string, pk: string, sk: string) : Promise< T | undefined> => {
-    const params : GetItemInput = {
+  getItem = async <T = any>(table: string, pk: string, sk: string): Promise<T | undefined> => {
+    const params: GetItemInput = {
       TableName: table,
       Key: AWS.DynamoDB.Converter.marshall({ pk, sk }),
     };
@@ -34,7 +34,7 @@ export default class DynamoProvider {
     keyCondition: string,
     expressionAttributeValues: AWS.DynamoDB.ExpressionAttributeValueMap,
   ) => {
-    const params : QueryInput = {
+    const params: QueryInput = {
       TableName: table,
       KeyConditionExpression: keyCondition,
       ExpressionAttributeValues: expressionAttributeValues,
@@ -45,7 +45,7 @@ export default class DynamoProvider {
   rawQuery = async (input: QueryInput) => dynamoDB.query(input).promise();
 
   deleteItem = async (table: string, pk: string, sk: string) => {
-    const params : DeleteItemInput = {
+    const params: DeleteItemInput = {
       TableName: table,
       Key: AWS.DynamoDB.Converter.marshall({ pk, sk }),
     };

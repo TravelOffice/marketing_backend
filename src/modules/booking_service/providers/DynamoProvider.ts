@@ -1,74 +1,36 @@
 import AWS from 'aws';
 import { getEnv } from 'get-env';
 
-type PutItemInput = AWS.DynamoDB.PutItemInput;
-type GetItemInput = AWS.DynamoDB.GetItemInput;
-type QueryInput = AWS.DynamoDB.QueryInput;
-type DeleteItemInput = AWS.DynamoDB.DeleteItemInput
-const dynamoDB : AWS.DynamoDB = new AWS.DynamoDB({ region: getEnv('AWS_REGION') });
+// Create the DynamoDB service object
+const docClient = new AWS.DynamoDB.DocumentClient({ region: getEnv('AWS_REGION') });
+
+type QueryInput = AWS.DynamoDB.DocumentClient.QueryInput;
+type QueryOutput = AWS.DynamoDB.DocumentClient.QueryOutput;
+type UpdateItemInput = AWS.DynamoDB.DocumentClient.UpdateItemInput;
+type UpdateItemOutput = AWS.DynamoDB.DocumentClient.UpdateItemOutput;
+type GetItemInput = AWS.DynamoDB.DocumentClient.GetItemInput;
+type PutItemInput = AWS.DynamoDB.DocumentClient.PutItemInput;
 
 export default class DynamoProvider {
-  putItem = async (table: string, pk: string, sk: string, data: any) => {
-    const params : PutItemInput = {
-      TableName: table,
-      Item: AWS.DynamoDB.Converter.marshall({ pk, sk, ...data }),
-    };
-    return dynamoDB.putItem(params).promise();
-  };
+  putItem = async (params: PutItemInput) => docClient.put(params).promise();
 
-  getItem = async <T = any>(table: string, pk: string, sk: string) : Promise< T | undefined> => {
-    const params : GetItemInput = {
+  query = async (params: QueryInput): Promise<QueryOutput> => docClient.query(params).promise();
+
+  update = async (
+    params: UpdateItemInput,
+  ): Promise<UpdateItemOutput> => docClient.update(params).promise();
+
+  get = async <T = any>(table: string, pk: string, sk: string): Promise<T | undefined> => {
+    const params: GetItemInput = {
       TableName: table,
-      Key: AWS.DynamoDB.Converter.marshall({ pk, sk }),
+      Key: { pk, sk },
     };
-    const { Item } = await dynamoDB.getItem(params).promise();
+    const { Item } = await docClient.get(params).promise();
     if (!Item) {
       return undefined;
     }
-    return AWS.DynamoDB.Converter.unmarshall(Item) as T;
+    return Item as T;
   };
 
-  query = async (
-    table: string,
-    keyCondition: string,
-    expressionAttributeValues: AWS.DynamoDB.ExpressionAttributeValueMap,
-  ) => {
-    const params : QueryInput = {
-      TableName: table,
-      KeyConditionExpression: keyCondition,
-      ExpressionAttributeValues: expressionAttributeValues,
-    };
-    const rs = await dynamoDB.query(params).promise();
-    return rs;
-  };
-
-  rawQuery = async (input: QueryInput) => dynamoDB.query(input).promise();
-
-  updateItem = async (
-    table: string,
-    pk: string,
-    sk: string,
-    updateExpression: string,
-    expressionAttributeValues: {[key: string]: any},
-    expressionAttributeNames?: AWS.DynamoDB.ExpressionAttributeNameMap,
-  ) => {
-    const params: AWS.DynamoDB.DocumentClient.UpdateItemInput = {
-      TableName: table,
-      Key: AWS.DynamoDB.Converter.marshall({ pk, sk }),
-      UpdateExpression: updateExpression,
-      ExpressionAttributeValues: expressionAttributeValues,
-      ExpressionAttributeNames: expressionAttributeNames,
-      ReturnValues: 'UPDATED_NEW',
-    };
-    const rs = await dynamoDB.updateItem(params).promise();
-    return rs;
-  };
-
-  deleteItem = async (table: string, pk: string, sk: string) => {
-    const params : DeleteItemInput = {
-      TableName: table,
-      Key: AWS.DynamoDB.Converter.marshall({ pk, sk }),
-    };
-    await dynamoDB.deleteItem(params).promise();
-  };
+  rawQuery = async (input: QueryInput) => docClient.query(input).promise();
 }
