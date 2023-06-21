@@ -3,7 +3,9 @@ import AWS from 'aws';
 import { getAwsSecretValue } from 'get-env';
 import { Lead, LeadStatus } from '../models/Lead';
 import { dynamoProvider } from '../providers';
-import { LEAD_INDEX, STATUS_INDEX, TENANT_INDEX } from '../utils/constants';
+import {
+  LEAD_COUNTER_INDEX, LEAD_INDEX, STATUS_INDEX, TENANT_INDEX,
+} from '../utils/constants';
 import logger from '../utils/logger';
 import { LeadRepository } from './interfaces/LeadRepository';
 
@@ -17,11 +19,38 @@ export default class LeadRepositoryImpl implements LeadRepository {
     return dynamoProvider.get(travelTable, pk, sk);
   };
 
-  create = async (tenantId: string, lead: Lead) => lead;
+  /**
+   * Transform then saving lead to a data source
+   * @param tenantId id of the tenant which the lead to be saved.
+   * @param lead the Lead object to be saved.
+   */
+  create = async (tenantId: string, lead: Lead) => {
+    await dynamoProvider.putItem({
+      TableName: await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
+      Item: {
+        pk: `${TENANT_INDEX}#${tenantId}`,
+        sk: `${LEAD_INDEX}#${lead.createdAt}`,
+        ...lead,
+      },
+    });
+    return lead;
+  };
 
-  update = async (tenantId: string, lead: Lead) => lead;
+  list = async (tenantId: string) => {
+    throw new Error('Method not implemented');
+  };
 
-  delete = async (tenantId: string, leadId: Lead) => { };
+  get = async (tenantId: string, leadId: string) => {
+    throw new Error('Method not implemented');
+  };
+
+  update = async (tenantId: string, leadId: string, lead: Lead) => {
+    throw new Error('Method not implemented');
+  };
+
+  delete = async (tenantId: string, leadId: string) => {
+    throw new Error('Method not implemented');
+  };
 
   changeAssignee = async (tenantId: string, leadId: string, saleId: string) => undefined;
 
@@ -108,6 +137,34 @@ export default class LeadRepositoryImpl implements LeadRepository {
       logger.log(`Error canceling lead: ${error}`);
 
       // Rethrow the error to be handled by the caller
+      throw error;
+    }
+  };
+
+  /**
+   * Method to generate lead code which is user-readable
+   * @param tenantId id of the tenant
+   */
+  generateLeadCode = async (tenantId: string) => {
+    const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    try {
+      const result = await dynamoProvider.update({
+        TableName: table,
+        Key: {
+          pk: `${TENANT_INDEX}#${tenantId}`,
+          sk: LEAD_COUNTER_INDEX,
+        },
+        UpdateExpression: 'SET incrIndex = if_not_exists(incrIndex, :start) + :increment',
+        ExpressionAttributeValues: {
+          ':start': 0, // Initial value if the attribute doesn't exist
+          ':increment': 1, // Increment value
+        },
+        ReturnValues: 'UPDATED_NEW',
+      });
+      const count = result.Attributes!.incrIndex as number;
+      return count.toString();
+    } catch (error) {
+      logger.log(`Error during increment operation for tenant ${tenantId}: ${error}`);
       throw error;
     }
   };

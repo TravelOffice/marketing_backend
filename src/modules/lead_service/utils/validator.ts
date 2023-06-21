@@ -3,13 +3,14 @@ import {
   body, param, ValidationError, validationResult,
 } from 'express-validator';
 import {
-  SexType, LeadStatus, VocativeType,
+  VocativeType,
 } from '../models/Lead';
 import {
-  VALIDATE_BOOLEAN_MSG, VALIDATE_DATE_MSG,
-  VALIDATE_EMAIL_MSG, VALIDATE_NON_EMPTY_STRING_MSG,
-  VALIDATE_PHONE_ARRAY_MSG, VALIDATE_PHONE_MSG,
-  VALIDATE_STRING_ARRAY_MSG, VALIDATE_STRING_MSG,
+  VALIDATE_DATE_MSG,
+  VALIDATE_EMAIL_MSG,
+  VALIDATE_NON_EMPTY_STRING_MSG, VALIDATE_NUMBER_MSG,
+  VALIDATE_PHONE_MSG,
+  VALIDATE_STRING_MSG,
 } from './constants';
 
 export default function validate(req: Request) {
@@ -32,90 +33,71 @@ export default function validate(req: Request) {
 export function createUpdateLeadValidator() {
   return [
     body('name', VALIDATE_NON_EMPTY_STRING_MSG)
-      .if(body('name').notEmpty())
+      .notEmpty()
       .isString(),
 
     body('vocative')
       .if(body('vocative').notEmpty())
       .isIn(Object.values(VocativeType)).withMessage(`property allow only in ${Object.values(VocativeType)}`),
 
-    body('birthday', VALIDATE_DATE_MSG)
-      .if(body('birthday').notEmpty())
-      .custom((value: string) => {
-        const date = Date.parse(value);
-        return !Number.isNaN(date);
-      }),
-
-    body('nationality', VALIDATE_NON_EMPTY_STRING_MSG)
-      .if(body('nationality').notEmpty())
-      .isString(),
-
-    body('sex')
-      .if(body('sex').exists())
-      .isIn(Object.values(SexType)).withMessage(`allow only in ${Object.values(SexType)}`),
-
-    body('primaryPhoneNumber', VALIDATE_PHONE_MSG)
+    body('phoneNumber', VALIDATE_PHONE_MSG)
       .notEmpty()
       .custom((value: string) => {
-        const regex = /^\(?(\d{3})\)?[-. ]?(\d{3})[-. ]?(\d{4})$/;
+        const regex = /^(?:\+?84|0)(\d){9,10}$/;
         return value.match(regex);
       }),
 
-    body('otherPhoneNumbers', VALIDATE_PHONE_ARRAY_MSG)
-      .if(body('otherPhoneNumbers').exists())
-      .isArray()
-      .custom((value: []) => value.every((phone: string) => {
-        const regex = /^\(?(\d{3})\)?[-. ]?(\d{3})[-. ]?(\d{4})$/;
-        return phone.match(regex);
-      })),
-
     body('email', VALIDATE_EMAIL_MSG)
-      .if(body('email').notEmpty())
+      .notEmpty()
       .isEmail(),
-
-    body('country', VALIDATE_STRING_MSG)
-      .if(body('country').notEmpty())
-      .isString(),
-
-    body('province', VALIDATE_STRING_MSG)
-      .if(body('province').notEmpty())
-      .isString(),
-
-    body('district', VALIDATE_STRING_MSG)
-      .if(body('district').notEmpty())
-      .isString(),
-
-    body('ward', VALIDATE_STRING_MSG)
-      .if(body('ward').notEmpty())
-      .isString(),
 
     body('address', VALIDATE_STRING_MSG)
       .if(body('address').notEmpty())
       .isString(),
 
-    body('tags', VALIDATE_STRING_ARRAY_MSG)
-      .if(body('tags').exists())
-      .isArray()
-      .custom((value: []) => value.every((tag: string) => tag !== '')),
+    body('tourTemplateId', VALIDATE_STRING_MSG)
+      .if(body('tourTemplateId').notEmpty())
+      .isString(),
 
-    body('enabled', VALIDATE_BOOLEAN_MSG)
-      .isBoolean(),
+    body('desiredTour', VALIDATE_STRING_MSG)
+      .if(body('desiredTour').notEmpty())
+      .isString(),
 
-    body('status')
-      .isIn(Object.values(LeadStatus)).withMessage(`allow only in ${Object.values(LeadStatus)}`),
+    body('description', VALIDATE_STRING_MSG)
+      .if(body('description').notEmpty())
+      .isString(),
 
-    body('notes').optional().isArray().withMessage('Notes must be array'),
-    body('notes.*.title').if(body('notes').exists()).notEmpty().isString(),
-    body('notes.*.description').if(body('notes').exists()).notEmpty().isString(),
-    body('tasks').optional().isArray().withMessage('Tasks must be array'),
-    body('tasks.*.title').if(body('tasks').exists()).notEmpty().isString(),
-    body('tasks.*.description').if(body('tasks').exists()).notEmpty().isString(),
-    body('tasks.*.dueDate')
-      .if(body('tasks').exists()).notEmpty()
-      .custom((value: string) => {
-        const date = Date.parse(value);
-        return !Number.isNaN(date);
-      }),
+    body('assigneeId', VALIDATE_STRING_MSG)
+      .if(body('assigneeId').notEmpty())
+      .isString(),
+
+    body('sourceId', VALIDATE_STRING_MSG)
+      .notEmpty()
+      .isString(),
+
+    body('numberOfAdultPassengers', VALIDATE_NUMBER_MSG)
+      .notEmpty()
+      .isNumeric(),
+
+    body('numberOfChildrenPassengers', VALIDATE_NUMBER_MSG)
+      .notEmpty()
+      .isNumeric(),
+
+    body('departure', VALIDATE_STRING_MSG)
+      .notEmpty()
+      .isString(),
+
+    body('startDate', VALIDATE_DATE_MSG)
+      .notEmpty()
+      .custom((value) => !Number.isNaN(Date.parse(value))),
+
+    body('type', VALIDATE_STRING_MSG)
+      .notEmpty()
+      .isString(),
+
+    body('tourType', VALIDATE_STRING_MSG)
+      .if(body('tourType').notEmpty())
+      .isString(),
   ];
 }
 

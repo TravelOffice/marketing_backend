@@ -2,13 +2,14 @@ import compression from 'compression';
 import cors from 'cors';
 import { getCurrentUserInfo } from 'decode-token';
 import express, { NextFunction, Request, Response } from 'express';
-import { cancelLeadUseCase, changeLeadStatusUseCase } from './useCases';
+import { cancelLeadUseCase, changeLeadStatusUseCase, createLeadUseCase } from './useCases';
 import { FAILED, SUCCESS } from './utils/constants';
 import logger from './utils/logger';
 import validate, {
   cancelLeadValidator, changeLeadStatusValidator, createUpdateLeadValidator, getLeadValidator,
 } from './utils/validator';
 import wrapResponse from './utils/wrapResponse';
+import { User } from './models/User';
 
 const app = express();
 
@@ -27,7 +28,9 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 app.post('/leads', createUpdateLeadValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
-    res.json(wrapResponse(SUCCESS));
+    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const lead = await createLeadUseCase.invoke(currentUser as User, req.body);
+    res.json(wrapResponse(SUCCESS, lead));
   } catch (error: any) {
     logger.log(`[POST /leads] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
