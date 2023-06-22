@@ -28,6 +28,6 @@ export const TENANT_INDEX = 'TENANT';
 
 export const LEAD_INDEX = 'LEAD';
 
-export const OPPORTUNITY_INDEX = 'OPPORTUNITY';
+export const STATUS_INDEX = 'STATUS';
 
 export const EMPLOYEE_INDEX = 'EMPLOYEE';

@@ -15,47 +15,51 @@ export enum LeadStatus {
   CLOSED = 'CLOSED',
   CANCEL = 'CANCEL',
 }
-export enum MaritalStatus {
-  MARRIED = 'MARRIED',
-  SINGLE = 'SINGLE',
-  // Other: user can input custom value
-}
-export enum LeadType {
-  LEAD = 'LEAD',
-  CUSTOMER = 'CUSTOMER',
-}
-export enum SourceType {
-  SOCIAL = 'SOCIAL',
-  WEBSITE = 'WEBSITE',
-  ADVERTISEMENT = 'ADVERTISEMENT',
-  EVENT = 'EVENT',
-  OTHER = 'OTHER'
-}
 
 export interface Lead {
+  // Contact
   name: string,
   vocative: VocativeType,
-  birthday: string,
-  nationality: string,
-  sex: SexType,
-  maritalStatus: MaritalStatus,
-  primaryPhoneNumber: string,
-  otherPhoneNumbers: Array<string>,
   email: string,
-  country: string,
-  province: string,
-  district: string,
-  ward: string,
+  phoneNumber: string,
   address: string,
-  status: LeadStatus,
-  createdAt: string,
-  updatedAt: string,
+
+  // Desire
+  tourTemplateId: string,
+  tourTemplateName: string,
+  desiredTour: string,
+  tourType: string,
+  type: string,
+  startFrom: string,
+  startDate: string,
+  description: string,
+  numberOfAdultPassengers: number,
+  numberOfChildrenPassengers: number,
+
+  // Manage
+  leadStatus: LeadStatus,
   tags: Array<string>,
   creatorId: string,
   creatorName: string,
   assigneeId: string,
   assigneeName: string,
-  source: SourceType,
-  enabled: boolean,
-  type: LeadType,
+  sourceId: string,
+  sourceName: string,
+  cancelledReason: string,
+  createdAt: string,
+  updatedAt: string,
+
+  // Indexes
+  lsi1: string, // LEAD#STATUS#<status>
+  lsi2: string, // LEAD#ASSIGNEE#<assignee>
+  lsi3: string, // LEAD#SOURCE#<source>,
+  lsi4: string, // LEAD#DEPARTURE#<departure>,
+  lsi5: string, // LEAD#TYPE#<type>
 }
+
+export const CHANGING_STATUS_RULES = [
+  `${LeadStatus.NEW}-${LeadStatus.PROCESSING}`,
+  `${LeadStatus.NEW}-${LeadStatus.CANCEL}`,
+  `${LeadStatus.PROCESSING}-${LeadStatus.CLOSED}`,
+  `${LeadStatus.PROCESSING}-${LeadStatus.CANCEL}`,
+];

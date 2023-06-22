@@ -1,6 +1,20 @@
-interface UseCases {}
+import CancelLeadUseCaseImpl from './CancelLeadUseCaseImpl';
+import ChangeLeadStatusUseCaseImpl from './ChangeLeadStatusUseCaseImpl';
+import { CancelLeadUseCase } from './interfaces/CancelLeadUseCase';
+import { ChangeLeadStatusUseCase } from './interfaces/ChangeLeadStatusUseCase';
 
-const useCases : UseCases = {};
+interface UseCases {
+  changeLeadStatusUseCase: ChangeLeadStatusUseCase,
+  cancelLeadUseCase: CancelLeadUseCase,
+}
 
-// eslint-disable-next-line no-empty-pattern
-export const {} = useCases;
+const useCases : UseCases = {
+  changeLeadStatusUseCase: new ChangeLeadStatusUseCaseImpl(),
+  cancelLeadUseCase: new CancelLeadUseCaseImpl(),
+};
+
+// eslint-disable-next-line import/prefer-default-export
+export const {
+  changeLeadStatusUseCase,
+  cancelLeadUseCase,
+} = useCases;

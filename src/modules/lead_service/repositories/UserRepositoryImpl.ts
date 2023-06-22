@@ -1,35 +1,22 @@
-import AWS from 'aws';
 import { getAwsSecretValue } from 'get-env';
 import { User } from '../models/User';
 import { dynamoProvider } from '../providers';
 import { EMPLOYEE_INDEX, TENANT_INDEX } from '../utils/constants';
 import { UserRepository } from './interfaces/UserRepository';
 
-type QueryInput = AWS.DynamoDB.QueryInput;
-
 export default class UserRepositoryImpl implements UserRepository {
   /**
-   * Get user attribute in dynamo db
-   * @param username Cognito username
-   * @returns User object
+   * Function used to get user object from userId
+   * @param tenantId Tenant ID
+   * @param userId User ID
+   * @returns Promise of User
    */
-  getUserAttributes = async (username: string): Promise<User | undefined> => {
-    const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
-    const params: QueryInput = {
-      TableName: travelTable,
-      IndexName: 'ReverseIndex',
-      KeyConditionExpression: 'sk = :sk AND begins_with(pk, :pk_filter_value)',
-      ExpressionAttributeValues: {
-        // Given sk
-        ':sk': { S: `${EMPLOYEE_INDEX}#${username}` },
-        // Prefix to Tenant item
-        ':pk_filter_value': { S: `${TENANT_INDEX}#` },
-      },
-    };
-    const rs = await dynamoProvider.query(params);
-    if (rs.Items && rs.Items?.length > 0) {
-      return rs.Items[0] as User;
-    }
-    return undefined;
+  getUserAttributes = async (tenantId: string, userId: string) => {
+    const ddbTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    return dynamoProvider.get<User>(
+      ddbTable,
+      `${TENANT_INDEX}#${tenantId}`,
+      `${EMPLOYEE_INDEX}#${userId}`,
+    );
   };
 }
