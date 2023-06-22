@@ -6,12 +6,15 @@ import { CreateLeadUseCase } from './interfaces/CreateLeadUseCase';
 import CreateLeadUseCaseImpl from './CreateLeadUseCaseImpl';
 import { GetLeadListUseCase } from './interfaces/GetLeadListUseCase';
 import GetLeadListUseCaseImpl from './GetLeadListUseCaseImpl';
+import { ChangeLeadAssigneeUseCase } from './interfaces/ChangeLeadAssigneeUseCase';
+import ChangeLeadAssigneeUseCaseImpl from './ChangeLeadAssigneeUseCaseImpl';
 
 interface UseCases {
   changeLeadStatusUseCase: ChangeLeadStatusUseCase,
   cancelLeadUseCase: CancelLeadUseCase,
   createLeadUseCase: CreateLeadUseCase,
   getLeadListUseCase: GetLeadListUseCase,
+  changeLeadAssigneeUseCase: ChangeLeadAssigneeUseCase,
 }
 
 const useCases: UseCases = {
@@ -19,6 +22,7 @@ const useCases: UseCases = {
   cancelLeadUseCase: new CancelLeadUseCaseImpl(),
   createLeadUseCase: new CreateLeadUseCaseImpl(),
   getLeadListUseCase: new GetLeadListUseCaseImpl(),
+  changeLeadAssigneeUseCase: new ChangeLeadAssigneeUseCaseImpl(),
 };
 
 // eslint-disable-next-line import/prefer-default-export
@@ -27,4 +31,5 @@ export const {
   cancelLeadUseCase,
   createLeadUseCase,
   getLeadListUseCase,
+  changeLeadAssigneeUseCase,
 } = useCases;

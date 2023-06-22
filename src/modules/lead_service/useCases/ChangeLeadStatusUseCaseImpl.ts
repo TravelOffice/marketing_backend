@@ -1,5 +1,5 @@
 import { CHANGING_STATUS_RULES, LeadStatus } from '../models/Lead';
-import { leadRepository, userRepository } from '../repositories';
+import { leadRepository } from '../repositories';
 import logger from '../utils/logger';
 import { ChangeLeadStatusUseCase } from './interfaces/ChangeLeadStatusUseCase';
 
@@ -8,24 +8,13 @@ export default class ChangeLeadStatusUseCaseImpl implements ChangeLeadStatusUseC
    * Invokes a change in the status of a lead for a specific user and tenant.
    *
    * @param {string} tenantId - The ID of the tenant.
-   * @param {string} userId - The ID of the user performing the status change.
    * @param {string} leadId - The ID of the lead to change the status for.
    * @param {LeadStatus} status - The new status to set for the lead.
    * @returns {Promise<Lead>} - A promise that resolves to the updated lead after the status change.
    * @throws {Error} - If the user or lead information is invalid orthe status change isn't allowed.
    */
-  invoke = async (tenantId: string, userId: string, leadId: string, status: LeadStatus) => {
+  invoke = async (tenantId: string, leadId: string, status: LeadStatus) => {
     logger.log(`Invoking status change for lead ${leadId} with status ${status}`);
-
-    // Retrieve the user attributes based on the tenantId and userId
-    const userAttributes = await userRepository.getUserAttributes(tenantId, userId);
-
-    // Validate user information
-    if (!userAttributes) {
-      throw new Error('User does not exist!');
-    }
-
-    logger.log('User information validated successfully.');
 
     // Retrieve the lead based on the tenantId and leadId
     const lead = await leadRepository.getById(tenantId, leadId);
@@ -47,6 +36,8 @@ export default class ChangeLeadStatusUseCaseImpl implements ChangeLeadStatusUseC
     const updatedLead = await leadRepository.changeStatus(tenantId, leadId, status);
 
     logger.log(`Status of lead ${leadId} changed to ${status} successfully.`);
+
+    // TODO: notification
 
     return updatedLead;
   };

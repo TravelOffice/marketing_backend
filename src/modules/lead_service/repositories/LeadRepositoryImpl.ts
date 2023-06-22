@@ -4,6 +4,7 @@ import { getAwsSecretValue } from 'get-env';
 import { Lead, LeadStatus } from '../models/Lead';
 import { dynamoProvider } from '../providers';
 import {
+  ASSIGNEE_INDEX,
   LEAD_COUNTER_INDEX, LEAD_INDEX, STATUS_INDEX, TENANT_INDEX,
 } from '../utils/constants';
 import logger from '../utils/logger';
@@ -69,7 +70,27 @@ export default class LeadRepositoryImpl implements LeadRepository {
     throw new Error('Method not implemented');
   };
 
-  changeAssignee = async (tenantId: string, leadId: string, saleId: string) => undefined;
+  changeAssignee = async (tenantId: string, leadId: string, assignee: string) => {
+    const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const pk = `${TENANT_INDEX}#${tenantId}`;
+    const sk = `${LEAD_INDEX}#${leadId}`;
+    const updateParams: UpdateItemInput = {
+      TableName: travelTable,
+      Key: {
+        pk,
+        sk,
+      },
+      UpdateExpression: 'SET assignee = :assignee, lsi2 = :assigneeLsi, updatedAt = :updatedAt',
+      ExpressionAttributeValues: {
+        ':assignee': assignee,
+        ':assigneeLsi': `${LEAD_INDEX}#${ASSIGNEE_INDEX}#${assignee}`,
+        ':updatedAt': Date.now(),
+      },
+      ReturnValues: 'UPDATED_NEW',
+    };
+    const rs = await dynamoProvider.update(updateParams);
+    return rs.Attributes as Lead;
+  };
 
   /**
    * Change lead status

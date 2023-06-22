@@ -3,6 +3,7 @@ import {
   body, param, ValidationError, validationResult,
 } from 'express-validator';
 import {
+  LeadStatus,
   VocativeType,
 } from '../models/Lead';
 import {
@@ -114,12 +115,25 @@ export function changeLeadStatusValidator() {
     param('leadId', VALIDATE_NON_EMPTY_STRING_MSG)
       .notEmpty()
       .isString(),
+    body('status')
+      .isIn(Object.values(LeadStatus)).withMessage(`property allow only in ${Object.values(LeadStatus)}`),
   ];
 }
 
 export function cancelLeadValidator() {
   return [
     body('reason', VALIDATE_NON_EMPTY_STRING_MSG)
+      .notEmpty()
+      .isString(),
+  ];
+}
+
+export function changeLeadAssigneeValidator() {
+  return [
+    param('leadId', VALIDATE_NON_EMPTY_STRING_MSG)
+      .notEmpty()
+      .isString(),
+    body('assignee')
       .notEmpty()
       .isString(),
   ];
