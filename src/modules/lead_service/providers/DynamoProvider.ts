@@ -4,7 +4,7 @@ import { getEnv } from 'get-env';
 // Create the DynamoDB service object
 const docClient = new AWS.DynamoDB.DocumentClient({ region: getEnv('AWS_REGION') });
 
-type QueryInput = AWS.DynamoDB.DocumentClient.QueryInput;
+export type QueryInput = AWS.DynamoDB.DocumentClient.QueryInput;
 type QueryOutput = AWS.DynamoDB.DocumentClient.QueryOutput;
 type UpdateItemInput = AWS.DynamoDB.DocumentClient.UpdateItemInput;
 type UpdateItemOutput = AWS.DynamoDB.DocumentClient.UpdateItemOutput;
