@@ -2,7 +2,9 @@ import compression from 'compression';
 import cors from 'cors';
 import { getCurrentUserInfo } from 'decode-token';
 import express, { NextFunction, Request, Response } from 'express';
-import { cancelLeadUseCase, changeLeadStatusUseCase, createLeadUseCase } from './useCases';
+import {
+  cancelLeadUseCase, changeLeadStatusUseCase, createLeadUseCase, getLeadListUseCase,
+} from './useCases';
 import { FAILED, SUCCESS } from './utils/constants';
 import logger from './utils/logger';
 import validate, {
@@ -60,7 +62,9 @@ app.get('/leads/:leadId', getLeadValidator(), async (req: Request, res: Response
 app.get('/leads', async (req: Request, res: Response) => {
   try {
     validate(req);
-    res.json(wrapResponse(SUCCESS));
+    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const leads = await getLeadListUseCase.invoke(currentUser.tenant);
+    res.json(wrapResponse(SUCCESS, leads));
   } catch (error: any) {
     logger.log(`[GET/leads] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
