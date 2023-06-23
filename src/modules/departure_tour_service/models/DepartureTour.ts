@@ -1,10 +1,6 @@
 import { TourTemplate } from './TourTemplate';
 
-export interface DepartureTour extends Omit<TourTemplate, 'lsi1'> {
+export interface DepartureTour extends TourTemplate {
   tourTemplate: string, // Tour template ID (sk)
   startDate: number,
-}
-
-export interface DepartureTourWithId extends DepartureTour {
-  id: string,
 }
