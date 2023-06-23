@@ -1,24 +1,26 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import AWS from 'aws';
 import { getAwsSecretValue } from 'get-env';
+import { helper, dynamoProvider } from 'core';
 import { Lead, LeadStatus } from '../models/Lead';
-import { dynamoProvider } from '../providers';
+
 import {
-  ASSIGNEE_INDEX,
-  LEAD_COUNTER_INDEX, LEAD_INDEX, STATUS_INDEX, TENANT_INDEX,
+  LEAD_COUNTER_INDEX,
+  LEAD_INDEX,
+  TENANT_INDEX,
 } from '../utils/constants';
 import logger from '../utils/logger';
 import { LeadRepository } from './interfaces/LeadRepository';
-import { QueryInput } from '../providers/DynamoProvider';
 
 type UpdateItemInput = AWS.DynamoDB.DocumentClient.UpdateItemInput;
+type QueryInput = AWS.DynamoDB.DocumentClient.QueryInput;
 
 export default class LeadRepositoryImpl implements LeadRepository {
   getById = async (tenantId: string, leadId: string) => {
     const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
-    const pk = `${TENANT_INDEX}#${tenantId}`;
-    const sk = `${LEAD_INDEX}#${leadId}`;
-    return dynamoProvider.get(travelTable, pk, sk);
+    const pk = `${TENANT_INDEX}#${tenantId}#${LEAD_INDEX}`;
+    const sk = `${leadId}`;
+    return dynamoProvider.getItem(travelTable, pk, sk);
   };
 
   /**
@@ -27,27 +29,25 @@ export default class LeadRepositoryImpl implements LeadRepository {
    * @param lead the Lead object to be saved.
    */
   create = async (tenantId: string, lead: Lead) => {
-    await dynamoProvider.putItem({
-      TableName: await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
-      Item: {
-        pk: `${TENANT_INDEX}#${tenantId}`,
-        sk: `${LEAD_INDEX}#${lead.createdAt}`,
-        ...lead,
-      },
-    });
+    await dynamoProvider.putItem(
+      await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
+      `${TENANT_INDEX}#${tenantId}#${LEAD_INDEX}`,
+      `${lead.code}`,
+      lead,
+    );
     return lead;
   };
 
   /**
-   * Query to get all lead from data source
+   * Query to get all leads from data source, sort by createdAt by default.
    * @param tenantId id of the tenant
    */
   list = async (tenantId: string) => this.queryLeads({
     TableName: await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
-    KeyConditionExpression: 'pk = :pk AND begins_with(sk, :sk)',
+    KeyConditionExpression: 'pk = :pk',
+    IndexName: 'Index1',
     ExpressionAttributeValues: {
-      ':pk': `${TENANT_INDEX}#${tenantId}`,
-      ':sk': `${LEAD_INDEX}#`,
+      ':pk': `${TENANT_INDEX}#${tenantId}#${LEAD_INDEX}`,
     },
   });
 
@@ -58,43 +58,32 @@ export default class LeadRepositoryImpl implements LeadRepository {
    */
   listByAssignee = async (tenantId: string, assigneeId: string) => this.queryLeads({
     TableName: await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
-    IndexName: 'Index2',
-    KeyConditionExpression: 'pk = :pk AND begins_with(lsi2, :lsi2)',
+    IndexName: 'Index4',
+    KeyConditionExpression: 'pk = :pk AND begins_with(lsi4, :lsi4)',
     ExpressionAttributeValues: {
-      ':pk': `${TENANT_INDEX}#${tenantId}`,
-      ':lsi2': `${LEAD_INDEX}#${ASSIGNEE_INDEX}#${assigneeId}`,
+      ':pk': `${TENANT_INDEX}#${tenantId}#${LEAD_INDEX}`,
+      ':lsi4': assigneeId,
     },
   });
-
-  /**
-   * Query to get all leads which is assigned to given employee
-   * @param tenantId id of the tenant
-   * @param assigneeId id of the employee
-   */
-  listByAssignee = async (tenantId: string, assigneeId: string) => {
-    const result = await dynamoProvider.query({
-      TableName: await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
-      IndexName: 'Index2',
-      KeyConditionExpression: 'pk = :pk AND begins_with(lsi2, :lsi2)',
-      ExpressionAttributeValues: {
-        ':pk': `${TENANT_INDEX}#${tenantId}`,
-        ':lsi2': `${LEAD_INDEX}#${ASSIGNEE_INDEX}#${assigneeId}`,
-      },
-    });
-    const items = result.Items || [];
-    const leads = items.map((item) => {
-      const { pk, sk, ...rest } = item;
-      return rest;
-    });
-    return leads as Lead[];
-  };
 
   get = async (tenantId: string, leadId: string) => {
     throw new Error('Method not implemented');
   };
 
-  update = async (tenantId: string, leadId: string, lead: Lead) => {
-    throw new Error('Method not implemented');
+  update = async (tenantId: string, leadId: string, lead: Partial<Lead>) => {
+    const expressionNamesAndValues = helper.generateUpdateExpressionNamesAndValues(lead);
+    const result = await dynamoProvider.rawUpdateItem({
+      TableName: await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
+      Key: {
+        pk: `${TENANT_INDEX}#${tenantId}#${LEAD_INDEX}`,
+        sk: `${leadId}`,
+      },
+      UpdateExpression: helper.generateUpdateExpression(lead),
+      ReturnValues: 'ALL_NEW',
+      ExpressionAttributeValues: expressionNamesAndValues.values,
+      ExpressionAttributeNames: expressionNamesAndValues.names,
+    });
+    return result.Attributes as Lead;
   };
 
   delete = async (tenantId: string, leadId: string) => {
@@ -103,23 +92,23 @@ export default class LeadRepositoryImpl implements LeadRepository {
 
   changeAssignee = async (tenantId: string, leadId: string, assignee: string) => {
     const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
-    const pk = `${TENANT_INDEX}#${tenantId}`;
-    const sk = `${LEAD_INDEX}#${leadId}`;
+    const pk = `${TENANT_INDEX}#${tenantId}#${LEAD_INDEX}`;
+    const sk = `${leadId}`;
     const updateParams: UpdateItemInput = {
       TableName: travelTable,
       Key: {
         pk,
         sk,
       },
-      UpdateExpression: 'SET assignee = :assignee, lsi2 = :assigneeLsi, updatedAt = :updatedAt',
+      UpdateExpression: 'SET assignee = :assignee, lsi4 = :assigneeLsi, updatedAt = :updatedAt',
       ExpressionAttributeValues: {
         ':assignee': assignee,
-        ':assigneeLsi': `${LEAD_INDEX}#${ASSIGNEE_INDEX}#${assignee}`,
+        ':assigneeLsi': assignee,
         ':updatedAt': Date.now(),
       },
       ReturnValues: 'UPDATED_NEW',
     };
-    const rs = await dynamoProvider.update(updateParams);
+    const rs = await dynamoProvider.rawUpdateItem(updateParams);
     return rs.Attributes as Lead;
   };
 
@@ -132,23 +121,23 @@ export default class LeadRepositoryImpl implements LeadRepository {
    */
   changeStatus = async (tenantId: string, leadId: string, status: LeadStatus) => {
     const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
-    const pk = `${TENANT_INDEX}#${tenantId}`;
-    const sk = `${LEAD_INDEX}#${leadId}`;
+    const pk = `${TENANT_INDEX}#${tenantId}#${LEAD_INDEX}`;
+    const sk = `${leadId}`;
     const updateParams: UpdateItemInput = {
       TableName: travelTable,
       Key: {
         pk,
         sk,
       },
-      UpdateExpression: 'SET leadStatus = :status, lsi1 = :statusLsi, updatedAt = :updatedAt',
+      UpdateExpression: 'SET leadStatus = :status, lsi3 = :statusLsi, updatedAt = :updatedAt',
       ExpressionAttributeValues: {
         ':status': status,
-        ':statusLsi': `${LEAD_INDEX}#${STATUS_INDEX}#${status}`,
+        ':statusLsi': status,
         ':updatedAt': Date.now(),
       },
       ReturnValues: 'UPDATED_NEW',
     };
-    const rs = await dynamoProvider.update(updateParams);
+    const rs = await dynamoProvider.rawUpdateItem(updateParams);
     return rs.Attributes as Lead;
   };
 
@@ -173,8 +162,8 @@ export default class LeadRepositoryImpl implements LeadRepository {
       const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
 
       // Construct the partition key and sort key for the lead in the DynamoDB table
-      const pk = `${TENANT_INDEX}#${tenantId}`;
-      const sk = `${LEAD_INDEX}#${leadId}`;
+      const pk = `${TENANT_INDEX}#${tenantId}#${LEAD_INDEX}`;
+      const sk = `${leadId}`;
 
       // Define the parameters for updating the lead in the DynamoDB table
       const updateParams: UpdateItemInput = {
@@ -186,7 +175,7 @@ export default class LeadRepositoryImpl implements LeadRepository {
         UpdateExpression: 'SET leadStatus = :status, lsi1 = :statusLsi, reason = :reason, updatedAt = :updatedAt',
         ExpressionAttributeValues: {
           ':status': LeadStatus.CANCEL,
-          ':statusLsi': `${LEAD_INDEX}#${STATUS_INDEX}#${LeadStatus.CANCEL}`,
+          ':statusLsi': LeadStatus.CANCEL,
           ':reason': reason,
           ':updatedAt': Date.now(),
         },
@@ -194,7 +183,7 @@ export default class LeadRepositoryImpl implements LeadRepository {
       };
 
       // Update the lead in the DynamoDB table and retrieve the updated attributes
-      const rs = await dynamoProvider.update(updateParams);
+      const rs = await dynamoProvider.rawUpdateItem(updateParams);
 
       // Log the success of the cancellation process
       logger.log('[]Cancellation process completed successfully.');
@@ -217,7 +206,7 @@ export default class LeadRepositoryImpl implements LeadRepository {
   generateLeadCode = async (tenantId: string) => {
     const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
     try {
-      const result = await dynamoProvider.update({
+      const result = await dynamoProvider.rawUpdateItem({
         TableName: table,
         Key: {
           pk: `${TENANT_INDEX}#${tenantId}`,
@@ -239,14 +228,8 @@ export default class LeadRepositoryImpl implements LeadRepository {
   };
 
   private async queryLeads(input: QueryInput) {
-    const result = await dynamoProvider.query(input);
-    const items = result.Items || [];
-    const leads = items.map((item) => {
-      const {
-        pk, sk, lsi1, lsi2, lsi3, lsi4, lsi5, ...rest
-      } = item;
-      return rest;
-    });
+    const items = await dynamoProvider.query(input);
+    const leads = items.map((item) => helper.excludeDataFromObject(item));
     return leads as Lead[];
   }
 }

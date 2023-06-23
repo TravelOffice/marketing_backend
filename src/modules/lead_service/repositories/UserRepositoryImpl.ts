@@ -1,6 +1,6 @@
+import { dynamoProvider } from 'core';
 import { getAwsSecretValue } from 'get-env';
 import { User } from '../models/User';
-import { dynamoProvider } from '../providers';
 import { EMPLOYEE_INDEX, TENANT_INDEX } from '../utils/constants';
 import { UserRepository } from './interfaces/UserRepository';
 
@@ -13,7 +13,7 @@ export default class UserRepositoryImpl implements UserRepository {
    */
   getUserAttributes = async (tenantId: string, userId: string) => {
     const ddbTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
-    return dynamoProvider.get<User>(
+    return dynamoProvider.getItem<User>(
       ddbTable,
       `${TENANT_INDEX}#${tenantId}`,
       `${EMPLOYEE_INDEX}#${userId}`,

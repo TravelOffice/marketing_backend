@@ -13,4 +13,10 @@ export const {
   dynamoProvider,
 } = providers;
 
-export { QueryInput } from './DynamoProvider';
+export {
+  QueryInput,
+  PutItemInput,
+  GetItemInput,
+  UpdateItemInput,
+  DeleteItemInput,
+} from './DynamoProvider';

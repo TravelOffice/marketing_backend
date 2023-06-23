@@ -9,6 +9,7 @@ import {
   createLeadUseCase,
   getLeadListUseCase,
   getMyLeadListUseCase,
+  updateLeadUseCase,
 } from './useCases';
 import { FAILED, SUCCESS } from './utils/constants';
 import logger from './utils/logger';
@@ -18,6 +19,7 @@ import validate, {
   changeLeadStatusValidator,
   createUpdateLeadValidator,
   getLeadValidator,
+  updateLeadValidator,
 } from './utils/validator';
 import wrapResponse from './utils/wrapResponse';
 import { User } from './models/User';
@@ -44,16 +46,6 @@ app.post('/leads', createUpdateLeadValidator(), async (req: Request, res: Respon
     res.json(wrapResponse(SUCCESS, lead));
   } catch (error: any) {
     logger.log(`[POST /leads] Error ${error}`);
-    res.json(wrapResponse(FAILED, undefined, error.message));
-  }
-});
-
-app.put('/leads', createUpdateLeadValidator(), async (req: Request, res: Response) => {
-  try {
-    validate(req);
-    res.json(wrapResponse(SUCCESS));
-  } catch (error: any) {
-    logger.log(`[PUT /leads] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });
@@ -87,6 +79,19 @@ app.get('/me/leads', async (req: Request, res: Response) => {
     res.json(wrapResponse(SUCCESS, leads));
   } catch (error: any) {
     logger.log(`[GET/leads] Error ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.put('/leads/:leadId', updateLeadValidator(), async (req: Request, res: Response) => {
+  try {
+    validate(req);
+    const { tenant } = getCurrentUserInfo(req.headers.authorization!);
+    const { leadId } = req.params;
+    const lead = await updateLeadUseCase.invoke(tenant, leadId, req.body);
+    res.json(wrapResponse(SUCCESS, lead));
+  } catch (error: any) {
+    logger.log(`[PUT /leads] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });

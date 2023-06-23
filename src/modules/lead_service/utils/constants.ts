@@ -32,6 +32,8 @@ export const STATUS_INDEX = 'STATUS';
 
 export const ASSIGNEE_INDEX = 'ASSIGNEE';
 export const SOURCE_INDEX = 'SOURCE';
+export const CREATED_INDEX = 'CREATED';
+export const UPDATED_INDEX = 'UPDATED';
 
 export const START_DATE_INDEX = 'START_DATE';
 
