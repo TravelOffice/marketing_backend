@@ -1,12 +1,12 @@
 import AWS from 'aws';
 import { getAwsSecretValue } from 'get-env';
+import { dynamoProvider, helper } from 'core';
 import { DepartureTour } from '../models/DepartureTour';
-import { dynamoProvider } from '../providers';
 import { DEPARTURE_TOUR_COUNTER_INDEX, DEPARTURE_TOUR_INDEX, TENANT_INDEX } from '../utils/constants';
 import logger from '../utils/logger';
 import { DepartureTourRepository } from './interfaces/DepartureTourRepository';
 
-type QueryInput = AWS.DynamoDB.QueryInput;
+type QueryInput = AWS.DynamoDB.DocumentClient.QueryInput;
 
 export default class DepartureTourRepositoryImpl implements DepartureTourRepository {
   /**
@@ -14,26 +14,18 @@ export default class DepartureTourRepositoryImpl implements DepartureTourReposit
    * generate lead code which is user-readable.
    * If the counter attribute doesn't exist, it creates it with an initial value and increments it.
    * @param tenantId The ID of the tenant.
-   * @returns The updated counter value.
+   * @returns The code value.
    */
   generateDepartureTourCode = async (tenantId: string) => {
     const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
     try {
       logger.log(`Incrementing counter for tenant ${tenantId}`);
-      const result = await dynamoProvider.updateItem(
+      const code = await helper.generateCode(
         table,
         `${TENANT_INDEX}#${tenantId}`,
         `${DEPARTURE_TOUR_COUNTER_INDEX}`,
-        'SET incrIndex = if_not_exists(incrIndex, :start) + :increment',
-        {
-          ':start': 0, // Initial value if the attribute doesn't exist
-          ':increment': 1, // Increment value
-        },
       );
-      const attributes = AWS.DynamoDB.Converter.unmarshall(result.Attributes!);
-      const count = attributes.incrIndex;
-      logger.log(`Increment operation successful for tenant ${tenantId}. Counter: ${count}`);
-      return count as number;
+      return code;
     } catch (error) {
       logger.log(`Error during increment operation for tenant ${tenantId}:`, error);
       throw error;
@@ -52,23 +44,20 @@ export default class DepartureTourRepositoryImpl implements DepartureTourReposit
       IndexName: 'Index1',
       KeyConditionExpression: 'pk = :pk AND begins_with(lsi1, :lsi1_filter_value)',
       ExpressionAttributeValues: {
-        ':pk': { S: `${TENANT_INDEX}#${tenantId}` },
-        ':lsi1_filter_value': { S: `${DEPARTURE_TOUR_INDEX}#` },
+        ':pk': `${TENANT_INDEX}#${tenantId}`,
+        ':lsi1_filter_value': `${DEPARTURE_TOUR_INDEX}#`,
       },
     };
 
     logger.log(`Listing departure tours for tenant ${tenantId}`);
     logger.log('Query parameters:', params);
 
-    const items = await dynamoProvider.query(params);
+    const items: DepartureTour[] = await dynamoProvider.query(params);
 
     // Formatting the items and adding the id property
-    const departureTours = items.map((item) => {
-      const {
-        pk, sk, lsi1, ...rest
-      } = item;
-      return rest;
-    });
+    const departureTours = items.map(
+      (item) => helper.excludeDataFromObject(item) as DepartureTour,
+    );
 
     // Logging the results
     logger.log(`Found ${departureTours.length} departure tours for tenant ${tenantId}`);
@@ -97,11 +86,9 @@ export default class DepartureTourRepositoryImpl implements DepartureTourReposit
 
     logger.log('DepartureTour retrieved:', item);
 
-    const {
-      pk, sk, lsi1, ...departureTour
-    } = item;
+    const departureTour = helper.excludeDataFromObject(item);
 
-    return departureTour;
+    return departureTour as DepartureTour;
   };
 
   /**
@@ -122,11 +109,7 @@ export default class DepartureTourRepositoryImpl implements DepartureTourReposit
 
     logger.log(`DepartureTour created successfully for tenant ${tenantId}`);
 
-    const {
-      lsi1, ...rest
-    } = departureTour;
-
-    return rest as DepartureTour;
+    return helper.excludeDataFromObject(departureTour) as DepartureTour;
   };
 
   /**
@@ -163,7 +146,7 @@ export default class DepartureTourRepositoryImpl implements DepartureTourReposit
 
     logger.log(`DepartureTour updated successfully for tenant ${tenantId}`);
 
-    return departureTour;
+    return helper.excludeDataFromObject(departureTour) as DepartureTour;
   };
 
   /**
