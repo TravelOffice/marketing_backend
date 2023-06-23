@@ -1,5 +1,5 @@
 import { CHANGING_STATUS_RULES, LeadStatus } from '../models/Lead';
-import { leadRepository, userRepository } from '../repositories';
+import { leadRepository } from '../repositories';
 import logger from '../utils/logger';
 import { CancelLeadUseCase } from './interfaces/CancelLeadUseCase';
 
@@ -8,21 +8,12 @@ export default class CancelLeadUseCaseImpl implements CancelLeadUseCase {
  * Invokes the cancellation of a lead for a specific user and tenant.
  *
  * @param {string} tenantId - The ID of the tenant.
- * @param {string} userId - The ID of the user initiating the cancellation.
  * @param {string} leadId - The ID of the lead to cancel.
  * @param {string} reason - The reason for the cancellation.
  * @returns {Promise<Lead>} - A promise that resolves to the canceled lead.
  * @throws {Error} - If the user or lead information is invalid or the cancellation is not allowed.
  */
-  invoke = async (tenantId: string, userId: string, leadId: string, reason: string) => {
-    // Retrieve the user attributes based on the tenantId and userId
-    const userAttributes = await userRepository.getUserAttributes(tenantId, userId);
-
-    // Validate user information
-    if (!userAttributes) {
-      throw new Error('User does not exist!');
-    }
-
+  invoke = async (tenantId: string, leadId: string, reason: string) => {
     // Retrieve the lead based on the tenantId and leadId
     const lead = await leadRepository.getById(tenantId, leadId);
 
@@ -38,6 +29,7 @@ export default class CancelLeadUseCaseImpl implements CancelLeadUseCase {
 
     // Cancel the lead
     logger.log(`[CancelleadUseCaseImpl]: Lead ${leadId} was canceled with the reason '${reason}'`);
+    // TODO: notification
     return leadRepository.cancel(tenantId, leadId, reason);
   };
 }

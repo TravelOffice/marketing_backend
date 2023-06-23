@@ -3,12 +3,20 @@ import cors from 'cors';
 import { getCurrentUserInfo } from 'decode-token';
 import express, { NextFunction, Request, Response } from 'express';
 import {
-  cancelLeadUseCase, changeLeadStatusUseCase, createLeadUseCase, getLeadListUseCase,
+  cancelLeadUseCase,
+  changeLeadAssigneeUseCase,
+  changeLeadStatusUseCase,
+  createLeadUseCase,
+  getLeadListUseCase,
 } from './useCases';
 import { FAILED, SUCCESS } from './utils/constants';
 import logger from './utils/logger';
 import validate, {
-  cancelLeadValidator, changeLeadStatusValidator, createUpdateLeadValidator, getLeadValidator,
+  cancelLeadValidator,
+  changeLeadAssigneeValidator,
+  changeLeadStatusValidator,
+  createUpdateLeadValidator,
+  getLeadValidator,
 } from './utils/validator';
 import wrapResponse from './utils/wrapResponse';
 import { User } from './models/User';
@@ -74,10 +82,10 @@ app.get('/leads', async (req: Request, res: Response) => {
 app.put('/leads/:leadId/status', changeLeadStatusValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
-    const { tenant, username } = getCurrentUserInfo(req.headers.authorization!);
+    const { tenant } = getCurrentUserInfo(req.headers.authorization!);
     const { leadId } = req.params;
     const { status } = req.body;
-    const lead = await changeLeadStatusUseCase.invoke(tenant, username, leadId, status);
+    const lead = await changeLeadStatusUseCase.invoke(tenant, leadId, status);
     res.json(wrapResponse(SUCCESS, lead));
   } catch (error: any) {
     logger.log(`[PUT /leads/:leadId/status] Error ${error}`);
@@ -88,13 +96,27 @@ app.put('/leads/:leadId/status', changeLeadStatusValidator(), async (req: Reques
 app.put('/leads/:leadId/cancel', cancelLeadValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
-    const { tenant, username } = getCurrentUserInfo(req.headers.authorization!);
+    const { tenant } = getCurrentUserInfo(req.headers.authorization!);
     const { leadId } = req.params;
     const { reason } = req.body;
-    const lead = await cancelLeadUseCase.invoke(tenant, username, leadId, reason);
+    const lead = await cancelLeadUseCase.invoke(tenant, leadId, reason);
     res.json(wrapResponse(SUCCESS, lead));
   } catch (error: any) {
-    logger.log(`[PUT /leads/:leadId/status] Error ${error}`);
+    logger.log(`[PUT /leads/:leadId/cancel] Error ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.put('/leads/:leadId/assignee', changeLeadAssigneeValidator(), async (req: Request, res: Response) => {
+  try {
+    validate(req);
+    const { tenant } = getCurrentUserInfo(req.headers.authorization!);
+    const { leadId } = req.params;
+    const { assignee } = req.body;
+    const lead = await changeLeadAssigneeUseCase.invoke(tenant, leadId, assignee);
+    res.json(wrapResponse(SUCCESS, lead));
+  } catch (error: any) {
+    logger.log(`[PUT /leads/:leadId/assignee] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });
