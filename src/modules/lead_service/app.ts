@@ -8,6 +8,7 @@ import {
   changeLeadStatusUseCase,
   createLeadUseCase,
   getLeadListUseCase,
+  getMyLeadListUseCase,
 } from './useCases';
 import { FAILED, SUCCESS } from './utils/constants';
 import logger from './utils/logger';
@@ -72,6 +73,17 @@ app.get('/leads', async (req: Request, res: Response) => {
     validate(req);
     const currentUser = getCurrentUserInfo(req.headers.authorization!);
     const leads = await getLeadListUseCase.invoke(currentUser.tenant);
+    res.json(wrapResponse(SUCCESS, leads));
+  } catch (error: any) {
+    logger.log(`[GET/leads] Error ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.get('/me/leads', async (req: Request, res: Response) => {
+  try {
+    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const leads = await getMyLeadListUseCase.invoke(currentUser as User);
     res.json(wrapResponse(SUCCESS, leads));
   } catch (error: any) {
     logger.log(`[GET/leads] Error ${error}`);

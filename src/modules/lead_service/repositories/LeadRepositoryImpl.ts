@@ -9,6 +9,7 @@ import {
 } from '../utils/constants';
 import logger from '../utils/logger';
 import { LeadRepository } from './interfaces/LeadRepository';
+import { QueryInput } from '../providers/DynamoProvider';
 
 type UpdateItemInput = AWS.DynamoDB.DocumentClient.UpdateItemInput;
 
@@ -41,22 +42,29 @@ export default class LeadRepositoryImpl implements LeadRepository {
    * Query to get all lead from data source
    * @param tenantId id of the tenant
    */
-  list = async (tenantId: string) => {
-    const result = await dynamoProvider.query({
-      TableName: await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
-      KeyConditionExpression: 'pk = :pk AND begins_with(sk, :sk)',
-      ExpressionAttributeValues: {
-        ':pk': `${TENANT_INDEX}#${tenantId}`,
-        ':sk': `${LEAD_INDEX}#`,
-      },
-    });
-    const items = result.Items || [];
-    const leads = items.map((item) => {
-      const { pk, sk, ...rest } = item;
-      return rest;
-    });
-    return leads as Lead[];
-  };
+  list = async (tenantId: string) => this.queryLeads({
+    TableName: await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
+    KeyConditionExpression: 'pk = :pk AND begins_with(sk, :sk)',
+    ExpressionAttributeValues: {
+      ':pk': `${TENANT_INDEX}#${tenantId}`,
+      ':sk': `${LEAD_INDEX}#`,
+    },
+  });
+
+  /**
+   * Query to get all leads which is assigned to given employee
+   * @param tenantId id of the tenant
+   * @param assigneeId id of the employee
+   */
+  listByAssignee = async (tenantId: string, assigneeId: string) => this.queryLeads({
+    TableName: await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
+    IndexName: 'Index2',
+    KeyConditionExpression: 'pk = :pk AND begins_with(lsi2, :lsi2)',
+    ExpressionAttributeValues: {
+      ':pk': `${TENANT_INDEX}#${tenantId}`,
+      ':lsi2': `${LEAD_INDEX}#${ASSIGNEE_INDEX}#${assigneeId}`,
+    },
+  });
 
   get = async (tenantId: string, leadId: string) => {
     throw new Error('Method not implemented');
@@ -206,4 +214,16 @@ export default class LeadRepositoryImpl implements LeadRepository {
       throw error;
     }
   };
+
+  private async queryLeads(input: QueryInput) {
+    const result = await dynamoProvider.query(input);
+    const items = result.Items || [];
+    const leads = items.map((item) => {
+      const {
+        pk, sk, lsi1, lsi2, lsi3, lsi4, lsi5, ...rest
+      } = item;
+      return rest;
+    });
+    return leads as Lead[];
+  }
 }
