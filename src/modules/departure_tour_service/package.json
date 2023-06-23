@@ -21,6 +21,7 @@
     "get-env": "link:../../libs/get-env",
     "decode-token": "link:../../libs/decode-token",
     "common-models": "link:../../libs/common-models",
+    "core": "link:../../libs/core",
     "object-assign": "^4.1.1",
     "reflect-metadata": "^0.1.13",
     "auto-assign-utilities": "link:../../libs/auto-assign-utilities"

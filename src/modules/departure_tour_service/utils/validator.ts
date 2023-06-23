@@ -12,6 +12,7 @@ import {
   VALIDATE_PRICE_ARRAY_MSG,
 } from './constants';
 import { TourType } from '../models/TourType';
+import { TourStatus } from '../models/TourStatus';
 
 export default function validate(req: Request) {
   const errors = validationResult(req);
@@ -39,6 +40,9 @@ export function createOrUpdateDepartureTourValidator() {
 
     body('type')
       .isIn(Object.values(TourType)).withMessage(`allow only in ${Object.values(TourType)}`),
+
+    body('status')
+      .notEmpty().isIn(Object.values(TourStatus)).withMessage(`allow only in ${Object.values(TourStatus)}`),
 
     body('visitorCount')
       .notEmpty().withMessage(VALIDATE_NUMBER_MSG)
