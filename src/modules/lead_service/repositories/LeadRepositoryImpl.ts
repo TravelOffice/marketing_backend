@@ -66,6 +66,29 @@ export default class LeadRepositoryImpl implements LeadRepository {
     },
   });
 
+  /**
+   * Query to get all leads which is assigned to given employee
+   * @param tenantId id of the tenant
+   * @param assigneeId id of the employee
+   */
+  listByAssignee = async (tenantId: string, assigneeId: string) => {
+    const result = await dynamoProvider.query({
+      TableName: await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
+      IndexName: 'Index2',
+      KeyConditionExpression: 'pk = :pk AND begins_with(lsi2, :lsi2)',
+      ExpressionAttributeValues: {
+        ':pk': `${TENANT_INDEX}#${tenantId}`,
+        ':lsi2': `${LEAD_INDEX}#${ASSIGNEE_INDEX}#${assigneeId}`,
+      },
+    });
+    const items = result.Items || [];
+    const leads = items.map((item) => {
+      const { pk, sk, ...rest } = item;
+      return rest;
+    });
+    return leads as Lead[];
+  };
+
   get = async (tenantId: string, leadId: string) => {
     throw new Error('Method not implemented');
   };
