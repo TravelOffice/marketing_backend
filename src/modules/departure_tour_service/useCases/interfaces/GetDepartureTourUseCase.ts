@@ -1,5 +1,5 @@
-import { DepartureTourWithId } from '../../models/DepartureTour';
+import { DepartureTour } from '../../models/DepartureTour';
 
 export interface GetDepartureTourUseCase {
-  invoke: (tenantId: string, departureTourId: string) => Promise<DepartureTourWithId | undefined>;
+  invoke: (tenantId: string, departureTourId: string) => Promise<DepartureTour | undefined>;
 }

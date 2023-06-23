@@ -2,6 +2,7 @@ import { TourServicePrice } from './TourServicePrice';
 import { TourType } from './TourType';
 
 export interface TourTemplate {
+  code: number,
   name: string,
   type: TourType,
   visitorCount: number,
@@ -21,5 +22,6 @@ export interface TourTemplate {
   },
   tourPlan: string,
   lsi1: string, // (Ex: TOUR#STATUS#NEW)
-  tenant: string,
+  createdAt: number,
+  updatedAt: number,
 }

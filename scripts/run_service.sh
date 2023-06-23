@@ -21,7 +21,26 @@ fi
 echo "Starting service ${SERVICENAME}..."
 
 # Build dependencies
-${CUR_DIR}/scripts/build_dependencies.sh
+# Set the default value of the flag variable
+has_installed_option=false
+
+# Iterate through the command-line arguments
+for arg in "$@"; do
+    case $arg in
+        --installed)
+            has_installed_option=true
+            ;;
+        *)
+            echo "$arg"
+            ;;
+    esac
+done
+# Check the value of the flag variable
+if [ "$has_installed_option" = true ]; then
+    echo "The --installed option was passed. Skip install dependencies"
+else
+    ${CUR_DIR}/scripts/build_dependencies.sh
+fi
 
 cd ${SERVICE_DIR}
 yarn install

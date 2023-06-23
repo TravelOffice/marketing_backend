@@ -7,5 +7,11 @@ export default class UpdateDepartureTourUseCaseImpl implements UpdateDepartureTo
     tenantId: string,
     departureTourId: string,
     departureTour: DepartureTour,
-  ) => departureTourRepository.update(tenantId, departureTourId, departureTour);
+  ) => {
+    const departureTourToUpdate: DepartureTour = {
+      ...departureTour,
+      updatedAt: Date.now(),
+    };
+    return departureTourRepository.update(tenantId, departureTourId, departureTourToUpdate);
+  };
 }
