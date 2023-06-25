@@ -4,12 +4,13 @@ import compression from 'compression';
 import { getCurrentUserInfo } from 'decode-token';
 import {
   createBookingUseCase,
-  getBookingListByLeadUseCase,
+  getAllBookingsUseCase,
+  getBookingByGivenIdUseCase,
 } from './useCases';
 import wrapResponse from './utils/wrapResponse';
 import { FAILED, SUCCESS } from './utils/constants';
-import { BookingStatus } from './models/booking/Booking';
 import validate, {
+  validateGetBookingFilteredParams,
   validateNewBookingDataInput,
 } from './utils/validator';
 import logger from './utils/logger';
@@ -33,16 +34,30 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
   next();
 });
 
-app.get('/leads/:leadId/bookings', async (req: Request, res: Response) => {
+app.post('/bookings', validateNewBookingDataInput(), async (req: Request, res: Response) => {
   try {
-    const { status } = req.query;
-    const { leadId } = req.params;
-    const { username } = getCurrentUserInfo(req.headers.authorization!);
-    const bookings = await getBookingListByLeadUseCase.invoke(
-      username,
-      leadId,
-      status as BookingStatus,
-    );
+    validate(req);
+    const { tenant } = getCurrentUserInfo(req.headers.authorization!);
+    const createdBooking = await createBookingUseCase.invoke(tenant, req.body);
+    res.json(wrapResponse(SUCCESS, createdBooking));
+  } catch (error: any) {
+    logger.log(`[app.get] Error ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.get('/bookings', validateGetBookingFilteredParams(), async (req: Request, res: Response) => {
+  try {
+    const isFilteredParamsEmpty = !Object.keys(req.params).length;
+    if (!isFilteredParamsEmpty) {
+      // TODO: Implement by using ElasticSearch functionality
+      validate(req);
+      throw new Error('Feature is not impqlemented.');
+    }
+
+    // Get all bookings related to tenant
+    const { tenant } = getCurrentUserInfo(req.headers.authorization!);
+    const bookings = await getAllBookingsUseCase.invoke(tenant);
     res.json(wrapResponse(SUCCESS, bookings));
   } catch (error: any) {
     logger.log(`[app.get] Error ${error}`);
@@ -50,12 +65,14 @@ app.get('/leads/:leadId/bookings', async (req: Request, res: Response) => {
   }
 });
 
-app.post('/bookings', validateNewBookingDataInput(), async (req: Request, res: Response) => {
+app.get('/bookings/:id', async (req: Request, res: Response) => {
   try {
-    validate(req);
+    // Get booking by given id
+    const { id } = req.params;
     const { tenant } = getCurrentUserInfo(req.headers.authorization!);
-    const createdBooking = await createBookingUseCase.invoke(tenant, req.body);
-    res.json(wrapResponse(SUCCESS, createdBooking));
+    const booking = await getBookingByGivenIdUseCase.invoke(tenant, id);
+    if (!booking) throw new Error('Not found.');
+    res.json(wrapResponse(SUCCESS, booking));
   } catch (error: any) {
     logger.log(`[app.get] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));

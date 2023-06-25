@@ -21,6 +21,7 @@
     "decode-token": "link:../../libs/decode-token",
     "get-env": "link:../../libs/get-env",
     "common-models": "link:../../libs/common-models",
+    "core": "link:../../libs/core",
     "jwt-decode": "^3.1.2",
     "reflect-metadata": "^0.1.13"
   },

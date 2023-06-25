@@ -1,57 +1,15 @@
-import AWS from 'aws';
 import { getAwsSecretValue } from 'get-env';
-import { Booking, BookingStatus } from '../models/booking/Booking';
-import { dynamoProvider } from '../providers';
+import { QueryInput, dynamoProvider, helper } from 'core';
+import { Booking } from '../models/booking/Booking';
 import {
-  BOOKING_CODE_INDEX,
   BOOKING_COUNTER_INDEX,
   BOOKING_INDEX,
-  LATEST_BOOKING_INDEX,
-  LEAD_INDEX,
   TENANT_INDEX,
 } from '../utils/constants';
 import { BookingRepository } from './interfaces/BookingRepository';
 import logger from '../utils/logger';
 
-type QueryInput = AWS.DynamoDB.QueryInput;
-
 export default class BookingRepositoryImpl implements BookingRepository {
-  /**
-   * Function to get bookings list by leadId and filter by status
-   * @param tenant Tenant ID
-   * @param leadId Lead ID
-   * @param status Status
-   * @returns a Promise of bookings list
-   */
-  listByLead = async (tenant: string, leadId: string, status?: BookingStatus) => {
-    const dynamoTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
-    let filterLsi = `${LEAD_INDEX}#${leadId}#${LATEST_BOOKING_INDEX}`;
-    if (status) {
-      filterLsi = `${LEAD_INDEX}#${leadId}#${LATEST_BOOKING_INDEX}#${status}`;
-    }
-
-    const params: QueryInput = {
-      TableName: dynamoTable,
-      IndexName: 'Index1',
-      KeyConditionExpression: 'pk = :pk AND begins_with(lsi1, :lsi_filter_value)',
-      ExpressionAttributeValues: {
-        ':pk': { S: `${TENANT_INDEX}#${tenant}#${BOOKING_INDEX}` },
-        ':lsi_filter_value': { S: filterLsi },
-      },
-    };
-    const { Items: bookings } = await dynamoProvider.rawQuery(params);
-    if (bookings) {
-      return bookings.map((item: AWS.DynamoDB.AttributeMap) => {
-        const booking = AWS.DynamoDB.Converter.unmarshall(item);
-        const {
-          pk, sk, lsi1, lsi2, lsi3, lsi4, lsi5, ...rest
-        } = booking;
-        return rest as Booking;
-      });
-    }
-    return [];
-  };
-
   /**
    * Create new direct booking
    * @param tenant Tenant id
@@ -59,14 +17,13 @@ export default class BookingRepositoryImpl implements BookingRepository {
    * @returns Created booking
    */
   create = async (tenant: string, booking: Booking) => {
-    await dynamoProvider.putItem({
-      TableName: await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
-      Item: {
-        pk: `${TENANT_INDEX}#${tenant}#${BOOKING_INDEX}`,
-        sk: `${BOOKING_CODE_INDEX}#${booking.code}`,
-        ...booking,
-      },
-    });
+    const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    await dynamoProvider.putItem(
+      table,
+      `${TENANT_INDEX}#${tenant}#${BOOKING_INDEX}`,
+      booking.code,
+      booking,
+    );
     logger.log(`Created new booking for tenant ${tenant}`);
     return booking;
   };
@@ -81,26 +38,57 @@ export default class BookingRepositoryImpl implements BookingRepository {
    * @param tenant id of the tenant
    */
   generateCode = async (tenant: string) => {
-    const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
     try {
-      const result = await dynamoProvider.update({
-        TableName: table,
-        Key: {
-          pk: `${TENANT_INDEX}#${tenant}`,
-          sk: BOOKING_COUNTER_INDEX,
-        },
-        UpdateExpression: 'SET incrIndex = if_not_exists(incrIndex, :start) + :increment',
-        ExpressionAttributeValues: {
-          ':start': 0, // Initial value if the attribute doesn't exist
-          ':increment': 1, // Increment value
-        },
-        ReturnValues: 'UPDATED_NEW',
-      });
-      const count = result.Attributes!.incrIndex as number;
+      const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+      const count = await helper.generateCode(
+        table,
+        `${TENANT_INDEX}#${tenant}`,
+        BOOKING_COUNTER_INDEX,
+      );
       return count.toString();
     } catch (error) {
       logger.log(`Error during increment operation for tenant ${tenant}: ${error}`);
       throw error;
     }
+  };
+
+  /**
+   * Get booking data by given id
+   * @param tenant Tenant id
+   * @param bookingId Booking id which is also known as booking code
+   * @returns Returned Booking entity
+   */
+  getByGivenId = async (tenant: string, bookingId: string) => {
+    const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    return dynamoProvider.getItem(
+      travelTable,
+      `${TENANT_INDEX}#${tenant}#${BOOKING_INDEX}`,
+      bookingId,
+    );
+  };
+
+  /**
+   * Get all related booking for given tenant
+   * @param tenant Tenant id
+   * @returns Returned Booking array
+   */
+  getAll = async (tenant: string) => {
+    const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const params: QueryInput = {
+      TableName: travelTable,
+      KeyConditionExpression: 'pk = :pk',
+      ExpressionAttributeValues: {
+        ':pk': `${TENANT_INDEX}#${tenant}#${BOOKING_INDEX}`,
+      },
+    };
+
+    logger.log(`Get all bookings for given tenant ${tenant}`);
+
+    const bookings = await dynamoProvider.query(params);
+
+    // Formatting the items and adding the id property
+    return bookings.map(
+      (booking) => helper.excludeDataFromObject(booking) as Booking,
+    );
   };
 }
