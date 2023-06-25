@@ -1,11 +1,8 @@
-import AWS from 'aws';
 import { getAwsSecretValue } from 'get-env';
-import { dynamoProvider } from '../providers';
+import { QueryInput, dynamoProvider, helper } from 'core';
 import { EMPLOYEE_INDEX, TENANT_INDEX } from '../utils/constants';
 import { UserRepository } from './interfaces/UserRepository';
 import { User } from '../models/User';
-
-type QueryInput = AWS.DynamoDB.QueryInput;
 
 export default class UserRepositoryImpl implements UserRepository {
   /**
@@ -24,10 +21,12 @@ export default class UserRepositoryImpl implements UserRepository {
         ':sk_employee': { S: `${EMPLOYEE_INDEX}#${userId}` },
       },
     };
-    const { Items: items } = await dynamoProvider.query(queryParams);
-    if (!items || items.length === 0) {
+    const users = await dynamoProvider.query(queryParams);
+    if (users.length === 0) {
       return undefined;
     }
-    return items.pop() as User;
+
+    // Formatting the item
+    return helper.excludeDataFromObject(users.pop()) as User;
   };
 }

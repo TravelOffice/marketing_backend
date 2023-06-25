@@ -3,8 +3,8 @@ import { getEnv } from 'get-env';
 
 type PutItemInput = AWS.DynamoDB.DocumentClient.PutItemInput;
 type GetItemInput = AWS.DynamoDB.DocumentClient.GetItemInput;
-type QueryInput = AWS.DynamoDB.DocumentClient.QueryInput;
 type DeleteItemInput = AWS.DynamoDB.DocumentClient.DeleteItemInput;
+export type QueryInput = AWS.DynamoDB.DocumentClient.QueryInput;
 
 const dynamoDB: AWS.DynamoDB.DocumentClient = new AWS.DynamoDB.DocumentClient({ region: getEnv('AWS_REGION') });
 

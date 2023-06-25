@@ -39,3 +39,9 @@ export function validateNewBookingDataInput() {
     body('customer.*.address').optional().isString(),
   ];
 }
+
+export function validateGetBookingFilteredParams() {
+  // TODO: Implement validator for filtered parameters
+  // such as start date, end date, customerId, etc
+  return [];
+}

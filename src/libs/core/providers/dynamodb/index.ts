@@ -4,7 +4,7 @@ interface Providers {
   dynamoProvider: DynamoProvider,
 }
 
-const providers : Providers = {
+const providers: Providers = {
   dynamoProvider: new DynamoProvider(),
 };
 
@@ -12,3 +12,5 @@ const providers : Providers = {
 export const {
   dynamoProvider,
 } = providers;
+
+export { QueryInput } from './DynamoProvider';

@@ -1,19 +1,24 @@
-import GetBookingListByLeadUseCaseImpl from './GetBookingListByLeadUseCaseImpl';
 import CreateBookingUseCaseImpl from './CreateBookingUseCaseImpl';
 import { CreateBookingUseCase } from './interfaces/CreateBookingUseCase';
-import { GetBookingListByLeadUseCase } from './interfaces/GetBookingListByLeadUseCase';
+import { GetBookingByGivenIdUseCase } from './interfaces/GetBookingByGivenIdUseCase';
+import GetBookingByGivenIdUseCaseImpl from './GetBookingByGivenIdUseCaseImpl';
+import { GetAllBookingUseCase } from './interfaces/GetAllBookingUseCase';
+import GetAllBookingUseCaseImpl from './GetAllBookingUseCaseImpl';
 
 interface UseCases {
-  getBookingListByLeadUseCase: GetBookingListByLeadUseCase,
   createBookingUseCase: CreateBookingUseCase,
+  getBookingByGivenIdUseCase: GetBookingByGivenIdUseCase,
+  getAllBookingsUseCase: GetAllBookingUseCase,
 }
 
-const useCases : UseCases = {
-  getBookingListByLeadUseCase: new GetBookingListByLeadUseCaseImpl(),
+const useCases: UseCases = {
   createBookingUseCase: new CreateBookingUseCaseImpl(),
+  getBookingByGivenIdUseCase: new GetBookingByGivenIdUseCaseImpl(),
+  getAllBookingsUseCase: new GetAllBookingUseCaseImpl(),
 };
 
 export const {
-  getBookingListByLeadUseCase,
   createBookingUseCase,
+  getBookingByGivenIdUseCase,
+  getAllBookingsUseCase,
 } = useCases;

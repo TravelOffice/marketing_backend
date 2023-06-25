@@ -1,8 +1,9 @@
-import { Booking, BookingStatus } from '../../models/booking/Booking';
+import { Booking } from '../../models/booking/Booking';
 
 export interface BookingRepository {
-  listByLead: (tenant: string, leadId: string, status?: BookingStatus) => Promise<Array<Booking>>,
   create: (tenant: string, booking: Booking) => Promise<Booking>,
   createFromLead: (tenant: string, leadId: string, booking: Booking) => Promise<Booking>,
+  getByGivenId: (tenant: string, bookingId: string) => Promise<Booking | undefined>,
+  getAll: (tenant: string) => Promise<Array<Booking>>,
   generateCode: (tenant: string) => Promise<string>,
 }
