@@ -1,4 +1,4 @@
-import { BookingStatus } from '../models/Booking';
+import { BookingStatus } from '../models/booking/Booking';
 import { bookingRepository, userRepository } from '../repositories';
 import { GetBookingListByLeadUseCase } from './interfaces/GetBookingListByLeadUseCase';
 

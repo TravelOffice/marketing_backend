@@ -3,11 +3,15 @@ import express, { Request, Response, NextFunction } from 'express';
 import compression from 'compression';
 import { getCurrentUserInfo } from 'decode-token';
 import {
+  createBookingUseCase,
   getBookingListByLeadUseCase,
 } from './useCases';
 import wrapResponse from './utils/wrapResponse';
 import { FAILED, SUCCESS } from './utils/constants';
-import { BookingStatus } from './models/Booking';
+import { BookingStatus } from './models/booking/Booking';
+import validate, {
+  validateNewBookingDataInput,
+} from './utils/validator';
 import logger from './utils/logger';
 
 const app = express();
@@ -40,6 +44,18 @@ app.get('/leads/:leadId/bookings', async (req: Request, res: Response) => {
       status as BookingStatus,
     );
     res.json(wrapResponse(SUCCESS, bookings));
+  } catch (error: any) {
+    logger.log(`[app.get] Error ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.post('/bookings', validateNewBookingDataInput(), async (req: Request, res: Response) => {
+  try {
+    validate(req);
+    const { tenant } = getCurrentUserInfo(req.headers.authorization!);
+    const createdBooking = await createBookingUseCase.invoke(tenant, req.body);
+    res.json(wrapResponse(SUCCESS, createdBooking));
   } catch (error: any) {
     logger.log(`[app.get] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
