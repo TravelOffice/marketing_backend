@@ -21,6 +21,19 @@ export enum MaritalStatus {
     // Other: user can input custom value
 }
 
+export enum CustomerType {
+    PERSONAL = 'PERSONAL',
+    BUSSINESS = 'BUSSINESS'
+}
+
+export enum CustomerLevel {
+  STANDARD = 'STANDARD',
+  SILVER = 'SILVER',
+  GOLD = 'GOLD',
+  PLATIUM = 'PLATIUM',
+  DIAMON = 'DIAMON',
+}
+
 export enum SourceType {
     SOCIAL = 'SOCIAL',
     WEBSITE = 'WEBSITE',
@@ -51,6 +64,14 @@ interface DdbCustomerModel extends BaseDdbModel {
     notes?: Note[],
     creatorId?: string,
     creatorName?: string,
+    assigneeId?: string,
+    assigneeName?: string,
+    interest?: string,
+    group?: string,
+    genitive?: string,
+    taxCode?: string,
+    level?: CustomerLevel,
+    socialLink?: string,
 }
 
 export type Customer = Omit<DdbCustomerModel, 'pk' | 'sk'>;

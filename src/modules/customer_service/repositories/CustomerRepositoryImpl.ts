@@ -1,0 +1,142 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import AWS from 'aws';
+import { getAwsSecretValue } from 'get-env';
+import { dynamoProvider, helper } from 'core';
+import { Customer } from '../models/Customer';
+import {
+  ASSIGNEE_INDEX,
+  CUSTOMER_COUNTER_INDEX,
+  CUSTOMER_INDEX,
+  PHONE_INDEX,
+  TENANT_INDEX,
+} from '../utils/constants';
+import { CustomerRepository } from './interfaces/CustomerRepository';
+import logger from '../utils/logger';
+
+type UpdateItemInput = AWS.DynamoDB.DocumentClient.UpdateItemInput;
+type QueryInput = AWS.DynamoDB.DocumentClient.QueryInput;
+
+export default class CustomerRepositoryImpl implements CustomerRepository {
+  /**
+   * Retrieves a customer for a specific tenant and customer ID.
+   * @param tenantId The ID of the tenant.
+   * @param customerID The ID of the customer.
+   * @returns The retrieved customer.
+   */
+  get = async (tenantId: string, customerId: string) => {
+    const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+
+    logger.log(`Retrieving Customer for tenant ${tenantId} with [${customerId}]`);
+
+    const item = await dynamoProvider.getItem(
+      table,
+      `${TENANT_INDEX}#${tenantId}#${CUSTOMER_INDEX}`,
+      `${customerId}`,
+    );
+    if (!item) throw new Error(`Customer [${customerId}] not found`);
+
+    logger.log('DepartureTour retrieved:', item);
+
+    const customer = helper.excludeDataFromObject(item);
+
+    return customer as Customer;
+  };
+
+  /**
+   * Transform then saving custoer to a data source
+   * @param tenantId id of the tenant which the customer to be saved.
+   * @param customer the customer object to be saved.
+   */
+  create = async (tenantId: string, customer: Customer) => {
+    const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const pk = `${TENANT_INDEX}#${tenantId}#${CUSTOMER_INDEX}`;
+    const sk = `${customer.code}`;
+    await dynamoProvider.putItem(table, pk, sk, customer);
+    return helper.excludeDataFromObject(customer) as Customer;
+  };
+
+  /**
+   * Query to get all customer from data source
+   * @param tenantId The id of the tenant
+   */
+  list = async (tenantId: string) => {
+    const result = await dynamoProvider.query({
+      TableName: await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
+      KeyConditionExpression: 'pk = :pk',
+      ExpressionAttributeValues: {
+        ':pk': `${TENANT_INDEX}#${tenantId}#${CUSTOMER_INDEX}`,
+      },
+    });
+    const customers = result.map((item) => helper.excludeDataFromObject(item));
+    return customers as Customer[];
+  };
+
+  findOneByPhone = async (tenantId: string, phone: string) => {
+    const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const params: QueryInput = {
+      TableName: travelTable,
+      IndexName: 'Index3',
+      KeyConditionExpression: 'pk = :pk AND begins_with(lsi3, :lsi3_filter_value)',
+      ExpressionAttributeValues: {
+        ':pk': `${TENANT_INDEX}#${tenantId}#${CUSTOMER_INDEX}`,
+        ':lsi3_filter_value': `${PHONE_INDEX}#${phone}`,
+      },
+    };
+    const items: Customer[] = await dynamoProvider.query(params);
+    if (items && items.length) {
+      return items[0];
+    }
+    return undefined;
+  };
+
+  update = async (tenantId: string, customer: Customer) => {
+    throw new Error('Method not implemented');
+  };
+
+  delete = async (tenantId: string, customerId: string) => {
+    throw new Error('Method not implemented');
+  };
+
+  changeAssignee = async (tenantId: string, customerId: string, assignee: string) => {
+    const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const pk = `${TENANT_INDEX}#${tenantId}#${CUSTOMER_INDEX}`;
+    const sk = `${customerId}`;
+    const updateExpression = 'SET assignee = :assignee, lsi2 = :assigneeLsi, updatedAt = :updatedAt';
+    const expressionAttributeValues = {
+      ':assignee': assignee,
+      ':assigneeLsi': `${CUSTOMER_INDEX}#${ASSIGNEE_INDEX}#${assignee}`,
+      ':updatedAt': Date.now(),
+    };
+    const rs = await dynamoProvider.updateItem(
+      travelTable,
+      pk,
+      sk,
+      updateExpression,
+      expressionAttributeValues,
+    );
+    return rs.Attributes as Customer;
+  };
+
+  /**
+   * Increments the counter for a specific tenant which use to
+   * generate customer code which is user-readable.
+   * If the counter attribute doesn't exist, it creates it with an initial value and increments it.
+   * @param tenantId The ID of the tenant.
+   * @returns The code value.
+   */
+  generateCustomerCode = async (tenantId: string) => {
+    const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    try {
+      logger.log(`Incrementing counter for tenant ${tenantId}`);
+      const code = await helper.generateCode(
+        table,
+        `${TENANT_INDEX}#${tenantId}`,
+        `${CUSTOMER_COUNTER_INDEX}`,
+      );
+      return code.toString();
+    } catch (error) {
+      logger.log(`Error during increment operation for tenant ${tenantId}: ${error}`);
+      throw error;
+    }
+  };
+}
