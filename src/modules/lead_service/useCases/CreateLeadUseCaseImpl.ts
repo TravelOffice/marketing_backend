@@ -1,17 +1,10 @@
+import { helper } from 'core';
 import { CreateLeadUseCase } from './interfaces/CreateLeadUseCase';
 import { CreateLeadDto } from '../dto/CreateLeadDto';
 import { Lead, LeadStatus } from '../models/Lead';
 import { leadRepository } from '../repositories';
 import { User } from '../models/User';
-import {
-  ASSIGNEE_INDEX,
-  LEAD_INDEX,
-  NONE_VALUE,
-  SOURCE_INDEX,
-  START_DATE_INDEX,
-  STATUS_INDEX,
-  TYPE_INDEX,
-} from '../utils/constants';
+import { NONE_VALUE } from '../utils/constants';
 
 export default class CreateLeadUseCaseImpl implements CreateLeadUseCase {
   /**
@@ -26,7 +19,7 @@ export default class CreateLeadUseCaseImpl implements CreateLeadUseCase {
   invoke = async (currentUser: User, createLeadDto: CreateLeadDto) => {
     // Extract data from dto
     const {
-      assigneeId, sourceId, startDate, type,
+      assigneeId, startDate,
     } = createLeadDto;
 
     // TODO: Create a new Customer
@@ -36,14 +29,14 @@ export default class CreateLeadUseCaseImpl implements CreateLeadUseCase {
     const status = assigneeId ? LeadStatus.PROCESSING : LeadStatus.NEW;
     const code = await leadRepository.generateLeadCode(currentUser.tenant);
     const leadToAdd: Lead = {
-      code: `L${code}`,
+      code,
       creatorId: currentUser.username,
       creatorName: currentUser.name,
-      lsi1: `${LEAD_INDEX}#${STATUS_INDEX}#${status}`,
-      lsi2: `${LEAD_INDEX}#${ASSIGNEE_INDEX}#${assigneeId || NONE_VALUE}`,
-      lsi3: `${LEAD_INDEX}#${SOURCE_INDEX}#${sourceId}`,
-      lsi4: `${LEAD_INDEX}#${START_DATE_INDEX}#${new Date(startDate).getTime()}`,
-      lsi5: `${LEAD_INDEX}#${TYPE_INDEX}#${type}`,
+      lsi1: now.toString(),
+      lsi2: now.toString(),
+      lsi3: status,
+      lsi4: assigneeId || NONE_VALUE,
+      lsi5: startDate,
       sourceName: '',
       leadStatus: status,
       tags: [],
@@ -56,6 +49,7 @@ export default class CreateLeadUseCaseImpl implements CreateLeadUseCase {
 
     // TODO: Logging and notification
 
-    return leadRepository.create(currentUser.tenant, leadToAdd);
+    const lead = await leadRepository.create(currentUser.tenant, leadToAdd);
+    return helper.excludeDataFromObject(lead) as Lead;
   };
 }

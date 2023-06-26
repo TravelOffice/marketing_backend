@@ -1,10 +1,11 @@
 import AWS from 'aws';
 import { getEnv } from 'get-env';
 
-type PutItemInput = AWS.DynamoDB.DocumentClient.PutItemInput;
-type GetItemInput = AWS.DynamoDB.DocumentClient.GetItemInput;
-type DeleteItemInput = AWS.DynamoDB.DocumentClient.DeleteItemInput;
+export type PutItemInput = AWS.DynamoDB.DocumentClient.PutItemInput;
+export type GetItemInput = AWS.DynamoDB.DocumentClient.GetItemInput;
+export type UpdateItemInput = AWS.DynamoDB.DocumentClient.UpdateItemInput;
 export type QueryInput = AWS.DynamoDB.DocumentClient.QueryInput;
+export type DeleteItemInput = AWS.DynamoDB.DocumentClient.DeleteItemInput;
 
 const dynamoDB: AWS.DynamoDB.DocumentClient = new AWS.DynamoDB.DocumentClient({ region: getEnv('AWS_REGION') });
 
@@ -82,8 +83,7 @@ export default class DynamoProvider {
       ExpressionAttributeNames: expressionAttributeNames,
       ReturnValues: 'UPDATED_NEW',
     };
-    const rs = await dynamoDB.update(params).promise();
-    return rs;
+    return dynamoDB.update(params).promise();
   };
 
   /**
@@ -99,4 +99,6 @@ export default class DynamoProvider {
     };
     await dynamoDB.delete(params).promise();
   };
+
+  rawUpdateItem = async (input: UpdateItemInput) => dynamoDB.update(input).promise();
 }

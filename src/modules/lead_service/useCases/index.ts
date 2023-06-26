@@ -10,6 +10,8 @@ import { ChangeLeadAssigneeUseCase } from './interfaces/ChangeLeadAssigneeUseCas
 import ChangeLeadAssigneeUseCaseImpl from './ChangeLeadAssigneeUseCaseImpl';
 import { GetMyLeadListUseCase } from './interfaces/GetMyLeadListUseCase';
 import GetMyLeadListUseCaseImpl from './GetMyLeadListUseCaseImpl';
+import { UpdateLeadUseCase } from './interfaces/UpdateLeadUseCase';
+import UpdateLeadUseCaseImpl from './UpdateLeadUseCaseImpl';
 
 interface UseCases {
   changeLeadStatusUseCase: ChangeLeadStatusUseCase,
@@ -18,6 +20,7 @@ interface UseCases {
   getLeadListUseCase: GetLeadListUseCase,
   changeLeadAssigneeUseCase: ChangeLeadAssigneeUseCase,
   getMyLeadListUseCase: GetMyLeadListUseCase,
+  updateLeadUseCase: UpdateLeadUseCase,
 }
 
 const useCases: UseCases = {
@@ -27,6 +30,7 @@ const useCases: UseCases = {
   getLeadListUseCase: new GetLeadListUseCaseImpl(),
   changeLeadAssigneeUseCase: new ChangeLeadAssigneeUseCaseImpl(),
   getMyLeadListUseCase: new GetMyLeadListUseCaseImpl(),
+  updateLeadUseCase: new UpdateLeadUseCaseImpl(),
 };
 
 // eslint-disable-next-line import/prefer-default-export
@@ -37,4 +41,5 @@ export const {
   getLeadListUseCase,
   changeLeadAssigneeUseCase,
   getMyLeadListUseCase,
+  updateLeadUseCase,
 } = useCases;

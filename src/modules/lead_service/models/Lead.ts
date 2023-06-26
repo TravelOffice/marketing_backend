@@ -53,11 +53,11 @@ export interface Lead {
   updatedAt: number,
 
   // Indexes
-  lsi1: string, // LEAD#STATUS#<status>
-  lsi2: string, // LEAD#ASSIGNEE#<assignee>
-  lsi3: string, // LEAD#SOURCE#<source>,
-  lsi4: string, // LEAD#START#<start_date>,
-  lsi5: string, // LEAD#TYPE#<type>
+  lsi1: string, // <createdAt>
+  lsi2: string, // <updatedAt>
+  lsi3: string, // <status>,
+  lsi4: string, // <assignee>,
+  lsi5: string, // <start_date>
 }
 
 export const CHANGING_STATUS_RULES = [
