@@ -37,8 +37,8 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
 app.post('/bookings', validateNewBookingDataInput(), async (req: Request, res: Response) => {
   try {
     validate(req);
-    const { tenant } = getCurrentUserInfo(req.headers.authorization!);
-    const createdBooking = await createBookingUseCase.invoke(tenant, req.body);
+    const user = getCurrentUserInfo(req.headers.authorization!);
+    const createdBooking = await createBookingUseCase.invoke(user, req.body);
     res.json(wrapResponse(SUCCESS, createdBooking));
   } catch (error: any) {
     logger.log(`[app.get] Error ${error}`);
