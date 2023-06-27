@@ -10,6 +10,10 @@ import { DeleteCustomerUseCase } from './interfaces/DeleteCustomerUseCase';
 import DeleteCustomerUseCaseImpl from './DeleteCustomerUseCaseImpl';
 import { GetCustomerUseCase } from './interfaces/GetCustomerUseCase';
 import GetCustomerUseCaseImpl from './GetCustomerUseCaseImpl';
+import { GetLeadByCustomerUseCase } from './interfaces/GetLeadByCustomerUseCase';
+import GetLeadByCustomerUseCaseImpl from './GetLeadByCustomerUseCaseImpl';
+import { GetBookingByCustomerUseCase } from './interfaces/GetBookingByCustomerUseCase';
+import GetBookingByCustomerUseCaseImpl from './GetBookingByCustomerUseCaseImpl';
 
 interface UseCases {
   getCustomerUseCase: GetCustomerUseCase,
@@ -18,6 +22,8 @@ interface UseCases {
   deleteCustomerUseCase: DeleteCustomerUseCase,
   getCustomerListUseCase: GetCustomerListUseCase,
   changeCustomerAssigneeUseCase: ChangeCustomerAssigneeUseCase,
+  getLeadByCustomerUseCase: GetLeadByCustomerUseCase,
+  getBookingByCustomerUseCase: GetBookingByCustomerUseCase,
 }
 
 const useCases: UseCases = {
@@ -27,6 +33,8 @@ const useCases: UseCases = {
   deleteCustomerUseCase: new DeleteCustomerUseCaseImpl(),
   getCustomerListUseCase: new GetCustomerListUseCaseImpl(),
   changeCustomerAssigneeUseCase: new ChangeCustomerAssigneeUseCaseImpl(),
+  getLeadByCustomerUseCase: new GetLeadByCustomerUseCaseImpl(),
+  getBookingByCustomerUseCase: new GetBookingByCustomerUseCaseImpl(),
 };
 
 export const {
@@ -36,4 +44,6 @@ export const {
   deleteCustomerUseCase,
   getCustomerListUseCase,
   changeCustomerAssigneeUseCase,
+  getLeadByCustomerUseCase,
+  getBookingByCustomerUseCase,
 } = useCases;
