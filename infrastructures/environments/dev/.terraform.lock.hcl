@@ -4,6 +4,7 @@
 provider "registry.terraform.io/hashicorp/archive" {
   version = "2.2.0"
   hashes = [
+    "h1:B+jc0hGbYzYq3fTCUb+uEZgs31GAF6/V2AxdqXUB7Qo=",
     "h1:CIWi5G6ob7p2wWoThRQbOB8AbmFlCzp7Ka81hR3cVp0=",
     "zh:06bd875932288f235c16e2237142b493c2c2b6aba0e82e8c85068332a8d2a29e",
     "zh:0c681b481372afcaefddacc7ccdf1d3bb3a0c0d4678a526bc8b02d0c331479bc",
@@ -23,6 +24,7 @@ provider "registry.terraform.io/hashicorp/aws" {
   version     = "4.24.0"
   constraints = ">= 3.44.0"
   hashes = [
+    "h1:YKjeRfwNeh9mMOFgujxQuKqD/mt+scDQm8RpYVXdSGk=",
     "h1:aKvDzj21HkU2Qy0hPVyhVtmY7UtC7jtdK9NOIE53occ=",
     "zh:3b58916e93cab4249bef6fcf6fb2ae3bbf0cb67a876e669205e1f785ffce88a4",
     "zh:5a51329c4d91ecdc2879a7d4acbc1dfd521ca6cd9a64f0d6f8c01d99a23fc98d",
@@ -43,6 +45,7 @@ provider "registry.terraform.io/hashicorp/external" {
   version = "2.2.2"
   hashes = [
     "h1:e7RpnZ2PbJEEPnfsg7V0FNwbfSk0/Z3FdrLsXINBmDY=",
+    "h1:jb8vLKmZGfq6cz8l+MxsctUzGpxAKPaGxKT0WV8Hz6U=",
     "zh:0b84ab0af2e28606e9c0c1289343949339221c3ab126616b831ddb5aaef5f5ca",
     "zh:10cf5c9b9524ca2e4302bf02368dc6aac29fb50aeaa6f7758cce9aa36ae87a28",
     "zh:56a016ee871c8501acb3f2ee3b51592ad7c3871a1757b098838349b17762ba6b",
@@ -61,6 +64,7 @@ provider "registry.terraform.io/hashicorp/external" {
 provider "registry.terraform.io/hashicorp/http" {
   version = "3.0.1"
   hashes = [
+    "h1:/Yzfe/TqgnnN6FZmfKI/YUeSGVY0oYV27SpiIfHK/tQ=",
     "h1:4N7YctkZrU+K2AvUF57c1qUvoD92bBJj6vXwf/FKMhM=",
     "zh:3b161998147d8cc3986a1580ddb065009ab628747424934cbcb9d221783541f8",
     "zh:62c78b565cde08d8e3b98e8138cd8e46b50fdc2ddc560ac1f62b5646ce8e9b1f",
@@ -81,6 +85,7 @@ provider "registry.terraform.io/hashicorp/null" {
   version = "3.1.1"
   hashes = [
     "h1:71sNUDvmiJcijsvfXpiLCz0lXIBSsEJjMxljt7hxMhw=",
+    "h1:kLrErio1jzW8ahFQ7EUcFy0pXMjJMkVEb+Lry3/QD6E=",
     "zh:063466f41f1d9fd0dd93722840c1314f046d8760b1812fa67c34de0afcba5597",
     "zh:08c058e367de6debdad35fc24d97131c7cf75103baec8279aba3506a08b53faf",
     "zh:73ce6dff935150d6ddc6ac4a10071e02647d10175c173cfe5dca81f3d13d8afe",
