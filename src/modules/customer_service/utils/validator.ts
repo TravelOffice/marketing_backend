@@ -107,10 +107,7 @@ export function getCustomerValidator() {
   return [
     param('customerId')
       .notEmpty()
-      .custom((value: string) => {
-        const regex = /^(0)(\d){9,10}$/;
-        return value.match(regex);
-      }),
+      .isString(),
   ];
 }
 
@@ -123,6 +120,22 @@ export function changeCustomerAssigneeValidator() {
         return value.match(regex);
       }),
     body('assignee')
+      .notEmpty()
+      .isString(),
+  ];
+}
+
+export function getLeadByCustomerValidator() {
+  return [
+    param('customerId')
+      .notEmpty()
+      .isString(),
+  ];
+}
+
+export function getBookingByCustomerValidator() {
+  return [
+    param('customerId')
       .notEmpty()
       .isString(),
   ];

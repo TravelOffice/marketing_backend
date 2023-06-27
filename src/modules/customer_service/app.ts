@@ -8,13 +8,20 @@ import logger from './utils/logger';
 import validate, {
   changeCustomerAssigneeValidator,
   createCustomerValidator,
+  getBookingByCustomerValidator,
   getCustomerValidator,
+  getLeadByCustomerValidator,
   updateCustomerValidator,
 } from './utils/validator';
 import wrapResponse from './utils/wrapResponse';
 import { User } from './models/User';
 import {
-  changeCustomerAssigneeUseCase, createCustomerUseCase, getCustomerListUseCase, getCustomerUseCase,
+  changeCustomerAssigneeUseCase,
+  createCustomerUseCase,
+  getBookingByCustomerUseCase,
+  getCustomerListUseCase,
+  getCustomerUseCase,
+  getLeadByCustomerUseCase,
 } from './useCases';
 
 const app = express();
@@ -88,6 +95,32 @@ app.put('/customers/:customerId/assignee', changeCustomerAssigneeValidator(), as
     res.json(wrapResponse(SUCCESS, customer));
   } catch (error: any) {
     logger.log(`[PUT /customers/:customerId/assignee] Error ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.get('/customers/:customerId/leads', getLeadByCustomerValidator(), async (req: Request, res: Response) => {
+  try {
+    validate(req);
+    const { tenant } = getCurrentUserInfo(req.headers.authorization!);
+    const { customerId } = req.params;
+    const leads = await getLeadByCustomerUseCase.invoke(tenant, customerId);
+    res.json(wrapResponse(SUCCESS, leads));
+  } catch (error: any) {
+    logger.log(`[PUT /customers/:customerId/leads] Error ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.get('/customers/:customerId/bookings', getBookingByCustomerValidator(), async (req: Request, res: Response) => {
+  try {
+    validate(req);
+    const { tenant } = getCurrentUserInfo(req.headers.authorization!);
+    const { customerId } = req.params;
+    const bookings = await getBookingByCustomerUseCase.invoke(tenant, customerId);
+    res.json(wrapResponse(SUCCESS, bookings));
+  } catch (error: any) {
+    logger.log(`[PUT /customers/:customerId/booking] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });

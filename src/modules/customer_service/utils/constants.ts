@@ -47,3 +47,11 @@ export const CUSTOMER_COUNTER_INDEX = 'CUSTOMER_COUNTER_INDEX';
 export const CREATOR_INDEX = 'CREATOR';
 
 export const PHONE_INDEX = 'PHONE';
+
+export const CREATED_AT_INDEX = 'CREATED_AT';
+
+export const UPDATED_AT_INDEX = 'UPDATED_AT';
+
+export const LEAD_INDEX = 'LEAD';
+
+export const BOOKING_INDEX = 'BOOKING';

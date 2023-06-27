@@ -3,8 +3,10 @@ import { customerRepository } from '../repositories';
 import { User } from '../models/User';
 import {
   ASSIGNEE_INDEX,
+  CREATED_AT_INDEX,
   CREATOR_INDEX,
   PHONE_INDEX,
+  UPDATED_AT_INDEX,
 } from '../utils/constants';
 import { Customer } from '../models/Customer';
 
@@ -38,8 +40,8 @@ export default class CreateCustomerUseCaseImpl implements CreateCustomerUseCase 
       code,
       creatorId,
       creatorName,
-      lsi1: now.toString(), // createdAt lsi
-      lsi2: now.toString(), // updatedAt lsi
+      lsi1: `${CREATED_AT_INDEX}#${now}`, // createdAt lsi
+      lsi2: `${UPDATED_AT_INDEX}#${now}`, // updatedAt lsi
       lsi3: `${PHONE_INDEX}#${customer.primaryPhoneNumber}`,
       lsi4: `${CREATOR_INDEX}#${creatorId}`,
       lsi5: `${ASSIGNEE_INDEX}#${customer.assigneeId ?? creatorId}`,

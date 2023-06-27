@@ -5,6 +5,7 @@ import { dynamoProvider, helper } from 'core';
 import { Customer } from '../models/Customer';
 import {
   ASSIGNEE_INDEX,
+  CREATOR_INDEX,
   CUSTOMER_COUNTER_INDEX,
   CUSTOMER_INDEX,
   PHONE_INDEX,
@@ -68,6 +69,68 @@ export default class CustomerRepositoryImpl implements CustomerRepository {
       },
     });
     const customers = result.map((item) => helper.excludeDataFromObject(item));
+    return customers as Customer[];
+  };
+
+  /**
+   * Retrieves a list of customers assigned to a specific assignee.
+   *
+   * @param {string} tenantId - The ID of the tenant.
+   * @param {string} assigneeId - The ID of the assignee.
+   * @returns {Promise<Customer[]>} - A promise that resolves to an array of customers.
+   */
+  listByAssignee = async (tenantId: string, assigneeId: string) => {
+    // Retrieve the name of the DynamoDB table
+    const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+
+    // Set the query parameters to retrieve customers by assignee
+    const params: QueryInput = {
+      TableName: travelTable, // Name of the DynamoDB table
+      IndexName: 'Index5', // Name of the index to query
+      KeyConditionExpression: 'pk = :pk AND begins_with(lsi5, :lsi5_filter_value)', // Key condition expression for the query
+      ExpressionAttributeValues: {
+        ':pk': `${TENANT_INDEX}#${tenantId}#${CUSTOMER_INDEX}`, // Value for the partition key
+        ':lsi5_filter_value': `${ASSIGNEE_INDEX}#${assigneeId}`, // Value for the sort key prefix
+      },
+    };
+
+    // Perform the query to retrieve the customers
+    const result = await dynamoProvider.query(params);
+
+    // Exclude sensitive data from the query result and convert to the array of customers
+    const customers = result.map((item) => helper.excludeDataFromObject(item));
+
+    return customers as Customer[];
+  };
+
+  /**
+   * Retrieves a list of customers created by a specific creator.
+   *
+   * @param {string} tenantId - The ID of the tenant.
+   * @param {string} creatorId - The ID of the creator.
+   * @returns {Promise<Customer[]>} - A promise that resolves to an array of customers.
+   */
+  listByCreator = async (tenantId: string, creatorId: string) => {
+    // Retrieve the name of the DynamoDB table
+    const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+
+    // Set the query parameters to retrieve customers by creator
+    const params: QueryInput = {
+      TableName: travelTable, // Name of the DynamoDB table
+      IndexName: 'Index4', // Name of the index to query
+      KeyConditionExpression: 'pk = :pk AND begins_with(lsi4, :lsi4_filter_value)', // Key condition expression for the query
+      ExpressionAttributeValues: {
+        ':pk': `${TENANT_INDEX}#${tenantId}#${CUSTOMER_INDEX}`, // Value for the partition key
+        ':lsi4_filter_value': `${CREATOR_INDEX}#${creatorId}`, // Value for the sort key prefix
+      },
+    };
+
+    // Perform the query to retrieve the customers
+    const result = await dynamoProvider.query(params);
+
+    // Exclude sensitive data from the query result and convert to the array of customers
+    const customers = result.map((item) => helper.excludeDataFromObject(item));
+
     return customers as Customer[];
   };
 
