@@ -20,7 +20,7 @@ export default class LeadRepositoryImpl implements LeadRepository {
     const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
     const pk = `${TENANT_INDEX}#${tenantId}#${LEAD_INDEX}`;
     const sk = `${leadId}`;
-    return dynamoProvider.getItem(travelTable, pk, sk);
+    return dynamoProvider.getItem<Lead>(travelTable, pk, sk);
   };
 
   /**
