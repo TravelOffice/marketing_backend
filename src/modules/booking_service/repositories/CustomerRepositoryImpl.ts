@@ -9,18 +9,18 @@ import logger from '../utils/logger';
 
 export default class CustomerRepositoryImpl implements CustomerRepository {
   /**
-     * Find customer by email and phone number
-     * @param tenant Tenant id
-     * @param phone Phone number
-     * @returns Customer object
-     */
+   * Find customer by email and phone number
+   * @param tenant Tenant id
+   * @param phone Phone number
+   * @returns Customer object
+   */
   findOneByPhone = async (tenant: string, phone: string) => {
     const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
     const pk = `${TENANT_INDEX}#${tenant}#${CUSTOMER_INDEX}`;
     const params: QueryInput = {
       TableName: table,
       IndexName: 'Index3',
-      KeyConditionExpression: 'pk = :pk AND begins_with(lsi3, :lsi3_filter_value)',
+      KeyConditionExpression: 'pk = :pk AND lsi3 = :lsi3_filter_value',
       ExpressionAttributeValues: {
         ':pk': pk,
         ':lsi3_filter_value': `${PHONE_INDEX}#${phone}`,
@@ -40,11 +40,11 @@ export default class CustomerRepositoryImpl implements CustomerRepository {
   };
 
   /**
-     * Create new customer
-     * @param tenant Tenant id
-     * @param customer Customer information
-     * @returns Created customer
-     */
+   * Create new customer
+   * @param tenant Tenant id
+   * @param customer Customer information
+   * @returns Created customer
+   */
   create = async (tenant: string, customer: Customer) => {
     const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
     await dynamoProvider.putItem(
@@ -57,9 +57,9 @@ export default class CustomerRepositoryImpl implements CustomerRepository {
   };
 
   /**
-     * Method to generate customer code which is user-readable
-     * @param tenant id of the tenant
-     */
+   * Method to generate customer code which is user-readable
+   * @param tenant id of the tenant
+   */
   generateCode = async (tenant: string) => {
     try {
       const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
