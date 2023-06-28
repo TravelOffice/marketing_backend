@@ -6,4 +6,5 @@ export interface BookingRepository {
   getByGivenId: (tenant: string, bookingId: string) => Promise<Booking | undefined>,
   getAll: (tenant: string) => Promise<Array<Booking>>,
   generateCode: (tenant: string) => Promise<string>,
+  cancel: (tenant: string, bookingId: string, reason: string) => Promise<Booking>,
 }

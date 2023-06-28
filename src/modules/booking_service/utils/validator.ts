@@ -5,6 +5,7 @@ import {
   validationResult,
 } from 'express-validator';
 import { tourTypes } from '../models/booking/Booking';
+import { VALIDATE_NON_EMPTY_STRING_MSG } from './constants';
 
 export default function validate(req: Request) {
   const errors = validationResult(req);
@@ -37,6 +38,12 @@ export function validateNewBookingDataInput() {
     body('customer.honorific').optional().isString(),
     body('customer.fullName').optional().isString(),
     body('customer.address').optional().isString(),
+  ];
+}
+
+export function validateCancelBookingDataInput() {
+  return [
+    body('reason', VALIDATE_NON_EMPTY_STRING_MSG).notEmpty().isString(),
   ];
 }
 

@@ -64,7 +64,7 @@ export default class CreateBookingUseCaseImpl implements CreateBookingUseCase {
       tourType,
       createdAt: now,
       updatedAt: now,
-      status: 'INITIALIZED',
+      bookingStatus: 'INITIALIZED',
       paymentStatus: 'UNPAID',
       lsi5: `${CUSTOMER_INDEX}#${customerId}`,
     };

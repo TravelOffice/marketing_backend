@@ -3,6 +3,7 @@ import express, { Request, Response, NextFunction } from 'express';
 import compression from 'compression';
 import { getCurrentUserInfo } from 'decode-token';
 import {
+  cancelBookingsUseCase,
   createBookingUseCase,
   getAllBookingsUseCase,
   getBookingByGivenIdUseCase,
@@ -10,6 +11,7 @@ import {
 import wrapResponse from './utils/wrapResponse';
 import { FAILED, SUCCESS } from './utils/constants';
 import validate, {
+  validateCancelBookingDataInput,
   validateGetBookingFilteredParams,
   validateNewBookingDataInput,
 } from './utils/validator';
@@ -75,6 +77,20 @@ app.get('/bookings/:id', async (req: Request, res: Response) => {
     res.json(wrapResponse(SUCCESS, booking));
   } catch (error: any) {
     logger.log(`[app.get] Error ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.put('/bookings/:id/cancel', validateCancelBookingDataInput(), async (req: Request, res: Response) => {
+  try {
+    validate(req);
+    const { tenant } = getCurrentUserInfo(req.headers.authorization!);
+    const { id } = req.params;
+    const { reason } = req.body;
+    const booking = await cancelBookingsUseCase.invoke(tenant, id, reason);
+    res.json(wrapResponse(SUCCESS, booking));
+  } catch (error: any) {
+    logger.log(`[PUT /bookings/:id/cancel] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });

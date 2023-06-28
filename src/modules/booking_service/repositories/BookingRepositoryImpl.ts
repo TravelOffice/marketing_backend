@@ -1,6 +1,8 @@
 import { getAwsSecretValue } from 'get-env';
-import { QueryInput, dynamoProvider, helper } from 'core';
-import { Booking } from '../models/booking/Booking';
+import {
+  QueryInput, dynamoProvider, helper, UpdateItemInput,
+} from 'core';
+import { Booking, BookingStatusEnum } from '../models/booking/Booking';
 import {
   BOOKING_COUNTER_INDEX,
   BOOKING_INDEX,
@@ -90,5 +92,50 @@ export default class BookingRepositoryImpl implements BookingRepository {
     return bookings.map(
       (booking) => helper.excludeDataFromObject(booking) as Booking,
     );
+  };
+
+  cancel = async (tenantId: string, bookingId: string, reason: string) => {
+    try {
+      // Log the start of the cancellation process
+      logger.log('Cancellation process started.');
+
+      // Retrieve the name of the DynamoDB table where travel data is stored
+      const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+
+      // Construct the partition key and sort key for the booking in the DynamoDB table
+      const pk = `${TENANT_INDEX}#${tenantId}#${BOOKING_INDEX}`;
+      const sk = bookingId;
+
+      // Define the parameters for updating the booking in the DynamoDB table
+      const updateParams: UpdateItemInput = {
+        TableName: travelTable,
+        Key: {
+          pk,
+          sk,
+        },
+        UpdateExpression: 'SET bookingStatus = :status, canceledReason = :reason, updatedAt = :updatedAt',
+        ExpressionAttributeValues: {
+          ':status': BookingStatusEnum.CANCELED,
+          ':reason': reason,
+          ':updatedAt': Date.now(),
+        },
+        ReturnValues: 'UPDATED_NEW',
+      };
+
+      // Update the booking in the DynamoDB table and retrieve the updated attributes
+      const rs = await dynamoProvider.rawUpdateItem(updateParams);
+
+      // Log the success of the cancellation process
+      logger.log('Cancellation process completed successfully.');
+
+      // Return the updated booking attributes
+      return rs.Attributes as Booking;
+    } catch (error) {
+      // Log any errors that occur during the cancellation process
+      logger.log(`Error canceling booking: ${error}`);
+
+      // Rethrow the error to be handled by the caller
+      throw error;
+    }
   };
 }
