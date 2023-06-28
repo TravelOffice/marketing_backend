@@ -52,3 +52,15 @@ export function validateGetBookingFilteredParams() {
   // such as start date, end date, customerId, etc
   return [];
 }
+
+export function validateUpdateBookingParams() {
+  return [
+    body('tourTemplateId').notEmpty().isString(),
+    body('tourType').notEmpty().isIn(tourTypes).withMessage(`allow only in ${tourTypes}`),
+    body('departureDate').optional().custom((value: string) => {
+      const date = Date.parse(value);
+      return !Number.isNaN(date);
+    }),
+    body('assigneeId').notEmpty().isString(),
+  ];
+}

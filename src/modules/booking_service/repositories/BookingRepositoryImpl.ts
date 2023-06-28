@@ -2,12 +2,15 @@ import { getAwsSecretValue } from 'get-env';
 import {
   QueryInput, dynamoProvider, helper, UpdateItemInput,
 } from 'core';
-import { Booking, BookingStatus, BookingStatusEnum } from '../models/booking/Booking';
+import { Booking, BookingStatus, BookingStatusEnum, statusTransitionRules } from '../models/booking/Booking';
 import {
+  ASSIGNEE_INDEX,
   BOOKING_COUNTER_INDEX,
   BOOKING_INDEX,
   BOOKING_STATUS_INDEX,
+  PHONE_INDEX,
   TENANT_INDEX,
+  UPDATED_AT_INDEX,
 } from '../utils/constants';
 import { BookingRepository } from './interfaces/BookingRepository';
 import logger from '../utils/logger';
@@ -29,6 +32,49 @@ export default class BookingRepositoryImpl implements BookingRepository {
     );
     logger.log(`Created new booking for tenant ${tenant}`);
     return booking;
+  };
+
+  /**
+   * Update booking data for tenant
+   * @param tenant Tenant id
+   * @param bookingId Booking code
+   * @param booking Booking data to update
+   * @returns Updated booking data
+   */
+  update = async (tenant: string, bookingId: string, booking: Booking) => {
+    // Table, {pk, sk} values
+    const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const pk = `${TENANT_INDEX}#${tenant}#${BOOKING_INDEX}`;
+    const sk = bookingId;
+
+    logger.log(`Updating booking for tenant ${tenant} with pk: ${pk}, sk: ${sk}`);
+    logger.log(`New booking data ${JSON.stringify(booking)}`);
+
+    // Booking should be existed in database
+    const existingBooking = await dynamoProvider.getItem<Booking>(table, pk, sk);
+    if (!existingBooking) {
+      throw new Error(`Booking with id ${bookingId} not found for tenant ${tenant}`);
+    }
+
+    // Verify status transition
+    const statusTransition = `${existingBooking.bookingStatus}-${booking.bookingStatus}`;
+    if (!statusTransitionRules.includes(statusTransition)) {
+      throw new Error(`Status could not be changed from ${existingBooking.bookingStatus} to ${booking.bookingStatus}`);
+    }
+    
+    // Indexes should be changed according to some values such as createdDateqqq, assignee
+    const lsi2 = `${UPDATED_AT_INDEX}#${Date.now()}`; // updatedAt lsi
+    const lsi5 = `${ASSIGNEE_INDEX}#${booking.assigneeId}`; // assignee lsi
+
+    // Code, createdAt should not be changed
+    const { code, createdAt, ...bookingToUpdate } = booking;
+
+    // Update booking item to database
+    await dynamoProvider.updateItemWithSetExpression(table, pk, sk, { ...bookingToUpdate, lsi2, lsi5 });
+
+    logger.log(`Booking with id ${bookingId} has been updated successfully for tenant ${tenant}`);
+
+    return helper.excludeDataFromObject(booking) as Booking;
   };
 
   createFromLead = async (tenant: string, leadId: string, booking: Booking) => {
@@ -136,17 +182,19 @@ export default class BookingRepositoryImpl implements BookingRepository {
       const sk = bookingId;
 
       // Define the parameters for updating the booking in the DynamoDB table
+      const canceledStatus = BookingStatusEnum.CANCELED;
       const updateParams: UpdateItemInput = {
         TableName: travelTable,
         Key: {
           pk,
           sk,
         },
-        UpdateExpression: 'SET bookingStatus = :status, canceledReason = :reason, updatedAt = :updatedAt',
+        UpdateExpression: 'SET bookingStatus = :status, canceledReason = :reason, updatedAt = :updatedAt, lsi3 = :lsi3',
         ExpressionAttributeValues: {
-          ':status': BookingStatusEnum.CANCELED,
+          ':status': canceledStatus,
           ':reason': reason,
           ':updatedAt': Date.now(),
+          ':lsi3': `${BOOKING_STATUS_INDEX}#${canceledStatus}`
         },
         ReturnValues: 'UPDATED_NEW',
       };

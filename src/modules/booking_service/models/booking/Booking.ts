@@ -49,6 +49,7 @@ interface DdbBookingModel extends BaseDdbModel {
   tasks?: Task[],
   bookingStatus: BookingStatus,
   paymentStatus: BookingPaymentStatus,
+  assigneeId?: string,
 
   /**
    * TODO: Temporary attributes
@@ -60,7 +61,6 @@ interface DdbBookingModel extends BaseDdbModel {
   sourceId?: string,
   creatorId?: string,
   creatorName?: string,
-  followerId?: string,
   requestStatus?: string,
   baseTotal?: number,
   baseTotalAfterVAT?: number,
@@ -94,3 +94,14 @@ export type Booking = Omit<DdbBookingModel, 'pk' | 'sk'>;
 
 export const bookingStatuses = Object.keys(BookingStatusEnum) as Array<BookingStatus>;
 export const tourTypes = Object.keys(BookingTourTypeEnum) as Array<BookingTourType>;
+export const statusTransitionRules = [
+  `${BookingStatusEnum.INITIALIZED}-${BookingStatusEnum.IN_PROCESS}`,
+  `${BookingStatusEnum.IN_PROCESS}-${BookingStatusEnum.PAYMENT_PENDING}`,
+  `${BookingStatusEnum.IN_PROCESS}-${BookingStatusEnum.CONFIRMED}`,
+  `${BookingStatusEnum.IN_PROCESS}-${BookingStatusEnum.CANCELED}`,
+  `${BookingStatusEnum.PAYMENT_PENDING}-${BookingStatusEnum.CANCELED}`,
+  `${BookingStatusEnum.PAYMENT_PENDING}-${BookingStatusEnum.CONFIRMED}`,
+  `${BookingStatusEnum.CONFIRMED}-${BookingStatusEnum.CANCELED}`,
+  `${BookingStatusEnum.CONFIRMED}-${BookingStatusEnum.COMPLETED}`,
+  `${BookingStatusEnum.CANCELED}-${BookingStatusEnum.INITIALIZED}`,
+];

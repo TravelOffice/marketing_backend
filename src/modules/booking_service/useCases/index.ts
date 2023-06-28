@@ -8,9 +8,12 @@ import { CancelBookingUseCase } from './interfaces/CancelBookingUseCase';
 import CancelBookingUseCaseImpl from './CancelBookingUseCaseImpl';
 import { GetBookingsByStatusUseCase } from './interfaces/GetBookingsByStatusUseCase';
 import GetBookingsByStatusUseCaseImpl from './GetBookingsByStatusUseCaseImpl';
+import { UpdateBookingUseCase } from './interfaces/UpdateBookingUseCase';
+import UpdateBookingUseCaseImpl from './UpdateBookingUseCaseImpl';
 
 interface UseCases {
   createBookingUseCase: CreateBookingUseCase,
+  updateBookingUseCase: UpdateBookingUseCase,
   getBookingByGivenIdUseCase: GetBookingByGivenIdUseCase,
   getAllBookingsUseCase: GetAllBookingUseCase,
   getBookingsByStatusUseCase: GetBookingsByStatusUseCase,
@@ -19,6 +22,7 @@ interface UseCases {
 
 const useCases: UseCases = {
   createBookingUseCase: new CreateBookingUseCaseImpl(),
+  updateBookingUseCase: new UpdateBookingUseCaseImpl(),
   getBookingByGivenIdUseCase: new GetBookingByGivenIdUseCaseImpl(),
   getAllBookingsUseCase: new GetAllBookingUseCaseImpl(),
   getBookingsByStatusUseCase: new GetBookingsByStatusUseCaseImpl(),
@@ -27,6 +31,7 @@ const useCases: UseCases = {
 
 export const {
   createBookingUseCase,
+  updateBookingUseCase,
   getBookingByGivenIdUseCase,
   getAllBookingsUseCase,
   getBookingsByStatusUseCase,
