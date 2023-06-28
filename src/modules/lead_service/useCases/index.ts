@@ -12,12 +12,15 @@ import { GetMyLeadListUseCase } from './interfaces/GetMyLeadListUseCase';
 import GetMyLeadListUseCaseImpl from './GetMyLeadListUseCaseImpl';
 import { UpdateLeadUseCase } from './interfaces/UpdateLeadUseCase';
 import UpdateLeadUseCaseImpl from './UpdateLeadUseCaseImpl';
+import { GetLeadUseCase } from './interfaces/GetLeadUseCase';
+import GetLeadUseCaseImpl from './GetLeadUseCaseImpl';
 
 interface UseCases {
   changeLeadStatusUseCase: ChangeLeadStatusUseCase,
   cancelLeadUseCase: CancelLeadUseCase,
   createLeadUseCase: CreateLeadUseCase,
   getLeadListUseCase: GetLeadListUseCase,
+  getLeadUseCase: GetLeadUseCase,
   changeLeadAssigneeUseCase: ChangeLeadAssigneeUseCase,
   getMyLeadListUseCase: GetMyLeadListUseCase,
   updateLeadUseCase: UpdateLeadUseCase,
@@ -28,6 +31,7 @@ const useCases: UseCases = {
   cancelLeadUseCase: new CancelLeadUseCaseImpl(),
   createLeadUseCase: new CreateLeadUseCaseImpl(),
   getLeadListUseCase: new GetLeadListUseCaseImpl(),
+  getLeadUseCase: new GetLeadUseCaseImpl(),
   changeLeadAssigneeUseCase: new ChangeLeadAssigneeUseCaseImpl(),
   getMyLeadListUseCase: new GetMyLeadListUseCaseImpl(),
   updateLeadUseCase: new UpdateLeadUseCaseImpl(),
@@ -39,6 +43,7 @@ export const {
   cancelLeadUseCase,
   createLeadUseCase,
   getLeadListUseCase,
+  getLeadUseCase,
   changeLeadAssigneeUseCase,
   getMyLeadListUseCase,
   updateLeadUseCase,

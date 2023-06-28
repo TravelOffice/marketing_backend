@@ -8,6 +8,7 @@ import {
   changeLeadStatusUseCase,
   createLeadUseCase,
   getLeadListUseCase,
+  getLeadUseCase,
   getMyLeadListUseCase,
   updateLeadUseCase,
 } from './useCases';
@@ -53,7 +54,9 @@ app.post('/leads', createUpdateLeadValidator(), async (req: Request, res: Respon
 app.get('/leads/:leadId', getLeadValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
-    res.json(wrapResponse(SUCCESS));
+    const { tenant } = getCurrentUserInfo(req.headers.authorization!);
+    const lead = await getLeadUseCase.invoke(tenant, req.params.leadId);
+    res.json(wrapResponse(SUCCESS, lead));
   } catch (error: any) {
     logger.log(`[GET /leads/:leadId] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
