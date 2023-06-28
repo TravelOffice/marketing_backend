@@ -52,7 +52,7 @@ export default class CreateBookingUseCaseImpl implements CreateBookingUseCase {
         lsi2: `${UPDATED_AT_INDEX}#${now}`, // updatedAt lsi
         lsi3: `${PHONE_INDEX}#${phone}`, // primaryPhoneNumber lsi
         lsi4: `${CREATOR_INDEX}#${creatorId}`, // creatorId lsi
-        lsi5: `${ASSIGNEE_INDEX}#${creatorId}`, // creatorId lsi
+        lsi5: `${ASSIGNEE_INDEX}#${creatorId}`, // assignee lsi
       });
       await customerRepository.create(tenant, customer);
     }

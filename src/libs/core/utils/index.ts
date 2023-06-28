@@ -4,7 +4,7 @@ interface Utils {
   helper: Helper,
 }
 
-const utils : Utils = {
+const utils: Utils = {
   helper: new Helper(),
 };
 
@@ -12,3 +12,6 @@ const utils : Utils = {
 export const {
   helper,
 } = utils;
+
+export * from './logger';
+export * from './constants';

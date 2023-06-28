@@ -8,6 +8,7 @@ import {
   getAllBookingsUseCase,
   getBookingByGivenIdUseCase,
   getBookingsByStatusUseCase,
+  updateBookingUseCase,
 } from './useCases';
 import wrapResponse from './utils/wrapResponse';
 import { FAILED, SUCCESS } from './utils/constants';
@@ -15,6 +16,7 @@ import validate, {
   validateCancelBookingDataInput,
   validateGetBookingFilteredParams,
   validateNewBookingDataInput,
+  validateUpdateBookingParams,
 } from './utils/validator';
 import logger from './utils/logger';
 import { BookingStatus } from './models/booking/Booking';
@@ -38,18 +40,6 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
   next();
 });
 
-app.post('/bookings', validateNewBookingDataInput(), async (req: Request, res: Response) => {
-  try {
-    validate(req);
-    const user = getCurrentUserInfo(req.headers.authorization!);
-    const createdBooking = await createBookingUseCase.invoke(user, req.body);
-    res.json(wrapResponse(SUCCESS, createdBooking));
-  } catch (error: any) {
-    logger.log(`[app.get] Error ${error}`);
-    res.json(wrapResponse(FAILED, undefined, error.message));
-  }
-});
-
 app.get('/bookings', validateGetBookingFilteredParams(), async (req: Request, res: Response) => {
   try {
     const isFilteredParamsEmpty = !Object.keys(req.params).length;
@@ -63,6 +53,31 @@ app.get('/bookings', validateGetBookingFilteredParams(), async (req: Request, re
     const { tenant } = getCurrentUserInfo(req.headers.authorization!);
     const bookings = await getAllBookingsUseCase.invoke(tenant);
     res.json(wrapResponse(SUCCESS, bookings));
+  } catch (error: any) {
+    logger.log(`[app.get] Error ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.post('/bookings', validateNewBookingDataInput(), async (req: Request, res: Response) => {
+  try {
+    validate(req);
+    const user = getCurrentUserInfo(req.headers.authorization!);
+    const createdBooking = await createBookingUseCase.invoke(user, req.body);
+    res.json(wrapResponse(SUCCESS, createdBooking));
+  } catch (error: any) {
+    logger.log(`[app.get] Error ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.put('/bookings/:id', validateUpdateBookingParams(), async (req: Request, res: Response) => {
+  try {
+    validate(req);
+    const { tenant } = getCurrentUserInfo(req.headers.authorization!);
+    const { id } = req.params;
+    const updatedBooking = await updateBookingUseCase.invoke(tenant, id, req.body);
+    res.json(wrapResponse(SUCCESS, updatedBooking));
   } catch (error: any) {
     logger.log(`[app.get] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
