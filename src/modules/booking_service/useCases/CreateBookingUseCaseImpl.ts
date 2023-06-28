@@ -1,9 +1,15 @@
 import { SourceType } from '../models/Customer';
-import { Booking } from '../models/booking/Booking';
+import { Booking, BookingStatus } from '../models/booking/Booking';
 import { CreateBookingInput } from '../models/rawApiData/CreateBookingInput';
 import { bookingRepository, customerRepository } from '../repositories';
 import {
-  ASSIGNEE_INDEX, CREATED_AT_INDEX, CREATOR_INDEX, CUSTOMER_INDEX, PHONE_INDEX, UPDATED_AT_INDEX,
+  ASSIGNEE_INDEX,
+  BOOKING_STATUS_INDEX,
+  CREATED_AT_INDEX,
+  CREATOR_INDEX,
+  CUSTOMER_INDEX,
+  PHONE_INDEX,
+  UPDATED_AT_INDEX,
 } from '../utils/constants';
 import { CreateBookingUseCase } from './interfaces/CreateBookingUseCase';
 
@@ -57,6 +63,7 @@ export default class CreateBookingUseCaseImpl implements CreateBookingUseCase {
     const { tourType } = newBookingInput;
     const customerInfo = { email, phone };
     const code = await bookingRepository.generateCode(tenant);
+    const status: BookingStatus = 'INITIALIZED';
     const newBooking: Booking = {
       code,
       customerId,
@@ -64,9 +71,10 @@ export default class CreateBookingUseCaseImpl implements CreateBookingUseCase {
       tourType,
       createdAt: now,
       updatedAt: now,
-      bookingStatus: 'INITIALIZED',
+      bookingStatus: status,
       paymentStatus: 'UNPAID',
-      lsi5: `${CUSTOMER_INDEX}#${customerId}`,
+      lsi3: `${BOOKING_STATUS_INDEX}#${status}`, // <status>,
+      lsi5: `${CUSTOMER_INDEX}#${customerId}`, // <customer_code>
     };
     // Save booking to database
     return bookingRepository.create(tenant, newBooking);
