@@ -10,12 +10,12 @@ export interface CreateBookingInput {
     fullName: string
     address: string
   },
-  // Reference to TourTemplate model, each TourTemplate is indentified by pk+sk pair
+  // Reference to TourTemplate model, each TourTemplate is identified by pk+sk pair
   tourTemplateId: string,
   // One kind of ['shared', 'group', 'solo']
   tourType: BookingTourType,
   // Expected begin date of trip
-  depatureDate: string,
-  // Reference to Sale model, each Sale is indentified by pk+sk pair
+  departureDate: string,
+  // Reference to Sale model, each Sale is identified by pk+sk pair
   assigneeId: string
 }

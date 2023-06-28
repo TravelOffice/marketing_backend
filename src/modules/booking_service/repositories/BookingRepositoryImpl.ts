@@ -29,7 +29,7 @@ export default class BookingRepositoryImpl implements BookingRepository {
   };
 
   createFromLead = async (tenant: string, leadId: string, booking: Booking) => {
-    console.log(tenant, leadId, booking);
+    logger.log(`Creating new booking from lead tenant ${tenant} leadId ${leadId} booking ${JSON.stringify(booking)}`);
     throw new Error('Unimplemented method');
   };
 

@@ -1,26 +1,36 @@
-import { Customer, SourceType } from '../models/Customer';
+import { SourceType } from '../models/Customer';
 import { Booking } from '../models/booking/Booking';
 import { CreateBookingInput } from '../models/rawApiData/CreateBookingInput';
 import { bookingRepository, customerRepository } from '../repositories';
-import { PHONE_INDEX } from '../utils/constants';
+import {
+  ASSIGNEE_INDEX, CREATED_AT_INDEX, CREATOR_INDEX, CUSTOMER_INDEX, PHONE_INDEX, UPDATED_AT_INDEX,
+} from '../utils/constants';
 import { CreateBookingUseCase } from './interfaces/CreateBookingUseCase';
 
 export default class CreateBookingUseCaseImpl implements CreateBookingUseCase {
   /**
    * Create new booking for customer
-   * @param newBooking Booking data sent from client
+   * @param currentUserInfo User info including tenant id, username and full name
+   * @param newBookingInput New booking input params
    */
-  invoke = async (tenant: string, newBookingInput: CreateBookingInput) => {
+  invoke = async (currentUserInfo: {
+    tenant: string,
+    username: string,
+    name: any,
+  }, newBookingInput: CreateBookingInput) => {
     // Verify customer data,
     // new customer will be created if customer data sent from client is not existed
     const now = Date.now();
+    const { tenant, username, name } = currentUserInfo;
     const {
       email, phone, honorific, fullName, address,
     } = newBookingInput.customer;
-    const customer = await customerRepository.findOneByPhone(tenant, phone);
+    let customer = await customerRepository.findOneByPhone(tenant, phone);
     if (!customer) {
+      const creatorId = username;
+      const creatorName = name;
       const code = await customerRepository.generateCode(tenant);
-      const newCustomer: Customer = {
+      customer = await customerRepository.create(tenant, {
         code,
         email,
         address,
@@ -30,13 +40,20 @@ export default class CreateBookingUseCaseImpl implements CreateBookingUseCase {
         source: SourceType.OTHER,
         createdAt: now,
         updatedAt: now,
-      };
-      await customerRepository.create(tenant, newCustomer);
+        creatorId,
+        creatorName,
+        lsi1: `${CREATED_AT_INDEX}#${now}`, // createdAt lsi
+        lsi2: `${UPDATED_AT_INDEX}#${now}`, // updatedAt lsi
+        lsi3: `${PHONE_INDEX}#${phone}`, // primaryPhoneNumber lsi
+        lsi4: `${CREATOR_INDEX}#${creatorId}`, // creatorId lsi
+        lsi5: `${ASSIGNEE_INDEX}#${creatorId}`, // creatorId lsi
+      });
+      await customerRepository.create(tenant, customer);
     }
 
     // Prepare booking information for storing to database
     // such as: Tour template, tour type, departure date, assignee, source, note
-    const customerId = `${PHONE_INDEX}#${phone}`;
+    const customerId = customer!.code;
     const { tourType } = newBookingInput;
     const customerInfo = { email, phone };
     const code = await bookingRepository.generateCode(tenant);
@@ -49,6 +66,7 @@ export default class CreateBookingUseCaseImpl implements CreateBookingUseCase {
       updatedAt: now,
       status: 'INITIALIZED',
       paymentStatus: 'UNPAID',
+      lsi5: `${CUSTOMER_INDEX}#${customerId}`,
     };
     // Save booking to database
     return bookingRepository.create(tenant, newBooking);
