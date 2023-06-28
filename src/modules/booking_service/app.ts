@@ -7,6 +7,7 @@ import {
   createBookingUseCase,
   getAllBookingsUseCase,
   getBookingByGivenIdUseCase,
+  getBookingsByStatusUseCase,
 } from './useCases';
 import wrapResponse from './utils/wrapResponse';
 import { FAILED, SUCCESS } from './utils/constants';
@@ -16,6 +17,7 @@ import validate, {
   validateNewBookingDataInput,
 } from './utils/validator';
 import logger from './utils/logger';
+import { BookingStatus } from './models/booking/Booking';
 
 const app = express();
 
@@ -54,12 +56,28 @@ app.get('/bookings', validateGetBookingFilteredParams(), async (req: Request, re
     if (!isFilteredParamsEmpty) {
       // TODO: Implement by using ElasticSearch functionality
       validate(req);
-      throw new Error('Feature is not impqlemented.');
+      throw new Error('Feature is not implemented.');
     }
 
     // Get all bookings related to tenant
     const { tenant } = getCurrentUserInfo(req.headers.authorization!);
     const bookings = await getAllBookingsUseCase.invoke(tenant);
+    res.json(wrapResponse(SUCCESS, bookings));
+  } catch (error: any) {
+    logger.log(`[app.get] Error ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.get('/bookings-by-status/:status', validateGetBookingFilteredParams(), async (req: Request, res: Response) => {
+  try {
+    // Get all bookings related to tenant
+    const { tenant } = getCurrentUserInfo(req.headers.authorization!);
+    const { status } = req.params;
+    const bookings = await getBookingsByStatusUseCase.invoke(
+      tenant,
+      status as BookingStatus,
+    );
     res.json(wrapResponse(SUCCESS, bookings));
   } catch (error: any) {
     logger.log(`[app.get] Error ${error}`);

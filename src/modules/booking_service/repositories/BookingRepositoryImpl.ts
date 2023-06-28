@@ -2,10 +2,11 @@ import { getAwsSecretValue } from 'get-env';
 import {
   QueryInput, dynamoProvider, helper, UpdateItemInput,
 } from 'core';
-import { Booking, BookingStatusEnum } from '../models/booking/Booking';
+import { Booking, BookingStatus, BookingStatusEnum } from '../models/booking/Booking';
 import {
   BOOKING_COUNTER_INDEX,
   BOOKING_INDEX,
+  BOOKING_STATUS_INDEX,
   TENANT_INDEX,
 } from '../utils/constants';
 import { BookingRepository } from './interfaces/BookingRepository';
@@ -85,6 +86,34 @@ export default class BookingRepositoryImpl implements BookingRepository {
     };
 
     logger.log(`Get all bookings for given tenant ${tenant}`);
+
+    const bookings = await dynamoProvider.query(params);
+
+    // Formatting the items and adding the id property
+    return bookings.map(
+      (booking) => helper.excludeDataFromObject(booking) as Booking,
+    );
+  };
+
+  /**
+   * Get list of booking by given status
+   * @param tenant Tenant id
+   * @param status Status of booking
+   * @returns List of bookings that filtered by status
+   */
+  getListByStatus = async (tenant: string, status: BookingStatus) => {
+    const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const params: QueryInput = {
+      TableName: travelTable,
+      IndexName: 'Index3',
+      KeyConditionExpression: 'pk = :pk and lsi3 = :lsi3',
+      ExpressionAttributeValues: {
+        ':pk': `${TENANT_INDEX}#${tenant}#${BOOKING_INDEX}`,
+        ':lsi3': `${BOOKING_STATUS_INDEX}#${status}`,
+      },
+    };
+
+    logger.log(`Get all bookings for given tenant ${tenant} with specific status ${status}`);
 
     const bookings = await dynamoProvider.query(params);
 
