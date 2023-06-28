@@ -8,6 +8,7 @@ export enum BookingStatusEnum {
   INITIALIZED = 'INITIALIZED',
   CONFIRMED = 'CONFIRMED',
   IN_PROCESS = 'IN_PROCESS',
+  PAYMENT_PENDING = 'PAYMENT_PENDING',
   CANCELED = 'CANCELED',
   COMPLETED = 'COMPLETED',
 }
@@ -22,6 +23,12 @@ export enum BookingTourTypeEnum {
   SHARED = 'SHARED',
   GROUP = 'GROUP',
 }
+
+export const CHANGING_STATUS_RULES = [
+  `${BookingStatusEnum.IN_PROCESS}-${BookingStatusEnum.CANCELED}`,
+  `${BookingStatusEnum.PAYMENT_PENDING}-${BookingStatusEnum.CANCELED}`,
+  `${BookingStatusEnum.CONFIRMED}-${BookingStatusEnum.CANCELED}`,
+];
 
 export type BookingStatus = keyof typeof BookingStatusEnum;
 export type BookingPaymentStatus = keyof typeof BookingPaymentStatusEnum;
@@ -40,7 +47,7 @@ interface DdbBookingModel extends BaseDdbModel {
   deletedBy?: string,
   notes?: Note[],
   tasks?: Task[],
-  status: BookingStatus,
+  bookingStatus: BookingStatus,
   paymentStatus: BookingPaymentStatus,
 
   /**
