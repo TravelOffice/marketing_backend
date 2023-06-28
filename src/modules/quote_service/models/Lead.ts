@@ -6,7 +6,7 @@ export enum SexType {
   FEMALE = 'FEMALE',
   OTHER = 'OTHER',
 }
-export enum VocativeType {
+export enum HonorificType {
   MR_YOUNG = 'MR_YOUNG',
   MRS_YOUNG = 'MRS_YOUNG',
   MR_OLD = 'MR_OLD',
@@ -39,7 +39,7 @@ export enum SourceType {
 
 export interface Lead {
   name: string,
-  vocative: VocativeType,
+  honorific: HonorificType,
   birthday: string,
   nationality: string,
   sex: SexType,

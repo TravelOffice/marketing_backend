@@ -5,6 +5,7 @@ import { helper, dynamoProvider } from 'core';
 import { Lead, LeadStatus } from '../models/Lead';
 
 import {
+  ASSIGNEE_INDEX,
   LEAD_COUNTER_INDEX,
   LEAD_INDEX,
   TENANT_INDEX,
@@ -62,7 +63,7 @@ export default class LeadRepositoryImpl implements LeadRepository {
     KeyConditionExpression: 'pk = :pk AND begins_with(lsi4, :lsi4)',
     ExpressionAttributeValues: {
       ':pk': `${TENANT_INDEX}#${tenantId}#${LEAD_INDEX}`,
-      ':lsi4': assigneeId,
+      ':lsi4': `${ASSIGNEE_INDEX}#${assigneeId}`,
     },
   });
 
@@ -103,7 +104,7 @@ export default class LeadRepositoryImpl implements LeadRepository {
       UpdateExpression: 'SET assignee = :assignee, lsi4 = :assigneeLsi, updatedAt = :updatedAt',
       ExpressionAttributeValues: {
         ':assignee': assignee,
-        ':assigneeLsi': assignee,
+        ':assigneeLsi': `${ASSIGNEE_INDEX}#${assignee}`,
         ':updatedAt': Date.now(),
       },
       ReturnValues: 'UPDATED_NEW',

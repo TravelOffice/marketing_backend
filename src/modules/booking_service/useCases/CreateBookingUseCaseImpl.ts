@@ -35,6 +35,8 @@ export default class CreateBookingUseCaseImpl implements CreateBookingUseCase {
     if (!customer) {
       const creatorId = username;
       const creatorName = name;
+      const assigneeId = username;
+      const assigneeName = name;
       const code = await customerRepository.generateCode(tenant);
       customer = await customerRepository.create(tenant, {
         code,
@@ -48,11 +50,13 @@ export default class CreateBookingUseCaseImpl implements CreateBookingUseCase {
         updatedAt: now,
         creatorId,
         creatorName,
+        assigneeId,
+        assigneeName,
         lsi1: `${CREATED_AT_INDEX}#${now}`, // createdAt lsi
         lsi2: `${UPDATED_AT_INDEX}#${now}`, // updatedAt lsi
         lsi3: `${PHONE_INDEX}#${phone}`, // primaryPhoneNumber lsi
         lsi4: `${CREATOR_INDEX}#${creatorId}`, // creatorId lsi
-        lsi5: `${ASSIGNEE_INDEX}#${creatorId}`, // creatorId lsi
+        lsi5: `${ASSIGNEE_INDEX}#${creatorId}`, // assignee lsi
       });
       await customerRepository.create(tenant, customer);
     }

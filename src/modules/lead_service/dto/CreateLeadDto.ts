@@ -5,7 +5,7 @@ export type CreateLeadDto = Pick<Lead,
   'name' |
   'phoneNumber' |
   'address' |
-  'vocative' |
+  'honorific' |
   'tourTemplateId' |
   'desiredTour' |
   'description' |

@@ -4,7 +4,7 @@ import { UpdateLeadUseCase } from './interfaces/UpdateLeadUseCase';
 import { UpdateLeadDto } from '../dto/UpdateLeadDto';
 import { Lead, LeadStatus } from '../models/Lead';
 import {
-  ASSIGNEE_INDEX, START_DATE_INDEX, STATUS_INDEX, UPDATED_INDEX,
+  ASSIGNEE_INDEX, STATUS_INDEX, UPDATED_INDEX,
 } from '../utils/constants';
 
 export default class UpdateLeadUseCaseImpl implements UpdateLeadUseCase {
@@ -13,7 +13,7 @@ export default class UpdateLeadUseCaseImpl implements UpdateLeadUseCase {
     'name',
     'phoneNumber',
     'address',
-    'vocative',
+    'honorific',
     'tourTemplateId',
     'desiredTour',
     'description',
@@ -64,7 +64,7 @@ export default class UpdateLeadUseCaseImpl implements UpdateLeadUseCase {
 
     const props = Object.keys(updateLeadDto);
 
-    const { assigneeId, startDate } = updateLeadDto;
+    const { assigneeId } = updateLeadDto;
 
     const now = Date.now();
 
@@ -83,11 +83,6 @@ export default class UpdateLeadUseCaseImpl implements UpdateLeadUseCase {
       dataToUpdate.assigneeName = ''; // TODO: Fill assigneeName
       dataToUpdate.lsi3 = `${STATUS_INDEX}#${LeadStatus.PROCESSING}`;
       dataToUpdate.lsi4 = `${ASSIGNEE_INDEX}#${assigneeId}`;
-    }
-
-    // Handle if changing start date
-    if (startDate) {
-      dataToUpdate.lsi5 = `${START_DATE_INDEX}#${new Date(startDate).getTime()}`;
     }
 
     // TODO: Fill other fields

@@ -55,8 +55,8 @@ export function createCustomerValidator() {
       .if(body('sex').notEmpty())
       .isIn(Object.values(SexType)).withMessage(`property allow only in ${Object.values(SexType)}`),
 
-    body('vocative')
-      .if(body('vocative').notEmpty())
+    body('honorific')
+      .if(body('honorific').notEmpty())
       .isIn(Object.values(HonorificType)).withMessage(`property allow only in ${Object.values(HonorificType)}`),
 
     body('level')
@@ -88,8 +88,8 @@ export function updateCustomerValidator() {
       .if(body('sex').notEmpty())
       .isIn(Object.values(SexType)).withMessage(`property allow only in ${Object.values(SexType)}`),
 
-    body('vocative')
-      .if(body('vocative').notEmpty())
+    body('honorific')
+      .if(body('honorific').notEmpty())
       .isIn(Object.values(HonorificType)).withMessage(`property allow only in ${Object.values(HonorificType)}`),
 
     body('level')

@@ -3,8 +3,8 @@ import {
   body, param, ValidationError, validationResult,
 } from 'express-validator';
 import {
+  HonorificType,
   LeadStatus,
-  VocativeType,
 } from '../models/Lead';
 import {
   VALIDATE_DATE_MSG,
@@ -37,9 +37,9 @@ export function createUpdateLeadValidator() {
       .notEmpty()
       .isString(),
 
-    body('vocative')
-      .if(body('vocative').notEmpty())
-      .isIn(Object.values(VocativeType)).withMessage(`property allow only in ${Object.values(VocativeType)}`),
+    body('honorific')
+      .if(body('honorific').notEmpty())
+      .isIn(Object.values(HonorificType)).withMessage(`property allow only in ${Object.values(HonorificType)}`),
 
     body('phoneNumber', VALIDATE_PHONE_MSG)
       .notEmpty()
@@ -108,9 +108,9 @@ export function updateLeadValidator() {
       .if(body('name').notEmpty())
       .isString(),
 
-    body('vocative')
-      .if(body('vocative').notEmpty())
-      .isIn(Object.values(VocativeType)).withMessage(`property allow only in ${Object.values(VocativeType)}`),
+    body('honorific')
+      .if(body('honorific').notEmpty())
+      .isIn(Object.values(HonorificType)).withMessage(`property allow only in ${Object.values(HonorificType)}`),
 
     body('phoneNumber', VALIDATE_PHONE_MSG)
       .if(body('phoneNumber').notEmpty())
