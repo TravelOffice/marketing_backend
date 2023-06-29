@@ -1,6 +1,6 @@
-import { User } from '../../models/User';
+import { CognitoUser } from '../../models/User';
 import { Lead } from '../../models/Lead';
 
 export interface GetMyLeadListUseCase {
-  invoke: (currentUser: User) => Promise<Lead[]>,
+  invoke: (currentUser: CognitoUser) => Promise<Lead[]>,
 }

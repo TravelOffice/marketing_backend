@@ -24,6 +24,8 @@ export const VALIDATE_DATE_MSG = 'property must be a date';
 
 export const VALIDATE_BOOLEAN_MSG = 'property must be a boolean';
 
+export const VALIDATE_URL_MSG = 'property must be a URL';
+
 export const TENANT_INDEX = 'TENANT';
 
 export const CUSTOMER_INDEX = 'CUSTOMER';

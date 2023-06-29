@@ -14,7 +14,7 @@ import validate, {
   updateCustomerValidator,
 } from './utils/validator';
 import wrapResponse from './utils/wrapResponse';
-import { User } from './models/User';
+import { CognitoUser } from './models/User';
 import {
   changeCustomerAssigneeUseCase,
   createCustomerUseCase,
@@ -22,6 +22,7 @@ import {
   getCustomerListUseCase,
   getCustomerUseCase,
   getLeadByCustomerUseCase,
+  updateCustomerUseCase,
 } from './useCases';
 
 const app = express();
@@ -42,7 +43,7 @@ app.post('/customers', createCustomerValidator(), async (req: Request, res: Resp
   try {
     validate(req);
     const currentUser = getCurrentUserInfo(req.headers.authorization!);
-    const customer = await createCustomerUseCase.invoke(currentUser as User, req.body);
+    const customer = await createCustomerUseCase.invoke(currentUser as CognitoUser, req.body);
     res.json(wrapResponse(SUCCESS, customer));
   } catch (error: any) {
     logger.log(`[POST /customers] Error ${error}`);
@@ -50,10 +51,13 @@ app.post('/customers', createCustomerValidator(), async (req: Request, res: Resp
   }
 });
 
-app.put('/customers', updateCustomerValidator(), async (req: Request, res: Response) => {
+app.put('/customers/:customerId', updateCustomerValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
-    res.json(wrapResponse(SUCCESS));
+    const { tenant } = getCurrentUserInfo(req.headers.authorization!);
+    const { customerId } = req.params;
+    const customer = await updateCustomerUseCase.invoke(tenant, customerId, req.body);
+    res.json(wrapResponse(SUCCESS, customer));
   } catch (error: any) {
     logger.log(`[PUT /customers] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));

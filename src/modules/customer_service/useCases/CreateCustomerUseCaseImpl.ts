@@ -1,6 +1,6 @@
 import { CreateCustomerUseCase } from './interfaces/CreateCustomerUseCase';
 import { customerRepository } from '../repositories';
-import { User } from '../models/User';
+import { CognitoUser } from '../models/User';
 import {
   ASSIGNEE_INDEX,
   CREATED_AT_INDEX,
@@ -19,7 +19,7 @@ export default class CreateCustomerUseCaseImpl implements CreateCustomerUseCase 
    * @param customer data to create a new customer
    * @return Customer an instance of customer after creating successfully
    */
-  invoke = async (currentUser: User, customer: Customer) => {
+  invoke = async (currentUser: CognitoUser, customer: Customer) => {
     // Check if the customer's phone number already exists in the database
     const customerInDB = await customerRepository.findOneByPhone(
       currentUser.tenant,

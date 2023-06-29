@@ -1,6 +1,6 @@
 import { Customer } from '../../models/Customer';
-import { User } from '../../models/User';
+import { CognitoUser } from '../../models/User';
 
 export interface CreateCustomerUseCase {
-  invoke: (currentUser: User, customer: Customer) => Promise<Customer>;
+  invoke: (currentUser: CognitoUser, customer: Customer) => Promise<Customer>;
 }

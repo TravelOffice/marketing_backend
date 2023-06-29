@@ -3,7 +3,7 @@ import { CreateLeadUseCase } from './interfaces/CreateLeadUseCase';
 import { CreateLeadDto } from '../dto/CreateLeadDto';
 import { Lead, LeadStatus } from '../models/Lead';
 import { customerRepository, leadRepository } from '../repositories';
-import { User } from '../models/User';
+import { CognitoUser } from '../models/User';
 import {
   ASSIGNEE_INDEX,
   CREATED_AT_INDEX,
@@ -26,7 +26,7 @@ export default class CreateLeadUseCaseImpl implements CreateLeadUseCase {
    * @param createLeadDto data to create a new lead
    * @return Lead an instance of Lead after creating successfully
    */
-  invoke = async (currentUser: User, createLeadDto: CreateLeadDto) => {
+  invoke = async (currentUser: CognitoUser, createLeadDto: CreateLeadDto) => {
     // Extract data from dto
     const {
       assigneeId,

@@ -36,7 +36,7 @@ export default class CustomerRepositoryImpl implements CustomerRepository {
     );
     if (!item) throw new Error(`Customer [${customerId}] not found`);
 
-    logger.log('DepartureTour retrieved:', item);
+    logger.log('Customer retrieved:', item);
 
     const customer = helper.excludeDataFromObject(item);
 
@@ -152,8 +152,20 @@ export default class CustomerRepositoryImpl implements CustomerRepository {
     return undefined;
   };
 
-  update = async (tenantId: string, customer: Customer) => {
-    throw new Error('Method not implemented');
+  update = async (tenantId: string, customerId: string, customer: Partial<Customer>) => {
+    const expressionNamesAndValues = helper.generateUpdateExpressionNamesAndValues(customer);
+    const result = await dynamoProvider.rawUpdateItem({
+      TableName: await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
+      Key: {
+        pk: `${TENANT_INDEX}#${tenantId}#${CUSTOMER_INDEX}`,
+        sk: `${customerId}`,
+      },
+      UpdateExpression: helper.generateUpdateExpression(customer),
+      ReturnValues: 'ALL_NEW',
+      ExpressionAttributeValues: expressionNamesAndValues.values,
+      ExpressionAttributeNames: expressionNamesAndValues.names,
+    });
+    return result.Attributes as Customer;
   };
 
   delete = async (tenantId: string, customerId: string) => {
