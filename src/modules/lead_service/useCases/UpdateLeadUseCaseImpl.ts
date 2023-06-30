@@ -1,5 +1,5 @@
 import { helper } from 'core';
-import { leadRepository } from '../repositories';
+import { leadRepository, userRepository } from '../repositories';
 import { UpdateLeadUseCase } from './interfaces/UpdateLeadUseCase';
 import { UpdateLeadDto } from '../dto/UpdateLeadDto';
 import { Lead, LeadStatus } from '../models/Lead';
@@ -46,7 +46,7 @@ export default class UpdateLeadUseCaseImpl implements UpdateLeadUseCase {
       updateLeadDto,
       this.allowedUpdatingKeys,
     );
-    const dataToUpdate = this.getDataToUpdate(lead, allowedUpdatingData);
+    const dataToUpdate = await this.getDataToUpdate(tenantId, lead, allowedUpdatingData);
 
     const updatedLead = await leadRepository.update(tenantId, leadId, dataToUpdate);
     return helper.excludeDataFromObject(updatedLead) as Lead;
@@ -59,7 +59,11 @@ export default class UpdateLeadUseCaseImpl implements UpdateLeadUseCase {
    * @param updateLeadDto data to update
    * @private
    */
-  private getDataToUpdate(lead: Lead, updateLeadDto: Partial<UpdateLeadDto>) {
+  private async getDataToUpdate(
+    tenantId: string,
+    lead: Lead,
+    updateLeadDto: Partial<UpdateLeadDto>,
+  ) {
     let dataToUpdate: Partial<Lead> = {};
 
     const props = Object.keys(updateLeadDto);
@@ -80,7 +84,11 @@ export default class UpdateLeadUseCaseImpl implements UpdateLeadUseCase {
 
     // Handle if changing assignee
     if (assigneeId) {
-      dataToUpdate.assigneeName = ''; // TODO: Fill assigneeName
+      const assignee = await userRepository.getUserAttributes(tenantId, assigneeId);
+      if (!assignee) {
+        throw new Error(`Could not found assignee with id ${assignee}`);
+      }
+      dataToUpdate.assigneeName = `${assignee.lastName} ${assignee.firstName}`;
       dataToUpdate.lsi3 = `${STATUS_INDEX}#${LeadStatus.PROCESSING}`;
       dataToUpdate.lsi4 = `${ASSIGNEE_INDEX}#${assigneeId}`;
     }

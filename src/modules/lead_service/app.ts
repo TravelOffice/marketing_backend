@@ -23,7 +23,7 @@ import validate, {
   updateLeadValidator,
 } from './utils/validator';
 import wrapResponse from './utils/wrapResponse';
-import { User } from './models/User';
+import { CognitoUser } from './models/User';
 
 const app = express();
 
@@ -43,7 +43,7 @@ app.post('/leads', createUpdateLeadValidator(), async (req: Request, res: Respon
   try {
     validate(req);
     const currentUser = getCurrentUserInfo(req.headers.authorization!);
-    const lead = await createLeadUseCase.invoke(currentUser as User, req.body);
+    const lead = await createLeadUseCase.invoke(currentUser as CognitoUser, req.body);
     res.json(wrapResponse(SUCCESS, lead));
   } catch (error: any) {
     logger.log(`[POST /leads] Error ${error}`);
@@ -78,7 +78,7 @@ app.get('/leads', async (req: Request, res: Response) => {
 app.get('/me/leads', async (req: Request, res: Response) => {
   try {
     const currentUser = getCurrentUserInfo(req.headers.authorization!);
-    const leads = await getMyLeadListUseCase.invoke(currentUser as User);
+    const leads = await getMyLeadListUseCase.invoke(currentUser as CognitoUser);
     res.json(wrapResponse(SUCCESS, leads));
   } catch (error: any) {
     logger.log(`[GET/leads] Error ${error}`);

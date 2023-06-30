@@ -6,12 +6,18 @@ import {
   CustomerLevel,
   SexType,
   HonorificType,
+  MaritalStatus,
+  SourceType,
 } from '../models/Customer';
 import {
+  VALIDATE_DATE_MSG,
   VALIDATE_EMAIL_MSG,
   VALIDATE_NON_EMPTY_STRING_MSG,
+  VALIDATE_PHONE_ARRAY_MSG,
   VALIDATE_PHONE_MSG,
+  VALIDATE_STRING_ARRAY_MSG,
   VALIDATE_STRING_MSG,
+  VALIDATE_URL_MSG,
 } from './constants';
 
 export default function validate(req: Request) {
@@ -72,34 +78,128 @@ export function createCustomerValidator() {
 
 export function updateCustomerValidator() {
   return [
-    body('email', VALIDATE_NON_EMPTY_STRING_MSG)
-      .if(body('email').notEmpty())
-      .isEmail(),
-
     body('name', VALIDATE_NON_EMPTY_STRING_MSG)
+      .if(body('name').exists())
       .notEmpty()
       .isString(),
 
-    body('address', VALIDATE_STRING_MSG)
-      .if(body('address').notEmpty())
+    body('honorific')
+      .if(body('honorific').exists())
+      .isIn(Object.values(HonorificType)).withMessage(`property allow only in ${Object.values(HonorificType)}`),
+
+    body('birthday', VALIDATE_DATE_MSG)
+      .if(body('birthday').exists())
+      .notEmpty()
+      .custom((value: string) => {
+        const date = Date.parse(value);
+        return !Number.isNaN(date);
+      }),
+
+    body('nationality', VALIDATE_NON_EMPTY_STRING_MSG)
+      .if(body('nationality').exists())
+      .notEmpty()
       .isString(),
 
     body('sex')
-      .if(body('sex').notEmpty())
+      .if(body('sex').exists())
       .isIn(Object.values(SexType)).withMessage(`property allow only in ${Object.values(SexType)}`),
 
-    body('honorific')
-      .if(body('honorific').notEmpty())
-      .isIn(Object.values(HonorificType)).withMessage(`property allow only in ${Object.values(HonorificType)}`),
+    body('maritalStatus')
+      .if(body('maritalStatus').exists())
+      .isIn(Object.values(MaritalStatus)).withMessage(`property allow only in ${Object.values(MaritalStatus)}`),
 
-    body('level')
-      .if(body('level').notEmpty())
-      .isIn(Object.values(CustomerLevel)).withMessage(`property allow only in ${Object.values(CustomerLevel)}`),
+    body('primaryPhoneNumber', VALIDATE_PHONE_MSG)
+      .if(body('primaryPhoneNumber').exists())
+      .custom((value: string) => {
+        const regex = /^(0)(\d){9,10}$/;
+        return value.match(regex);
+      }),
 
-    body('socialLink', VALIDATE_EMAIL_MSG)
-      .if(body('socialLink').notEmpty())
+    body('otherPhoneNumbers', VALIDATE_PHONE_ARRAY_MSG)
+      .if(body('otherPhoneNumbers').exists())
+      .custom((value: Array<string>) => {
+        if (!Array.isArray(value)) return false;
+        const regex = /^(0)(\d){9,10}$/;
+        return value.every((item: string) => item.toString().match(regex));
+      }),
+
+    body('email', VALIDATE_NON_EMPTY_STRING_MSG)
+      .if(body('email').exists())
       .notEmpty()
       .isEmail(),
+
+    body('contry', VALIDATE_NON_EMPTY_STRING_MSG)
+      .if(body('contry').exists())
+      .notEmpty()
+      .isString(),
+
+    body('province', VALIDATE_NON_EMPTY_STRING_MSG)
+      .if(body('province').exists())
+      .notEmpty()
+      .isString(),
+
+    body('province', VALIDATE_NON_EMPTY_STRING_MSG)
+      .if(body('province').exists())
+      .notEmpty()
+      .isString(),
+
+    body('district', VALIDATE_NON_EMPTY_STRING_MSG)
+      .if(body('district').exists())
+      .notEmpty()
+      .isString(),
+
+    body('ward', VALIDATE_NON_EMPTY_STRING_MSG)
+      .if(body('ward').exists())
+      .notEmpty()
+      .isString(),
+
+    body('address', VALIDATE_NON_EMPTY_STRING_MSG)
+      .if(body('address').exists())
+      .notEmpty()
+      .isString(),
+
+    body('tags', VALIDATE_STRING_ARRAY_MSG)
+      .if(body('tags').exists())
+      .custom((value: Array<string>) => {
+        if (!Array.isArray(value)) return false;
+        return value.every((item: string) => typeof item === 'string' && item.length > 0);
+      }),
+    body('source')
+      .if(body('source').exists())
+      .isIn(Object.values(SourceType)).withMessage(`property allow only in ${Object.values(SourceType)}`),
+
+    body('assigneeId', VALIDATE_NON_EMPTY_STRING_MSG)
+      .if(body('address').exists())
+      .notEmpty()
+      .isString(),
+
+    body('interest', VALIDATE_NON_EMPTY_STRING_MSG)
+      .if(body('interest').exists())
+      .notEmpty()
+      .isString(),
+
+    body('group', VALIDATE_NON_EMPTY_STRING_MSG)
+      .if(body('group').exists())
+      .notEmpty()
+      .isString(),
+
+    body('genitive', VALIDATE_NON_EMPTY_STRING_MSG)
+      .if(body('genitive').exists())
+      .notEmpty()
+      .isString(),
+
+    body('taxCode', VALIDATE_NON_EMPTY_STRING_MSG)
+      .if(body('taxCode').exists())
+      .notEmpty()
+      .isString(),
+
+    body('level')
+      .if(body('level').exists())
+      .isIn(Object.values(CustomerLevel)).withMessage(`property allow only in ${Object.values(CustomerLevel)}`),
+
+    body('socialLink', VALIDATE_URL_MSG)
+      .if(body('socialLink').exists())
+      .isURL(),
   ];
 }
 
