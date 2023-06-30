@@ -34,6 +34,6 @@ export function getCurrentUserInfo(jwtToken: string) {
   return {
     tenant: tenant,
     username: usernameArr.length === 1 ? tenant : username,
-    name: decoded.name,
+    name: `${decoded['family_name']} ${decoded['given_name']}`.trim(),
   };
 }

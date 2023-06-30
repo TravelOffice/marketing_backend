@@ -2,7 +2,7 @@ import { helper } from 'core';
 import { CreateLeadUseCase } from './interfaces/CreateLeadUseCase';
 import { CreateLeadDto } from '../dto/CreateLeadDto';
 import { Lead, LeadStatus } from '../models/Lead';
-import { customerRepository, leadRepository } from '../repositories';
+import { customerRepository, leadRepository, userRepository } from '../repositories';
 import { CognitoUser } from '../models/User';
 import {
   ASSIGNEE_INDEX,
@@ -83,6 +83,14 @@ export default class CreateLeadUseCaseImpl implements CreateLeadUseCase {
       // type: '', // TODO: Fill lead type, depends on tour template
       ...createLeadDto,
     };
+
+    // Fill assignee
+    if (assigneeId) {
+      const assignee = await userRepository.getUserAttributes(tenant, assigneeId);
+      if (assignee) {
+        leadToAdd.assigneeName = `${assignee.lastName} ${assignee.firstName}`;
+      }
+    }
 
     // TODO: Logging and notification
 
