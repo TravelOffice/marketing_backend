@@ -49,6 +49,12 @@ interface DdbBookingModel extends BaseDdbModel {
   tasks?: Task[],
   bookingStatus: BookingStatus,
   paymentStatus: BookingPaymentStatus,
+  assigneeId?: string,
+  canceledAt?: number,
+  canceledReason?: string,
+  canceledNote?: string,
+  canceledBy?: string,
+  canceledAtPhase?: string,
 
   /**
    * TODO: Temporary attributes
@@ -60,7 +66,6 @@ interface DdbBookingModel extends BaseDdbModel {
   sourceId?: string,
   creatorId?: string,
   creatorName?: string,
-  followerId?: string,
   requestStatus?: string,
   baseTotal?: number,
   baseTotalAfterVAT?: number,
@@ -78,11 +83,6 @@ interface DdbBookingModel extends BaseDdbModel {
   waitingAt?: number, // Time for waiting payment
   waitingExpiredAt?: number, // The time resavation expired
   doneAt?: string,
-  canceledAt?: number,
-  canceledReason?: string,
-  canceledNote?: string,
-  canceledBy?: string,
-  canceledAtPhase?: string,
   // success // executiveNote // guideRecashMoney // commission
   totalPax?: number, // Total travellers
   // keepBonus // taxId // isBusiness // executiveStatus
@@ -93,4 +93,17 @@ interface DdbBookingModel extends BaseDdbModel {
 export type Booking = Omit<DdbBookingModel, 'pk' | 'sk'>;
 
 export const bookingStatuses = Object.keys(BookingStatusEnum) as Array<BookingStatus>;
+// eslint-disable-next-line max-len
+export const bookingPaymentStatuses = Object.keys(BookingPaymentStatusEnum) as Array<BookingPaymentStatusEnum>;
 export const tourTypes = Object.keys(BookingTourTypeEnum) as Array<BookingTourType>;
+export const statusTransitionRules = [
+  `${BookingStatusEnum.INITIALIZED}-${BookingStatusEnum.IN_PROCESS}`,
+  `${BookingStatusEnum.IN_PROCESS}-${BookingStatusEnum.PAYMENT_PENDING}`,
+  `${BookingStatusEnum.IN_PROCESS}-${BookingStatusEnum.CONFIRMED}`,
+  `${BookingStatusEnum.IN_PROCESS}-${BookingStatusEnum.CANCELED}`,
+  `${BookingStatusEnum.PAYMENT_PENDING}-${BookingStatusEnum.CANCELED}`,
+  `${BookingStatusEnum.PAYMENT_PENDING}-${BookingStatusEnum.CONFIRMED}`,
+  `${BookingStatusEnum.CONFIRMED}-${BookingStatusEnum.CANCELED}`,
+  `${BookingStatusEnum.CONFIRMED}-${BookingStatusEnum.COMPLETED}`,
+  `${BookingStatusEnum.CANCELED}-${BookingStatusEnum.INITIALIZED}`,
+];

@@ -1,5 +1,7 @@
 import AWS from 'aws';
 import { getEnv } from 'get-env';
+import { UPDATE_SET_EXPRESSION } from '../../utils';
+import logger from '../../utils/logger';
 
 export type PutItemInput = AWS.DynamoDB.DocumentClient.PutItemInput;
 export type GetItemInput = AWS.DynamoDB.DocumentClient.GetItemInput;
@@ -83,6 +85,37 @@ export default class DynamoProvider {
       ExpressionAttributeNames: expressionAttributeNames,
       ReturnValues: 'UPDATED_NEW',
     };
+    return dynamoDB.update(params).promise();
+  };
+
+  updateItemWithSetExpression = async (
+    table: string,
+    pk: string,
+    sk: string,
+    values: { [key: string]: any },
+  ) => {
+    // Build expression dynamically
+    const expressionAttributeValues: { [key: string]: any } = {};
+    const expressionAttributeNames: { [key: string]: string } = {};
+    let updateExpression = UPDATE_SET_EXPRESSION;
+    Object.entries(values).forEach(([key, item]) => {
+      updateExpression += ` ${key} = :${key},`;
+      expressionAttributeNames[key] = key;
+      expressionAttributeValues[`:${key}`] = item;
+    });
+    updateExpression = updateExpression.slice(0, -1);
+
+    // Update item
+    const params: UpdateItemInput = {
+      TableName: table,
+      Key: { pk, sk },
+      UpdateExpression: updateExpression,
+      ExpressionAttributeValues: expressionAttributeValues,
+      ReturnValues: 'UPDATED_NEW',
+    };
+
+    logger.log(`Updating new DynamoDB item with parameters ${JSON.stringify(params, null, 3)}`);
+
     return dynamoDB.update(params).promise();
   };
 
