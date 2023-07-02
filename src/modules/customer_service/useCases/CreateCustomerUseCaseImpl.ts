@@ -8,7 +8,7 @@ import {
   PHONE_INDEX,
   UPDATED_AT_INDEX,
 } from '../utils/constants';
-import { Customer } from '../models/Customer';
+import { Customer, CustomerLevel } from '../models/Customer';
 
 export default class CreateCustomerUseCaseImpl implements CreateCustomerUseCase {
   /**
@@ -35,9 +35,11 @@ export default class CreateCustomerUseCaseImpl implements CreateCustomerUseCase 
     const code = await customerRepository.generateCustomerCode(currentUser.tenant);
     const creatorId = currentUser.username;
     const creatorName = currentUser.name;
+    const level = customer.level ?? CustomerLevel.STANDARD;
     const customerToAdd = {
       ...customer,
       code,
+      level,
       creatorId,
       creatorName,
       lsi1: `${CREATED_AT_INDEX}#${now}`, // createdAt lsi

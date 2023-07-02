@@ -1,4 +1,4 @@
-import { SourceType } from '../models/Customer';
+import { CustomerLevel, SourceType } from '../models/Customer';
 import { Booking, BookingStatus } from '../models/booking/Booking';
 import { CreateBookingInput } from '../models/rawApiData/CreateBookingInput';
 import { bookingRepository, customerRepository } from '../repositories';
@@ -46,6 +46,7 @@ export default class CreateBookingUseCaseImpl implements CreateBookingUseCase {
         name: fullName,
         primaryPhoneNumber: phone,
         source: SourceType.OTHER,
+        level: CustomerLevel.STANDARD,
         createdAt: now,
         updatedAt: now,
         creatorId,

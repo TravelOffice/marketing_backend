@@ -14,7 +14,7 @@ import {
   PHONE_INDEX,
   UPDATED_AT_INDEX,
 } from '../utils/constants';
-import { SourceType } from '../models/Customer';
+import { CustomerLevel, SourceType } from '../models/Customer';
 
 export default class CreateLeadUseCaseImpl implements CreateLeadUseCase {
   /**
@@ -49,6 +49,7 @@ export default class CreateLeadUseCaseImpl implements CreateLeadUseCase {
         name: createLeadDto.name,
         primaryPhoneNumber: createLeadDto.phoneNumber,
         source: SourceType.OTHER,
+        level: CustomerLevel.STANDARD,
         createdAt: now,
         updatedAt: now,
         creatorId,
