@@ -70,7 +70,7 @@ interface DdbCustomerModel extends BaseDdbModel {
     group?: string,
     genitive?: string,
     taxCode?: string,
-    level?: CustomerLevel,
+    level: CustomerLevel,
     socialLink?: string,
 }
 
