@@ -3,6 +3,7 @@
 import { BaseDdbModel } from 'common-models';
 import { Note } from '../Note';
 import { Task } from '../Task';
+import { Service } from './Service';
 
 export enum BookingStatusEnum {
   INITIALIZED = 'INITIALIZED',
@@ -55,6 +56,7 @@ interface DdbBookingModel extends BaseDdbModel {
   canceledNote?: string,
   canceledBy?: string,
   canceledAtPhase?: string,
+  services?: Service[],
 
   /**
    * TODO: Temporary attributes
