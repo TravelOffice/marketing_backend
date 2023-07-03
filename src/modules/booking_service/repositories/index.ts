@@ -2,23 +2,28 @@ import BookingRepositoryImpl from './BookingRepositoryImpl';
 import CustomerRepositoryImpl from './CustomerRepositoryImpl';
 import { BookingRepository } from './interfaces/BookingRepository';
 import { CustomerRepository } from './interfaces/CustomerRepository';
+import { LeadRepository } from './interfaces/LeadRepository';
 import { UserRepository } from './interfaces/UserRepository';
+import LeadRepositoryImpl from './LeadRepositoryImpl';
 import UserRepositoryImpl from './UserRepositoryImpl';
 
 interface Repositories {
   bookingRepository: BookingRepository,
   userRepository: UserRepository,
   customerRepository: CustomerRepository,
+  leadRepository: LeadRepository,
 }
 
 const repositories: Repositories = {
   bookingRepository: new BookingRepositoryImpl(),
   userRepository: new UserRepositoryImpl(),
   customerRepository: new CustomerRepositoryImpl(),
+  leadRepository: new LeadRepositoryImpl(),
 };
 
 export const {
   bookingRepository,
   userRepository,
   customerRepository,
+  leadRepository,
 } = repositories;

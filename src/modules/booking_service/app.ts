@@ -4,6 +4,7 @@ import compression from 'compression';
 import { getCurrentUserInfo } from 'decode-token';
 import {
   cancelBookingsUseCase,
+  createBookingFromLeadUseCase,
   createBookingUseCase,
   getAllBookingsUseCase,
   getBookingByGivenIdUseCase,
@@ -15,7 +16,8 @@ import { FAILED, SUCCESS } from './utils/constants';
 import validate, {
   validateCancelBookingDataInput,
   validateGetBookingFilteredParams,
-  validateNewBookingDataInput,
+  validateNewBookingFromLeadParams,
+  validateNewBookingParams,
   validateUpdateBookingParams,
 } from './utils/validator';
 import logger from './utils/logger';
@@ -59,11 +61,23 @@ app.get('/bookings', validateGetBookingFilteredParams(), async (req: Request, re
   }
 });
 
-app.post('/bookings', validateNewBookingDataInput(), async (req: Request, res: Response) => {
+app.post('/bookings', validateNewBookingParams(), async (req: Request, res: Response) => {
   try {
     validate(req);
     const user = getCurrentUserInfo(req.headers.authorization!);
     const createdBooking = await createBookingUseCase.invoke(user, req.body);
+    res.json(wrapResponse(SUCCESS, createdBooking));
+  } catch (error: any) {
+    logger.log(`[app.get] Error ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.post('/bookings/create-from-lead', validateNewBookingFromLeadParams(), async (req: Request, res: Response) => {
+  try {
+    validate(req);
+    const user = getCurrentUserInfo(req.headers.authorization!);
+    const createdBooking = await createBookingFromLeadUseCase.invoke(user, req.body);
     res.json(wrapResponse(SUCCESS, createdBooking));
   } catch (error: any) {
     logger.log(`[app.get] Error ${error}`);

@@ -1,7 +1,7 @@
 import { Request } from 'express';
 import { body, ValidationError, validationResult } from 'express-validator';
 import { bookingPaymentStatuses, bookingStatuses, tourTypes } from '../models/booking/Booking';
-import { VALIDATE_NON_EMPTY_STRING_MSG } from './constants';
+import { VALIDATE_NON_EMPTY_STRING_MSG, VALIDATE_NUMBER_MSG, VALIDATE_POSITIVE_NUMBER } from './constants';
 
 export default function validate(req: Request) {
   const errors = validationResult(req);
@@ -19,7 +19,7 @@ export default function validate(req: Request) {
   }
 }
 
-export function validateNewBookingDataInput() {
+export function validateNewBookingParams() {
   return [
     body('tourTemplateId').notEmpty().isString(),
     body('tourType').notEmpty().isIn(tourTypes).withMessage(`allow only in ${tourTypes}`),
@@ -34,6 +34,29 @@ export function validateNewBookingDataInput() {
     body('customer.honorific').optional().isString(),
     body('customer.fullName').optional().isString(),
     body('customer.address').optional().isString(),
+  ];
+}
+
+export function validateNewBookingFromLeadParams() {
+  return [
+    body('leadId').notEmpty().isString(),
+    body('tourTemplateId').notEmpty().isString(),
+    body('tourType').notEmpty().isIn(tourTypes).withMessage(`allow only in ${tourTypes}`),
+    body('departureDate').notEmpty().custom((value: string) => {
+      const date = Date.parse(value);
+      return !Number.isNaN(date);
+    }),
+    body('note').optional().isString(),
+    body('services').isArray().notEmpty().withMessage('Booking services must not be empty/'),
+    body('services.*.serviceName').notEmpty().isString(),
+    body('services.*.quantity', VALIDATE_POSITIVE_NUMBER)
+      .notEmpty()
+      .withMessage(VALIDATE_NUMBER_MSG)
+      .isInt({ min: 0 }),
+    body('services.*.price', VALIDATE_POSITIVE_NUMBER)
+      .notEmpty()
+      .withMessage(VALIDATE_NUMBER_MSG)
+      .isInt({ min: 0 }),
   ];
 }
 
