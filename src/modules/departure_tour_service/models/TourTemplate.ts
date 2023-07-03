@@ -3,7 +3,7 @@ import { TourServicePrice } from './TourServicePrice';
 import { TourType } from './TourType';
 
 export interface TourTemplate extends BaseDdbModel {
-  code: number,
+  code: string,
   name: string,
   type: TourType,
   visitorCount: number,

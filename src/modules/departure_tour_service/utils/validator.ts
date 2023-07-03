@@ -38,6 +38,9 @@ export function createOrUpdateDepartureTourValidator() {
     body('tourTemplate')
       .notEmpty().withMessage(VALIDATE_NON_EMPTY_STRING_MSG),
 
+    body('tourTemplateCode')
+      .notEmpty().withMessage(VALIDATE_NON_EMPTY_STRING_MSG),
+
     body('type')
       .isIn(Object.values(TourType)).withMessage(`allow only in ${Object.values(TourType)}`),
 

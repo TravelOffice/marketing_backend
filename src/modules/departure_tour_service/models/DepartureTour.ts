@@ -2,7 +2,8 @@ import { TourStatus } from './TourStatus';
 import { TourTemplate } from './TourTemplate';
 
 export interface DepartureTour extends TourTemplate {
-  tourTemplate: string, // Tour template ID (sk)
+  tourTemplate: string,
+  tourTemplateCode: string,
   startDate: number,
   status: TourStatus,
 }
