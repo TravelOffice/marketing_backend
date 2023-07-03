@@ -1,9 +1,31 @@
+import { helper } from 'core';
 import { DepartureTour } from '../models/DepartureTour';
 import { departureTourRepository } from '../repositories';
-import { DEPARTURE_TOUR_INDEX } from '../utils/constants';
+import { CREATED_AT_INDEX, STATUS_INDEX, UPDATED_AT_INDEX } from '../utils/constants';
 import { CreateDepartureTourUseCase } from './interfaces/CreateDepartureTourUseCase';
 
 export default class CreateDepartureTourUseCaseImpl implements CreateDepartureTourUseCase {
+  allowedCreatingKeys: (keyof DepartureTour)[] = [
+    'name',
+    'type',
+    'visitorCount',
+    'startingLocation',
+    'endingLocation',
+    'durationInDays',
+    'durationInNights',
+    'adultPrice',
+    'childUnder5Price',
+    'child5to7Price',
+    'child8to11Price',
+    'otherPrice',
+    'policiesAndRegulations',
+    'tourPlan',
+    'tourTemplate',
+    'tourTemplateCode',
+    'startDate',
+    'status',
+  ];
+
   invoke = async (
     tenantId: string,
     departureTour: DepartureTour,
@@ -11,12 +33,15 @@ export default class CreateDepartureTourUseCaseImpl implements CreateDepartureTo
     const now = Date.now();
     const code = await departureTourRepository.generateDepartureTourCode(tenantId);
     const departureTourToAdd: DepartureTour = {
-      ...departureTour,
+      ...(helper.extractDataFromObject(departureTour, this.allowedCreatingKeys) as DepartureTour),
       code,
       createdAt: now,
       updatedAt: now,
-      lsi1: `${DEPARTURE_TOUR_INDEX}#${now}`,
+      lsi1: `${CREATED_AT_INDEX}#${now}`,
+      lsi2: `${UPDATED_AT_INDEX}#${now}`,
+      lsi3: `${STATUS_INDEX}#${departureTour.status}`,
     };
-    return departureTourRepository.create(tenantId, departureTourToAdd);
+    await departureTourRepository.create(tenantId, departureTourToAdd);
+    return helper.excludeDataFromObject(departureTourToAdd) as DepartureTour;
   };
 }

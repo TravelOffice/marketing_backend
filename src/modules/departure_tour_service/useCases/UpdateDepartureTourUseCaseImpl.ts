@@ -1,17 +1,56 @@
+import { helper } from 'core';
 import { DepartureTour } from '../models/DepartureTour';
 import { departureTourRepository } from '../repositories';
 import { UpdateDepartureTourUseCase } from './interfaces/UpdateDepartureTourUseCase';
+import { STATUS_INDEX, UPDATED_AT_INDEX } from '../utils/constants';
 
 export default class UpdateDepartureTourUseCaseImpl implements UpdateDepartureTourUseCase {
-  invoke = (
+  allowedUpdatingKeys: (keyof DepartureTour)[] = [
+    'name',
+    'type',
+    'visitorCount',
+    'startingLocation',
+    'endingLocation',
+    'durationInDays',
+    'durationInNights',
+    'adultPrice',
+    'childUnder5Price',
+    'child5to7Price',
+    'child8to11Price',
+    'otherPrice',
+    'policiesAndRegulations',
+    'tourPlan',
+    'tourTemplate',
+    'tourTemplateCode',
+    'startDate',
+    'status',
+  ];
+
+  invoke = async (
     tenantId: string,
     departureTourId: string,
     departureTour: DepartureTour,
   ) => {
+    const now = Date.now();
+    const existingDepartureTour = await departureTourRepository.get(tenantId, departureTourId);
+    if (!existingDepartureTour) {
+      throw new Error(`Departure tour [${departureTourId}] not found for tenant ${tenantId}`);
+    }
+
     const departureTourToUpdate: DepartureTour = {
-      ...departureTour,
-      updatedAt: Date.now(),
+      ...existingDepartureTour,
+      ...helper.extractDataFromObject(departureTour, this.allowedUpdatingKeys),
+      updatedAt: now,
+      lsi2: `${UPDATED_AT_INDEX}#${now}`,
+      lsi3: `${STATUS_INDEX}#${departureTour.status}`,
     };
-    return departureTourRepository.update(tenantId, departureTourId, departureTourToUpdate);
+
+    await departureTourRepository.update(
+      tenantId,
+      departureTourId,
+      departureTourToUpdate,
+    );
+
+    return helper.excludeDataFromObject(departureTourToUpdate) as DepartureTour;
   };
 }

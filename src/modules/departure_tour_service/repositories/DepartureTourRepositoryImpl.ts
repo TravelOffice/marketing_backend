@@ -2,7 +2,9 @@ import AWS from 'aws';
 import { getAwsSecretValue } from 'get-env';
 import { dynamoProvider, helper } from 'core';
 import { DepartureTour } from '../models/DepartureTour';
-import { DEPARTURE_TOUR_COUNTER_INDEX, DEPARTURE_TOUR_INDEX, TENANT_INDEX } from '../utils/constants';
+import {
+  CREATED_AT_INDEX, DEPARTURE_TOUR_COUNTER_INDEX, DEPARTURE_TOUR_INDEX, TENANT_INDEX,
+} from '../utils/constants';
 import logger from '../utils/logger';
 import { DepartureTourRepository } from './interfaces/DepartureTourRepository';
 
@@ -25,7 +27,7 @@ export default class DepartureTourRepositoryImpl implements DepartureTourReposit
         `${TENANT_INDEX}#${tenantId}`,
         `${DEPARTURE_TOUR_COUNTER_INDEX}`,
       );
-      return code;
+      return code.toString();
     } catch (error) {
       logger.log(`Error during increment operation for tenant ${tenantId}:`, error);
       throw error;
@@ -44,24 +46,19 @@ export default class DepartureTourRepositoryImpl implements DepartureTourReposit
       IndexName: 'Index1',
       KeyConditionExpression: 'pk = :pk AND begins_with(lsi1, :lsi1_filter_value)',
       ExpressionAttributeValues: {
-        ':pk': `${TENANT_INDEX}#${tenantId}`,
-        ':lsi1_filter_value': `${DEPARTURE_TOUR_INDEX}#`,
+        ':pk': `${TENANT_INDEX}#${tenantId}#${DEPARTURE_TOUR_INDEX}`,
+        ':lsi1_filter_value': `${CREATED_AT_INDEX}#`,
       },
     };
 
     logger.log(`Listing departure tours for tenant ${tenantId}`);
     logger.log('Query parameters:', params);
 
-    const items: DepartureTour[] = await dynamoProvider.query(params);
-
-    // Formatting the items and adding the id property
-    const departureTours = items.map(
-      (item) => helper.excludeDataFromObject(item) as DepartureTour,
-    );
+    const departureTours: DepartureTour[] = await dynamoProvider.query(params);
 
     // Logging the results
     logger.log(`Found ${departureTours.length} departure tours for tenant ${tenantId}`);
-    logger.log('Formatted items:', departureTours);
+    logger.log('Departure tours items:', departureTours);
 
     return departureTours;
   };
@@ -79,16 +76,14 @@ export default class DepartureTourRepositoryImpl implements DepartureTourReposit
 
     const item = await dynamoProvider.getItem(
       table,
-      `${TENANT_INDEX}#${tenantId}`,
-      `${DEPARTURE_TOUR_INDEX}#${departureTourId}`,
+      `${TENANT_INDEX}#${tenantId}#${DEPARTURE_TOUR_INDEX}`,
+      `${departureTourId}`,
     );
     if (!item) throw new Error(`Departure tour [${departureTourId}] not found`);
 
     logger.log('DepartureTour retrieved:', item);
 
-    const departureTour = helper.excludeDataFromObject(item);
-
-    return departureTour as DepartureTour;
+    return item as DepartureTour;
   };
 
   /**
@@ -99,8 +94,8 @@ export default class DepartureTourRepositoryImpl implements DepartureTourReposit
    */
   create = async (tenantId: string, departureTour: DepartureTour) => {
     const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
-    const pk = `${TENANT_INDEX}#${tenantId}`;
-    const sk = `${DEPARTURE_TOUR_INDEX}#${departureTour.code}`;
+    const pk = `${TENANT_INDEX}#${tenantId}#${DEPARTURE_TOUR_INDEX}`;
+    const sk = `${departureTour.code}`;
 
     logger.log(`Creating DepartureTour for tenant ${tenantId} with pk: ${pk}, sk: ${sk}`);
     logger.log(`Tenant ${tenantId} - DepartureTour:`, departureTour);
@@ -109,7 +104,7 @@ export default class DepartureTourRepositoryImpl implements DepartureTourReposit
 
     logger.log(`DepartureTour created successfully for tenant ${tenantId}`);
 
-    return helper.excludeDataFromObject(departureTour) as DepartureTour;
+    return departureTour;
   };
 
   /**
@@ -121,32 +116,17 @@ export default class DepartureTourRepositoryImpl implements DepartureTourReposit
    */
   update = async (tenantId: string, departureTourId: string, departureTour: DepartureTour) => {
     const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
-    const pk = `${TENANT_INDEX}#${tenantId}`;
-    const sk = `${DEPARTURE_TOUR_INDEX}#${departureTourId}`;
+    const pk = `${TENANT_INDEX}#${tenantId}#${DEPARTURE_TOUR_INDEX}`;
+    const sk = `${departureTourId}`;
 
     logger.log(`Updating DepartureTour for tenant ${tenantId} with pk: ${pk}, sk: ${sk}`);
     logger.log(`Tenant ${tenantId} - DepartureTour:`, departureTour);
 
-    const existingDepartureTour = await dynamoProvider.getItem<DepartureTour>(table, pk, sk);
-    if (!existingDepartureTour) {
-      throw new Error(`Departure tour [${departureTourId}] not found for tenant ${tenantId}`);
-    }
-
-    await dynamoProvider.putItem(
-      table,
-      pk,
-      sk,
-      {
-        ...departureTour,
-        code: departureTourId,
-        lsi1: existingDepartureTour.lsi1,
-        createdAt: existingDepartureTour.createdAt,
-      },
-    );
+    await dynamoProvider.putItem(table, pk, sk, departureTour);
 
     logger.log(`DepartureTour updated successfully for tenant ${tenantId}`);
 
-    return helper.excludeDataFromObject(departureTour) as DepartureTour;
+    return departureTour;
   };
 
   /**
@@ -157,8 +137,8 @@ export default class DepartureTourRepositoryImpl implements DepartureTourReposit
    */
   delete = async (tenantId: string, departureTourId: string) => {
     const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
-    const pk = `${TENANT_INDEX}#${tenantId}`;
-    const sk = `${DEPARTURE_TOUR_INDEX}#${departureTourId}`;
+    const pk = `${TENANT_INDEX}#${tenantId}#${DEPARTURE_TOUR_INDEX}`;
+    const sk = `${departureTourId}`;
 
     logger.log(`Deleting DepartureTour for tenant ${tenantId} with pk: ${pk}, sk: ${sk}`);
 

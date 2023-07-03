@@ -1,7 +1,7 @@
 import { DepartureTour } from '../../models/DepartureTour';
 
 export interface DepartureTourRepository {
-  generateDepartureTourCode: (tenantId: string) => Promise<number>
+  generateDepartureTourCode: (tenantId: string) => Promise<string>
   list: (tenantId: string) => Promise<Array<DepartureTour>>
   create: (tenantId: string, departureTour: DepartureTour) => Promise<DepartureTour>
   get: (tenantId: string, departureTourId: string) => Promise<DepartureTour | undefined>
