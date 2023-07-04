@@ -111,7 +111,7 @@ export default class DynamoProvider {
       Key: { pk, sk },
       UpdateExpression: updateExpression,
       ExpressionAttributeValues: expressionAttributeValues,
-      ReturnValues: 'UPDATED_NEW',
+      ReturnValues: 'ALL_NEW',
     };
 
     logger.log(`Updating new DynamoDB item with parameters ${JSON.stringify(params, null, 3)}`);

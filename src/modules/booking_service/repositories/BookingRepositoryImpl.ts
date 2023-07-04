@@ -74,7 +74,7 @@ export default class BookingRepositoryImpl implements BookingRepository {
     const { code, createdAt, ...bookingToUpdate } = booking;
 
     // Update booking item to database
-    await dynamoProvider.updateItemWithSetExpression(
+    const result = await dynamoProvider.updateItemWithSetExpression(
       table,
       pk,
       sk,
@@ -83,21 +83,23 @@ export default class BookingRepositoryImpl implements BookingRepository {
       },
     );
 
+    const updatedBooking = result.Attributes as Booking;
+
     logger.log(`Booking with id ${bookingId} has been updated successfully for tenant ${tenant}`);
 
     // Check if the booking status is "COMPLETED" and update customer revenue
-    if (bookingToUpdate.bookingStatus === BookingStatusEnum.COMPLETED) {
+    if (updatedBooking.bookingStatus === BookingStatusEnum.COMPLETED) {
       // Update the customer's revenue using customerRepository.updateRevenue
       await customerRepository.updateRevenue(
         tenant,
-        bookingToUpdate.customerId,
-        booking.totalPayment!,
+        updatedBooking.customerId,
+        updatedBooking.totalPayment!,
       );
       // Log a success message indicating the customer's revenue has been updated
-      logger.log(`Update customer ${booking.customerId} revenue successfully`);
+      logger.log(`Update customer ${updatedBooking.customerId} revenue successfully`);
     }
 
-    return helper.excludeDataFromObject(booking) as Booking;
+    return helper.excludeDataFromObject(bookingToUpdate) as Booking;
   };
 
   createFromLead = async (tenant: string, leadId: string, booking: Booking) => {

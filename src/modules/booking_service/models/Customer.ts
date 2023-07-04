@@ -71,7 +71,7 @@ interface DdbCustomerModel extends BaseDdbModel {
   taxCode?: string,
   level: CustomerLevel,
   socialLink?: string,
-  revenue: number,
+  revenue?: number,
 }
 
 export type Customer = Omit<DdbCustomerModel, 'pk' | 'sk'>;

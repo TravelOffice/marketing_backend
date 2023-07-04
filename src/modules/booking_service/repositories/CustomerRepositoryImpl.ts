@@ -102,8 +102,9 @@ export default class CustomerRepositoryImpl implements CustomerRepository {
         pk, // Partition key value
         sk, // Sort key value
       },
-      UpdateExpression: 'SET revenue = revenue + :bookingRevenue, updatedAt = :updatedAt', // Update expression
+      UpdateExpression: 'SET revenue = if_not_exists(incrIndex, :start) + :bookingRevenue, updatedAt = :updatedAt', // Update expression
       ExpressionAttributeValues: {
+        ':start': 0,
         ':bookingRevenue': bookingRevenue, // Value for the booking revenue
         ':updatedAt': Date.now(), // Value for the updatedAt timestamp
       },
@@ -111,11 +112,6 @@ export default class CustomerRepositoryImpl implements CustomerRepository {
     };
 
     // Perform the update operation
-    const rs = await dynamoProvider.rawUpdateItem(updateParams);
-
-    logger.log('Update customer revenue successfully.');
-
-    // Return the updated revenue of the customer
-    return rs.Attributes.revenue;
+    await dynamoProvider.rawUpdateItem(updateParams);
   };
 }
