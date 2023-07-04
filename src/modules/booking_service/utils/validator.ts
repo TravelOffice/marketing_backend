@@ -47,7 +47,7 @@ export function validateNewBookingFromLeadParams() {
       return !Number.isNaN(date);
     }),
     body('note').optional().isString(),
-    body('services').isArray().notEmpty().withMessage('Booking services must not be empty/'),
+    body('services').isArray().notEmpty().withMessage('Booking services must not be empty.'),
     body('services.*.serviceName').notEmpty().isString(),
     body('services.*.quantity', VALIDATE_POSITIVE_NUMBER)
       .notEmpty()
@@ -131,5 +131,15 @@ export function validateUpdateBookingParams() {
     body('waitingExpiredAt').optional().isNumeric(),
     body('doneAt').optional().isNumeric(),
     body('totalPax').optional().isNumeric(),
+    body('services').isArray().notEmpty().withMessage('Booking services must not be empty.'),
+    body('services.*.serviceName').notEmpty().isString(),
+    body('services.*.quantity', VALIDATE_POSITIVE_NUMBER)
+      .notEmpty()
+      .withMessage(VALIDATE_NUMBER_MSG)
+      .isInt({ min: 0 }),
+    body('services.*.price', VALIDATE_POSITIVE_NUMBER)
+      .notEmpty()
+      .withMessage(VALIDATE_NUMBER_MSG)
+      .isInt({ min: 0 }),
   ];
 }

@@ -56,7 +56,7 @@ interface DdbBookingModel extends BaseDdbModel {
   canceledNote?: string,
   canceledBy?: string,
   canceledAtPhase?: string,
-  services?: Service[],
+  services: Service[],
 
   /**
    * TODO: Temporary attributes

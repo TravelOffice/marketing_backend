@@ -78,6 +78,7 @@ export default class CreateBookingUseCaseImpl implements CreateBookingUseCase {
       updatedAt: now,
       bookingStatus: status,
       paymentStatus: 'UNPAID',
+      services: [],
       lsi3: `${BOOKING_STATUS_INDEX}#${status}`, // <status>,
       lsi5: `${CUSTOMER_INDEX}#${customerId}`, // <customer_code>
     };

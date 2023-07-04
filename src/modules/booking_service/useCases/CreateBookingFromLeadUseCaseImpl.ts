@@ -84,7 +84,7 @@ export default class CreateBookingFromLeadUseCaseImpl implements CreateBookingFr
     // Prepare booking information for storing to database
     // such as: Tour template, tour type, departure date, assignee, source, note
     const customerId = customer!.code;
-    const { tourType } = newBookingInput;
+    const { tourType, services } = newBookingInput;
     const customerInfo = { email, phone };
     const code = await bookingRepository.generateCode(tenant);
     const status: BookingStatus = 'INITIALIZED';
@@ -97,6 +97,7 @@ export default class CreateBookingFromLeadUseCaseImpl implements CreateBookingFr
       updatedAt: now,
       bookingStatus: status,
       paymentStatus: 'UNPAID',
+      services,
       lsi3: `${BOOKING_STATUS_INDEX}#${status}`, // <status>,
       lsi5: `${CUSTOMER_INDEX}#${customerId}`, // <customer_code>
     };
