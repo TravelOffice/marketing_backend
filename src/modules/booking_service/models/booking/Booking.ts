@@ -25,12 +25,6 @@ export enum BookingTourTypeEnum {
   GROUP = 'GROUP',
 }
 
-export const CHANGING_STATUS_RULES = [
-  `${BookingStatusEnum.IN_PROCESS}-${BookingStatusEnum.CANCELED}`,
-  `${BookingStatusEnum.PAYMENT_PENDING}-${BookingStatusEnum.CANCELED}`,
-  `${BookingStatusEnum.CONFIRMED}-${BookingStatusEnum.CANCELED}`,
-];
-
 export type BookingStatus = keyof typeof BookingStatusEnum;
 export type BookingPaymentStatus = keyof typeof BookingPaymentStatusEnum;
 export type BookingTourType = keyof typeof BookingTourTypeEnum;
