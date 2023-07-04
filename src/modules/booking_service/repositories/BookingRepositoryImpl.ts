@@ -15,6 +15,7 @@ import {
 } from '../utils/constants';
 import { BookingRepository } from './interfaces/BookingRepository';
 import logger from '../utils/logger';
+import { customerRepository } from './index';
 
 export default class BookingRepositoryImpl implements BookingRepository {
   /**
@@ -83,6 +84,18 @@ export default class BookingRepositoryImpl implements BookingRepository {
     );
 
     logger.log(`Booking with id ${bookingId} has been updated successfully for tenant ${tenant}`);
+
+    // Check if the booking status is "COMPLETED" and update customer revenue
+    if (bookingToUpdate.bookingStatus === BookingStatusEnum.COMPLETED) {
+      // Update the customer's revenue using customerRepository.updateRevenue
+      await customerRepository.updateRevenue(
+        tenant,
+        bookingToUpdate.customerId,
+        booking.totalPayment!,
+      );
+      // Log a success message indicating the customer's revenue has been updated
+      logger.log(`Update customer ${booking.customerId} revenue successfully`);
+    }
 
     return helper.excludeDataFromObject(booking) as Booking;
   };

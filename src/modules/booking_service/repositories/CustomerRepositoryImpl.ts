@@ -1,5 +1,7 @@
 import { getAwsSecretValue } from 'get-env';
-import { QueryInput, dynamoProvider, helper } from 'core';
+import {
+  dynamoProvider, helper, QueryInput, UpdateItemInput,
+} from 'core';
 import {
   CUSTOMER_COUNTER_INDEX, CUSTOMER_INDEX, PHONE_INDEX, TENANT_INDEX,
 } from '../utils/constants';
@@ -73,5 +75,47 @@ export default class CustomerRepositoryImpl implements CustomerRepository {
       logger.log(`Error during increment operation for tenant ${tenant}: ${error}`);
       throw error;
     }
+  };
+
+  /**
+   * Updates the revenue of a customer.
+   *
+   * @param {string} tenant - The ID of the tenant.
+   * @param {string} customerId - The ID of the customer.
+   * @param {number} bookingRevenue - The revenue to be added to the customer's existing revenue.
+   * @returns {Promise<number>} - A promise that resolves to the updated revenue of the customer.
+   */
+  updateRevenue = async (tenant: string, customerId: string, bookingRevenue: number) => {
+    logger.log('Update revenue process started.');
+
+    // Retrieve the name of the DynamoDB table
+    const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+
+    // Construct the partition key and sort key for the customer
+    const pk = `${TENANT_INDEX}#${tenant}#${CUSTOMER_INDEX}`;
+    const sk = customerId;
+
+    // Set the update parameters to increase the customer's revenue
+    const updateParams: UpdateItemInput = {
+      TableName: travelTable, // Name of the DynamoDB table
+      Key: {
+        pk, // Partition key value
+        sk, // Sort key value
+      },
+      UpdateExpression: 'SET revenue = revenue + :bookingRevenue, updatedAt = :updatedAt', // Update expression
+      ExpressionAttributeValues: {
+        ':bookingRevenue': bookingRevenue, // Value for the booking revenue
+        ':updatedAt': Date.now(), // Value for the updatedAt timestamp
+      },
+      ReturnValues: 'UPDATED_NEW', // Specify to return the updated attributes
+    };
+
+    // Perform the update operation
+    const rs = await dynamoProvider.rawUpdateItem(updateParams);
+
+    logger.log('Update customer revenue successfully.');
+
+    // Return the updated revenue of the customer
+    return rs.Attributes.revenue;
   };
 }
