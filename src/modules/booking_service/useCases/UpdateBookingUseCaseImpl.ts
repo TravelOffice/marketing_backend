@@ -1,4 +1,4 @@
-import logger from 'core/utils/logger';
+import logger from '../utils/logger';
 import { Booking } from '../models/booking/Booking';
 import { bookingRepository } from '../repositories';
 import { UpdateBookingUseCase } from './interfaces/UpdateBookingUseCase';

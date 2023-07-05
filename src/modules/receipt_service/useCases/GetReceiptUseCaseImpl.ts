@@ -1,5 +1,5 @@
-import logger from 'core/utils/logger';
 import { helper } from 'core';
+import logger from '../utils/logger';
 import { Receipt } from '../models/Receipt';
 import { receiptRepository } from '../repositories';
 import { GetReceiptUseCase } from './interfaces/GetReceiptUseCase';
