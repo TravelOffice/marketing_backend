@@ -50,7 +50,7 @@ app.get('/receipts', async (req: Request, res: Response) => {
     const receipts = await getReceiptListUseCase.invoke(tenant);
     res.json(wrapResponse(SUCCESS, receipts));
   } catch (error: any) {
-    logger.log('Error retrieving tour locations:', error.message);
+    logger.log('Error retrieving payment vouchers:', error.message);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });
@@ -63,7 +63,7 @@ app.post('/receipts', async (req: Request, res: Response) => {
     const receipt = await createReceiptUseCase.invoke(userInfo as CognitoUser, req.body);
     res.json(wrapResponse(SUCCESS, receipt));
   } catch (error: any) {
-    logger.log('Error creating tour location:', error.message);
+    logger.log('Error creating payment voucher:', error.message);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });
@@ -76,7 +76,7 @@ app.get('receipts/:id', async (req: Request, res: Response) => {
     const receipt = await getReceiptUseCase.invoke(tenant, id);
     res.json(wrapResponse(SUCCESS, receipt));
   } catch (error: any) {
-    logger.log('Error retrieving tour location:', error.message);
+    logger.log('Error retrieving payment voucher:', error.message);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });
@@ -90,7 +90,7 @@ app.put('/receipts/:id', async (req: Request, res: Response) => {
     const receipt = await updateReceiptUseCase.invoke(tenant, id, req.body);
     res.json(wrapResponse(SUCCESS, receipt));
   } catch (error: any) {
-    logger.log('Error updating tour location:', error.message);
+    logger.log('Error updating payment voucher:', error.message);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });
