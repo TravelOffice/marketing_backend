@@ -1,4 +1,6 @@
-import { bookingRepository } from '../repositories';
+import {
+  bookingRepository, customerRepository, leadRepository, tourTemplateRepository,
+} from '../repositories';
 import { GetBookingByGivenIdUseCase } from './interfaces/GetBookingByGivenIdUseCase';
 
 export default class GetBookingByGivenIdUseCaseImpl implements GetBookingByGivenIdUseCase {
@@ -9,5 +11,16 @@ export default class GetBookingByGivenIdUseCaseImpl implements GetBookingByGiven
   invoke = async (
     tenant: string,
     bookingId: string,
-  ) => bookingRepository.getByGivenId(tenant, bookingId);
+  ) => {
+    const booking = await bookingRepository.getByGivenId(tenant, bookingId);
+    if (booking) {
+      const { tourLeadId, customerId, tourTemplateId } = booking;
+      if (tourLeadId) booking.lead = await leadRepository.getById(tenant, tourLeadId);
+      if (customerId) booking.customer = await customerRepository.get(tenant, customerId);
+      if (tourTemplateId) {
+        booking.tourTemplate = await tourTemplateRepository.get(tenant, tourTemplateId);
+      }
+    }
+    return booking;
+  };
 }

@@ -1,21 +1,40 @@
 import { getAwsSecretValue } from 'get-env';
 import {
-  dynamoProvider, helper, QueryInput, UpdateItemInput,
+  dynamoProvider,
+  helper,
+  KeyList,
+  QueryInput,
+  UpdateItemInput,
 } from 'core';
 import {
-  Booking, BookingStatus, BookingStatusEnum, statusTransitionRules,
+  Booking,
+  BookingStatus,
+  BookingStatusEnum,
+  statusTransitionRules,
 } from '../models/booking/Booking';
 import {
   ASSIGNEE_INDEX,
   BOOKING_COUNTER_INDEX,
   BOOKING_INDEX,
   BOOKING_STATUS_INDEX,
+  CUSTOMER_INDEX,
+  LEAD_INDEX,
   TENANT_INDEX,
+  TOUR_TEMPLATE_INDEX,
   UPDATED_AT_INDEX,
 } from '../utils/constants';
 import { BookingRepository } from './interfaces/BookingRepository';
 import logger from '../utils/logger';
 import { customerRepository } from './index';
+import { compact, uniqueItems } from '../utils/array';
+import { Customer } from '../models/Customer';
+import { Lead } from '../models/Lead';
+import { TourTemplate } from '../models/tour/TourTemplate';
+
+const buildBatchReqItems = (
+  pk: string,
+  ids: string[],
+) => ids.map((id) => ({ pk, sk: id })) as KeyList;
 
 export default class BookingRepositoryImpl implements BookingRepository {
   /**
@@ -239,5 +258,41 @@ export default class BookingRepositoryImpl implements BookingRepository {
       // Rethrow the error to be handled by the caller
       throw error;
     }
+  };
+
+  fetchBookingsRelatedItems = async (tenant: string, bookings: Booking[]) => {
+    // Pks
+    const customerPk = `${TENANT_INDEX}#${tenant}#${CUSTOMER_INDEX}`;
+    const leadPk = `${TENANT_INDEX}#${tenant}#${LEAD_INDEX}`;
+    const tourTemplatePk = `${TENANT_INDEX}#${tenant}#${TOUR_TEMPLATE_INDEX}`;
+
+    // Fetch all related data of bookings
+    // such as leads, tour templates and so on
+    const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const customerIds = uniqueItems(compact(bookings.map((booking) => booking.customerId)));
+    const leadIds = uniqueItems(compact(bookings.map((booking) => booking.tourLeadId)));
+    const tourTemplateIds = uniqueItems(compact(bookings.map((booking) => booking.tourTemplateId)));
+    const keys: KeyList = ([] as KeyList)
+      .concat(buildBatchReqItems(customerPk, customerIds))
+      .concat(buildBatchReqItems(leadPk, leadIds as string[]))
+      .concat(buildBatchReqItems(tourTemplatePk, tourTemplateIds as string[]));
+
+    const responses = await dynamoProvider.batchGetItems({
+      RequestItems: {
+        [table]: { Keys: keys },
+      },
+    });
+    const bookingRelatedItems = responses[table];
+    const customers = bookingRelatedItems
+      .filter((item) => item.pk === customerPk)
+      .map((item) => helper.excludeDataFromObject(item)) as Customer[];
+    const leads = bookingRelatedItems
+      .filter((item) => item.pk === leadPk)
+      .map((item) => helper.excludeDataFromObject(item)) as Lead[];
+    const tourTemplates = bookingRelatedItems
+      .filter((item) => item.pk === tourTemplatePk)
+      .map((item) => helper.excludeDataFromObject(item)) as TourTemplate[];
+
+    return { customers, leads, tourTemplates };
   };
 }

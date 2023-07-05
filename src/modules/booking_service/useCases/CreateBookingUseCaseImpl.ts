@@ -1,7 +1,7 @@
 import { CustomerLevel, SourceType } from '../models/Customer';
 import { Booking, BookingStatus } from '../models/booking/Booking';
 import { CreateBookingInput } from '../models/rawApiData/CreateBookingInput';
-import { bookingRepository, customerRepository } from '../repositories';
+import { bookingRepository, customerRepository, tourTemplateRepository } from '../repositories';
 import {
   ASSIGNEE_INDEX,
   BOOKING_STATUS_INDEX,
@@ -65,7 +65,15 @@ export default class CreateBookingUseCaseImpl implements CreateBookingUseCase {
     // Prepare booking information for storing to database
     // such as: Tour template, tour type, departure date, assignee, source, note
     const customerId = customer!.code;
-    const { tourType } = newBookingInput;
+    const { tourType, tourTemplateId } = newBookingInput;
+
+    // Verify tour template
+    const tourTemplate = await tourTemplateRepository.get(tenant, tourTemplateId);
+    if (!tourTemplate) {
+      throw new Error(`Tour template with id ${tourTemplateId} of tenant ${tenant} not found.`);
+    }
+
+    // Prepare and save booking to database
     const customerInfo = { email, phone };
     const code = await bookingRepository.generateCode(tenant);
     const status: BookingStatus = 'INITIALIZED';
@@ -79,10 +87,10 @@ export default class CreateBookingUseCaseImpl implements CreateBookingUseCase {
       bookingStatus: status,
       paymentStatus: 'UNPAID',
       services: [],
+      tourTemplateId,
       lsi3: `${BOOKING_STATUS_INDEX}#${status}`, // <status>,
       lsi5: `${CUSTOMER_INDEX}#${customerId}`, // <customer_code>
     };
-    // Save booking to database
     return bookingRepository.create(tenant, newBooking);
   };
 }

@@ -4,6 +4,9 @@ import { BaseDdbModel } from 'common-models';
 import { Note } from '../Note';
 import { Task } from '../Task';
 import { Service } from './Service';
+import { Lead } from '../Lead';
+import { Customer } from '../Customer';
+import { TourTemplate } from '../tour/TourTemplate';
 
 export enum BookingStatusEnum {
   INITIALIZED = 'INITIALIZED',
@@ -51,6 +54,15 @@ interface DdbBookingModel extends BaseDdbModel {
   canceledBy?: string,
   canceledAtPhase?: string,
   services: Service[],
+  tourTemplateId?: string,
+
+  /**
+   * Booking related items
+   * Such as Lead, Customer, TourTemplate
+   */
+  lead?: Lead,
+  customer?: Customer,
+  tourTemplate?: TourTemplate,
 
   /**
    * TODO: Temporary attributes
