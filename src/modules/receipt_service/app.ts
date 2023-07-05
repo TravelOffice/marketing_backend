@@ -2,7 +2,7 @@ import cors from 'cors';
 import express, { NextFunction, Request, Response } from 'express';
 import compression from 'compression';
 import { getCurrentUserInfo } from 'decode-token';
-import logger from 'core/utils/logger';
+import logger from './utils/logger';
 import {
   createReceiptUseCase,
   deleteReceiptUseCase,

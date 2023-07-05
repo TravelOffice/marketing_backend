@@ -1,5 +1,5 @@
-import logger from 'core/utils/logger';
 import { helper } from 'core';
+import logger from '../utils/logger';
 import { TourLocation } from '../models/TourLocation';
 import { tourLocationRepository } from '../repositories';
 import { GetTourLocationUseCase } from './interfaces/GetTourLocationUseCase';

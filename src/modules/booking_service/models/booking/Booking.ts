@@ -57,7 +57,6 @@ interface DdbBookingModel extends BaseDdbModel {
    * These attrs will be updated later
    */
   requestedCode?: string,
-  bookingCode?: string,
   labelId?: string,
   sourceId?: string,
   creatorId?: string,

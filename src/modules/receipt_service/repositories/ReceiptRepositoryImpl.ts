@@ -1,7 +1,7 @@
 import AWS from 'aws';
 import { getAwsSecretValue } from 'get-env';
 import { dynamoProvider, helper } from 'core';
-import logger from 'core/utils/logger';
+import logger from '../utils/logger';
 import { Receipt } from '../models/Receipt';
 import { CREATED_AT_INDEX, RECEIPT_INDEX, TENANT_INDEX } from '../utils/constants';
 import { ReceiptRepository } from './interfaces/ReceiptRepository';
