@@ -1,4 +1,4 @@
-import { BookingStatusEnum, CHANGING_STATUS_RULES } from '../models/booking/Booking';
+import { BookingStatusEnum, statusTransitionRules } from '../models/booking/Booking';
 import { bookingRepository } from '../repositories';
 import { CancelBookingUseCase } from './interfaces/CancelBookingUseCase';
 import logger from '../utils/logger';
@@ -23,7 +23,7 @@ export default class CancelBookingUseCaseImpl implements CancelBookingUseCase {
     }
 
     // Check if the cancellation is allowed based on the booking status and cancellation rules
-    if (!CHANGING_STATUS_RULES.includes(`${booking.bookingStatus}-${BookingStatusEnum.CANCELED}`)) {
+    if (!statusTransitionRules.includes(`${booking.bookingStatus}-${BookingStatusEnum.CANCELED}`)) {
       throw new Error(`Cannot change status from '${booking.bookingStatus}' to '${BookingStatusEnum.CANCELED}'`);
     }
 
