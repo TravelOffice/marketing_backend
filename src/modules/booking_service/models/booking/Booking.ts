@@ -55,6 +55,7 @@ interface DdbBookingModel extends BaseDdbModel {
   canceledAtPhase?: string,
   services: Service[],
   tourTemplateId?: string,
+  departureDate?: string,
 
   /**
    * Booking related items
