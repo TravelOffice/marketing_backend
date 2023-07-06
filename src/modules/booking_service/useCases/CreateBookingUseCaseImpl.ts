@@ -65,7 +65,7 @@ export default class CreateBookingUseCaseImpl implements CreateBookingUseCase {
     // Prepare booking information for storing to database
     // such as: Tour template, tour type, departure date, assignee, source, note
     const customerId = customer!.code;
-    const { tourType, tourTemplateId } = newBookingInput;
+    const { tourType, tourTemplateId, departureDate } = newBookingInput;
 
     // Verify tour template
     const tourTemplate = await tourTemplateRepository.get(tenant, tourTemplateId);
@@ -88,6 +88,7 @@ export default class CreateBookingUseCaseImpl implements CreateBookingUseCase {
       paymentStatus: 'UNPAID',
       services: [],
       tourTemplateId,
+      departureDate,
       lsi3: `${BOOKING_STATUS_INDEX}#${status}`, // <status>,
       lsi5: `${CUSTOMER_INDEX}#${customerId}`, // <customer_code>
     };
