@@ -1,6 +1,7 @@
 import { Customer } from '../../models/Customer';
 
 export interface CustomerRepository {
+  get: (tenantId: string, customerId: string) => Promise<Customer>,
   findOneByPhone: (tenant: string, phone: string) => Promise<Customer | undefined>,
   create: (tenant: string, customer: Customer) => Promise<Customer>,
   generateCode: (tenant: string) => Promise<string>,

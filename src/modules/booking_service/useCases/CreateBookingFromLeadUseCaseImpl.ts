@@ -5,6 +5,7 @@ import {
   bookingRepository,
   customerRepository,
   leadRepository,
+  tourTemplateRepository,
   userRepository,
 } from '../repositories';
 import {
@@ -41,12 +42,20 @@ export default class CreateBookingFromLeadUseCaseImpl implements CreateBookingFr
       throw new Error(`Lead with id ${leadId} of tenant ${tenant} not found.`);
     }
     const {
-      email, phoneNumber: phone, honorific, name: fullName, address,
+      email, phoneNumber: phone, honorific, name: fullName, address, tourTemplateId,
     } = lead;
+
+    // Verify tour template
+    if (tourTemplateId) {
+      const tourTemplate = await tourTemplateRepository.get(tenant, tourTemplateId);
+      if (!tourTemplate) {
+        throw new Error(`Tour template with id ${tourTemplateId} of tenant ${tenant} not found.`);
+      }
+    }
 
     // Get and extract data attributes from User (Sale employee)
     const sale = await userRepository.get(tenant, assigneeId);
-    if (!sale) { // Sake should not be empty
+    if (!sale) { // Sale should not be empty
       throw new Error(`Sale with id ${assigneeId} of tenant ${tenant} not found.`);
     }
     const { firstName, lastName, username: saleUsername } = sale;
@@ -88,6 +97,8 @@ export default class CreateBookingFromLeadUseCaseImpl implements CreateBookingFr
     const customerInfo = { email, phone };
     const code = await bookingRepository.generateCode(tenant);
     const status: BookingStatus = 'INITIALIZED';
+
+    // Prepare and save booking to database
     const newBooking: Booking = {
       code,
       customerId,
@@ -98,10 +109,10 @@ export default class CreateBookingFromLeadUseCaseImpl implements CreateBookingFr
       bookingStatus: status,
       paymentStatus: 'UNPAID',
       services,
+      tourTemplateId,
       lsi3: `${BOOKING_STATUS_INDEX}#${status}`, // <status>,
       lsi5: `${CUSTOMER_INDEX}#${customerId}`, // <customer_code>
     };
-    // Save booking to database
     return bookingRepository.create(tenant, newBooking);
   };
 }

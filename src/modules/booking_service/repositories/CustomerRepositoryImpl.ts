@@ -11,6 +11,31 @@ import logger from '../utils/logger';
 
 export default class CustomerRepositoryImpl implements CustomerRepository {
   /**
+   * Retrieves a customer for a specific tenant and customer ID.
+   * @param tenantId The ID of the tenant.
+   * @param customerID The ID of the customer.
+   * @returns The retrieved customer.
+   */
+  get = async (tenantId: string, customerId: string) => {
+    const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+
+    logger.log(`Retrieving Customer for tenant ${tenantId} with [${customerId}]`);
+
+    const item = await dynamoProvider.getItem(
+      table,
+      `${TENANT_INDEX}#${tenantId}#${CUSTOMER_INDEX}`,
+      `${customerId}`,
+    );
+    if (!item) throw new Error(`Customer [${customerId}] not found`);
+
+    logger.log('Customer retrieved:', item);
+
+    const customer = helper.excludeDataFromObject(item);
+
+    return customer as Customer;
+  };
+
+  /**
    * Find customer by email and phone number
    * @param tenant Tenant id
    * @param phone Phone number

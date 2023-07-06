@@ -19,4 +19,6 @@ export {
   GetItemInput,
   UpdateItemInput,
   DeleteItemInput,
+  BatchGetItemInput,
+  KeyList,
 } from './DynamoProvider';
