@@ -35,3 +35,7 @@ export const VALIDATE_POSITIVE_NUMBER = 'property must be a positive integer';
 export const VALIDATE_NUMBER_MSG = 'property must be a number';
 
 export const TOUR_TEMPLATE_INDEX = 'TOUR_TEMPLATE';
+
+export const VALIDATE_STRING_MSG = 'property must be a string';
+
+export const NO_REPLY_DEFAULT_EMAIL = 'no-reply@traveloffice.shop';

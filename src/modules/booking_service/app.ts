@@ -1,5 +1,5 @@
 import cors from 'cors';
-import express, { Request, Response, NextFunction } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import compression from 'compression';
 import { getCurrentUserInfo } from 'decode-token';
 import {
@@ -9,15 +9,17 @@ import {
   getAllBookingsUseCase,
   getBookingByGivenIdUseCase,
   getBookingsByStatusUseCase,
+  sendEmailToTourOperator,
   updateBookingUseCase,
 } from './useCases';
 import wrapResponse from './utils/wrapResponse';
-import { FAILED, SUCCESS } from './utils/constants';
+import { FAILED, NO_REPLY_DEFAULT_EMAIL, SUCCESS } from './utils/constants';
 import validate, {
   validateCancelBookingDataInput,
   validateGetBookingFilteredParams,
   validateNewBookingFromLeadParams,
   validateNewBookingParams,
+  validateSendEmailToTourGuideParams,
   validateUpdateBookingParams,
 } from './utils/validator';
 import logger from './utils/logger';
@@ -138,6 +140,18 @@ app.put('/bookings/:id/cancel', validateCancelBookingDataInput(), async (req: Re
     res.json(wrapResponse(SUCCESS, booking));
   } catch (error: any) {
     logger.log(`[PUT /bookings/:id/cancel] Error ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.post('/bookings/:id/send-email-to-tour-operator', validateSendEmailToTourGuideParams(), async (req: Request, res: Response) => {
+  try {
+    validate(req);
+    const { tenant } = getCurrentUserInfo(req.headers.authorization!);
+    const { id } = req.params;
+    await sendEmailToTourOperator.invoke(tenant, id, NO_REPLY_DEFAULT_EMAIL, req.body);
+    res.json(wrapResponse(SUCCESS));
+  } catch (error: any) {
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });

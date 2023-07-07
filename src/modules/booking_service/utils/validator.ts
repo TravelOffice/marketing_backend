@@ -1,7 +1,12 @@
 import { Request } from 'express';
 import { body, ValidationError, validationResult } from 'express-validator';
 import { bookingPaymentStatuses, bookingStatuses, tourTypes } from '../models/booking/Booking';
-import { VALIDATE_NON_EMPTY_STRING_MSG, VALIDATE_NUMBER_MSG, VALIDATE_POSITIVE_NUMBER } from './constants';
+import {
+  VALIDATE_NON_EMPTY_STRING_MSG,
+  VALIDATE_NUMBER_MSG,
+  VALIDATE_POSITIVE_NUMBER,
+  VALIDATE_STRING_MSG,
+} from './constants';
 
 export default function validate(req: Request) {
   const errors = validationResult(req);
@@ -141,5 +146,27 @@ export function validateUpdateBookingParams() {
       .notEmpty()
       .withMessage(VALIDATE_NUMBER_MSG)
       .isInt({ min: 0 }),
+  ];
+}
+
+export function validateSendEmailToTourGuideParams() {
+  const emailAddressPattern = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
+  return [
+    body('toAddresses').isArray().withMessage('toAddresses must be an array')
+      .custom((value: Array<string>) => {
+        if (!Array.isArray(value)) return false;
+        return value.every((item: string) => item.toString().match(emailAddressPattern));
+      })
+      .withMessage('all elements of toAddresses must be email address'),
+    body('ccAddresses').isArray().withMessage('ccAddresses must be an array')
+      .custom((value: Array<string>) => {
+        if (!Array.isArray(value)) return false;
+        return value.every((item: string) => item.toString().match(emailAddressPattern));
+      })
+      .withMessage('all elements of ccAddresses must be email address'),
+    body('subject').notEmpty().withMessage(VALIDATE_NON_EMPTY_STRING_MSG).isString()
+      .withMessage(VALIDATE_STRING_MSG),
+    body('html', VALIDATE_STRING_MSG).optional().isString(),
+    body('text', VALIDATE_STRING_MSG).optional().isString(),
   ];
 }
