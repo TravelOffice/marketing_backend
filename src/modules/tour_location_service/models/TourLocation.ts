@@ -8,5 +8,6 @@ export enum TourLocationStatus {
 export interface TourLocation extends BaseDdbModel {
   name: string
   code: string,
-  status: TourLocationStatus
+  status: TourLocationStatus,
+  creator: string,
 }

@@ -10,6 +10,7 @@ export default class CreateTourLocationUseCaseImpl implements CreateTourLocation
   private allowedCreatingKeys: (keyof TourLocation)[] = [
     'name',
     'status',
+    'creator',
   ];
 
   invoke = async (

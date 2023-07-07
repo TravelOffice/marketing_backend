@@ -1,4 +1,5 @@
 import { Request } from 'express';
+import moment from 'moment';
 import {
   body,
   ValidationError,
@@ -13,6 +14,18 @@ import {
 } from './constants';
 import { TourType } from '../models/TourType';
 import { TourStatus } from '../models/TourStatus';
+
+/**
+ * Checks if a date is after or same the current date (considering only the year, month, and day).
+ * @param dateValue The timestamp of the date to compare.
+ * @returns `true` if the provided date is after the current date, `false` otherwise.
+ */
+function isDateSameOrAfter(dateValue: number): boolean {
+  const currentDate = moment().startOf('day'); // Set time to the start of the day
+  const otherDate = moment(dateValue).startOf('day'); // Set time to the start of the day
+
+  return otherDate.isSameOrAfter(currentDate);
+}
 
 export default function validate(req: Request) {
   const errors = validationResult(req);
@@ -55,11 +68,7 @@ export function createOrUpdateDepartureTourValidator() {
     body('startDate', VALIDATE_DATE_MSG)
       .notEmpty()
       .custom((value) => !Number.isNaN(new Date(value)))
-      .custom((value) => {
-        const currentDate = new Date();
-        const startDate = new Date(value);
-        return startDate > currentDate;
-      })
+      .custom((value) => isDateSameOrAfter(value))
       .withMessage('Start date must be after the current date'),
 
     body('startingLocation')

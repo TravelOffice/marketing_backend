@@ -2,7 +2,7 @@ import cors from 'cors';
 import express, { Request, Response, NextFunction } from 'express';
 import compression from 'compression';
 import { getCurrentUserInfo } from 'decode-token';
-import logger from './utils/logger';
+import logger from 'core/utils/logger';
 import {
   createTourLocationUseCase,
   deleteTourLocationUseCase,
@@ -61,7 +61,8 @@ app.get(`${prefix}/`, async (req: Request, res: Response) => {
 app.post(`${prefix}/`, createUpdateTourLocationValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
-    const { tenant } = getCurrentUserInfo(req.headers.authorization!);
+    const { username, tenant } = getCurrentUserInfo(req.headers.authorization!);
+    req.body.creator = username;
     const tourLocation = await createTourLocationUseCase.invoke(tenant, req.body);
     res.json(wrapResponse(SUCCESS, tourLocation));
   } catch (error: any) {
@@ -102,8 +103,8 @@ app.delete(`${prefix}/:id`, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { tenant } = getCurrentUserInfo(req.headers.authorization!);
-    await deleteTourLocationUseCase.invoke(tenant, id);
-    res.json(wrapResponse(SUCCESS, {}));
+    const ret = await deleteTourLocationUseCase.invoke(tenant, id);
+    res.json(wrapResponse(SUCCESS, ret));
   } catch (error: any) {
     logger.log('Error deleting tour location:', error.message);
     res.json(wrapResponse(FAILED, undefined, error.message));
