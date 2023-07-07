@@ -22,4 +22,6 @@ export interface TourTemplate extends BaseDdbModel {
     cancellationTerms?: string,
   },
   tourPlan: string,
+  creatorId: string,
+  creatorName: string,
 }

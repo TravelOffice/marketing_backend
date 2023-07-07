@@ -48,9 +48,10 @@ app.get('/departure-tours', async (req: Request, res: Response) => {
 app.post('/departure-tours', createOrUpdateDepartureTourValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
-    const { tenant, username } = getCurrentUserInfo(req.headers.authorization!);
+    const { tenant, username, name } = getCurrentUserInfo(req.headers.authorization!);
     logger.log(`[${req.method}] Request received for tenant '${tenant}' on route '${req.originalUrl}'`);
-    req.body.creator = username;
+    req.body.creatorId = username;
+    req.body.creatorName = name;
     const departureTour = await createDepartureTourUseCase.invoke(tenant, req.body);
     res.json(wrapResponse(SUCCESS, departureTour));
   } catch (error: any) {

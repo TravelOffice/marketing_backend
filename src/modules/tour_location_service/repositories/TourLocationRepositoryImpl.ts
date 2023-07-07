@@ -1,10 +1,12 @@
 import AWS from 'aws';
 import { getAwsSecretValue } from 'get-env';
 import { dynamoProvider, helper } from 'core';
-import logger from '../utils/logger';
+import logger from 'core/utils/logger';
 import { TourLocation } from '../models/TourLocation';
 import { TourLocationRepository } from './interfaces/TourLocationRepository';
-import { CREATED_AT_INDEX, TENANT_INDEX, TOUR_LOCATION_INDEX } from '../utils/constants';
+import {
+  CREATED_AT_INDEX, TENANT_INDEX, TOUR_LOCATION_COUNTER_INDEX, TOUR_LOCATION_INDEX,
+} from '../utils/constants';
 
 type QueryInput = AWS.DynamoDB.DocumentClient.QueryInput;
 
@@ -23,7 +25,7 @@ export default class TourLocationRepositoryImpl implements TourLocationRepositor
       const code = await helper.generateCode(
         table,
         `${TENANT_INDEX}#${tenantId}`,
-        `${TOUR_LOCATION_INDEX}`,
+        `${TOUR_LOCATION_COUNTER_INDEX}`,
       );
       return code.toString();
     } catch (error) {

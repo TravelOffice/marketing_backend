@@ -24,6 +24,8 @@ export default class CreateDepartureTourUseCaseImpl implements CreateDepartureTo
     'tourTemplateCode',
     'startDate',
     'status',
+    'creatorId',
+    'creatorName',
   ];
 
   invoke = async (
