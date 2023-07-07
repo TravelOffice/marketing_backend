@@ -12,6 +12,8 @@ import { UpdateBookingUseCase } from './interfaces/UpdateBookingUseCase';
 import UpdateBookingUseCaseImpl from './UpdateBookingUseCaseImpl';
 import CreateBookingFromLeadUseCaseImpl from './CreateBookingFromLeadUseCaseImpl';
 import { CreateBookingFromLeadUseCase } from './interfaces/CreateBookingFromLeadUseCase';
+import { SendEmailToTourOperatorUseCase } from './interfaces/SendEmailToTourOperatorUseCase';
+import SendEmailToTourOperatorImpl from './SendEmailToTourOperatorImpl';
 
 interface UseCases {
   createBookingUseCase: CreateBookingUseCase,
@@ -21,6 +23,7 @@ interface UseCases {
   getAllBookingsUseCase: GetAllBookingUseCase,
   getBookingsByStatusUseCase: GetBookingsByStatusUseCase,
   cancelBookingsUseCase: CancelBookingUseCase,
+  sendEmailToTourOperator: SendEmailToTourOperatorUseCase
 }
 
 const useCases: UseCases = {
@@ -31,6 +34,7 @@ const useCases: UseCases = {
   getAllBookingsUseCase: new GetAllBookingUseCaseImpl(),
   getBookingsByStatusUseCase: new GetBookingsByStatusUseCaseImpl(),
   cancelBookingsUseCase: new CancelBookingUseCaseImpl(),
+  sendEmailToTourOperator: new SendEmailToTourOperatorImpl(),
 };
 
 export const {
@@ -41,4 +45,5 @@ export const {
   getAllBookingsUseCase,
   getBookingsByStatusUseCase,
   cancelBookingsUseCase,
+  sendEmailToTourOperator,
 } = useCases;

@@ -79,7 +79,13 @@ locals {
       NODE_ENV                       = var.ENV
       SECRET_MANAGER_ID              = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
       SEND_NOTIFICATION_SERVICE_NAME = "${var.ENV}-${var.FEATURE_NAME}-send_notification"
-    }
+    },
+    booking_service_lambda_vars = {
+      REGION                         = var.AWS_REGION
+      NODE_ENV                       = var.ENV
+      SECRET_MANAGER_ID              = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
+      SEND_NOTIFICATION_SERVICE_NAME = "${var.ENV}-${var.FEATURE_NAME}-send_notification"
+    },
   }
 }
 
