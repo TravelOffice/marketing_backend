@@ -1,5 +1,5 @@
-import invokeFunction from 'core/utils/lambda';
 import { getEnv } from 'get-env';
+import invokeFunction from './lambda';
 import { MailTemplate } from '../models/MailTemplate';
 
 /**
