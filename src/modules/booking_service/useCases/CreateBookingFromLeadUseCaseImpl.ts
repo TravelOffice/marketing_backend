@@ -101,6 +101,7 @@ export default class CreateBookingFromLeadUseCaseImpl implements CreateBookingFr
     // Prepare and save booking to database
     const newBooking: Booking = {
       code,
+      tourLeadId: leadId,
       customerId,
       customerInfo,
       tourType,
