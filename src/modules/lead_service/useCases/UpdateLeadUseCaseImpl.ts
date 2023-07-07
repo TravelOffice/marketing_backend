@@ -1,13 +1,14 @@
 import { helper } from 'core';
-import { leadRepository, userRepository } from '../repositories';
+import { leadRepository } from '../repositories';
 import { UpdateLeadUseCase } from './interfaces/UpdateLeadUseCase';
 import { UpdateLeadDto } from '../dto/UpdateLeadDto';
 import { Lead, LeadStatus } from '../models/Lead';
 import {
   ASSIGNEE_INDEX, STATUS_INDEX, UPDATED_INDEX,
 } from '../utils/constants';
+import BaseRepositoryImpl from './BaseRepositoryImpl';
 
-export default class UpdateLeadUseCaseImpl implements UpdateLeadUseCase {
+export default class UpdateLeadUseCaseImpl extends BaseRepositoryImpl implements UpdateLeadUseCase {
   allowedUpdatingKeys: (keyof UpdateLeadDto)[] = [
     'email',
     'name',
@@ -55,6 +56,7 @@ export default class UpdateLeadUseCaseImpl implements UpdateLeadUseCase {
   /**
    * Parse dto to data which should be used to update. This method is useful to optimize
    * the amount of data to update.
+   * @param tenantId
    * @param lead original lead object before updating
    * @param updateLeadDto data to update
    * @private
@@ -68,7 +70,9 @@ export default class UpdateLeadUseCaseImpl implements UpdateLeadUseCase {
 
     const props = Object.keys(updateLeadDto);
 
-    const { assigneeId } = updateLeadDto;
+    const {
+      assigneeId, tourTemplateId, sourceId, departure,
+    } = updateLeadDto;
 
     const now = Date.now();
 
@@ -83,17 +87,31 @@ export default class UpdateLeadUseCaseImpl implements UpdateLeadUseCase {
     dataToUpdate.lsi2 = `${UPDATED_INDEX}#${now}`;
 
     // Handle if changing assignee
-    if (assigneeId) {
-      const assignee = await userRepository.getUserAttributes(tenantId, assigneeId);
-      if (!assignee) {
-        throw new Error(`Could not found assignee with id ${assignee}`);
-      }
+    const assignee = await this.getAssignee(tenantId, assigneeId);
+    if (assignee) {
       dataToUpdate.assigneeName = `${assignee.lastName} ${assignee.firstName}`;
       dataToUpdate.lsi3 = `${STATUS_INDEX}#${LeadStatus.PROCESSING}`;
       dataToUpdate.lsi4 = `${ASSIGNEE_INDEX}#${assigneeId}`;
     }
 
-    // TODO: Fill other fields
+    // Fill tour template
+    const tourTemplate = await this.getTourTemplate(tenantId, tourTemplateId);
+    if (tourTemplate) {
+      dataToUpdate.tourTemplateName = tourTemplate.name;
+      dataToUpdate.type = tourTemplate.type;
+    }
+
+    // Fill source
+    if (sourceId) {
+      const source = await this.getSource(tenantId, sourceId);
+      dataToUpdate.sourceName = source.name;
+    }
+
+    // Fill location
+    if (departure) {
+      const location = await this.getTourLocation(tenantId, departure);
+      dataToUpdate.departureName = location.name;
+    }
 
     return dataToUpdate;
   }

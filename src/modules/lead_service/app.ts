@@ -18,7 +18,7 @@ import validate, {
   cancelLeadValidator,
   changeLeadAssigneeValidator,
   changeLeadStatusValidator,
-  createUpdateLeadValidator,
+  createLeadValidator,
   getLeadValidator,
   updateLeadValidator,
 } from './utils/validator';
@@ -39,7 +39,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
-app.post('/leads', createUpdateLeadValidator(), async (req: Request, res: Response) => {
+app.post('/leads', createLeadValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
     const currentUser = getCurrentUserInfo(req.headers.authorization!);

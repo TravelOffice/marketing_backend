@@ -61,3 +61,7 @@ export const UPDATED_AT_INDEX = 'UPDATED_AT';
 export const CREATOR_INDEX = 'CREATOR';
 
 export const LEAD_STATUS_INDEX = 'STATUS';
+
+export const TOUR_TEMPLATE_INDEX = 'TOUR_TEMPLATE';
+
+export const TOUR_LOCATION_INDEX = 'TOUR_LOCATION';

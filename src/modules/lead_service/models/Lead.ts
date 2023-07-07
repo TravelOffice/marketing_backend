@@ -34,6 +34,7 @@ export interface Lead {
   tourType?: string,
   type: string,
   departure: string,
+  departureName: string,
   startDate: string,
   description?: string,
   numberOfAdultPassengers: number,
