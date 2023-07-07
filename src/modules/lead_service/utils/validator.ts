@@ -31,7 +31,7 @@ export default function validate(req: Request) {
   }
 }
 
-export function createUpdateLeadValidator() {
+export function createLeadValidator() {
   return [
     body('name', VALIDATE_NON_EMPTY_STRING_MSG)
       .notEmpty()
@@ -49,7 +49,7 @@ export function createUpdateLeadValidator() {
       }),
 
     body('email', VALIDATE_EMAIL_MSG)
-      .notEmpty()
+      .if(body('email').notEmpty())
       .isEmail(),
 
     body('address', VALIDATE_STRING_MSG)

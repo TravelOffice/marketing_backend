@@ -71,7 +71,6 @@ export function createCustomerValidator() {
 
     body('socialLink', VALIDATE_EMAIL_MSG)
       .if(body('socialLink').notEmpty())
-      .notEmpty()
       .isEmail(),
   ];
 }
@@ -79,44 +78,41 @@ export function createCustomerValidator() {
 export function updateCustomerValidator() {
   return [
     body('name', VALIDATE_NON_EMPTY_STRING_MSG)
-      .if(body('name').exists())
-      .notEmpty()
+      .if(body('name').notEmpty())
       .isString(),
 
     body('honorific')
-      .if(body('honorific').exists())
+      .if(body('honorific').notEmpty())
       .isIn(Object.values(HonorificType)).withMessage(`property allow only in ${Object.values(HonorificType)}`),
 
     body('birthday', VALIDATE_DATE_MSG)
-      .if(body('birthday').exists())
-      .notEmpty()
+      .if(body('birthday').notEmpty())
       .custom((value: string) => {
         const date = Date.parse(value);
         return !Number.isNaN(date);
       }),
 
     body('nationality', VALIDATE_NON_EMPTY_STRING_MSG)
-      .if(body('nationality').exists())
-      .notEmpty()
+      .if(body('nationality').notEmpty())
       .isString(),
 
     body('sex')
-      .if(body('sex').exists())
+      .if(body('sex').notEmpty())
       .isIn(Object.values(SexType)).withMessage(`property allow only in ${Object.values(SexType)}`),
 
     body('maritalStatus')
-      .if(body('maritalStatus').exists())
+      .if(body('maritalStatus').notEmpty())
       .isIn(Object.values(MaritalStatus)).withMessage(`property allow only in ${Object.values(MaritalStatus)}`),
 
     body('primaryPhoneNumber', VALIDATE_PHONE_MSG)
-      .if(body('primaryPhoneNumber').exists())
+      .if(body('primaryPhoneNumber').notEmpty())
       .custom((value: string) => {
         const regex = /^(0)(\d){9,10}$/;
         return value.match(regex);
       }),
 
     body('otherPhoneNumbers', VALIDATE_PHONE_ARRAY_MSG)
-      .if(body('otherPhoneNumbers').exists())
+      .if(body('otherPhoneNumbers').notEmpty())
       .custom((value: Array<string>) => {
         if (!Array.isArray(value)) return false;
         const regex = /^(0)(\d){9,10}$/;
@@ -124,81 +120,69 @@ export function updateCustomerValidator() {
       }),
 
     body('email', VALIDATE_NON_EMPTY_STRING_MSG)
-      .if(body('email').exists())
-      .notEmpty()
+      .if(body('email').notEmpty())
       .isEmail(),
 
-    body('contry', VALIDATE_NON_EMPTY_STRING_MSG)
-      .if(body('contry').exists())
-      .notEmpty()
+    body('country', VALIDATE_NON_EMPTY_STRING_MSG)
+      .if(body('country').notEmpty())
       .isString(),
 
     body('province', VALIDATE_NON_EMPTY_STRING_MSG)
-      .if(body('province').exists())
-      .notEmpty()
+      .if(body('province').notEmpty())
       .isString(),
 
     body('province', VALIDATE_NON_EMPTY_STRING_MSG)
-      .if(body('province').exists())
-      .notEmpty()
+      .if(body('province').notEmpty())
       .isString(),
 
     body('district', VALIDATE_NON_EMPTY_STRING_MSG)
-      .if(body('district').exists())
-      .notEmpty()
+      .if(body('district').notEmpty())
       .isString(),
 
     body('ward', VALIDATE_NON_EMPTY_STRING_MSG)
-      .if(body('ward').exists())
-      .notEmpty()
+      .if(body('ward').notEmpty())
       .isString(),
 
     body('address', VALIDATE_NON_EMPTY_STRING_MSG)
-      .if(body('address').exists())
-      .notEmpty()
+      .if(body('address').notEmpty())
       .isString(),
 
     body('tags', VALIDATE_STRING_ARRAY_MSG)
-      .if(body('tags').exists())
+      .if(body('tags').notEmpty())
       .custom((value: Array<string>) => {
         if (!Array.isArray(value)) return false;
         return value.every((item: string) => typeof item === 'string' && item.length > 0);
       }),
     body('source')
-      .if(body('source').exists())
+      .if(body('source').notEmpty())
       .isIn(Object.values(SourceType)).withMessage(`property allow only in ${Object.values(SourceType)}`),
 
     body('assigneeId', VALIDATE_NON_EMPTY_STRING_MSG)
-      .if(body('address').exists())
-      .notEmpty()
+      .if(body('address').notEmpty())
       .isString(),
 
     body('interest', VALIDATE_NON_EMPTY_STRING_MSG)
-      .if(body('interest').exists())
-      .notEmpty()
+      .if(body('interest').notEmpty())
       .isString(),
 
     body('group', VALIDATE_NON_EMPTY_STRING_MSG)
-      .if(body('group').exists())
-      .notEmpty()
+      .if(body('group').notEmpty())
       .isString(),
 
     body('genitive', VALIDATE_NON_EMPTY_STRING_MSG)
-      .if(body('genitive').exists())
-      .notEmpty()
+      .if(body('genitive').notEmpty())
       .isString(),
 
     body('taxCode', VALIDATE_NON_EMPTY_STRING_MSG)
-      .if(body('taxCode').exists())
-      .notEmpty()
+      .if(body('taxCode').notEmpty())
       .isString(),
 
     body('level')
-      .if(body('level').exists())
+      .if(body('level').notEmpty())
       .isIn(Object.values(CustomerLevel)).withMessage(`property allow only in ${Object.values(CustomerLevel)}`),
 
     body('socialLink', VALIDATE_URL_MSG)
-      .if(body('socialLink').exists())
+      .if(body('socialLink').notEmpty())
       .isURL(),
   ];
 }
