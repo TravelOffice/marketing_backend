@@ -2,9 +2,7 @@ import { helper } from 'core';
 import { CreateLeadUseCase } from './interfaces/CreateLeadUseCase';
 import { CreateLeadDto } from '../dto/CreateLeadDto';
 import { Lead, LeadStatus } from '../models/Lead';
-import {
-  customerRepository, leadRepository,
-} from '../repositories';
+import { customerRepository, leadRepository } from '../repositories';
 import { CognitoUser } from '../models/User';
 import {
   ASSIGNEE_INDEX,
@@ -103,7 +101,7 @@ export default class CreateLeadUseCaseImpl extends BaseRepositoryImpl implements
       lsi2: `${UPDATED_AT_INDEX}#${now.toString()}`,
       lsi3: `${LEAD_STATUS_INDEX}#${status}`,
       lsi4: `${ASSIGNEE_INDEX}#${assigneeId || NONE_VALUE}`,
-      lsi5: `${CUSTOMER_INDEX}#${customer.code}}`,
+      lsi5: `${CUSTOMER_INDEX}#${customer.code}`,
       ...createLeadDto,
       creatorId: username,
       creatorName: name,
