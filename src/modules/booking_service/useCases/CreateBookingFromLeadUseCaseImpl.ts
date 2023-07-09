@@ -62,9 +62,9 @@ export default class CreateBookingFromLeadUseCaseImpl implements CreateBookingFr
     const assigneeName = (firstName && lastName) ? `${firstName} ${lastName}` : saleUsername;
 
     let customer = await customerRepository.findOneByPhone(tenant, phone);
+    const creatorId = username;
+    const creatorName = name;
     if (!customer) {
-      const creatorId = username;
-      const creatorName = name;
       const code = await customerRepository.generateCode(tenant);
       customer = await customerRepository.create(tenant, {
         code,
@@ -115,6 +115,13 @@ export default class CreateBookingFromLeadUseCaseImpl implements CreateBookingFr
       lsi3: `${BOOKING_STATUS_INDEX}#${status}`, // <status>,
       lsi5: `${CUSTOMER_INDEX}#${customerId}`, // <customer_code>
     };
-    return bookingRepository.create(tenant, newBooking);
+    const createdBooking = await bookingRepository.create(tenant, newBooking);
+    await customerRepository.updateLatestBooking(tenant, customerId, {
+      id: code,
+      creatorId,
+      creatorName,
+      createdAt: now,
+    });
+    return createdBooking;
   };
 }

@@ -1,4 +1,4 @@
-import { Customer } from '../../models/Customer';
+import { Customer, LatestBooking } from '../../models/Customer';
 
 export interface CustomerRepository {
   get: (tenantId: string, customerId: string) => Promise<Customer>,
@@ -6,4 +6,5 @@ export interface CustomerRepository {
   create: (tenant: string, customer: Customer) => Promise<Customer>,
   generateCode: (tenant: string) => Promise<string>,
   updateRevenue: (tenant: string, customerId: string, bookingRevenue: number) => Promise<void>
+  updateLatestBooking: (tenant: string, customerId: string, booking: LatestBooking) => Promise<void>
 }
