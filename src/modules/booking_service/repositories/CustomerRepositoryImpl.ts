@@ -6,7 +6,7 @@ import {
   CUSTOMER_COUNTER_INDEX, CUSTOMER_INDEX, PHONE_INDEX, TENANT_INDEX,
 } from '../utils/constants';
 import { CustomerRepository } from './interfaces/CustomerRepository';
-import { Customer } from '../models/Customer';
+import { Customer, LatestBooking } from '../models/Customer';
 import logger from '../utils/logger';
 
 export default class CustomerRepositoryImpl implements CustomerRepository {
@@ -131,6 +131,42 @@ export default class CustomerRepositoryImpl implements CustomerRepository {
       ExpressionAttributeValues: {
         ':start': 0,
         ':bookingRevenue': bookingRevenue, // Value for the booking revenue
+        ':updatedAt': Date.now(), // Value for the updatedAt timestamp
+      },
+      ReturnValues: 'UPDATED_NEW', // Specify to return the updated attributes
+    };
+
+    // Perform the update operation
+    await dynamoProvider.rawUpdateItem(updateParams);
+  };
+
+  /**
+   * Updates the latest booking information for a customer.
+   *
+   * @param {string} tenant - The ID of the tenant.
+   * @param {string} customerId - The ID of the customer.
+   * @param {LatestBooking} booking - The latest booking information to be updated.
+   */
+  updateLatestBooking = async (tenant: string, customerId: string, booking: LatestBooking) => {
+    logger.log('Update revenue process started.');
+
+    // Retrieve the name of the DynamoDB table
+    const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+
+    // Construct the partition key and sort key for the customer
+    const pk = `${TENANT_INDEX}#${tenant}#${CUSTOMER_INDEX}`;
+    const sk = customerId;
+
+    // Set the update parameters to update the latest booking and the updatedAt timestamp
+    const updateParams: UpdateItemInput = {
+      TableName: travelTable, // Name of the DynamoDB table
+      Key: {
+        pk, // Partition key value
+        sk, // Sort key value
+      },
+      UpdateExpression: 'SET latestBooking = :booking, updatedAt = :updatedAt', // Update expression
+      ExpressionAttributeValues: {
+        ':booking': booking, // Value for the booking information
         ':updatedAt': Date.now(), // Value for the updatedAt timestamp
       },
       ReturnValues: 'UPDATED_NEW', // Specify to return the updated attributes

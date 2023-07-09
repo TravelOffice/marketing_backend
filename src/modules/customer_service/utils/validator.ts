@@ -92,10 +92,6 @@ export function updateCustomerValidator() {
         return !Number.isNaN(date);
       }),
 
-    body('nationality', VALIDATE_NON_EMPTY_STRING_MSG)
-      .if(body('nationality').notEmpty())
-      .isString(),
-
     body('sex')
       .if(body('sex').notEmpty())
       .isIn(Object.values(SexType)).withMessage(`property allow only in ${Object.values(SexType)}`),
@@ -122,26 +118,6 @@ export function updateCustomerValidator() {
     body('email', VALIDATE_NON_EMPTY_STRING_MSG)
       .if(body('email').notEmpty())
       .isEmail(),
-
-    body('country', VALIDATE_NON_EMPTY_STRING_MSG)
-      .if(body('country').notEmpty())
-      .isString(),
-
-    body('province', VALIDATE_NON_EMPTY_STRING_MSG)
-      .if(body('province').notEmpty())
-      .isString(),
-
-    body('province', VALIDATE_NON_EMPTY_STRING_MSG)
-      .if(body('province').notEmpty())
-      .isString(),
-
-    body('district', VALIDATE_NON_EMPTY_STRING_MSG)
-      .if(body('district').notEmpty())
-      .isString(),
-
-    body('ward', VALIDATE_NON_EMPTY_STRING_MSG)
-      .if(body('ward').notEmpty())
-      .isString(),
 
     body('address', VALIDATE_NON_EMPTY_STRING_MSG)
       .if(body('address').notEmpty())

@@ -32,9 +32,9 @@ export default class CreateBookingUseCaseImpl implements CreateBookingUseCase {
       email, phone, honorific, fullName, address,
     } = newBookingInput.customer;
     let customer = await customerRepository.findOneByPhone(tenant, phone);
+    const creatorId = username;
+    const creatorName = name;
     if (!customer) {
-      const creatorId = username;
-      const creatorName = name;
       const assigneeId = username;
       const assigneeName = name;
       const code = await customerRepository.generateCode(tenant);
@@ -92,6 +92,13 @@ export default class CreateBookingUseCaseImpl implements CreateBookingUseCase {
       lsi3: `${BOOKING_STATUS_INDEX}#${status}`, // <status>,
       lsi5: `${CUSTOMER_INDEX}#${customerId}`, // <customer_code>
     };
-    return bookingRepository.create(tenant, newBooking);
+    const createdBooking = await bookingRepository.create(tenant, newBooking);
+    await customerRepository.updateLatestBooking(tenant, customerId, {
+      id: code,
+      creatorId,
+      creatorName,
+      createdAt: now,
+    });
+    return createdBooking;
   };
 }

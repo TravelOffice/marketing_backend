@@ -1,8 +1,6 @@
 import { helper } from 'core';
 import { customerRepository, userRepository } from '../repositories';
-import {
-  ASSIGNEE_INDEX, UPDATED_AT_INDEX,
-} from '../utils/constants';
+import { ASSIGNEE_INDEX, UPDATED_AT_INDEX } from '../utils/constants';
 import { UpdateCustomerUseCase } from './interfaces/UpdateCustomerUseCase';
 import { UpdateCustomerDto } from '../dto/UpdateCustomerDto';
 import { Customer } from '../models/Customer';
@@ -11,16 +9,11 @@ export default class UpdateCustomerUseCaseImpl implements UpdateCustomerUseCase 
   allowedUpdatingKeys: (keyof UpdateCustomerDto)[] = [
     'name',
     'honorific',
-    'nationality',
     'sex',
     'maritalStatus',
     'primaryPhoneNumber',
     'otherPhoneNumbers',
     'email',
-    'country',
-    'province',
-    'district',
-    'ward',
     'address',
     'tags',
     'assigneeId',

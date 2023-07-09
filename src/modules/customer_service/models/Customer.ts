@@ -40,21 +40,24 @@ export enum CustomerType {
   BUSSINESS = 'BUSSINESS'
 }
 
+// Save latest booking information into customer record
+export interface LatestBooking {
+  id: string,
+  creatorId: string,
+  creatorName: string,
+  createdAt: number,
+}
+
 interface DdbCustomerModel extends BaseDdbModel {
   code: string,
   name: string,
   honorific: HonorificType,
   birthday?: string,
-  nationality?: string,
   sex?: SexType,
   maritalStatus?: MaritalStatus,
   primaryPhoneNumber: string,
   otherPhoneNumbers?: Array<string>,
   email: string,
-  country?: string,
-  province?: string,
-  district?: string,
-  ward?: string,
   address: string,
   tags?: Array<string>,
   source: SourceType,
@@ -71,6 +74,7 @@ interface DdbCustomerModel extends BaseDdbModel {
   level: CustomerLevel,
   socialLink?: string,
   revenue?: number,
+  latestBooking?: LatestBooking,
 }
 
 export type Customer = Omit<DdbCustomerModel, 'pk' | 'sk'>;
