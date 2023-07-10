@@ -1,12 +1,12 @@
 import AWS from 'aws';
 import { getAwsSecretValue } from 'get-env';
 import { dynamoProvider, helper } from 'core';
-import logger from 'core/utils/logger';
 import { TourLocation } from '../models/TourLocation';
 import { TourLocationRepository } from './interfaces/TourLocationRepository';
 import {
   CREATED_AT_INDEX, TENANT_INDEX, TOUR_LOCATION_COUNTER_INDEX, TOUR_LOCATION_INDEX,
 } from '../utils/constants';
+import logger from '../utils/logger';
 
 type QueryInput = AWS.DynamoDB.DocumentClient.QueryInput;
 

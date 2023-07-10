@@ -1,8 +1,8 @@
-import logger from 'core/utils/logger';
 import { helper } from 'core';
 import { PaymentVoucher } from '../models/PaymentVoucher';
 import { paymentVoucherRepository } from '../repositories';
 import { GetPaymentVoucherUseCase } from './interfaces/GetPaymentVoucherUseCase';
+import logger from '../utils/logger';
 
 export default class GetPaymentVoucherUseCaseImpl implements GetPaymentVoucherUseCase {
   invoke = async (tenantId: string, id: string) => {

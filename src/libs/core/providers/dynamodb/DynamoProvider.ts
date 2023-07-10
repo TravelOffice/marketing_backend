@@ -1,7 +1,6 @@
 import AWS from 'aws';
 import { getEnv } from 'get-env';
 import { UPDATE_SET_EXPRESSION } from '../../utils';
-import logger from '../../utils/logger';
 
 export type PutItemInput = AWS.DynamoDB.DocumentClient.PutItemInput;
 export type GetItemInput = AWS.DynamoDB.DocumentClient.GetItemInput;
@@ -10,7 +9,6 @@ export type QueryInput = AWS.DynamoDB.DocumentClient.QueryInput;
 export type DeleteItemInput = AWS.DynamoDB.DocumentClient.DeleteItemInput;
 export type BatchGetItemInput = AWS.DynamoDB.DocumentClient.BatchGetItemInput;
 export type KeyList = AWS.DynamoDB.DocumentClient.KeyList;
-
 
 const dynamoDB: AWS.DynamoDB.DocumentClient = new AWS.DynamoDB.DocumentClient({ region: getEnv('AWS_REGION') });
 
@@ -116,9 +114,6 @@ export default class DynamoProvider {
       ExpressionAttributeValues: expressionAttributeValues,
       ReturnValues: 'ALL_NEW',
     };
-
-    logger.log(`Updating new DynamoDB item with parameters ${JSON.stringify(params, null, 3)}`);
-
     return dynamoDB.update(params).promise();
   };
 
@@ -152,5 +147,5 @@ export default class DynamoProvider {
     // TODO: See docs https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_BatchGetItem.html for limitations
     const { Responses: tableItems = [] } = await dynamoDB.batchGet(batchGetInput).promise();
     return tableItems as AWS.DynamoDB.DocumentClient.BatchGetResponseMap;
-  }
+  };
 }

@@ -1,8 +1,8 @@
 import { helper } from 'core';
-import logger from 'core/utils/logger';
 import { TourLocation } from '../models/TourLocation';
 import { tourLocationRepository } from '../repositories';
 import { GetTourLocationUseCase } from './interfaces/GetTourLocationUseCase';
+import logger from '../utils/logger';
 
 export default class GetTourLocationUseCaseImpl implements GetTourLocationUseCase {
   invoke = async (tenantId: string, id: string) => {

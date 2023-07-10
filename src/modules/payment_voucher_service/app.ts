@@ -2,7 +2,6 @@ import cors from 'cors';
 import express, { NextFunction, Request, Response } from 'express';
 import compression from 'compression';
 import { getCurrentUserInfo } from 'decode-token';
-import logger from 'core/utils/logger';
 import {
   createPaymentVoucherUseCase,
   deletePaymentVoucherUseCase,
@@ -14,6 +13,7 @@ import wrapResponse from './utils/wrapResponse';
 import { FAILED, SUCCESS } from './utils/constants';
 import { CognitoUser } from './models/CognitoUser';
 import { createPaymentVoucherValidator } from './utils/validator';
+import logger from './utils/logger';
 
 // Create an instance of the Express application
 const app = express();
