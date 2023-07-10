@@ -18,5 +18,6 @@ export type UpdateCustomerDto = Pick<Customer,
   'genitive' |
   'taxCode' |
   'level' |
-  'socialLink'
+  'socialLink' |
+  'sourceId'
 >

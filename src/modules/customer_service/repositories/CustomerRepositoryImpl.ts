@@ -13,6 +13,7 @@ import {
 } from '../utils/constants';
 import { CustomerRepository } from './interfaces/CustomerRepository';
 import logger from '../utils/logger';
+import { User } from '../models/User';
 
 type UpdateItemInput = AWS.DynamoDB.DocumentClient.UpdateItemInput;
 type QueryInput = AWS.DynamoDB.DocumentClient.QueryInput;
@@ -172,14 +173,15 @@ export default class CustomerRepositoryImpl implements CustomerRepository {
     throw new Error('Method not implemented');
   };
 
-  changeAssignee = async (tenantId: string, customerId: string, assignee: string) => {
+  changeAssignee = async (tenantId: string, customerId: string, assignee: User) => {
     const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
     const pk = `${TENANT_INDEX}#${tenantId}#${CUSTOMER_INDEX}`;
     const sk = `${customerId}`;
-    const updateExpression = 'SET assignee = :assignee, lsi2 = :assigneeLsi, updatedAt = :updatedAt';
+    const updateExpression = 'SET assigneeId = :assigneeId, assigneeName = :assigneeName, lsi2 = :assigneeLsi, updatedAt = :updatedAt';
     const expressionAttributeValues = {
-      ':assignee': assignee,
-      ':assigneeLsi': `${CUSTOMER_INDEX}#${ASSIGNEE_INDEX}#${assignee}`,
+      ':assigneeId': assignee.username,
+      ':asigneeName': `${assignee.firstName} ${assignee.lastName}`,
+      ':assigneeLsi': `${ASSIGNEE_INDEX}#${assignee}`,
       ':updatedAt': Date.now(),
     };
     const rs = await dynamoProvider.updateItem(

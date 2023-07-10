@@ -7,7 +7,6 @@ import {
   SexType,
   HonorificType,
   MaritalStatus,
-  SourceType,
 } from '../models/Customer';
 import {
   VALIDATE_DATE_MSG,
@@ -129,9 +128,10 @@ export function updateCustomerValidator() {
         if (!Array.isArray(value)) return false;
         return value.every((item: string) => typeof item === 'string' && item.length > 0);
       }),
-    body('source')
-      .if(body('source').notEmpty())
-      .isIn(Object.values(SourceType)).withMessage(`property allow only in ${Object.values(SourceType)}`),
+
+    body('sourceId', VALIDATE_NON_EMPTY_STRING_MSG)
+      .if(body('sourceId').notEmpty())
+      .isString(),
 
     body('assigneeId', VALIDATE_NON_EMPTY_STRING_MSG)
       .if(body('address').notEmpty())

@@ -8,10 +8,12 @@ import {
   ASSIGNEE_INDEX,
   LEAD_COUNTER_INDEX,
   LEAD_INDEX,
+  STATUS_INDEX,
   TENANT_INDEX,
 } from '../utils/constants';
 import logger from '../utils/logger';
 import { LeadRepository } from './interfaces/LeadRepository';
+import { User } from '../models/User';
 
 type UpdateItemInput = AWS.DynamoDB.DocumentClient.UpdateItemInput;
 type QueryInput = AWS.DynamoDB.DocumentClient.QueryInput;
@@ -91,7 +93,7 @@ export default class LeadRepositoryImpl implements LeadRepository {
     throw new Error('Method not implemented');
   };
 
-  changeAssignee = async (tenantId: string, leadId: string, assignee: string) => {
+  changeAssignee = async (tenantId: string, leadId: string, assignee: User) => {
     const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
     const pk = `${TENANT_INDEX}#${tenantId}#${LEAD_INDEX}`;
     const sk = `${leadId}`;
@@ -101,10 +103,11 @@ export default class LeadRepositoryImpl implements LeadRepository {
         pk,
         sk,
       },
-      UpdateExpression: 'SET assignee = :assignee, lsi4 = :assigneeLsi, updatedAt = :updatedAt',
+      UpdateExpression: 'SET assigneeId = :assigneeId, assigneeName = :asigneeName, lsi4 = :assigneeLsi, updatedAt = :updatedAt',
       ExpressionAttributeValues: {
-        ':assignee': assignee,
-        ':assigneeLsi': `${ASSIGNEE_INDEX}#${assignee}`,
+        ':assigneeId': assignee.username,
+        ':asigneeName': `${assignee.firstName} ${assignee.lastName}`,
+        ':assigneeLsi': `${ASSIGNEE_INDEX}#${assignee.username}`,
         ':updatedAt': Date.now(),
       },
       ReturnValues: 'UPDATED_NEW',
@@ -133,7 +136,7 @@ export default class LeadRepositoryImpl implements LeadRepository {
       UpdateExpression: 'SET leadStatus = :status, lsi3 = :statusLsi, updatedAt = :updatedAt',
       ExpressionAttributeValues: {
         ':status': status,
-        ':statusLsi': status,
+        ':statusLsi': `${STATUS_INDEX}#${status}`,
         ':updatedAt': Date.now(),
       },
       ReturnValues: 'UPDATED_NEW',
@@ -176,7 +179,7 @@ export default class LeadRepositoryImpl implements LeadRepository {
         UpdateExpression: 'SET leadStatus = :status, lsi1 = :statusLsi, reason = :reason, updatedAt = :updatedAt',
         ExpressionAttributeValues: {
           ':status': LeadStatus.CANCEL,
-          ':statusLsi': LeadStatus.CANCEL,
+          ':statusLsi': `${STATUS_INDEX}#${LeadStatus.CANCEL}`,
           ':reason': reason,
           ':updatedAt': Date.now(),
         },
