@@ -23,7 +23,7 @@ export default class BookingRepositoryImpl implements BookingRepository {
     const queryParameters = {
       TableName: await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'), // Name of the DynamoDB table
       IndexName: 'Index5', // Name of the index to query
-      KeyConditionExpression: 'pk = :pk AND begins_with(lsi5, :lsi5)', // Key condition expression for the query
+      KeyConditionExpression: 'pk = :pk AND lsi5 = :lsi5', // Key condition expression for the query
       ExpressionAttributeValues: {
         ':pk': `${TENANT_INDEX}#${tenantId}#${BOOKING_INDEX}`, // Value for the partition key
         ':lsi5': `${CUSTOMER_INDEX}#${customerId}`, // Value for the sort key prefix
