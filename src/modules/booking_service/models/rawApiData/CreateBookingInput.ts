@@ -17,5 +17,7 @@ export interface CreateBookingInput {
   // Expected begin date of trip
   departureDate: string,
   // Reference to Sale model, each Sale is identified by pk+sk pair
-  assigneeId: string
+  assigneeId: string,
+  // Reference to source model
+  sourceId: string,
 }

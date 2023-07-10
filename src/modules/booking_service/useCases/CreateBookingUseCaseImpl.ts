@@ -1,7 +1,9 @@
-import { CustomerLevel, SourceType } from '../models/Customer';
+import { CustomerLevel } from '../models/Customer';
 import { Booking, BookingStatus } from '../models/booking/Booking';
 import { CreateBookingInput } from '../models/rawApiData/CreateBookingInput';
-import { bookingRepository, customerRepository, tourTemplateRepository } from '../repositories';
+import {
+  bookingRepository, customerRepository, sourceRepository, tourTemplateRepository,
+} from '../repositories';
 import {
   ASSIGNEE_INDEX,
   BOOKING_STATUS_INDEX,
@@ -31,6 +33,24 @@ export default class CreateBookingUseCaseImpl implements CreateBookingUseCase {
     const {
       email, phone, honorific, fullName, address,
     } = newBookingInput.customer;
+
+    const {
+      tourType, tourTemplateId, departureDate, sourceId,
+    } = newBookingInput;
+
+    // Verify source
+    const source = await sourceRepository.get(tenant, sourceId);
+    if (!source) {
+      throw new Error(`Source with id ${sourceId} of tenant ${tenant} not found`);
+    }
+    const sourceName = source.name;
+
+    // Verify tour template
+    const tourTemplate = await tourTemplateRepository.get(tenant, tourTemplateId);
+    if (!tourTemplate) {
+      throw new Error(`Tour template with id ${tourTemplateId} of tenant ${tenant} not found.`);
+    }
+
     let customer = await customerRepository.findOneByPhone(tenant, phone);
     const creatorId = username;
     const creatorName = name;
@@ -45,7 +65,6 @@ export default class CreateBookingUseCaseImpl implements CreateBookingUseCase {
         honorific,
         name: fullName,
         primaryPhoneNumber: phone,
-        source: SourceType.OTHER,
         level: CustomerLevel.STANDARD,
         createdAt: now,
         updatedAt: now,
@@ -53,6 +72,8 @@ export default class CreateBookingUseCaseImpl implements CreateBookingUseCase {
         creatorName,
         assigneeId,
         assigneeName,
+        sourceId,
+        sourceName,
         lsi1: `${CREATED_AT_INDEX}#${now}`, // createdAt lsi
         lsi2: `${UPDATED_AT_INDEX}#${now}`, // updatedAt lsi
         lsi3: `${PHONE_INDEX}#${phone}`, // primaryPhoneNumber lsi
@@ -65,13 +86,6 @@ export default class CreateBookingUseCaseImpl implements CreateBookingUseCase {
     // Prepare booking information for storing to database
     // such as: Tour template, tour type, departure date, assignee, source, note
     const customerId = customer!.code;
-    const { tourType, tourTemplateId, departureDate } = newBookingInput;
-
-    // Verify tour template
-    const tourTemplate = await tourTemplateRepository.get(tenant, tourTemplateId);
-    if (!tourTemplate) {
-      throw new Error(`Tour template with id ${tourTemplateId} of tenant ${tenant} not found.`);
-    }
 
     // Prepare and save booking to database
     const customerInfo = { email, phone };
@@ -89,6 +103,8 @@ export default class CreateBookingUseCaseImpl implements CreateBookingUseCase {
       services: [],
       tourTemplateId,
       departureDate,
+      sourceId,
+      sourceName,
       lsi3: `${BOOKING_STATUS_INDEX}#${status}`, // <status>,
       lsi5: `${CUSTOMER_INDEX}#${customerId}`, // <customer_code>
     };
