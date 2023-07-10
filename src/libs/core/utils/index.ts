@@ -13,5 +13,4 @@ export const {
   helper,
 } = utils;
 
-export * from './logger';
 export * from './constants';

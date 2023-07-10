@@ -2,7 +2,6 @@ import cors from 'cors';
 import express, { Request, Response, NextFunction } from 'express';
 import compression from 'compression';
 import { getCurrentUserInfo } from 'decode-token';
-import logger from 'core/utils/logger';
 import {
   createTourLocationUseCase,
   deleteTourLocationUseCase,
@@ -13,6 +12,7 @@ import {
 import wrapResponse from './utils/wrapResponse';
 import { FAILED, SUCCESS } from './utils/constants';
 import validate, { createUpdateTourLocationValidator } from './utils/validator';
+import logger from './utils/logger';
 
 // Create an instance of the Express application
 const app = express();

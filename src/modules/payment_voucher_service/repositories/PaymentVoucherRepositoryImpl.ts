@@ -1,10 +1,10 @@
 import AWS from 'aws';
 import { getAwsSecretValue } from 'get-env';
 import { dynamoProvider, helper } from 'core';
-import logger from 'core/utils/logger';
 import { PaymentVoucher } from '../models/PaymentVoucher';
 import { CREATED_AT_INDEX, PAYMENT_VOUCHER_INDEX, TENANT_INDEX } from '../utils/constants';
 import { PaymentVoucherRepository } from './interfaces/PaymentVoucherRepository';
+import logger from '../utils/logger';
 
 type QueryInput = AWS.DynamoDB.DocumentClient.QueryInput;
 

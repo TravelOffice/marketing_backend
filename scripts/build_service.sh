@@ -53,6 +53,11 @@ fi
 rm -rf ${SERVICE_DIR}/node_modules
 echo "Install production dependencies"
 yarn install --production
+
+echo "Clean dependencies resource"
+cd ${CUR_DIR}
+./scripts/build_dependencies.sh --production
+
 echo "Finished installing production"
 LAYER_DIR=${CUR_DIR}/src/layers/${SERVICENAME}/nodejs
 mkdir -p ${LAYER_DIR}
