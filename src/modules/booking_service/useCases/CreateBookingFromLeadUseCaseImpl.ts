@@ -1,4 +1,4 @@
-import { CustomerLevel, SourceType } from '../models/Customer';
+import { CustomerLevel } from '../models/Customer';
 import { Booking, BookingStatus } from '../models/booking/Booking';
 import { CreateBookingFromLeadInput } from '../models/rawApiData/CreateBookingFromLeadInput';
 import {
@@ -42,7 +42,14 @@ export default class CreateBookingFromLeadUseCaseImpl implements CreateBookingFr
       throw new Error(`Lead with id ${leadId} of tenant ${tenant} not found.`);
     }
     const {
-      email, phoneNumber: phone, honorific, name: fullName, address, tourTemplateId,
+      email,
+      phoneNumber: phone,
+      honorific,
+      name: fullName,
+      address,
+      tourTemplateId,
+      sourceId,
+      sourceName,
     } = lead;
 
     // Verify tour template
@@ -73,7 +80,6 @@ export default class CreateBookingFromLeadUseCaseImpl implements CreateBookingFr
         honorific,
         name: fullName,
         primaryPhoneNumber: phone,
-        source: SourceType.OTHER,
         level: CustomerLevel.STANDARD,
         createdAt: now,
         updatedAt: now,
@@ -81,6 +87,8 @@ export default class CreateBookingFromLeadUseCaseImpl implements CreateBookingFr
         creatorName,
         assigneeId,
         assigneeName,
+        sourceId,
+        sourceName,
         lsi1: `${CREATED_AT_INDEX}#${now}`, // createdAt lsi
         lsi2: `${UPDATED_AT_INDEX}#${now}`, // updatedAt lsi
         lsi3: `${PHONE_INDEX}#${phone}`, // primaryPhoneNumber lsi
@@ -112,6 +120,8 @@ export default class CreateBookingFromLeadUseCaseImpl implements CreateBookingFr
       services,
       tourTemplateId,
       departureDate,
+      sourceId,
+      sourceName,
       lsi3: `${BOOKING_STATUS_INDEX}#${status}`, // <status>,
       lsi5: `${CUSTOMER_INDEX}#${customerId}`, // <customer_code>
     };

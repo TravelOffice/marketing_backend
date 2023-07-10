@@ -51,6 +51,7 @@ interface DdbBookingModel extends BaseDdbModel {
   bookingCode?: string,
   labelId?: string,
   sourceId?: string,
+  sourceName?: string,
   creatorId?: string,
   creatorName?: string,
   followerId?: string,

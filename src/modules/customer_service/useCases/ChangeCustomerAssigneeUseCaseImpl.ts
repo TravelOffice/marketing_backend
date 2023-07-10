@@ -7,8 +7,8 @@ export default class ChangeCustomerAssigneeUseCaseImpl implements ChangeCustomer
    * Invokes the change of assignee for a customer in a specific tenant.
    *
    * @param {string} tenantId - The ID of the tenant.
-   * @param {string} phone - The phone number of the customer.
-   * @param {string} assignee - The ID of the user to assign the customer to.
+   * @param {string} customerId - The phone number of the customer.
+   * @param {string} assigneeId - The ID of the user to assign the customer to.
    * @returns {Promise<Customer>} - A promise that resolves to the updated customer
    * after the assignee change.
    * @throws {Error} - If the user or customer information is invalid.
@@ -19,7 +19,7 @@ export default class ChangeCustomerAssigneeUseCaseImpl implements ChangeCustomer
 
     // Validate user information
     if (!assignee) {
-      throw new Error(`User ${assignee} does not exist!`);
+      throw new Error(`User ${assigneeId} does not exist!`);
     }
 
     logger.log('User information validated successfully.');

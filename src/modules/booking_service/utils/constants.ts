@@ -20,6 +20,8 @@ export const CUSTOMER_COUNTER_INDEX = 'CUSTOMER_COUNTER';
 
 export const PHONE_INDEX = 'PHONE';
 
+export const SOURCE_INDEX = 'SOURCE';
+
 export const CREATED_AT_INDEX = 'CREATED_AT';
 
 export const UPDATED_AT_INDEX = 'UPDATED_AT';

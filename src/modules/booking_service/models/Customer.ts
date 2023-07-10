@@ -32,15 +32,6 @@ export enum CustomerLevel {
   VVIP = 'VVIP'
 }
 
-export enum SourceType {
-  SOCIAL = 'SOCIAL',
-  WEBSITE = 'WEBSITE',
-  ADVERTISEMENT = 'ADVERTISEMENT',
-  EVENT = 'EVENT',
-  OTHER = 'OTHER',
-
-}
-
 // Save latest booking information into customer record
 export interface LatestBooking {
   id: string,
@@ -61,7 +52,8 @@ interface DdbCustomerModel extends BaseDdbModel {
   email: string,
   address: string,
   tags?: Array<string>,
-  source: SourceType,
+  sourceId?: string,
+  sourceName?: string,
   tasks?: Task[],
   notes?: Note[],
   creatorId?: string,

@@ -1,11 +1,10 @@
 import cors from 'cors';
 import { getCurrentUserInfo } from 'decode-token';
-import express, { Request, Response, NextFunction } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import compression from 'compression';
 import { logger } from 'core';
 import {
-  createSourceUseCase, deleteSourceUseCase, getSourceListUseCase, getSourceUseCase,
-  updateSourceUseCase,
+  createSourceUseCase, getSourceListUseCase, getSourceUseCase, updateSourceUseCase,
 } from './useCases';
 import wrapResponse from './utils/wrapResponse';
 import { FAILED, SUCCESS } from './utils/constants';
@@ -69,17 +68,6 @@ app.put('/sources/:id', updateSourceValidator(), async (req: Request, res: Respo
     const currentUser = getCurrentUserInfo(req.headers.authorization!);
     const source = await updateSourceUseCase.invoke(currentUser, id, req.body);
     res.json(wrapResponse(SUCCESS, source));
-  } catch (e: any) {
-    res.json(wrapResponse(FAILED, undefined, e.message));
-  }
-});
-
-app.delete('/:id', async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-    const currentUser = getCurrentUserInfo(req.headers.authorization!);
-    await deleteSourceUseCase.invoke(currentUser, id);
-    res.json(wrapResponse(SUCCESS, {}));
   } catch (e: any) {
     res.json(wrapResponse(FAILED, undefined, e.message));
   }

@@ -181,7 +181,7 @@ export default class CustomerRepositoryImpl implements CustomerRepository {
     const expressionAttributeValues = {
       ':assigneeId': assignee.username,
       ':asigneeName': `${assignee.firstName} ${assignee.lastName}`,
-      ':assigneeLsi': `${ASSIGNEE_INDEX}#${assignee}`,
+      ':assigneeLsi': `${ASSIGNEE_INDEX}#${assignee.username}`,
       ':updatedAt': Date.now(),
     };
     const rs = await dynamoProvider.updateItem(

@@ -11,7 +11,7 @@ export default class ChangeLeadAssigneeUseCaseImpl implements ChangeLeadAssignee
 
     // Validate user information
     if (!assignee) {
-      throw new Error(`User ${assignee} does not exist!`);
+      throw new Error(`User ${assigneeId} does not exist!`);
     }
 
     logger.log('User information validated successfully.');
