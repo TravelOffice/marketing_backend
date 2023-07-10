@@ -13,12 +13,12 @@ export default class ChangeCustomerAssigneeUseCaseImpl implements ChangeCustomer
    * after the assignee change.
    * @throws {Error} - If the user or customer information is invalid.
    */
-  invoke = async (tenantId: string, customerId: string, assignee: string) => {
-    // Retrieve the user attributes based on the tenantId and assignee
-    const userAttributes = await userRepository.getUserAttributes(tenantId, assignee);
+  invoke = async (tenantId: string, customerId: string, assigneeId: string) => {
+    // Retrieve the user attributes based on the tenantId and assigneeId
+    const assignee = await userRepository.getUserAttributes(tenantId, assigneeId);
 
     // Validate user information
-    if (!userAttributes) {
+    if (!assignee) {
       throw new Error(`User ${assignee} does not exist!`);
     }
 

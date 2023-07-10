@@ -1,5 +1,5 @@
 import { helper } from 'core';
-import { customerRepository, userRepository } from '../repositories';
+import { customerRepository, sourceRepository, userRepository } from '../repositories';
 import { ASSIGNEE_INDEX, UPDATED_AT_INDEX } from '../utils/constants';
 import { UpdateCustomerUseCase } from './interfaces/UpdateCustomerUseCase';
 import { UpdateCustomerDto } from '../dto/UpdateCustomerDto';
@@ -23,6 +23,7 @@ export default class UpdateCustomerUseCaseImpl implements UpdateCustomerUseCase 
     'taxCode',
     'level',
     'socialLink',
+    'sourceId',
   ];
 
   /**
@@ -63,7 +64,7 @@ export default class UpdateCustomerUseCaseImpl implements UpdateCustomerUseCase 
 
     const props = Object.keys(updateCustomerDto);
 
-    const { assigneeId } = updateCustomerDto;
+    const { assigneeId, sourceId } = updateCustomerDto;
 
     const now = Date.now();
 
@@ -87,6 +88,12 @@ export default class UpdateCustomerUseCaseImpl implements UpdateCustomerUseCase 
       dataToUpdate.lsi4 = `${ASSIGNEE_INDEX}#${assigneeId}`;
     }
 
+    // Fill source
+    if (sourceId) {
+      const source = await sourceRepository.get(tenantId, sourceId);
+      if (!source) throw new Error(`Could not found source with id ${sourceId}`);
+      dataToUpdate.sourceName = source.name;
+    }
     // TODO: Fill other fields
 
     return dataToUpdate;

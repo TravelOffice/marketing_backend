@@ -46,7 +46,7 @@ export default class CreateCustomerUseCaseImpl implements CreateCustomerUseCase 
       lsi2: `${UPDATED_AT_INDEX}#${now}`, // updatedAt lsi
       lsi3: `${PHONE_INDEX}#${customer.primaryPhoneNumber}`,
       lsi4: `${CREATOR_INDEX}#${creatorId}`,
-      lsi5: `${ASSIGNEE_INDEX}#${customer.assigneeId ?? creatorId}`,
+      lsi5: `${ASSIGNEE_INDEX}#${creatorId}`,
       createdAt: now,
       updatedAt: now,
     };

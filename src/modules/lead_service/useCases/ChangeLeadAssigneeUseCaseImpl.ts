@@ -3,14 +3,14 @@ import logger from '../utils/logger';
 import { ChangeLeadAssigneeUseCase } from './interfaces/ChangeLeadAssigneeUseCase';
 
 export default class ChangeLeadAssigneeUseCaseImpl implements ChangeLeadAssigneeUseCase {
-  invoke = async (tenantId: string, leadId: string, assignee: string) => {
-    logger.log(`Invoking status change for lead ${leadId} with assignee ${assignee}`);
+  invoke = async (tenantId: string, leadId: string, assigneeId: string) => {
+    logger.log(`Invoking status change for lead ${leadId} with assignee ${assigneeId}`);
 
     // Retrieve the user attributes based on the tenantId and userId
-    const userAttributes = await userRepository.getUserAttributes(tenantId, assignee);
+    const assignee = await userRepository.getUserAttributes(tenantId, assigneeId);
 
     // Validate user information
-    if (!userAttributes) {
+    if (!assignee) {
       throw new Error(`User ${assignee} does not exist!`);
     }
 
