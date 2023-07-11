@@ -6,4 +6,6 @@ export interface DepartureTour extends TourTemplate {
   tourTemplateCode: string,
   startDate: number,
   status: TourStatus,
+  assigneeId: string,
+  assigneeName: string,
 }

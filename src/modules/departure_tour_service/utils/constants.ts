@@ -27,3 +27,9 @@ export const CREATED_AT_INDEX = 'CREATED_AT';
 export const UPDATED_AT_INDEX = 'UPDATED_AT';
 
 export const STATUS_INDEX = 'STATUS';
+
+export const ASSIGNEE_INDEX = 'ASSIGNEE';
+
+export const EMPLOYEE_INDEX = 'EMPLOYEE';
+
+export const OPERATOR_MANAGER_ROLE = 'OPERATOR_MANAGER';

@@ -84,7 +84,7 @@ export default class DynamoProvider {
       UpdateExpression: updateExpression,
       ExpressionAttributeValues: expressionAttributeValues,
       ExpressionAttributeNames: expressionAttributeNames,
-      ReturnValues: 'UPDATED_NEW',
+      ReturnValues: 'ALL_NEW',
     };
     return dynamoDB.update(params).promise();
   };

@@ -1,8 +1,9 @@
 import cors from 'cors';
 import { getCurrentUserInfo } from 'decode-token';
-import express, { Request, Response, NextFunction } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import compression from 'compression';
 import {
+  changeAssigneeUseCase,
   createDepartureTourUseCase,
   deleteDepartureTourUseCase,
   getDepartureTourListUseCase,
@@ -96,6 +97,20 @@ app.delete('/departure-tours/:id', async (req: Request, res: Response) => {
     res.json(wrapResponse(SUCCESS, ret));
   } catch (error: any) {
     logger.log(`[${req.method}] An error occurred while deleting departure tour on route '${req.originalUrl}':`, error);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.put('/departure-tours/:id/assignee', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { tenant } = getCurrentUserInfo(req.headers.authorization!);
+    const { assigneeId } = req.body;
+    logger.log(`[${req.method}] Request received for tenant '${tenant}' on route '${req.originalUrl}'`);
+    const departureTour = await changeAssigneeUseCase.invoke(tenant, id, assigneeId);
+    res.json(wrapResponse(SUCCESS, departureTour));
+  } catch (error: any) {
+    logger.log(`[${req.method}] An error occurred while changing assignee of departure tour on route '${req.originalUrl}':`, error);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });

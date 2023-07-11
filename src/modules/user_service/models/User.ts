@@ -1,7 +1,10 @@
+import { BaseDdbModel } from 'common-models';
+
 export enum THEMES_TYPE {
   DARK = 'dark',
   LIGHT = 'light'
 }
+
 export enum LANGUAGES_TYPE {
   ENGLISH = 'en',
   VIETNAMESE = 'vi'
@@ -21,7 +24,7 @@ export enum UserStatusEnum {
   inactive = 'inactive',
 }
 
-export interface User {
+export interface User extends BaseDdbModel {
   username: string,
   firstName?: string,
   lastName?: string,
@@ -37,8 +40,6 @@ export interface User {
     language?: LANGUAGES_TYPE,
     theme?: THEMES_TYPE
   },
-  createdAt: number,
-  updatedAt: number,
   // Number of assigned chats
   nacs?: number,
   // Flag to check whether user is in waiting for response chat state

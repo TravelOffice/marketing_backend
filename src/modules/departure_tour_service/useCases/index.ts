@@ -8,6 +8,8 @@ import { GetDepartureTourListUseCase } from './interfaces/GetDepartureTourListUs
 import { GetDepartureTourUseCase } from './interfaces/GetDepartureTourUseCase';
 import { UpdateDepartureTourUseCase } from './interfaces/UpdateDepartureTourUseCase';
 import UpdateDepartureTourUseCaseImpl from './UpdateDepartureTourUseCaseImpl';
+import { ChangeAssigneeUseCase } from './interfaces/ChangeAssigneeUseCase';
+import ChangeAssigneeUseCaseImpl from './ChangeAssigneeUseCaseImpl';
 
 interface UseCases {
   getDepartureTourListUseCase: GetDepartureTourListUseCase,
@@ -15,14 +17,16 @@ interface UseCases {
   getDepartureTourUseCase: GetDepartureTourUseCase,
   updateDepartureTourUseCase: UpdateDepartureTourUseCase,
   deleteDepartureTourUseCase: DeleteDepartureTourUseCase,
+  changeAssigneeUseCase: ChangeAssigneeUseCase,
 }
 
-const useCases : UseCases = {
+const useCases: UseCases = {
   getDepartureTourListUseCase: new GetDepartureTourListUseCaseImpl(),
   createDepartureTourUseCase: new CreateDepartureTourUseCaseImpl(),
   getDepartureTourUseCase: new GetDepartureTourUseCaseImpl(),
   updateDepartureTourUseCase: new UpdateDepartureTourUseCaseImpl(),
   deleteDepartureTourUseCase: new DeleteDepartureTourUseCaseImpl(),
+  changeAssigneeUseCase: new ChangeAssigneeUseCaseImpl(),
 };
 
 export const {
@@ -31,4 +35,5 @@ export const {
   getDepartureTourUseCase,
   updateDepartureTourUseCase,
   deleteDepartureTourUseCase,
+  changeAssigneeUseCase,
 } = useCases;

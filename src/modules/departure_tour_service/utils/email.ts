@@ -1,0 +1,27 @@
+import { getEnv } from 'get-env';
+import invokeFunction from './lambda';
+import { MailTemplate } from '../models/MailTemplate';
+
+/**
+ * Send mail via notification service
+ * @param fromAddress Send from
+ * @param mailTemplate Mail Template include toAddress, ccAddresses, subject, html, text
+ * @returns
+ */
+const sendEmail = async (fromAddress: string, mailTemplate: MailTemplate) => {
+  const sendMailData = {
+    type: 'EMAIL',
+    data: {
+      fromAddress,
+      ...mailTemplate,
+    },
+  };
+  await invokeFunction({
+    FunctionName: getEnv('SEND_NOTIFICATION_SERVICE_NAME'),
+    InvocationType: 'RequestResponse',
+    LogType: 'Tail',
+    Payload: JSON.stringify(sendMailData),
+  });
+};
+
+export default sendEmail;
