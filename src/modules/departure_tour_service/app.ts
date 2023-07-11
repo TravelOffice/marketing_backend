@@ -115,4 +115,17 @@ app.put('/departure-tours/:id/assignee', async (req: Request, res: Response) => 
   }
 });
 
+app.put('/me/take-care-tour', async (req: Request, res: Response) => {
+  try {
+    const { tenant, username } = getCurrentUserInfo(req.headers.authorization!);
+    const { departureTourId } = req.body;
+    logger.log(`[${req.method}] Request received for tenant '${tenant}' on route '${req.originalUrl}'`);
+    const departureTour = await changeAssigneeUseCase.invoke(tenant, departureTourId, username);
+    res.json(wrapResponse(SUCCESS, departureTour));
+  } catch (error: any) {
+    logger.log(`[${req.method}] An error occurred while taking care departure tour on route '${req.originalUrl}':`, error);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
 export default app;
