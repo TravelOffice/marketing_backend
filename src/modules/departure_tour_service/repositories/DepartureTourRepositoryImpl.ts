@@ -3,10 +3,15 @@ import { getAwsSecretValue } from 'get-env';
 import { dynamoProvider, helper } from 'core';
 import { DepartureTour } from '../models/DepartureTour';
 import {
-  CREATED_AT_INDEX, DEPARTURE_TOUR_COUNTER_INDEX, DEPARTURE_TOUR_INDEX, TENANT_INDEX,
+  ASSIGNEE_INDEX,
+  CREATED_AT_INDEX,
+  DEPARTURE_TOUR_COUNTER_INDEX,
+  DEPARTURE_TOUR_INDEX,
+  TENANT_INDEX,
 } from '../utils/constants';
 import logger from '../utils/logger';
 import { DepartureTourRepository } from './interfaces/DepartureTourRepository';
+import { User } from '../models/User';
 
 type QueryInput = AWS.DynamoDB.DocumentClient.QueryInput;
 
@@ -147,5 +152,33 @@ export default class DepartureTourRepositoryImpl implements DepartureTourReposit
     logger.log(`DepartureTour deleted successfully for tenant ${tenantId}`);
 
     return departureTourId;
+  };
+
+  /**
+   * Change the assignee of the departure tour
+   * @param tenantId The ID of the tanent
+   * @param departureTourId The ID of the departure tour
+   * @param assignee The new assignee
+   * @returns The departure tour after updated
+   */
+  changeAssignee = async (tenantId: string, departureTourId: string, assignee: User) => {
+    const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const pk = `${TENANT_INDEX}#${tenantId}#${DEPARTURE_TOUR_INDEX}`;
+    const sk = `${departureTourId}`;
+    const updateExpression = 'SET assigneeId = :assigneeId, assigneeName = :assigneeName, lsi2 = :assigneeLsi, updatedAt = :updatedAt';
+    const expressionAttributeValues = {
+      ':assigneeId': assignee.username,
+      ':assigneeName': `${assignee.lastName} ${assignee.firstName}`,
+      ':assigneeLsi': `${ASSIGNEE_INDEX}#${assignee.username}`,
+      ':updatedAt': Date.now(),
+    };
+    const rs = await dynamoProvider.updateItem(
+      travelTable,
+      pk,
+      sk,
+      updateExpression,
+      expressionAttributeValues,
+    );
+    return rs.Attributes as DepartureTour;
   };
 }

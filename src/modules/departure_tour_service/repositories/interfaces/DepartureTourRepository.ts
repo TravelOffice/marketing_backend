@@ -1,4 +1,5 @@
 import { DepartureTour } from '../../models/DepartureTour';
+import { User } from '../../models/User';
 
 export interface DepartureTourRepository {
   generateDepartureTourCode: (tenantId: string) => Promise<string>
@@ -9,6 +10,11 @@ export interface DepartureTourRepository {
     tenantId: string,
     departureTourId: string,
     departureTour: DepartureTour
-    ) => Promise<DepartureTour>
+  ) => Promise<DepartureTour>
   delete: (tenantId: string, departureTourId: string) => Promise<string>
+  changeAssignee: (
+    tenantId: string,
+    departureTourId: string,
+    assignee: User,
+  ) => Promise<DepartureTour>
 }

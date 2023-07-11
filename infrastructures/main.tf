@@ -85,6 +85,15 @@ locals {
       NODE_ENV                       = var.ENV
       SECRET_MANAGER_ID              = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
       SEND_NOTIFICATION_SERVICE_NAME = "${var.ENV}-${var.FEATURE_NAME}-send_notification"
+      NO_REPLY_DEFAULT_EMAIL         = "no-reply@${local.domain_name}"
+    },
+    departure_tour_service_lambda_vars = {
+      REGION                         = var.AWS_REGION
+      NODE_ENV                       = var.ENV
+      SECRET_MANAGER_ID              = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
+      SEND_NOTIFICATION_SERVICE_NAME = "${var.ENV}-${var.FEATURE_NAME}-send_notification",
+      NO_REPLY_DEFAULT_EMAIL         = "no-reply@${local.domain_name}",
+      DEPARTURE_TOUR_URL             = "${local.domain_name}/apps/tour/departure"
     },
   }
 }
