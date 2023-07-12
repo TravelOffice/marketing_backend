@@ -13,6 +13,7 @@ import {
 import wrapResponse from './utils/wrapResponse';
 import { FAILED, SUCCESS } from './utils/constants';
 import { CognitoUser } from './models/CognitoUser';
+import validate, { createReceiptValidator, updateReceiptValidator } from './utils/validator';
 
 // Create an instance of the Express application
 const app = express();
@@ -56,9 +57,9 @@ app.get('/receipts', async (req: Request, res: Response) => {
 });
 
 // Route for handling POST requests to the root endpoint
-app.post('/receipts', async (req: Request, res: Response) => {
+app.post('/receipts', createReceiptValidator(), async (req: Request, res: Response) => {
   try {
-    // validate(req);
+    validate(req);
     const userInfo = getCurrentUserInfo(req.headers.authorization!);
     const receipt = await createReceiptUseCase.invoke(userInfo as CognitoUser, req.body);
     res.json(wrapResponse(SUCCESS, receipt));
@@ -82,9 +83,9 @@ app.get('receipts/:id', async (req: Request, res: Response) => {
 });
 
 // Route for handling PUT requests to a specific tour location endpoint
-app.put('/receipts/:id', async (req: Request, res: Response) => {
+app.put('/receipts/:id', updateReceiptValidator(), async (req: Request, res: Response) => {
   try {
-    // validate(req);
+    validate(req);
     const { id } = req.params;
     const { tenant } = getCurrentUserInfo(req.headers.authorization!);
     const receipt = await updateReceiptUseCase.invoke(tenant, id, req.body);

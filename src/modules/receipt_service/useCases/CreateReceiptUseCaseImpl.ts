@@ -22,7 +22,7 @@ export default class CreateReceiptUseCaseImpl implements CreateReceiptUseCase {
     const receiptToAdd: Receipt = {
       ...(helper.extractDataFromObject(receipt, this.allowedCreatingKeys) as Receipt),
       code,
-      receiptStatus: ReceiptStatus.OPEN,
+      status: ReceiptStatus.OPEN,
       createdAt: now,
       updatedAt: now,
       creatorId: userInfo.username,

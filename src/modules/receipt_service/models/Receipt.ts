@@ -8,7 +8,7 @@ export enum ReceiptStatus {
 export interface Receipt extends BaseDdbModel {
   code: string,
   paymentMethod: string,
-  receiptStatus: ReceiptStatus,
+  status: ReceiptStatus,
   bookingId?: string,
   customerId?: string,
   customerName?: string,
