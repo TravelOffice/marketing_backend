@@ -27,6 +27,7 @@ export default function validate(req: Request) {
 export function validateNewBookingParams() {
   return [
     body('tourTemplateId').notEmpty().isString(),
+    body('sourceId').notEmpty().isString(),
     body('tourType').notEmpty().isIn(tourTypes).withMessage(`allow only in ${tourTypes}`),
     body('departureDate').optional().custom((value: string) => {
       const date = Date.parse(value);
@@ -80,6 +81,7 @@ export function validateGetBookingFilteredParams() {
 export function validateUpdateBookingParams() {
   return [
     body('tourTemplateId').notEmpty().isString(),
+    body('sourceId').notEmpty().isString(),
     body('tourLeadId').optional().isString(),
     body('customerId').notEmpty().isString(),
     body('customer').isObject().withMessage('Customer information must not be empty'),

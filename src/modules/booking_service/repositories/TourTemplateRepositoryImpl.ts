@@ -1,5 +1,5 @@
 import { getAwsSecretValue } from 'get-env';
-import { dynamoProvider } from 'core';
+import { dynamoProvider, helper } from 'core';
 import { TourTemplate } from '../models/tour/TourTemplate';
 import { TENANT_INDEX, TOUR_TEMPLATE_INDEX } from '../utils/constants';
 import logger from '../utils/logger';
@@ -27,6 +27,6 @@ implements TourTemplateRepository {
 
     logger.log('TourTemplate retrieved:', tourTemplate);
 
-    return tourTemplate as TourTemplate;
+    return helper.excludeDataFromObject(tourTemplate) as TourTemplate;
   };
 }

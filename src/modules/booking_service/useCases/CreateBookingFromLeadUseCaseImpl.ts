@@ -122,6 +122,10 @@ export default class CreateBookingFromLeadUseCaseImpl implements CreateBookingFr
       departureDate,
       sourceId,
       sourceName,
+      creatorId,
+      creatorName,
+      assigneeId,
+      assigneeName,
       lsi3: `${BOOKING_STATUS_INDEX}#${status}`, // <status>,
       lsi5: `${CUSTOMER_INDEX}#${customerId}`, // <customer_code>
     };

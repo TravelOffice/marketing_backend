@@ -54,9 +54,9 @@ export default class CreateBookingUseCaseImpl implements CreateBookingUseCase {
     let customer = await customerRepository.findOneByPhone(tenant, phone);
     const creatorId = username;
     const creatorName = name;
+    const assigneeId = username;
+    const assigneeName = name;
     if (!customer) {
-      const assigneeId = username;
-      const assigneeName = name;
       const code = await customerRepository.generateCode(tenant);
       customer = await customerRepository.create(tenant, {
         code,
@@ -105,6 +105,10 @@ export default class CreateBookingUseCaseImpl implements CreateBookingUseCase {
       departureDate,
       sourceId,
       sourceName,
+      creatorId,
+      creatorName,
+      assigneeId,
+      assigneeName,
       lsi3: `${BOOKING_STATUS_INDEX}#${status}`, // <status>,
       lsi5: `${CUSTOMER_INDEX}#${customerId}`, // <customer_code>
     };
