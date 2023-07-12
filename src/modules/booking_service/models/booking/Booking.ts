@@ -48,6 +48,7 @@ interface DdbBookingModel extends BaseDdbModel {
   bookingStatus: BookingStatus,
   paymentStatus: BookingPaymentStatus,
   assigneeId?: string,
+  assigneeName?: string,
   canceledAt?: number,
   canceledReason?: string,
   canceledNote?: string,

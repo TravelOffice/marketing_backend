@@ -153,11 +153,12 @@ export default class BookingRepositoryImpl implements BookingRepository {
    */
   getByGivenId = async (tenant: string, bookingId: string) => {
     const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
-    return dynamoProvider.getItem(
+    const result = await dynamoProvider.getItem(
       travelTable,
       `${TENANT_INDEX}#${tenant}#${BOOKING_INDEX}`,
       bookingId,
     );
+    return helper.excludeDataFromObject(result) as Booking;
   };
 
   /**

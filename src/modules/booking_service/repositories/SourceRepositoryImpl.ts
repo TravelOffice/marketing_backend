@@ -7,10 +7,11 @@ import { Source } from '../models/Source';
 export default class SourceRepositoryImpl implements SourceRepository {
   async get(tenantId: string, sourceId: string): Promise<Source | undefined> {
     const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
-    return dynamoProvider.getItem<Source>(
+    const rs = await dynamoProvider.getItem<Source>(
       travelTable,
       `${TENANT_INDEX}#${tenantId}#${SOURCE_INDEX}`,
       sourceId,
     );
+    return rs;
   }
 }
