@@ -11,6 +11,6 @@ export interface LeadRepository {
   delete: (tenantId: string, leadId: string) => Promise<void>,
   changeAssignee: (tenantId: string, leadId: string, assginee: User) => Promise<Lead>,
   changeStatus: (tenantId: string, leadId: string, status: LeadStatus) => Promise<Lead>,
-  cancel: (tenantId: string, leadId: string, reason: string) => Promise<Lead>,
+  cancel: (tenantId: string, leadId: string, cancelledReason: string) => Promise<Lead>,
   generateLeadCode: (tenantId: string) => Promise<string>,
 }

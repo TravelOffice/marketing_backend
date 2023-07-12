@@ -150,11 +150,11 @@ export default class LeadRepositoryImpl implements LeadRepository {
    *
    * @param {string} tenantId - The ID of the tenant.
    * @param {string} leadId - The ID of the lead to cancel.
-   * @param {string} reason - The reason for cancellation.
+   * @param {string} cancelledReason - The reason for cancellation.
    * @returns {Lead} - The updated lead after cancellation.
    * @throws {Error} - If an error occurs during the cancellation process.
    */
-  cancel = async (tenantId: string, leadId: string, reason: string) => {
+  cancel = async (tenantId: string, leadId: string, cancelledReason: string) => {
     try {
       // Log the start of the cancellation process
       logger.log('Cancellation process started.');
@@ -176,11 +176,11 @@ export default class LeadRepositoryImpl implements LeadRepository {
           pk,
           sk,
         },
-        UpdateExpression: 'SET leadStatus = :status, lsi1 = :statusLsi, reason = :reason, updatedAt = :updatedAt',
+        UpdateExpression: 'SET leadStatus = :status, lsi1 = :statusLsi, cancelledReason = :cancelledReason, updatedAt = :updatedAt',
         ExpressionAttributeValues: {
           ':status': LeadStatus.CANCEL,
           ':statusLsi': `${STATUS_INDEX}#${LeadStatus.CANCEL}`,
-          ':reason': reason,
+          ':cancelledReason': cancelledReason,
           ':updatedAt': Date.now(),
         },
         ReturnValues: 'UPDATED_NEW',
