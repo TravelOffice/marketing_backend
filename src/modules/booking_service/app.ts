@@ -67,7 +67,12 @@ app.post('/bookings', validateNewBookingParams(), async (req: Request, res: Resp
   try {
     validate(req);
     const user = getCurrentUserInfo(req.headers.authorization!);
-    const createdBooking = await createBookingUseCase.invoke(user, req.body);
+    const body = {
+      creatorId: user.username,
+      creatorName: user.username,
+      ...req.body,
+    };
+    const createdBooking = await createBookingUseCase.invoke(user, body);
     res.json(wrapResponse(SUCCESS, createdBooking));
   } catch (error: any) {
     logger.log(`[app.get] Error ${error}`);
@@ -79,7 +84,12 @@ app.post('/bookings/create-from-lead', validateNewBookingFromLeadParams(), async
   try {
     validate(req);
     const user = getCurrentUserInfo(req.headers.authorization!);
-    const createdBooking = await createBookingFromLeadUseCase.invoke(user, req.body);
+    const body = {
+      creatorId: user.username,
+      creatorName: user.username,
+      ...req.body,
+    };
+    const createdBooking = await createBookingFromLeadUseCase.invoke(user, body);
     res.json(wrapResponse(SUCCESS, createdBooking));
   } catch (error: any) {
     logger.log(`[app.get] Error ${error}`);
