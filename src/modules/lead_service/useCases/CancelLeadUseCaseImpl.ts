@@ -9,11 +9,11 @@ export default class CancelLeadUseCaseImpl implements CancelLeadUseCase {
  *
  * @param {string} tenantId - The ID of the tenant.
  * @param {string} leadId - The ID of the lead to cancel.
- * @param {string} reason - The reason for the cancellation.
+ * @param {string} cancelledReason - The reason for the cancellation.
  * @returns {Promise<Lead>} - A promise that resolves to the canceled lead.
  * @throws {Error} - If the user or lead information is invalid or the cancellation is not allowed.
  */
-  invoke = async (tenantId: string, leadId: string, reason: string) => {
+  invoke = async (tenantId: string, leadId: string, cancelledReason: string) => {
     // Retrieve the lead based on the tenantId and leadId
     const lead = await leadRepository.getById(tenantId, leadId);
 
@@ -28,8 +28,8 @@ export default class CancelLeadUseCaseImpl implements CancelLeadUseCase {
     }
 
     // Cancel the lead
-    logger.log(`[CancelleadUseCaseImpl]: Lead ${leadId} was canceled with the reason '${reason}'`);
+    logger.log(`[CancelleadUseCaseImpl]: Lead ${leadId} was canceled with the reason '${cancelledReason}'`);
     // TODO: notification
-    return leadRepository.cancel(tenantId, leadId, reason);
+    return leadRepository.cancel(tenantId, leadId, cancelledReason);
   };
 }

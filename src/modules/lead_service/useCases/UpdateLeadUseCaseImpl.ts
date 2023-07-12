@@ -28,6 +28,11 @@ export default class UpdateLeadUseCaseImpl extends BaseRepositoryImpl implements
     'tourType',
   ];
 
+  disallowedUpdateStatus = [
+    LeadStatus.CANCEL,
+    LeadStatus.CLOSED,
+  ];
+
   /**
    * Method to update a Lead, following steps:
    * - Update customer information
@@ -43,6 +48,9 @@ export default class UpdateLeadUseCaseImpl extends BaseRepositoryImpl implements
     // TODO: Update lead information
     const lead = await leadRepository.getById(tenantId, leadId);
     if (!lead) throw new Error(`Could not found lead ${leadId}`);
+    if (this.disallowedUpdateStatus.includes(lead.leadStatus)) {
+      throw new Error('Lead can not be updated');
+    }
     const allowedUpdatingData = helper.extractDataFromObject(
       updateLeadDto,
       this.allowedUpdatingKeys,

@@ -118,8 +118,8 @@ app.put('/leads/:leadId/cancel', cancelLeadValidator(), async (req: Request, res
     validate(req);
     const { tenant } = getCurrentUserInfo(req.headers.authorization!);
     const { leadId } = req.params;
-    const { reason } = req.body;
-    const lead = await cancelLeadUseCase.invoke(tenant, leadId, reason);
+    const { cancelledReason } = req.body;
+    const lead = await cancelLeadUseCase.invoke(tenant, leadId, cancelledReason);
     res.json(wrapResponse(SUCCESS, lead));
   } catch (error: any) {
     logger.log(`[PUT /leads/:leadId/cancel] Error ${error}`);

@@ -193,7 +193,7 @@ export function changeLeadStatusValidator() {
 
 export function cancelLeadValidator() {
   return [
-    body('reason', VALIDATE_NON_EMPTY_STRING_MSG)
+    body('cancelledReason', VALIDATE_NON_EMPTY_STRING_MSG)
       .notEmpty()
       .isString(),
   ];
