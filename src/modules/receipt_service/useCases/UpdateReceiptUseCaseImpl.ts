@@ -22,7 +22,7 @@ export default class UpdateReceiptUseCaseImpl implements UpdateReceiptUseCase {
     if (!existingTourLocation) {
       throw new Error(`Tour Location [${id}] not found for tenant ${tenantId}`);
     }
-    if (existingTourLocation.receiptStatus === ReceiptStatus.CLOSED) {
+    if (existingTourLocation.status === ReceiptStatus.CLOSED) {
       throw new Error(`Can't update receipt [${id}], it was closed`);
     }
     const receiptToUpdate: Receipt = {
@@ -30,7 +30,7 @@ export default class UpdateReceiptUseCaseImpl implements UpdateReceiptUseCase {
       ...helper.extractDataFromObject(receipt, this.allowedUpdatingKeys),
       updatedAt: now,
       lsi2: `${UPDATED_AT_INDEX}#${now}`,
-      lsi3: `${STATUS_INDEX}#${receipt.receiptStatus}`,
+      lsi3: `${STATUS_INDEX}#${receipt.status}`,
     };
 
     await receiptRepository.update(
