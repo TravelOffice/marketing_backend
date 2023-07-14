@@ -138,7 +138,7 @@ export function validateUpdateBookingParams() {
     body('waitingExpiredAt').optional().isNumeric(),
     body('doneAt').optional().isNumeric(),
     body('totalPax').optional().isNumeric(),
-    body('services').isArray().notEmpty().withMessage('Booking services must not be empty.'),
+    body('services').optional().isArray().withMessage('Booking services must be an array.'),
     body('services.*.serviceName').notEmpty().isString(),
     body('services.*.quantity', VALIDATE_POSITIVE_NUMBER)
       .notEmpty()
