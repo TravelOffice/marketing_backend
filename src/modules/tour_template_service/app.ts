@@ -63,7 +63,7 @@ app.post(
         `[${req.method}] Request received for tenant '${user.tenant}' on route '${req.originalUrl}'`,
       );
       req.body.creatorId = user.username;
-      req.body.creatorName = user.username;
+      req.body.creatorName = user.name;
       const tourTemplate = await createTourTemplateUseCase.invoke(
         user.tenant,
         req.body,

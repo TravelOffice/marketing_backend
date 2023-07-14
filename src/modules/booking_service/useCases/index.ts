@@ -16,6 +16,12 @@ import { SendEmailToTourOperatorUseCase } from './interfaces/SendEmailToTourOper
 import SendEmailToTourOperatorImpl from './SendEmailToTourOperatorImpl';
 import { ConfirmBookingUseCase } from './interfaces/ConfirmBookingUseCase';
 import ConfirmBookingUseCaseImpl from './ConfirmBookingUseCaseImpl';
+import { AddNoteUseCase } from './interfaces/AddNoteUseCase';
+import AddNoteUseCaseImpl from './AddNoteUseCaseImpl';
+import { UpdateNoteUseCase } from './interfaces/UpdateNoteUseCase';
+import UpdateNoteUseCaseImpl from './UpdateNoteUseCaseImpl';
+import DeleteNoteUseCaseImpl from './DeleteNoteUseCaseImpl';
+import { DeleteNoteUseCase } from './interfaces/DeleteNoteUseCase';
 
 interface UseCases {
   createBookingUseCase: CreateBookingUseCase,
@@ -27,6 +33,9 @@ interface UseCases {
   cancelBookingsUseCase: CancelBookingUseCase,
   sendEmailToTourOperator: SendEmailToTourOperatorUseCase,
   confirmBookingUseCase: ConfirmBookingUseCase,
+  addNoteUseCase: AddNoteUseCase,
+  updateNoteUseCase: UpdateNoteUseCase,
+  deleteNoteUseCase: DeleteNoteUseCase,
 }
 
 const useCases: UseCases = {
@@ -39,6 +48,9 @@ const useCases: UseCases = {
   cancelBookingsUseCase: new CancelBookingUseCaseImpl(),
   sendEmailToTourOperator: new SendEmailToTourOperatorImpl(),
   confirmBookingUseCase: new ConfirmBookingUseCaseImpl(),
+  addNoteUseCase: new AddNoteUseCaseImpl(),
+  updateNoteUseCase: new UpdateNoteUseCaseImpl(),
+  deleteNoteUseCase: new DeleteNoteUseCaseImpl(),
 };
 
 export const {
@@ -51,4 +63,7 @@ export const {
   cancelBookingsUseCase,
   sendEmailToTourOperator,
   confirmBookingUseCase,
+  addNoteUseCase,
+  updateNoteUseCase,
+  deleteNoteUseCase,
 } = useCases;
