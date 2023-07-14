@@ -12,7 +12,7 @@ import {
 import wrapResponse from './utils/wrapResponse';
 import { FAILED, SUCCESS } from './utils/constants';
 import { CognitoUser } from './models/CognitoUser';
-import { createPaymentVoucherValidator } from './utils/validator';
+import validate, { createPaymentVoucherValidator } from './utils/validator';
 import logger from './utils/logger';
 
 // Create an instance of the Express application
@@ -59,7 +59,7 @@ app.get('/payment-vouchers', async (req: Request, res: Response) => {
 // Route for handling POST requests to the root endpoint
 app.post('/payment-vouchers', createPaymentVoucherValidator(), async (req: Request, res: Response) => {
   try {
-    // validate(req);
+    validate(req);
     const userInfo = getCurrentUserInfo(req.headers.authorization!);
     const paymentVoucher = await createPaymentVoucherUseCase.invoke(
       userInfo as CognitoUser,
@@ -88,7 +88,7 @@ app.get('payment-vouchers/:id', async (req: Request, res: Response) => {
 // Route for handling PUT requests to a specific tour location endpoint
 app.put('/payment-vouchers/:id', async (req: Request, res: Response) => {
   try {
-    // validate(req);
+    validate(req);
     const { id } = req.params;
     const { tenant } = getCurrentUserInfo(req.headers.authorization!);
     const receipt = await updatePaymentVoucherUseCase.invoke(tenant, id, req.body);

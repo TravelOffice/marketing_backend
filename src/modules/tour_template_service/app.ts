@@ -1,6 +1,6 @@
 import cors from 'cors';
 import { getCurrentUserInfo } from 'decode-token';
-import express, { Request, Response, NextFunction } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import compression from 'compression';
 import {
   createTourTemplateUseCase,
@@ -11,9 +11,7 @@ import {
 } from './useCases';
 import wrapResponse from './utils/wrapResponse';
 import { FAILED, SUCCESS } from './utils/constants';
-import validate, {
-  createOrUpdateTourTemplateValidator,
-} from './utils/validator';
+import validate, { createOrUpdateTourTemplateValidator } from './utils/validator';
 import logger from './utils/logger';
 
 const app = express();
@@ -58,15 +56,16 @@ app.post(
   async (req: Request, res: Response) => {
     try {
       validate(req);
-      const { tenant, username } = getCurrentUserInfo(
+      const user = getCurrentUserInfo(
         req.headers.authorization!,
       );
       logger.log(
-        `[${req.method}] Request received for tenant '${tenant}' on route '${req.originalUrl}'`,
+        `[${req.method}] Request received for tenant '${user.tenant}' on route '${req.originalUrl}'`,
       );
-      req.body.creator = username;
+      req.body.creatorId = user.username;
+      req.body.creatorName = user.username;
       const tourTemplate = await createTourTemplateUseCase.invoke(
-        tenant,
+        user.tenant,
         req.body,
       );
       res.json(wrapResponse(SUCCESS, tourTemplate));

@@ -59,76 +59,29 @@ export function createOrUpdateTourTemplateValidator() {
       .withMessage(VALIDATE_NUMBER_MSG)
       .isInt({ min: 0 }),
 
-    body('adultPrice', VALIDATE_POSITIVE_NUMBER)
+    body('services').isArray({ min: 1 }).withMessage(VALIDATE_PRICE_ARRAY_MSG),
+
+    body('services.*.name').notEmpty().isString().withMessage(VALIDATE_NON_EMPTY_STRING_MSG),
+
+    body('services.*.price').notEmpty().isNumeric().withMessage(VALIDATE_NUMBER_MSG),
+
+    body('policiesAndRegulations', 'Policies and regulations must be an object')
+      .isObject(),
+
+    body('policiesAndRegulations.inclusionAndExclusion', VALIDATE_NON_EMPTY_STRING_MSG)
+      .if(body('policiesAndRegulations.inclusionAndExclusion').exists())
       .notEmpty()
-      .withMessage(VALIDATE_NUMBER_MSG)
-      .isInt({ min: 0 }),
+      .isString(),
 
-    body('childUnder5Price', VALIDATE_POSITIVE_NUMBER)
+    body('policiesAndRegulations.policyConditionsAndExtraFee', VALIDATE_NON_EMPTY_STRING_MSG)
+      .if(body('policiesAndRegulations.inclusionAndExclusion').exists())
       .notEmpty()
-      .withMessage(VALIDATE_NUMBER_MSG)
-      .isInt({ min: 0 }),
+      .isString(),
 
-    body('child5to7Price', VALIDATE_POSITIVE_NUMBER)
+    body('policiesAndRegulations.cancellationTerms', VALIDATE_NON_EMPTY_STRING_MSG)
+      .if(body('policiesAndRegulations.inclusionAndExclusion').exists())
       .notEmpty()
-      .withMessage(VALIDATE_NUMBER_MSG)
-      .isInt({ min: 0 }),
-
-    body('child8to11Price', VALIDATE_POSITIVE_NUMBER)
-      .notEmpty()
-      .withMessage(VALIDATE_NUMBER_MSG)
-      .isInt({ min: 0 }),
-
-    body('otherPrice', VALIDATE_PRICE_ARRAY_MSG)
-      .if(body('otherPrice').exists())
-      .isArray({ min: 1 })
-      .custom((value) => {
-        if (Array.isArray(value)) {
-          // eslint-disable-next-line no-restricted-syntax
-          for (const servicePrice of value) {
-            if (typeof servicePrice.name !== 'string') {
-              throw new Error('Invalid name in service price');
-            }
-            if (typeof servicePrice.price !== 'number') {
-              throw new Error('Invalid price in service price');
-            }
-          }
-          return true;
-        }
-        throw new Error(VALIDATE_PRICE_ARRAY_MSG);
-      }),
-
-    body('policiesAndRegulations')
-      .isObject()
-      .withMessage('Policies and regulations must be an object')
-      .bail()
-      .custom((value) => {
-        const {
-          inclusionAndExclusion,
-          policyConditionsAndExtraFee,
-          cancellationTerms,
-        } = value;
-
-        if (
-          inclusionAndExclusion
-          && typeof inclusionAndExclusion !== 'string'
-        ) {
-          throw new Error('Invalid inclusionAndExclusion');
-        }
-
-        if (
-          policyConditionsAndExtraFee
-          && typeof policyConditionsAndExtraFee !== 'string'
-        ) {
-          throw new Error('Invalid policyConditionsAndExtraFee');
-        }
-
-        if (cancellationTerms && typeof cancellationTerms !== 'string') {
-          throw new Error('Invalid cancellationTerms');
-        }
-
-        return true;
-      }),
+      .isString(),
 
     body('tourPlan').notEmpty().withMessage(VALIDATE_NON_EMPTY_STRING_MSG),
   ];

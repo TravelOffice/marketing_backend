@@ -6,7 +6,7 @@ export enum PaymentVoucherStatus {
   WAIT_FOR_SIGN = 'WAIT_FOR_SIGN',
   SIGNED = 'SIGNED',
   WAIT_FOR_TRANSFER = 'WAIT_FOR_TRANSFER',
-  TRANSFERED = 'TRANSFERED'
+  TRANSFERRED = 'TRANSFERRED'
 }
 
 export enum PaymentVoucherMethod {
@@ -27,7 +27,7 @@ export interface PaymentVoucher extends BaseDdbModel {
   includeTax: boolean,
   quickApproval: boolean,
   attachment?: string,
-  paymentVoucherStatus: PaymentVoucherStatus,
+  status: PaymentVoucherStatus,
   creatorId: string,
   creatorName: string,
 }

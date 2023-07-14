@@ -17,7 +17,7 @@ export default class UpdatePaymentVoucherUseCaseImpl implements UpdatePaymentVou
     'includeTax',
     'quickApproval',
     'attachment',
-    'paymentVoucherStatus',
+    'status',
   ];
 
   invoke = async (
@@ -35,7 +35,7 @@ export default class UpdatePaymentVoucherUseCaseImpl implements UpdatePaymentVou
       ...helper.extractDataFromObject(paymentVoucher, this.allowedUpdatingKeys),
       updatedAt: now,
       lsi2: `${UPDATED_AT_INDEX}#${now}`,
-      lsi3: `${STATUS_INDEX}#${paymentVoucher.paymentVoucherStatus}`,
+      lsi3: `${STATUS_INDEX}#${paymentVoucher.status}`,
     };
 
     await paymentVoucherRepository.update(

@@ -31,7 +31,7 @@ export default class CreatePaymentVoucherUseCaseImpl implements CreatePaymentVou
     const paymentVoucherToAdd: PaymentVoucher = {
       ...(helper.extractDataFromObject(paymentVoucher, this.allowedCreatingKeys) as PaymentVoucher),
       code,
-      paymentVoucherStatus: PaymentVoucherStatus.WAIT_FOR_APPROVAL,
+      status: PaymentVoucherStatus.WAIT_FOR_APPROVAL,
       createdAt: now,
       updatedAt: now,
       creatorId: userInfo.username,

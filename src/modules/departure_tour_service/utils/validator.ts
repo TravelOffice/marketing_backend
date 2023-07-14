@@ -1,10 +1,6 @@
 import { Request } from 'express';
 import moment from 'moment';
-import {
-  body,
-  ValidationError,
-  validationResult,
-} from 'express-validator';
+import { body, ValidationError, validationResult } from 'express-validator';
 import {
   VALIDATE_DATE_MSG,
   VALIDATE_NON_EMPTY_STRING_MSG,
@@ -30,10 +26,10 @@ function isDateSameOrAfter(dateValue: number): boolean {
 export default function validate(req: Request) {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    const errorGroups : {[key: string]: ValidationError[]} = {};
+    const errorGroups: { [key: string]: ValidationError[] } = {};
     errors.array().forEach((err) => {
       const location = err.location || 'unknown';
-      const errs : ValidationError[] = errorGroups[location] || [];
+      const errs: ValidationError[] = errorGroups[location] || [];
       errs.push(err);
       errorGroups[location] = errs;
     });
@@ -85,65 +81,29 @@ export function createOrUpdateDepartureTourValidator() {
       .notEmpty().withMessage(VALIDATE_NUMBER_MSG)
       .isInt({ min: 0 }),
 
-    body('adultPrice', VALIDATE_POSITIVE_NUMBER)
-      .notEmpty().withMessage(VALIDATE_NUMBER_MSG)
-      .isInt({ min: 0 }),
+    body('services').isArray({ min: 1 }).withMessage(VALIDATE_PRICE_ARRAY_MSG),
 
-    body('childUnder5Price', VALIDATE_POSITIVE_NUMBER)
-      .notEmpty().withMessage(VALIDATE_NUMBER_MSG)
-      .isInt({ min: 0 }),
+    body('services.*.name').notEmpty().isString().withMessage(VALIDATE_NON_EMPTY_STRING_MSG),
 
-    body('child5to7Price', VALIDATE_POSITIVE_NUMBER)
-      .notEmpty().withMessage(VALIDATE_NUMBER_MSG)
-      .isInt({ min: 0 }),
+    body('services.*.price').notEmpty().isNumeric().withMessage(VALIDATE_NUMBER_MSG),
 
-    body('child8to11Price', VALIDATE_POSITIVE_NUMBER)
-      .notEmpty().withMessage(VALIDATE_NUMBER_MSG)
-      .isInt({ min: 0 }),
+    body('policiesAndRegulations', 'Policies and regulations must be an object')
+      .isObject(),
 
-    body('otherPrice', VALIDATE_PRICE_ARRAY_MSG)
-      .if(body('otherPrice').exists())
-      .isArray({ min: 1 })
-      .custom((value) => {
-        if (Array.isArray(value)) {
-          // eslint-disable-next-line no-restricted-syntax
-          for (const servicePrice of value) {
-            if (typeof servicePrice.name !== 'string') {
-              throw new Error('Invalid name in service price');
-            }
-            if (typeof servicePrice.price !== 'number') {
-              throw new Error('Invalid price in service price');
-            }
-          }
-          return true;
-        }
-        throw new Error(VALIDATE_PRICE_ARRAY_MSG);
-      }),
+    body('policiesAndRegulations.inclusionAndExclusion', VALIDATE_NON_EMPTY_STRING_MSG)
+      .if(body('policiesAndRegulations.inclusionAndExclusion').exists())
+      .notEmpty()
+      .isString(),
 
-    body('policiesAndRegulations')
-      .isObject().withMessage('Policies and regulations must be an object')
-      .bail()
-      .custom((value) => {
-        const {
-          inclusionAndExclusion,
-          policyConditionsAndExtraFee,
-          cancellationTerms,
-        } = value;
+    body('policiesAndRegulations.policyConditionsAndExtraFee', VALIDATE_NON_EMPTY_STRING_MSG)
+      .if(body('policiesAndRegulations.inclusionAndExclusion').exists())
+      .notEmpty()
+      .isString(),
 
-        if (inclusionAndExclusion && typeof inclusionAndExclusion !== 'string') {
-          throw new Error('Invalid inclusionAndExclusion');
-        }
-
-        if (policyConditionsAndExtraFee && typeof policyConditionsAndExtraFee !== 'string') {
-          throw new Error('Invalid policyConditionsAndExtraFee');
-        }
-
-        if (cancellationTerms && typeof cancellationTerms !== 'string') {
-          throw new Error('Invalid cancellationTerms');
-        }
-
-        return true;
-      }),
+    body('policiesAndRegulations.cancellationTerms', VALIDATE_NON_EMPTY_STRING_MSG)
+      .if(body('policiesAndRegulations.inclusionAndExclusion').exists())
+      .notEmpty()
+      .isString(),
 
     body('tourPlan')
       .notEmpty().withMessage(VALIDATE_NON_EMPTY_STRING_MSG),
