@@ -159,3 +159,19 @@ export function confirmBookingValidator() {
     body('departureTourId').notEmpty().isString(),
   ];
 }
+
+export function addNoteValidator() {
+  return [
+    body('title').notEmpty().isString(),
+    body('description').notEmpty().isString(),
+    body('type').notEmpty().isString(),
+  ];
+}
+
+export function updateNoteValidator() {
+  return [
+    body('title').optional().isString(),
+    body('description').optional().isString(),
+    body('type').optional().isString(),
+  ];
+}

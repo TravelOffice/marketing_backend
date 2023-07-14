@@ -102,7 +102,6 @@ export default class CreateBookingFromLeadUseCaseImpl implements CreateBookingFr
     // such as: Tour template, tour type, departure date, assignee, source, note
     const customerId = customer!.code;
     const { tourType, services, departureDate } = newBookingInput;
-    const customerInfo = { email, phone };
     const code = await bookingRepository.generateCode(tenant);
     const status: BookingStatus = 'INITIALIZED';
 
