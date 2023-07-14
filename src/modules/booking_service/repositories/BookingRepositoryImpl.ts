@@ -62,7 +62,7 @@ export default class BookingRepositoryImpl implements BookingRepository {
    * @param booking Booking data to update
    * @returns Updated booking data
    */
-  update = async (tenant: string, bookingId: string, booking: Booking) => {
+  update = async (tenant: string, bookingId: string, booking: Partial<Booking>) => {
     // Table, {pk, sk} values
     const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
     const pk = `${TENANT_INDEX}#${tenant}#${BOOKING_INDEX}`;
@@ -295,5 +295,29 @@ export default class BookingRepositoryImpl implements BookingRepository {
       .map((item) => helper.excludeDataFromObject(item)) as TourTemplate[];
 
     return { customers, leads, tourTemplates };
+  };
+
+  /**
+   * Confirms a booking by updating its data in the DynamoDB table.
+   *
+   * @param tenant - The ID of the tenant.
+   * @param bookingId - The ID of the booking to confirm.
+   * @param dataToUpdate - The partial booking data to update.
+   * @returns A Promise that resolves to the updated booking.
+   */
+  confirm = async (tenant: string, bookingId: string, dataToUpdate: Partial<Booking>) => {
+    const expressionNamesAndValues = helper.generateUpdateExpressionNamesAndValues(dataToUpdate);
+    const result = await dynamoProvider.rawUpdateItem({
+      TableName: await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
+      Key: {
+        pk: `${TENANT_INDEX}#${tenant}#${BOOKING_INDEX}`,
+        sk: `${bookingId}`,
+      },
+      UpdateExpression: helper.generateUpdateExpression(dataToUpdate),
+      ReturnValues: 'ALL_NEW',
+      ExpressionAttributeValues: expressionNamesAndValues.values,
+      ExpressionAttributeNames: expressionNamesAndValues.names,
+    });
+    return result.Attributes as Booking;
   };
 }

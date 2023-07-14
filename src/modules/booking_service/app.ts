@@ -4,6 +4,7 @@ import compression from 'compression';
 import { getCurrentUserInfo } from 'decode-token';
 import {
   cancelBookingsUseCase,
+  confirmBookingUseCase,
   createBookingFromLeadUseCase,
   createBookingUseCase,
   getAllBookingsUseCase,
@@ -15,6 +16,7 @@ import {
 import wrapResponse from './utils/wrapResponse';
 import { FAILED, NO_REPLY_DEFAULT_EMAIL, SUCCESS } from './utils/constants';
 import validate, {
+  confirmBookingValidator,
   validateCancelBookingDataInput,
   validateGetBookingFilteredParams,
   validateNewBookingFromLeadParams,
@@ -150,6 +152,18 @@ app.put('/bookings/:id/cancel', validateCancelBookingDataInput(), async (req: Re
     res.json(wrapResponse(SUCCESS, booking));
   } catch (error: any) {
     logger.log(`[PUT /bookings/:id/cancel] Error ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.put('/bookings/:id/confirm', confirmBookingValidator(), async (req: Request, res: Response) => {
+  try {
+    validate(req);
+    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    await confirmBookingUseCase.invoke(currentUser, req.params.id, req.body);
+    res.json(wrapResponse(SUCCESS));
+  } catch (error: any) {
+    logger.log(`[PUT /bookings/:id/confirm] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });

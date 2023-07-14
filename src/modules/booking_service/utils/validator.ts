@@ -172,3 +172,9 @@ export function validateSendEmailToTourGuideParams() {
     body('text', VALIDATE_STRING_MSG).optional().isString(),
   ];
 }
+
+export function confirmBookingValidator() {
+  return [
+    body('departureTourId').notEmpty().isString(),
+  ];
+}
