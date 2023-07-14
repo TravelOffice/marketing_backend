@@ -10,6 +10,8 @@ import LeadRepositoryImpl from './LeadRepositoryImpl';
 import SourceRepositoryImpl from './SourceRepositoryImpl';
 import TourTemplateRepositoryImpl from './TourTemplateRepositoryImpl';
 import UserRepositoryImpl from './UserRepositoryImpl';
+import { DepartureTourRepository } from './interfaces/DepartureTourRepository';
+import DepartureTourRepositoryImpl from './DepartureTourRepositoryImpl';
 
 interface Repositories {
   bookingRepository: BookingRepository,
@@ -18,6 +20,7 @@ interface Repositories {
   leadRepository: LeadRepository,
   tourTemplateRepository: TourTemplateRepository,
   sourceRepository: SourceRepository,
+  departureTourRepository: DepartureTourRepository,
 }
 
 const repositories: Repositories = {
@@ -27,6 +30,7 @@ const repositories: Repositories = {
   leadRepository: new LeadRepositoryImpl(),
   tourTemplateRepository: new TourTemplateRepositoryImpl(),
   sourceRepository: new SourceRepositoryImpl(),
+  departureTourRepository: new DepartureTourRepositoryImpl(),
 };
 
 export const {
@@ -36,4 +40,5 @@ export const {
   leadRepository,
   tourTemplateRepository,
   sourceRepository,
+  departureTourRepository,
 } = repositories;
