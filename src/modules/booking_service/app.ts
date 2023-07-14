@@ -3,20 +3,24 @@ import express, { NextFunction, Request, Response } from 'express';
 import compression from 'compression';
 import { getCurrentUserInfo } from 'decode-token';
 import {
+  addNoteUseCase,
   cancelBookingsUseCase,
   confirmBookingUseCase,
   createBookingFromLeadUseCase,
   createBookingUseCase,
+  deleteNoteUseCase,
   getAllBookingsUseCase,
   getBookingByGivenIdUseCase,
   getBookingsByStatusUseCase,
   sendEmailToTourOperator,
   updateBookingUseCase,
+  updateNoteUseCase,
 } from './useCases';
 import wrapResponse from './utils/wrapResponse';
 import { FAILED, NO_REPLY_DEFAULT_EMAIL, SUCCESS } from './utils/constants';
 import validate, {
-  confirmBookingValidator,
+  addNoteValidator,
+  confirmBookingValidator, updateNoteValidator,
   validateCancelBookingDataInput,
   validateGetBookingFilteredParams,
   validateNewBookingFromLeadParams,
@@ -176,6 +180,44 @@ app.post('/bookings/:id/send-email-to-tour-operator', validateSendEmailToTourGui
     await sendEmailToTourOperator.invoke(tenant, id, NO_REPLY_DEFAULT_EMAIL, req.body);
     res.json(wrapResponse(SUCCESS));
   } catch (error: any) {
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.post('/bookings/:id/notes', addNoteValidator(), async (req: Request, res: Response) => {
+  try {
+    validate(req);
+    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const { id: bookingId } = req.params;
+    const booking = await addNoteUseCase.invoke(currentUser, bookingId, req.body);
+    res.json(wrapResponse(SUCCESS, booking));
+  } catch (error: any) {
+    logger.log(`[POST /bookings/:id/notes] Error ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.put('/bookings/:id/notes/:noteId', updateNoteValidator(), async (req: Request, res: Response) => {
+  try {
+    validate(req);
+    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const { id: bookingId, noteId } = req.params;
+    const booking = await updateNoteUseCase.invoke(currentUser, bookingId, noteId, req.body);
+    res.json(wrapResponse(SUCCESS, booking));
+  } catch (error: any) {
+    logger.log(`[PUT /bookings/:bookingId/notes/:noteId] Error ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.delete('/bookings/:id/notes/:noteId', async (req: Request, res: Response) => {
+  try {
+    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const { id: bookingId, noteId } = req.params;
+    const booking = await deleteNoteUseCase.invoke(currentUser, bookingId, noteId);
+    res.json(wrapResponse(SUCCESS, booking));
+  } catch (error: any) {
+    logger.log(`[DELETE /bookings/:bookingId/notes/:noteId] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });
