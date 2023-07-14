@@ -1,4 +1,4 @@
-export interface ServicePrice {
-  name: string;
-  price: number;
+export interface TourServicePrice {
+  name: string,
+  price: number,
 }

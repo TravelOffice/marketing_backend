@@ -11,11 +11,7 @@ export interface TourTemplate extends BaseDdbModel {
   endingLocation: string,
   durationInDays: number,
   durationInNights: number,
-  adultPrice: number,
-  childUnder5Price?: number,
-  child5to7Price?: number,
-  child8to11Price?: number,
-  otherPrice?: TourServicePrice[],
+  services?: TourServicePrice[],
   policiesAndRegulations: {
     inclusionAndExclusion?: string,
     policyConditionsAndExtraFee?: string,

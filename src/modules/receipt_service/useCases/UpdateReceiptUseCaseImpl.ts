@@ -10,6 +10,7 @@ export default class UpdateReceiptUseCaseImpl implements UpdateReceiptUseCase {
     'amount',
     'description',
     'note',
+    'status',
   ];
 
   invoke = async (

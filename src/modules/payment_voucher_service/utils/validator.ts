@@ -95,7 +95,7 @@ export function updatePaymentVoucherValidator() {
       .if(body('attachment').exists())
       .isString()
       .notEmpty(),
-    body('paymentVoucherStatus')
+    body('status')
       .isIn(Object.values(PaymentVoucherStatus)).withMessage(`property allow only in ${Object.values(PaymentVoucherStatus)}`),
   ];
 }
