@@ -1,19 +1,18 @@
 import cors from 'cors';
 import { getCurrentUserInfo } from 'decode-token';
-import express, { Request, Response, NextFunction } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import compression from 'compression';
 import {
   createSupplierUseCase,
   deleteSupplierUseCase,
   getSupplierListUseCase,
   getSupplierUseCase,
+  updateSupplierQuoteUseCase,
   updateSupplierUseCase,
 } from './useCases';
 import wrapResponse from './utils/wrapResponse';
 import { FAILED, SUCCESS } from './utils/constants';
-import validate, {
-  createOrUpdateSupplierValidator,
-} from './utils/validator';
+import validate, { createOrUpdateSupplierValidator, updateSupplierQuoteValidator } from './utils/validator';
 import logger from './utils/logger';
 
 const app = express();
@@ -138,6 +137,29 @@ app.delete('/suppliers/:id', async (req: Request, res: Response) => {
   } catch (error: any) {
     logger.log(
       `[${req.method}] An error occurred while deleting supplier on route '${req.originalUrl}':`,
+      error,
+    );
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.put('/suppliers/:id/quotes', updateSupplierQuoteValidator(), async (req: Request, res: Response) => {
+  try {
+    validate(req);
+    const { id } = req.params;
+    const { tenant } = getCurrentUserInfo(req.headers.authorization!);
+    logger.log(
+      `[${req.method}] Request received for tenant '${tenant}' on route '${req.originalUrl}'`,
+    );
+    const supplier = await updateSupplierQuoteUseCase.invoke(
+      tenant,
+      id,
+      req.body.quotes,
+    );
+    res.json(wrapResponse(SUCCESS, supplier));
+  } catch (error: any) {
+    logger.log(
+      `[${req.method}] An error occurred while updating supplier quotes on route '${req.originalUrl}':`,
       error,
     );
     res.json(wrapResponse(FAILED, undefined, error.message));

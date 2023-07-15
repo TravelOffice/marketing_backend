@@ -1,7 +1,7 @@
 import { getAwsSecretValue } from 'get-env';
 import { dynamoProvider, helper, QueryInput } from 'core';
-import { Supplier } from '../models/Supplier';
-import { TENANT_INDEX, SUPPLIER_INDEX, SUPPLIER_COUNTER_INDEX } from '../utils/constants';
+import { Quote, Supplier } from '../models/Supplier';
+import { SUPPLIER_COUNTER_INDEX, SUPPLIER_INDEX, TENANT_INDEX } from '../utils/constants';
 import logger from '../utils/logger';
 import { SupplierRepository } from './interfaces/SupplierRepository';
 
@@ -176,5 +176,56 @@ implements SupplierRepository {
     logger.log(`Supplier deleted successfully for tenant ${tenantId}`);
 
     return supplierId;
+  };
+
+  /**
+   * Updates a Supplier for a specific tenant and supplier ID.
+   * @param tenantId The ID of the tenant.
+   * @param supplierId The ID of the supplier.
+   * @param quotes The updated quote array for supplier.
+   * @returns The supplier with updated quotes.
+   */
+  updateQuotes = async (
+    tenantId: string,
+    supplierId: string,
+    quotes: Array<Quote>,
+  ) => {
+    const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const pk = `${TENANT_INDEX}#${tenantId}#${SUPPLIER_INDEX}`;
+    const sk = supplierId;
+
+    logger.log(
+      `Updating quotes for supplier ${supplierId} - tenant ${tenantId} with pk: ${pk}, sk: ${sk}`,
+    );
+    logger.log(`Tenant ${tenantId} - Supplier ${supplierId} - Quotes:`, quotes);
+
+    const existingSupplier = await dynamoProvider.getItem<Supplier>(
+      table,
+      pk,
+      sk,
+    );
+    if (!existingSupplier) {
+      throw new Error(
+        `Supplier [${supplierId}] not found for tenant ${tenantId}`,
+      );
+    }
+
+    const updatedAt = Date.now();
+    const {
+      code, createdAt, creatorId, creatorName, ...supplierToUpdate
+    } = helper.excludeDataFromObject(existingSupplier);
+
+    const result = await dynamoProvider.updateItemWithSetExpression(
+      table,
+      pk,
+      sk,
+      {
+        ...supplierToUpdate, quotes, updatedAt,
+      },
+    );
+
+    logger.log(`Update quotes for supplier ${supplierId} - tenant ${tenantId} successfully`);
+
+    return helper.excludeDataFromObject(result) as Supplier;
   };
 }

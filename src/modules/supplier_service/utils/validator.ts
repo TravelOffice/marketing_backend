@@ -2,11 +2,11 @@ import { Request } from 'express';
 import { body, ValidationError, validationResult } from 'express-validator';
 import {
   VALIDATE_ARRAY_MSG,
-  VALIDATE_NON_EMPTY_STRING_MSG, VALIDATE_NUMBER_MSG, VALIDATE_STRING_MSG,
+  VALIDATE_NON_EMPTY_STRING_MSG,
+  VALIDATE_NUMBER_MSG,
+  VALIDATE_STRING_MSG,
 } from './constants';
-import {
-  supplierServiceTypes,
-} from '../models/Supplier';
+import { supplierServiceTypes } from '../models/Supplier';
 
 export default function validate(req: Request) {
   const errors = validationResult(req);
@@ -44,5 +44,17 @@ export function createOrUpdateSupplierValidator() {
     body('quotes').optional().isArray().withMessage(VALIDATE_ARRAY_MSG),
     body('paymentInfo').optional().isArray().withMessage(VALIDATE_ARRAY_MSG),
     body('contacts').optional().isArray().withMessage(VALIDATE_ARRAY_MSG),
+  ];
+}
+
+export function updateSupplierQuoteValidator() {
+  return [
+    body('quotes').isArray().isLength({ min: 0 })
+      .withMessage(VALIDATE_ARRAY_MSG),
+    body('quotes.*').optional().isObject().withMessage('must be an array of objects'),
+    body('quotes.*.year').optional().isInt({ min: 1900, max: 2100 }).withMessage('must be within the range of 1900-2100'),
+    body('quotes.*.price').optional().isInt().withMessage('must be an integer'),
+    body('quotes.*.link').optional().isURL().withMessage('must be an url'),
+    body('quotes.*.description').optional().isString().withMessage('must be a string'),
   ];
 }

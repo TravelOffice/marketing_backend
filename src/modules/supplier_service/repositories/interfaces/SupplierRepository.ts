@@ -1,4 +1,4 @@
-import { Supplier } from '../../models/Supplier';
+import { Quote, Supplier } from '../../models/Supplier';
 
 export interface SupplierRepository {
   generateCode: (tenantId: string) => Promise<string>;
@@ -17,4 +17,9 @@ export interface SupplierRepository {
     supplier: Supplier,
   ) => Promise<Supplier>;
   delete: (tenantId: string, supplierId: string) => Promise<string>;
+  updateQuotes: (
+    tenantId: string,
+    supplierId: string,
+    quotes: Array<Quote>,
+  ) => Promise<Supplier>;
 }
