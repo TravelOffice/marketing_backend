@@ -10,6 +10,8 @@ import { GetSupplierListUseCase } from './interfaces/GetSupplierListUseCase';
 import { GetSupplierUseCase } from './interfaces/GetSupplierUseCase';
 import { UpdateSupplierUseCase } from './interfaces/UpdateSupplierUseCase';
 import UpdateSupplierUseCaseImpl from './UpdateSupplierUseCaseImpl';
+import { UpdateSupplierQuoteUseCase } from './interfaces/UpdateSupplierQuoteUseCase';
+import UpdateSupplierQuoteUseCaseImpl from './UpdateSupplierQuoteUseCaseImpl';
 
 interface UseCases {
   getSupplierListUseCase: GetSupplierListUseCase;
@@ -17,6 +19,7 @@ interface UseCases {
   getSupplierUseCase: GetSupplierUseCase;
   updateSupplierUseCase: UpdateSupplierUseCase;
   deleteSupplierUseCase: DeleteSupplierUseCase;
+  updateSupplierQuoteUseCase: UpdateSupplierQuoteUseCase;
 }
 
 const useCases: UseCases = {
@@ -25,6 +28,7 @@ const useCases: UseCases = {
   getSupplierUseCase: new GetSupplierUseCaseImpl(),
   updateSupplierUseCase: new UpdateSupplierUseCaseImpl(),
   deleteSupplierUseCase: new DeleteSupplierUseCaseImpl(),
+  updateSupplierQuoteUseCase: new UpdateSupplierQuoteUseCaseImpl(),
 };
 
 export const {
@@ -33,4 +37,5 @@ export const {
   getSupplierUseCase,
   updateSupplierUseCase,
   deleteSupplierUseCase,
+  updateSupplierQuoteUseCase,
 } = useCases;
