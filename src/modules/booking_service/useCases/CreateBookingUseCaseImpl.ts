@@ -32,7 +32,7 @@ export default class CreateBookingUseCaseImpl implements CreateBookingUseCase {
     const { tenant, username, name } = currentUserInfo;
     const {
       email, phone, honorific, fullName, address,
-    } = newBookingInput.customer;
+    } = newBookingInput.customerInfo;
 
     const {
       tourType, tourTemplateId, departureDate, sourceId,
@@ -88,13 +88,12 @@ export default class CreateBookingUseCaseImpl implements CreateBookingUseCase {
     const customerId = customer!.code;
 
     // Prepare and save booking to database
-    const customerInfo = { email, phone };
     const code = await bookingRepository.generateCode(tenant);
     const status: BookingStatus = 'INITIALIZED';
     const newBooking: Booking = {
       code,
       customerId,
-      customerInfo,
+      customerInfo: { email, phone },
       tourType,
       createdAt: now,
       updatedAt: now,

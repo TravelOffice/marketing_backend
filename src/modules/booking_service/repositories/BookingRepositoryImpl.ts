@@ -1,19 +1,9 @@
 import { getAwsSecretValue } from 'get-env';
 import {
-  dynamoProvider,
-  helper,
-  KeyList,
-  QueryInput,
-  UpdateItemInput,
+  dynamoProvider, helper, KeyList, QueryInput, UpdateItemInput,
 } from 'core';
+import { Booking, BookingStatus, BookingStatusEnum } from '../models/booking/Booking';
 import {
-  Booking,
-  BookingStatus,
-  BookingStatusEnum,
-  statusTransitionRules,
-} from '../models/booking/Booking';
-import {
-  ASSIGNEE_INDEX,
   BOOKING_COUNTER_INDEX,
   BOOKING_INDEX,
   BOOKING_STATUS_INDEX,
@@ -21,11 +11,9 @@ import {
   LEAD_INDEX,
   TENANT_INDEX,
   TOUR_TEMPLATE_INDEX,
-  UPDATED_AT_INDEX,
 } from '../utils/constants';
 import { BookingRepository } from './interfaces/BookingRepository';
 import logger from '../utils/logger';
-import { customerRepository } from './index';
 import { compact, uniqueItems } from '../utils/array';
 import { Customer } from '../models/Customer';
 import { Lead } from '../models/Lead';
@@ -63,62 +51,20 @@ export default class BookingRepositoryImpl implements BookingRepository {
    * @returns Updated booking data
    */
   update = async (tenant: string, bookingId: string, booking: Partial<Booking>) => {
-    // Table, {pk, sk} values
-    const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
-    const pk = `${TENANT_INDEX}#${tenant}#${BOOKING_INDEX}`;
-    const sk = bookingId;
-
-    logger.log(`Updating booking for tenant ${tenant} with pk: ${pk}, sk: ${sk}`);
-    logger.log(`New booking data ${JSON.stringify(booking)}`);
-
-    // Booking should be existed in database
-    const existingBooking = await dynamoProvider.getItem<Booking>(table, pk, sk);
-    if (!existingBooking) {
-      throw new Error(`Booking with id ${bookingId} not found for tenant ${tenant}`);
-    }
-
-    // Verify status transition
-    const statusTransition = `${existingBooking.bookingStatus}-${booking.bookingStatus}`;
-    if (!statusTransitionRules.includes(statusTransition)) {
-      throw new Error(`Status could not be changed from ${existingBooking.bookingStatus} to ${booking.bookingStatus}`);
-    }
-
-    const updatedAt = Date.now();
-
-    // Indexes should be changed according to some values such as createdDate, assignee
-    const lsi2 = `${UPDATED_AT_INDEX}#${updatedAt}`; // updatedAt lsi
-    const lsi5 = `${ASSIGNEE_INDEX}#${booking.assigneeId}`; // assignee lsi
-
-    // Code, createdAt should not be changed
-    const { code, createdAt, ...bookingToUpdate } = booking;
-
-    // Update booking item to database
-    const result = await dynamoProvider.updateItemWithSetExpression(
-      table,
-      pk,
-      sk,
-      {
-        ...bookingToUpdate, lsi2, lsi5, updatedAt,
+    const expressionNamesAndValues = helper.generateUpdateExpressionNamesAndValues(booking);
+    const result = await dynamoProvider.rawUpdateItem({
+      TableName: await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
+      Key: {
+        pk: `${TENANT_INDEX}#${tenant}#${BOOKING_INDEX}`,
+        sk: bookingId,
       },
-    );
+      UpdateExpression: helper.generateUpdateExpression(booking),
+      ReturnValues: 'ALL_NEW',
+      ExpressionAttributeValues: expressionNamesAndValues.values,
+      ExpressionAttributeNames: expressionNamesAndValues.names,
+    });
 
-    const updatedBooking = result.Attributes as Booking;
-
-    logger.log(`Booking with id ${bookingId} has been updated successfully for tenant ${tenant}`);
-
-    // Check if the booking status is "COMPLETED" and update customer revenue
-    if (updatedBooking.bookingStatus === BookingStatusEnum.COMPLETED) {
-      // Update the customer's revenue using customerRepository.updateRevenue
-      await customerRepository.updateRevenue(
-        tenant,
-        updatedBooking.customerId,
-        updatedBooking.totalPayment!,
-      );
-      // Log a success message indicating the customer's revenue has been updated
-      logger.log(`Update customer ${updatedBooking.customerId} revenue successfully`);
-    }
-
-    return helper.excludeDataFromObject(bookingToUpdate) as Booking;
+    return result.Attributes as Booking;
   };
 
   createFromLead = async (tenant: string, leadId: string, booking: Booking) => {
