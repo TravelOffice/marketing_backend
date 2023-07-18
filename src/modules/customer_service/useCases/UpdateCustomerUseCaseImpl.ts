@@ -37,7 +37,7 @@ export default class UpdateCustomerUseCaseImpl implements UpdateCustomerUseCase 
   invoke = async (tenantId: string, customerId: string, updateCustomerDto: UpdateCustomerDto) => {
     // Update customer information
     const customer = await customerRepository.get(tenantId, customerId);
-    if (!customer) throw new Error(`Could not found lead ${customerId}`);
+    if (!customer) throw new Error(`Could not found Customer ${customerId}`);
     const allowedUpdatingData = helper.extractDataFromObject(
       updateCustomerDto,
       this.allowedUpdatingKeys,

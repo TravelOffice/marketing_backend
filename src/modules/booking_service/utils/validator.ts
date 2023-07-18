@@ -1,6 +1,6 @@
 import { Request } from 'express';
 import { body, ValidationError, validationResult } from 'express-validator';
-import { bookingPaymentStatuses, bookingStatuses, tourTypes } from '../models/booking/Booking';
+import { bookingPaymentStatuses, tourTypes } from '../models/booking/Booking';
 import {
   VALIDATE_NON_EMPTY_STRING_MSG,
   VALIDATE_NUMBER_MSG,
@@ -34,12 +34,12 @@ export function validateNewBookingParams() {
       return !Number.isNaN(date);
     }),
     body('assigneeId').notEmpty().isString(),
-    body('customer').isObject().withMessage('Customer information must not be empty'),
-    body('customer.email').notEmpty().isEmail(),
-    body('customer.phone').notEmpty().isMobilePhone('any'),
-    body('customer.honorific').optional().isString(),
-    body('customer.fullName').optional().isString(),
-    body('customer.address').optional().isString(),
+    body('customerInfo').isObject().withMessage('Customer information must not be empty'),
+    body('customerInfo.email').notEmpty().isEmail(),
+    body('customerInfo.phone').notEmpty().isMobilePhone('any'),
+    body('customerInfo.honorific').optional().isString(),
+    body('customerInfo.fullName').optional().isString(),
+    body('customerInfo.address').optional().isString(),
   ];
 }
 
@@ -80,16 +80,8 @@ export function validateGetBookingFilteredParams() {
 
 export function validateUpdateBookingParams() {
   return [
-    body('tourTemplateId').notEmpty().isString(),
-    body('sourceId').notEmpty().isString(),
-    body('tourLeadId').optional().isString(),
-    body('customerId').notEmpty().isString(),
-    body('customer').isObject().withMessage('Customer information must not be empty'),
-    body('customer.email').notEmpty().isEmail(),
-    body('customer.phone').notEmpty().isMobilePhone('any'),
-    body('customer.honorific').optional().isString(),
-    body('customer.fullName').optional().isString(),
-    body('customer.address').optional().isString(),
+    body('tourTemplateId').optional().notEmpty().isString(),
+    body('sourceId').optional().notEmpty().isString(),
     body('notes').optional().isArray().withMessage('Notes must be array'),
     body('notes.*.title').if(body('notes').exists()).notEmpty().isString(),
     body('notes.*.description').if(body('notes').exists()).notEmpty().isString(),
@@ -102,10 +94,11 @@ export function validateUpdateBookingParams() {
         const date = Date.parse(value);
         return !Number.isNaN(date);
       }),
-    body('tourType').notEmpty().isIn(tourTypes).withMessage(`allow only in ${tourTypes}`),
-    body('bookingStatus').notEmpty().isIn(bookingStatuses).withMessage(`allow only in ${bookingStatuses}`),
-    body('paymentStatus').notEmpty().isIn(bookingPaymentStatuses).withMessage(`allow only in ${bookingPaymentStatuses}`),
-    body('assigneeId').notEmpty().isString(),
+    body('tourType').optional().notEmpty().isIn(tourTypes)
+      .withMessage(`allow only in ${tourTypes}`),
+    body('paymentStatus').optional().notEmpty().isIn(bookingPaymentStatuses)
+      .withMessage(`allow only in ${bookingPaymentStatuses}`),
+    body('assigneeId').optional().notEmpty().isString(),
     body('canceledAt').optional().isNumeric(),
     body('canceledReason').optional().isString(),
     body('canceledNote').optional().isString(),
@@ -119,8 +112,6 @@ export function validateUpdateBookingParams() {
     body('bookingCode').optional().isString(),
     body('labelId').optional().isString(),
     body('sourceId').optional().isString(),
-    body('creatorId').optional().isString(),
-    body('creatorName').optional().isString(),
     body('requestStatus').optional().isString(),
     body('baseTotal').optional().isNumeric(),
     body('baseTotalAfterVAT').optional().isNumeric(),
