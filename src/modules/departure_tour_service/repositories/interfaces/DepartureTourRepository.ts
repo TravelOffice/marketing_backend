@@ -1,4 +1,5 @@
 import { DepartureTour } from '../../models/DepartureTour';
+import TourOperationStatus from '../../models/TourOperationstatus';
 import { User } from '../../models/User';
 
 export interface DepartureTourRepository {
@@ -16,5 +17,10 @@ export interface DepartureTourRepository {
     tenantId: string,
     departureTourId: string,
     assignee: User,
+  ) => Promise<DepartureTour>
+  changeOperationStatus: (
+    tenantId: string,
+    departureTourId: string,
+    toOperationStatus: TourOperationStatus,
   ) => Promise<DepartureTour>
 }

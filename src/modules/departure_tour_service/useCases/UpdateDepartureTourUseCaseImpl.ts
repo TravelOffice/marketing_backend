@@ -1,8 +1,9 @@
 import { helper } from 'core';
-import { DepartureTour } from '../models/DepartureTour';
+import { DepartureTour, operationStatusTransitionRules } from '../models/DepartureTour';
 import { departureTourRepository } from '../repositories';
 import { UpdateDepartureTourUseCase } from './interfaces/UpdateDepartureTourUseCase';
-import { STATUS_INDEX, UPDATED_AT_INDEX } from '../utils/constants';
+import { OPERATION_STATUS_INDEX, STATUS_INDEX, UPDATED_AT_INDEX } from '../utils/constants';
+import logger from '../utils/logger';
 
 export default class UpdateDepartureTourUseCaseImpl implements UpdateDepartureTourUseCase {
   allowedUpdatingKeys: (keyof DepartureTour)[] = [
@@ -20,6 +21,7 @@ export default class UpdateDepartureTourUseCaseImpl implements UpdateDepartureTo
     'tourTemplateCode',
     'startDate',
     'status',
+    'operationStatus',
   ];
 
   invoke = async (
@@ -33,12 +35,22 @@ export default class UpdateDepartureTourUseCaseImpl implements UpdateDepartureTo
       throw new Error(`Departure tour [${departureTourId}] not found for tenant ${tenantId}`);
     }
 
+    // Verify status transition
+    const currentOperationStatus = existingDepartureTour.operationStatus;
+    const toOperationStatus = departureTour.operationStatus;
+    const transition = `${currentOperationStatus}-${toOperationStatus}`;
+    if (!operationStatusTransitionRules.includes(transition)) {
+      throw new Error(`Invalid status transition: ${transition}`);
+    }
+    logger.log('Departure tour information validated successfully.');
+
     const departureTourToUpdate: DepartureTour = {
       ...existingDepartureTour,
       ...helper.extractDataFromObject(departureTour, this.allowedUpdatingKeys),
       updatedAt: now,
       lsi2: `${UPDATED_AT_INDEX}#${now}`,
       lsi3: `${STATUS_INDEX}#${departureTour.status}`,
+      lsi4: `${OPERATION_STATUS_INDEX}#${departureTour.operationStatus}`,
     };
 
     await departureTourRepository.update(

@@ -28,6 +28,8 @@ export const UPDATED_AT_INDEX = 'UPDATED_AT';
 
 export const STATUS_INDEX = 'STATUS';
 
+export const OPERATION_STATUS_INDEX = 'OPERATION_STATUS';
+
 export const ASSIGNEE_INDEX = 'ASSIGNEE';
 
 export const EMPLOYEE_INDEX = 'EMPLOYEE';
