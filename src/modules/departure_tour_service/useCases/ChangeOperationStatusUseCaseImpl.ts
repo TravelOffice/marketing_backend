@@ -31,12 +31,6 @@ export default class ChangeOperationStatusUseCaseImpl implements ChangeOperation
       throw new Error(`Departure tour ${departureTourId} does not exist!`);
     }
 
-    // Retrieve the user attributes based on the tenantId and assigneeId
-    const assignee = await userRepository.getUserAttributes(tenantId, departureTour.assigneeId);
-    if (!assignee) {
-      throw new Error('User does not exist!');
-    }
-
     // Return the departure tour as it is
     // if the departure tour is already in the given operation status
     const currentOperationStatus = departureTour.operationStatus;
@@ -61,17 +55,26 @@ export default class ChangeOperationStatusUseCaseImpl implements ChangeOperation
 
     // Notify the change to the operator manager
     const operatorManagers = await userRepository.listByRole(tenantId, OPERATOR_MANAGER_ROLE);
-    // Send mail to Operator manager
-    // TODO: In the future, tenants can configure the mail template
-    const departureTourUrl = `${tenantId}.${getEnv('DEPARTURE_TOUR_URL')}/${departureTourId}`;
-    const mail: MailTemplate = {
-      toAddresses: [assignee.email],
-      ccAddresses: operatorManagers.map((item) => item.email),
-      subject: `Operate departure tour [${departureTourId}]`,
-      text: `The departure tour [${departureTourId}] has been transited to new state`, // For non-html client
-      html: `<p>The operational status of departure tour [${departureTourId}] has been changed from ${currentOperationStatus} to ${toOperationStatus}</p><a href="${departureTourUrl}">Details</a>`, // For html client
-    };
-    await sendEmail(getEnv('NO_REPLY_DEFAULT_EMAIL'), mail);
+
+    // Retrieve the user attributes based on the tenantId and assigneeId
+    if (departureTour.assigneeId) {
+      const assignee = await userRepository.getUserAttributes(tenantId, departureTour.assigneeId);
+      const departureTourUrl = `${tenantId}.${getEnv('DEPARTURE_TOUR_URL')}/${departureTourId}`;
+      if (!assignee) {
+        throw new Error(`User ${departureTour.assigneeId} does not exist!`);
+      }
+
+      // Send mail to Operator manager
+      // TODO: In the future, tenants can configure the mail template
+      const mail: MailTemplate = {
+        toAddresses: [assignee.email],
+        ccAddresses: operatorManagers.map((item) => item.email),
+        subject: `Operate departure tour [${departureTourId}]`,
+        text: `The departure tour [${departureTourId}] has been transited to new state`, // For non-html client
+        html: `<p>The operational status of departure tour [${departureTourId}] has been changed from ${currentOperationStatus} to ${toOperationStatus}</p><a href="${departureTourUrl}">Details</a>`, // For html client
+      };
+      await sendEmail(getEnv('NO_REPLY_DEFAULT_EMAIL'), mail);
+    }
 
     return helper.excludeDataFromObject(updatedDepartureTour) as DepartureTour;
   };

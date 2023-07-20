@@ -111,7 +111,6 @@ export default class CreateBookingFromLeadUseCaseImpl implements CreateBookingFr
       code,
       tourLeadId: leadId,
       customerId,
-      customerInfo,
       tourType,
       createdAt: now,
       updatedAt: now,

@@ -36,10 +36,6 @@ interface DdbBookingModel extends BaseDdbModel {
   code: string, // Format BK+<number>
   tourLeadId?: string, // Sk value of Lead item
   customerId: string, // Sk value of Customer item
-  customerInfo: { // Customer information at the time booking created
-    phone: string
-    email: string
-  },
   tourType: BookingTourType,
   deletedAt?: number,
   deletedBy?: string,

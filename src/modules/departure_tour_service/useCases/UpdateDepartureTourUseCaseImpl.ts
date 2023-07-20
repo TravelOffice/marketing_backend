@@ -44,6 +44,10 @@ export default class UpdateDepartureTourUseCaseImpl implements UpdateDepartureTo
     }
     logger.log('Departure tour information validated successfully.');
 
+    if (!existingDepartureTour.assigneeId && toOperationStatus !== 'WAITING_FOR_OPERATION') {
+      throw new Error('Operation status could not be changed without operator');
+    }
+
     const departureTourToUpdate: DepartureTour = {
       ...existingDepartureTour,
       ...helper.extractDataFromObject(departureTour, this.allowedUpdatingKeys),

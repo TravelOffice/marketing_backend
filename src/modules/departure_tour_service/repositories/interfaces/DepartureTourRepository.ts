@@ -17,6 +17,7 @@ export interface DepartureTourRepository {
     tenantId: string,
     departureTourId: string,
     assignee: User,
+    isFirstAssignee?: boolean,
   ) => Promise<DepartureTour>
   changeOperationStatus: (
     tenantId: string,
