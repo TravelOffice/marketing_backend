@@ -1,6 +1,7 @@
 import { CustomerLevel } from '../models/Customer';
 import { Booking, BookingStatus } from '../models/booking/Booking';
 import { CreateBookingInput } from '../models/rawApiData/CreateBookingInput';
+import { TourServicePrice } from '../models/tour/TourServicePrice';
 import {
   bookingRepository, customerRepository, sourceRepository, tourTemplateRepository,
 } from '../repositories';
@@ -89,6 +90,12 @@ export default class CreateBookingUseCaseImpl implements CreateBookingUseCase {
 
     // Prepare and save booking to database
     const code = await bookingRepository.generateCode(tenant);
+    const services = tourTemplate.services?.map((service: TourServicePrice) => ({
+      serviceName: service.name,
+      price: service.price,
+      quantity: 1,
+      tax: 0,
+    })) ?? [];
     const status: BookingStatus = 'INITIALIZED';
     const newBooking: Booking = {
       code,
@@ -98,7 +105,7 @@ export default class CreateBookingUseCaseImpl implements CreateBookingUseCase {
       updatedAt: now,
       bookingStatus: status,
       paymentStatus: 'UNPAID',
-      services: [],
+      services,
       tourTemplateId,
       departureDate,
       sourceId,

@@ -47,6 +47,7 @@ export function createPaymentVoucherValidator() {
       .isString()
       .notEmpty(),
     body('signGroup', VALIDATE_NON_EMPTY_STRING_MSG)
+      .optional()
       .isString()
       .notEmpty(),
     body('includeTax', VALIDATE_BOOLEAN_MSG)
@@ -85,6 +86,7 @@ export function updatePaymentVoucherValidator() {
       .isString()
       .notEmpty(),
     body('signGroup', VALIDATE_NON_EMPTY_STRING_MSG)
+      .optional()
       .isString()
       .notEmpty(),
     body('includeTax', VALIDATE_BOOLEAN_MSG)

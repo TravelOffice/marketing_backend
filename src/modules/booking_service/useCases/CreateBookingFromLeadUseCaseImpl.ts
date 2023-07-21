@@ -1,6 +1,7 @@
 import { CustomerLevel } from '../models/Customer';
 import { Booking, BookingStatus } from '../models/booking/Booking';
 import { CreateBookingFromLeadInput } from '../models/rawApiData/CreateBookingFromLeadInput';
+import { TourServicePrice } from '../models/tour/TourServicePrice';
 import {
   bookingRepository,
   customerRepository,
@@ -53,8 +54,9 @@ export default class CreateBookingFromLeadUseCaseImpl implements CreateBookingFr
     } = lead;
 
     // Verify tour template
+    let tourTemplate;
     if (tourTemplateId) {
-      const tourTemplate = await tourTemplateRepository.get(tenant, tourTemplateId);
+      tourTemplate = await tourTemplateRepository.get(tenant, tourTemplateId);
       if (!tourTemplate) {
         throw new Error(`Tour template with id ${tourTemplateId} of tenant ${tenant} not found.`);
       }
@@ -101,11 +103,15 @@ export default class CreateBookingFromLeadUseCaseImpl implements CreateBookingFr
     // Prepare booking information for storing to database
     // such as: Tour template, tour type, departure date, assignee, source, note
     const customerId = customer!.code;
-    const { tourType, services, departureDate } = newBookingInput;
-    const customerInfo = { email, phone };
+    const { tourType, departureDate } = newBookingInput;
     const code = await bookingRepository.generateCode(tenant);
     const status: BookingStatus = 'INITIALIZED';
-
+    const services = tourTemplate?.services?.map((service: TourServicePrice) => ({
+      serviceName: service.name,
+      price: service.price,
+      quantity: 1,
+      tax: 0,
+    })) ?? [];
     // Prepare and save booking to database
     const newBooking: Booking = {
       code,
