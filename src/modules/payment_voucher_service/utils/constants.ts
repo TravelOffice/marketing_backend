@@ -10,13 +10,11 @@ export const CREATED_AT_INDEX = 'CREATED_AT';
 
 export const UPDATED_AT_INDEX = 'UPDATED_AT';
 
-export const STATUS_INDEX = 'STATUS_INDEX';
+export const STATUS_INDEX = 'STATUS';
 
-export const PAYMENT_VOUCHER_INDEX = 'PAYMENT_VOUCHER_INDEX';
+export const PAYMENT_VOUCHER_INDEX = 'PAYMENT_VOUCHER';
 
-export const BOOKING_INDEX = 'BOOKING_INDEX';
-
-export const CREATOR_INDEX = 'CREATOR_INDEX';
+export const CREATOR_INDEX = 'CREATOR';
 
 export const VALIDATE_NON_EMPTY_STRING_MSG = 'property must be a non-empty string';
 
