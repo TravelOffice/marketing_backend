@@ -3,6 +3,7 @@ import { GenerateAvatarPresignedUrlOption } from '../models/GenerateAvatarPresig
 import { GenerateMailPresignedUrlOption } from '../models/GenerateMailPresignedUrlOption';
 import { s3Provider } from '../providers';
 import { S3Repository } from './interfaces/S3Repository';
+import { GeneratePaymentVoucherPresignedUrlOption } from '../models/GeneratePaymentVoucherPresignedUrlOption';
 
 export default class S3RepositoryImpl implements S3Repository {
   /**
@@ -23,4 +24,11 @@ export default class S3RepositoryImpl implements S3Repository {
    * @returns PresignedUrl object
    */
   generateAvatarPresignedUrl = async (option: GenerateAvatarPresignedUrlOption) => s3Provider.generatePresignedUrl(option.bucket, `${option.tenant}/${option.username}/avatar/${option.fileName}`, option.expires, option.fileType);
+
+  /**
+   * Generate presigned url to upload payment voucher to s3
+   * @param option GeneratePaymentVoucherPresignedUrlOption
+   * @returns PresignedUrl object
+   */
+  generatePaymentVoucherPresignedUrl = async (option: GeneratePaymentVoucherPresignedUrlOption) => s3Provider.generatePresignedUrl(option.bucket, `${option.tenant}/payment-voucher/${option.fileName}`, option.expires, option.fileType);
 }

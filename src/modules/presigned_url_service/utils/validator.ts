@@ -34,3 +34,10 @@ export function getAvatarPresignedUrlValidator() {
     query('fileType', 'is required').not().isEmpty(),
   ];
 }
+
+export function getPaymentVoucherPresignedUrlValidator() {
+  return [
+    query('fileName', 'is required').not().isEmpty(),
+    query('fileType', 'is required').not().isEmpty(),
+  ];
+}
