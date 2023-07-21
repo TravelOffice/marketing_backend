@@ -11,7 +11,10 @@ export default class DepartureTourRepositoryImpl implements DepartureTourReposit
    * @param id - The ID of the departure tour to retrieve.
    * @returns A Promise that resolves to the retrieved departure tour.
    */
-  getDepartureTour = async (tenant: string, id: string) => dynamoProvider.getItem<DepartureTour>(
+  getDepartureTour = async (
+    tenant: string,
+    id: string,
+  ) => dynamoProvider.getItem<DepartureTour>(
     await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
     `TENANT#${tenant}#DEPARTURE_TOUR`,
     id,

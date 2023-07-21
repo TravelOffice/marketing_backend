@@ -7,11 +7,13 @@ import {
   CREATED_AT_INDEX,
   DEPARTURE_TOUR_COUNTER_INDEX,
   DEPARTURE_TOUR_INDEX,
+  OPERATION_STATUS_INDEX,
   TENANT_INDEX,
 } from '../utils/constants';
 import logger from '../utils/logger';
 import { DepartureTourRepository } from './interfaces/DepartureTourRepository';
 import { User } from '../models/User';
+import TourOperationStatus from '../models/TourOperationstatus';
 
 type QueryInput = AWS.DynamoDB.DocumentClient.QueryInput;
 
@@ -161,15 +163,62 @@ export default class DepartureTourRepositoryImpl implements DepartureTourReposit
    * @param assignee The new assignee
    * @returns The departure tour after updated
    */
-  changeAssignee = async (tenantId: string, departureTourId: string, assignee: User) => {
+  changeAssignee = async (
+    tenantId: string,
+    departureTourId: string,
+    assignee: User,
+    isFirstAssignee?: boolean,
+  ) => {
     const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
     const pk = `${TENANT_INDEX}#${tenantId}#${DEPARTURE_TOUR_INDEX}`;
     const sk = `${departureTourId}`;
-    const updateExpression = 'SET assigneeId = :assigneeId, assigneeName = :assigneeName, lsi2 = :assigneeLsi, updatedAt = :updatedAt';
-    const expressionAttributeValues = {
+    let updateExpression = 'SET assigneeId = :assigneeId, assigneeName = :assigneeName, lsi2 = :assigneeLsi, updatedAt = :updatedAt';
+    let expressionAttributeValues: { [key: string]: any } = {
       ':assigneeId': assignee.username,
       ':assigneeName': `${assignee.lastName} ${assignee.firstName}`,
       ':assigneeLsi': `${ASSIGNEE_INDEX}#${assignee.username}`,
+      ':updatedAt': Date.now(),
+    };
+
+    // If the assignee is the first assignee, update the operation status to WAITING_FOR_OPERATION
+    if (isFirstAssignee) {
+      updateExpression += ', operationStatus = :operationStatus, lsi4 = :operationStatusLsi';
+      expressionAttributeValues = {
+        ...expressionAttributeValues,
+        ':operationStatus': TourOperationStatus.PROCESSING,
+        ':operationStatusLsi': `${OPERATION_STATUS_INDEX}#${TourOperationStatus.PROCESSING}`,
+      };
+    }
+
+    const rs = await dynamoProvider.updateItem(
+      travelTable,
+      pk,
+      sk,
+      updateExpression,
+      expressionAttributeValues,
+    );
+    return rs.Attributes as DepartureTour;
+  };
+
+  /**
+   * Change the operation status of the departure tour
+   * @param tenantId The ID of the tenant
+   * @param departureTourId The ID of the departure tour
+   * @param toOperationStatus The new operation status
+   * @returns The departure tour after updated
+   */
+  changeOperationStatus = async (
+    tenantId: string,
+    departureTourId: string,
+    toOperationStatus: TourOperationStatus,
+  ) => {
+    const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const pk = `${TENANT_INDEX}#${tenantId}#${DEPARTURE_TOUR_INDEX}`;
+    const sk = `${departureTourId}`;
+    const updateExpression = 'SET operationStatus = :operationStatus, lsi4 = :operationStatusLsi, updatedAt = :updatedAt';
+    const expressionAttributeValues = {
+      ':operationStatus': toOperationStatus,
+      ':operationStatusLsi': `${OPERATION_STATUS_INDEX}#${toOperationStatus}`,
       ':updatedAt': Date.now(),
     };
     const rs = await dynamoProvider.updateItem(

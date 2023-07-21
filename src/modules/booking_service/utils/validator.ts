@@ -34,12 +34,12 @@ export function validateNewBookingParams() {
       return !Number.isNaN(date);
     }),
     body('assigneeId').notEmpty().isString(),
-    body('customerInfo').isObject().withMessage('Customer information must not be empty'),
-    body('customerInfo.email').notEmpty().isEmail(),
-    body('customerInfo.phone').notEmpty().isMobilePhone('any'),
-    body('customerInfo.honorific').optional().isString(),
-    body('customerInfo.fullName').optional().isString(),
-    body('customerInfo.address').optional().isString(),
+    body('customer').isObject().withMessage('Customer information must not be empty'),
+    body('customer.email').notEmpty().isEmail(),
+    body('customer.phone').notEmpty().isMobilePhone('any'),
+    body('customer.honorific').optional().isString(),
+    body('customer.fullName').optional().isString(),
+    body('customer.address').optional().isString(),
   ];
 }
 
@@ -53,16 +53,6 @@ export function validateNewBookingFromLeadParams() {
       return !Number.isNaN(date);
     }),
     body('note').optional().isString(),
-    body('services').isArray().notEmpty().withMessage('Booking services must not be empty.'),
-    body('services.*.serviceName').notEmpty().isString(),
-    body('services.*.quantity', VALIDATE_POSITIVE_NUMBER)
-      .notEmpty()
-      .withMessage(VALIDATE_NUMBER_MSG)
-      .isInt({ min: 0 }),
-    body('services.*.price', VALIDATE_POSITIVE_NUMBER)
-      .notEmpty()
-      .withMessage(VALIDATE_NUMBER_MSG)
-      .isInt({ min: 0 }),
   ];
 }
 
@@ -167,5 +157,21 @@ export function validateSendEmailToTourGuideParams() {
 export function confirmBookingValidator() {
   return [
     body('departureTourId').notEmpty().isString(),
+  ];
+}
+
+export function addNoteValidator() {
+  return [
+    body('title').notEmpty().isString(),
+    body('description').notEmpty().isString(),
+    body('type').notEmpty().isString(),
+  ];
+}
+
+export function updateNoteValidator() {
+  return [
+    body('title').optional().isString(),
+    body('description').optional().isString(),
+    body('type').optional().isString(),
   ];
 }

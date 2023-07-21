@@ -10,6 +10,7 @@ import {
 } from './constants';
 import { TourType } from '../models/TourType';
 import { TourStatus } from '../models/TourStatus';
+import TourOperationStatus from '../models/TourOperationstatus';
 
 /**
  * Checks if a date is after or same the current date (considering only the year, month, and day).
@@ -107,5 +108,9 @@ export function createOrUpdateDepartureTourValidator() {
 
     body('tourPlan')
       .notEmpty().withMessage(VALIDATE_NON_EMPTY_STRING_MSG),
+
+    body('operationStatus')
+      .if(body('code').exists())
+      .isIn(Object.values(TourOperationStatus)).withMessage(`allow only in ${Object.values(TourOperationStatus)}`),
   ];
 }

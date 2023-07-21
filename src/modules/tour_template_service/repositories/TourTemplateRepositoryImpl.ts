@@ -1,7 +1,7 @@
 import { getAwsSecretValue } from 'get-env';
 import { dynamoProvider, helper, QueryInput } from 'core';
 import { TourTemplate } from '../models/TourTemplate';
-import { TENANT_INDEX, TOUR_TEMPLATE_INDEX, TOUR_TEMPLATE_COUNTER_INDEX } from '../utils/constants';
+import { TENANT_INDEX, TOUR_TEMPLATE_COUNTER_INDEX, TOUR_TEMPLATE_INDEX } from '../utils/constants';
 import logger from '../utils/logger';
 import { TourTemplateRepository } from './interfaces/TourTemplateRepository';
 
@@ -140,22 +140,21 @@ implements TourTemplateRepository {
       );
     }
 
-    const expressionNamesAndValues = helper.generateUpdateExpressionNamesAndValues(tourTemplate);
-    const result = await dynamoProvider.rawUpdateItem({
-      TableName: table,
-      Key: {
-        pk,
-        sk,
+    const updatedAt = Date.now();
+    const { code, createdAt, ...tourTemplateToUpdate } = tourTemplate;
+
+    const result = await dynamoProvider.updateItemWithSetExpression(
+      table,
+      pk,
+      sk,
+      {
+        ...tourTemplateToUpdate, updatedAt,
       },
-      UpdateExpression: helper.generateUpdateExpression(tourTemplate),
-      ReturnValues: 'ALL_NEW',
-      ExpressionAttributeValues: expressionNamesAndValues.values,
-      ExpressionAttributeNames: expressionNamesAndValues.names,
-    });
+    );
 
     logger.log(`TourTemplate updated successfully for tenant ${tenantId}`);
 
-    return helper.excludeDataFromObject(result) as TourTemplate;
+    return helper.excludeDataFromObject(result.Attributes as TourTemplate) as TourTemplate;
   };
 
   /**
