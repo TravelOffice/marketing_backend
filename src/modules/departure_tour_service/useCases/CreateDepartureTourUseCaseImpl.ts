@@ -1,7 +1,11 @@
 import { helper } from 'core';
 import { DepartureTour } from '../models/DepartureTour';
 import { departureTourRepository } from '../repositories';
-import { CREATED_AT_INDEX, STATUS_INDEX, UPDATED_AT_INDEX } from '../utils/constants';
+import {
+  CREATED_AT_INDEX,
+  OPERATION_STATUS_INDEX,
+  STATUS_INDEX, UPDATED_AT_INDEX,
+} from '../utils/constants';
 import { CreateDepartureTourUseCase } from './interfaces/CreateDepartureTourUseCase';
 
 export default class CreateDepartureTourUseCaseImpl implements CreateDepartureTourUseCase {
@@ -22,6 +26,7 @@ export default class CreateDepartureTourUseCaseImpl implements CreateDepartureTo
     'status',
     'creatorId',
     'creatorName',
+    'operationStatus',
   ];
 
   invoke = async (
@@ -38,6 +43,7 @@ export default class CreateDepartureTourUseCaseImpl implements CreateDepartureTo
       lsi1: `${CREATED_AT_INDEX}#${now}`,
       lsi2: `${UPDATED_AT_INDEX}#${now}`,
       lsi3: `${STATUS_INDEX}#${departureTour.status}`,
+      lsi4: `${OPERATION_STATUS_INDEX}#${departureTour.operationStatus}`,
     };
     await departureTourRepository.create(tenantId, departureTourToAdd);
     return helper.excludeDataFromObject(departureTourToAdd) as DepartureTour;

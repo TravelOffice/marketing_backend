@@ -3,7 +3,7 @@ import { HonorificType } from '../Customer';
 
 export interface CreateBookingInput {
   // Customer information, new customer will be created in database if not existed
-  customerInfo: {
+  customer: {
     email: string
     phone: string
     honorific: HonorificType

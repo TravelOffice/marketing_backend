@@ -32,7 +32,7 @@ export default class CreateBookingUseCaseImpl implements CreateBookingUseCase {
     const { tenant, username, name } = currentUserInfo;
     const {
       email, phone, honorific, fullName, address,
-    } = newBookingInput.customerInfo;
+    } = newBookingInput.customer;
 
     const {
       tourType, tourTemplateId, departureDate, sourceId,
@@ -93,7 +93,6 @@ export default class CreateBookingUseCaseImpl implements CreateBookingUseCase {
     const newBooking: Booking = {
       code,
       customerId,
-      customerInfo: { email, phone },
       tourType,
       createdAt: now,
       updatedAt: now,

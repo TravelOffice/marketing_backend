@@ -46,10 +46,12 @@ export default class ChangeAssigneeUseCaseImpl implements ChangeAssigneeUseCase 
     logger.log('Departure tour information validated successfully.');
 
     // Change the assignee of the departure tour
+    const isFirstAssignee = !departureTour.assigneeId;
     const updatedDepartureTour = await departureTourRepository.changeAssignee(
       tenantId,
       departureTourId,
       assignee,
+      isFirstAssignee,
     );
 
     logger.log(`Assignee of Departure tour ${departureTourId} changed to ${assigneeId} successfully.`);
