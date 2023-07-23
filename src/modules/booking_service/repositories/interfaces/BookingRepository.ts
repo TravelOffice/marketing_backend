@@ -1,3 +1,4 @@
+import { CognitoUser } from '../../models/CognitoUser';
 import { Booking, BookingStatus } from '../../models/booking/Booking';
 import { BookingsRelatedItems } from '../../models/booking/BookingsRelatedItems';
 
@@ -9,7 +10,7 @@ export interface BookingRepository {
   getAll: (tenant: string) => Promise<Array<Booking>>,
   getListByStatus: (tenant: string, status: BookingStatus) => Promise<Array<Booking>>,
   generateCode: (tenant: string) => Promise<string>,
-  cancel: (tenant: string, bookingId: string, reason: string) => Promise<Booking>,
+  cancel: (userInfo: CognitoUser, booking: Booking, reason: string) => Promise<Booking>,
   confirm: (tenant: string, bookingId: string, dataToUpdate: Partial<Booking>) => Promise<Booking>,
   fetchBookingsRelatedItems: (tenant: string, bookings: Booking[]) => Promise<BookingsRelatedItems>,
 }
