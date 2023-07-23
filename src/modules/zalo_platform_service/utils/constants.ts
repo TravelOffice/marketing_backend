@@ -22,7 +22,7 @@ export const PERMISSION_INDEX = 'PERMISSION';
 
 export const FILE_INDEX = 'FILE';
 
-export const DEFAULT_ROLES = ['ROOT', 'ADMIN', 'SALE'];
+export const DEFAULT_ROLES = ['ROOT', 'ADMIN', 'SALE', 'OPERATOR', 'OPERATOR_MANAGER'];
 
 export const OMITTED_CONVERSATION_ATTRIBUTES = ['pk', 'sk', 'lsi1', 'lsi2', 'lsi3', 'lsi4', 'lsi5'];
 

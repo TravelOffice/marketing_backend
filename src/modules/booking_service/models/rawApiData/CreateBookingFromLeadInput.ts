@@ -9,7 +9,7 @@ export interface CreateBookingFromLeadInput {
   // One kind of ['shared', 'group', 'solo']
   tourType: BookingTourType,
   // Expected begin date of trip
-  departureDate: string,
+  departureDate: number,
   // Reference to Sale model, each Sale is identified by pk+sk pair
   assigneeId: string,
   // List of services added to booking

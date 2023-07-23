@@ -28,7 +28,7 @@ export const FAILED = 'Failed!';
 
 export const PARTITION_KEY_DELIMITER = '#';
 
-export const DEFAULT_ROLES = ['ROOT', 'ADMIN', 'SALE'];
+export const DEFAULT_ROLES = ['ROOT', 'ADMIN', 'SALE', 'OPERATOR', 'OPERATOR_MANAGER'];
 
 export const ROOT_ROLE = 'ROOT';
 

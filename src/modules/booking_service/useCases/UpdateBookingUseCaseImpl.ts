@@ -15,7 +15,6 @@ export default class UpdateBookingUseCaseImpl implements UpdateBookingUseCase {
     'paymentStatus',
     'assigneeId',
     'canceledReason',
-    'canceledNote',
     'canceledAtPhase',
     'services',
     'tourTemplateId',

@@ -33,6 +33,7 @@ export default class ConfirmBookingUseCaseImpl implements ConfirmBookingUseCase 
     const dataToUpdate: Partial<Booking> = {
       departureTourId,
       departureTourName: departureTour.name,
+      departureDate: departureTour.startDate,
       bookingStatus: BookingStatusEnum.CONFIRMED,
       updatedAt: Date.now(),
       lsi3: `${BOOKING_STATUS_INDEX}#${BookingStatusEnum.CONFIRMED}`,

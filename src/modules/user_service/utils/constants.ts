@@ -60,6 +60,6 @@ export const MAIL_ACCOUT_INDEX = 'MAIL_ACCOUNT';
 
 export const OMITTED_USER_ATTRIBUTES = ['tenant', 'pk', 'sk', 'lsi1', 'lsi2', 'lsi3', 'lsi4', 'lsi5', 'wct', 'nacs', 'roleStr', 'searchApiKey'];
 
-export const DEFAULT_ROLES = ['ROOT', 'ADMIN', 'SALE'];
+export const DEFAULT_ROLES = ['ROOT', 'ADMIN', 'SALE', 'OPERATOR', 'OPERATOR_MANAGER'];
 
 export const ROOT_ROLE = 'ROOT';
