@@ -29,10 +29,7 @@ export function validateNewBookingParams() {
     body('tourTemplateId').notEmpty().isString(),
     body('sourceId').notEmpty().isString(),
     body('tourType').notEmpty().isIn(tourTypes).withMessage(`allow only in ${tourTypes}`),
-    body('departureDate').optional().custom((value: string) => {
-      const date = Date.parse(value);
-      return !Number.isNaN(date);
-    }),
+    body('departureDate').optional().custom((value) => !Number.isNaN(new Date(value))),
     body('assigneeId').notEmpty().isString(),
     body('customer').isObject().withMessage('Customer information must not be empty'),
     body('customer.email').notEmpty().isEmail(),
@@ -48,10 +45,7 @@ export function validateNewBookingFromLeadParams() {
     body('leadId').notEmpty().isString(),
     body('tourTemplateId').notEmpty().isString(),
     body('tourType').notEmpty().isIn(tourTypes).withMessage(`allow only in ${tourTypes}`),
-    body('departureDate').notEmpty().custom((value: string) => {
-      const date = Date.parse(value);
-      return !Number.isNaN(date);
-    }),
+    body('departureDate').notEmpty().custom((value) => !Number.isNaN(new Date(value))),
     body('note').optional().isString(),
   ];
 }
@@ -89,11 +83,6 @@ export function validateUpdateBookingParams() {
     body('paymentStatus').optional().notEmpty().isIn(bookingPaymentStatuses)
       .withMessage(`allow only in ${bookingPaymentStatuses}`),
     body('assigneeId').optional().notEmpty().isString(),
-    body('canceledAt').optional().isNumeric(),
-    body('canceledReason').optional().isString(),
-    body('canceledNote').optional().isString(),
-    body('canceledBy').optional().isString(),
-    body('canceledAtPhase').optional().isString(),
     /**
      * TODO: Temporary attributes
      * These attrs will be updated later
@@ -115,8 +104,6 @@ export function validateUpdateBookingParams() {
     body('checkin').optional().isNumeric(),
     body('checkout').optional().isNumeric(),
     body('bookingAt').optional().isNumeric(),
-    body('waitingAt').optional().isNumeric(),
-    body('waitingExpiredAt').optional().isNumeric(),
     body('doneAt').optional().isNumeric(),
     body('totalPax').optional().isNumeric(),
     body('services').optional().isArray().withMessage('Booking services must be an array.'),

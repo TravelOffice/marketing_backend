@@ -7,7 +7,6 @@ export type UpdateBookingDto = Pick<Booking,
   'paymentStatus' |
   'assigneeId' |
   'canceledReason' |
-  'canceledNote' |
   'canceledAtPhase' |
   'services' |
   'tourTemplateId' |
