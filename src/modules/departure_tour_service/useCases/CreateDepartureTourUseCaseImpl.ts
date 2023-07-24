@@ -7,6 +7,7 @@ import {
   STATUS_INDEX, UPDATED_AT_INDEX,
 } from '../utils/constants';
 import { CreateDepartureTourUseCase } from './interfaces/CreateDepartureTourUseCase';
+import TourOperationStatus from '../models/TourOperationstatus';
 
 export default class CreateDepartureTourUseCaseImpl implements CreateDepartureTourUseCase {
   allowedCreatingKeys: (keyof DepartureTour)[] = [
@@ -35,15 +36,17 @@ export default class CreateDepartureTourUseCaseImpl implements CreateDepartureTo
   ) => {
     const now = Date.now();
     const code = await departureTourRepository.generateDepartureTourCode(tenantId);
+    const operationStatus = TourOperationStatus.WAITING_FOR_OPERATION;
     const departureTourToAdd: DepartureTour = {
       ...(helper.extractDataFromObject(departureTour, this.allowedCreatingKeys) as DepartureTour),
       code,
       createdAt: now,
       updatedAt: now,
+      operationStatus,
       lsi1: `${CREATED_AT_INDEX}#${now}`,
       lsi2: `${UPDATED_AT_INDEX}#${now}`,
       lsi3: `${STATUS_INDEX}#${departureTour.status}`,
-      lsi4: `${OPERATION_STATUS_INDEX}#${departureTour.operationStatus}`,
+      lsi4: `${OPERATION_STATUS_INDEX}#${operationStatus}`,
     };
     await departureTourRepository.create(tenantId, departureTourToAdd);
     return helper.excludeDataFromObject(departureTourToAdd) as DepartureTour;
