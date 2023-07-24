@@ -106,11 +106,10 @@ export function createOrUpdateDepartureTourValidator() {
       .notEmpty()
       .isString(),
 
-    body('tourPlan')
-      .notEmpty().withMessage(VALIDATE_NON_EMPTY_STRING_MSG),
-
     body('operationStatus')
       .if(body('code').exists())
       .isIn(Object.values(TourOperationStatus)).withMessage(`allow only in ${Object.values(TourOperationStatus)}`),
+
+    // TODO: Validate tour plan later
   ];
 }

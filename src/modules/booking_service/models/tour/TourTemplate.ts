@@ -1,6 +1,7 @@
 import { BaseDdbModel } from 'common-models';
 import { TourServicePrice } from './TourServicePrice';
 import { TourType } from './TourType';
+import { TourPlan } from './TourPlan';
 
 export interface TourTemplate extends BaseDdbModel {
   code: string,
@@ -17,7 +18,7 @@ export interface TourTemplate extends BaseDdbModel {
     policyConditionsAndExtraFee?: string,
     cancellationTerms?: string,
   },
-  tourPlan: string,
+  tourPlan?: TourPlan,
   creatorId: string,
   creatorName: string,
 }

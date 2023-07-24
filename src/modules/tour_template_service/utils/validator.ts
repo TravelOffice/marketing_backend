@@ -82,7 +82,6 @@ export function createOrUpdateTourTemplateValidator() {
       .if(body('policiesAndRegulations.inclusionAndExclusion').exists())
       .notEmpty()
       .isString(),
-
-    body('tourPlan').notEmpty().withMessage(VALIDATE_NON_EMPTY_STRING_MSG),
+    // TODO: Validate tour plan later
   ];
 }
