@@ -18,6 +18,7 @@ import { compact, uniqueItems } from '../utils/array';
 import { Customer } from '../models/Customer';
 import { Lead } from '../models/Lead';
 import { TourTemplate } from '../models/tour/TourTemplate';
+import { CognitoUser } from '../models/CognitoUser';
 
 const buildBatchReqItems = (
   pk: string,
@@ -160,8 +161,9 @@ export default class BookingRepositoryImpl implements BookingRepository {
     );
   };
 
-  cancel = async (tenantId: string, bookingId: string, reason: string) => {
+  cancel = async (userInfo: CognitoUser, booking: Booking, reason: string) => {
     try {
+      const { tenant, username } = userInfo;
       // Log the start of the cancellation process
       logger.log('Cancellation process started.');
 
@@ -169,8 +171,8 @@ export default class BookingRepositoryImpl implements BookingRepository {
       const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
 
       // Construct the partition key and sort key for the booking in the DynamoDB table
-      const pk = `${TENANT_INDEX}#${tenantId}#${BOOKING_INDEX}`;
-      const sk = bookingId;
+      const pk = `${TENANT_INDEX}#${tenant}#${BOOKING_INDEX}`;
+      const sk = booking.code;
 
       // Define the parameters for updating the booking in the DynamoDB table
       const canceledStatus = BookingStatusEnum.CANCELED;
@@ -180,10 +182,12 @@ export default class BookingRepositoryImpl implements BookingRepository {
           pk,
           sk,
         },
-        UpdateExpression: 'SET bookingStatus = :status, canceledReason = :reason, updatedAt = :updatedAt, lsi3 = :lsi3',
+        UpdateExpression: 'SET bookingStatus = :status, canceledReason = :reason, canceledBy = :canceledBy, canceledAtPhase = :canceledAtPhase, updatedAt = :updatedAt, lsi3 = :lsi3',
         ExpressionAttributeValues: {
           ':status': canceledStatus,
           ':reason': reason,
+          ':canceledBy': username,
+          ':canceledAtPhase': booking.bookingStatus,
           ':updatedAt': Date.now(),
           ':lsi3': `${BOOKING_STATUS_INDEX}#${canceledStatus}`,
         },

@@ -149,10 +149,10 @@ app.get('/bookings/:id', async (req: Request, res: Response) => {
 app.put('/bookings/:id/cancel', validateCancelBookingDataInput(), async (req: Request, res: Response) => {
   try {
     validate(req);
-    const { tenant } = getCurrentUserInfo(req.headers.authorization!);
+    const userInfo = getCurrentUserInfo(req.headers.authorization!);
     const { id } = req.params;
     const { reason } = req.body;
-    const booking = await cancelBookingsUseCase.invoke(tenant, id, reason);
+    const booking = await cancelBookingsUseCase.invoke(userInfo, id, reason);
     res.json(wrapResponse(SUCCESS, booking));
   } catch (error: any) {
     logger.log(`[PUT /bookings/:id/cancel] Error ${error}`);
