@@ -240,14 +240,14 @@ app.delete('/bookings/:id/notes/:noteId', async (req: Request, res: Response) =>
   }
 });
 
-app.get('/departure-tours/:departureTourId/bookings', validateGetBookingFilteredParams(), async (req: Request, res: Response) => {
+app.get('/departure-tours/:id/bookings', validateGetBookingFilteredParams(), async (req: Request, res: Response) => {
   try {
     // Get all bookings related to tenant
     const { tenant } = getCurrentUserInfo(req.headers.authorization!);
-    const { departureTourId } = req.params;
+    const { id } = req.params;
     const bookings = await getBookingsByDepartureTourIdUseCase.invoke(
       tenant,
-      departureTourId,
+      id,
     );
     res.json(wrapResponse(SUCCESS, bookings));
   } catch (error: any) {
