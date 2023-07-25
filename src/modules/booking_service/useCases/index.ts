@@ -22,6 +22,8 @@ import { UpdateNoteUseCase } from './interfaces/UpdateNoteUseCase';
 import UpdateNoteUseCaseImpl from './UpdateNoteUseCaseImpl';
 import DeleteNoteUseCaseImpl from './DeleteNoteUseCaseImpl';
 import { DeleteNoteUseCase } from './interfaces/DeleteNoteUseCase';
+import { GetBookingsByDepartureTourIdUseCase } from './interfaces/GetBookingsByDepartureTourIdUseCase';
+import GetBookingsByDepartureTourIdUseCaseImpl from './GetBookingsByDepartureTourIdUseCaseImpl';
 
 interface UseCases {
   createBookingUseCase: CreateBookingUseCase,
@@ -36,6 +38,7 @@ interface UseCases {
   addNoteUseCase: AddNoteUseCase,
   updateNoteUseCase: UpdateNoteUseCase,
   deleteNoteUseCase: DeleteNoteUseCase,
+  getBookingsByDepartureTourIdUseCase: GetBookingsByDepartureTourIdUseCase,
 }
 
 const useCases: UseCases = {
@@ -51,6 +54,7 @@ const useCases: UseCases = {
   addNoteUseCase: new AddNoteUseCaseImpl(),
   updateNoteUseCase: new UpdateNoteUseCaseImpl(),
   deleteNoteUseCase: new DeleteNoteUseCaseImpl(),
+  getBookingsByDepartureTourIdUseCase: new GetBookingsByDepartureTourIdUseCaseImpl(),
 };
 
 export const {
@@ -66,4 +70,5 @@ export const {
   addNoteUseCase,
   updateNoteUseCase,
   deleteNoteUseCase,
+  getBookingsByDepartureTourIdUseCase,
 } = useCases;

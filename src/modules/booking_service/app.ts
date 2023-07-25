@@ -11,6 +11,7 @@ import {
   deleteNoteUseCase,
   getAllBookingsUseCase,
   getBookingByGivenIdUseCase,
+  getBookingsByDepartureTourIdUseCase,
   getBookingsByStatusUseCase,
   sendEmailToTourOperator,
   updateBookingUseCase,
@@ -20,7 +21,8 @@ import wrapResponse from './utils/wrapResponse';
 import { FAILED, NO_REPLY_DEFAULT_EMAIL, SUCCESS } from './utils/constants';
 import validate, {
   addNoteValidator,
-  confirmBookingValidator, updateNoteValidator,
+  confirmBookingValidator,
+  updateNoteValidator,
   validateCancelBookingDataInput,
   validateGetBookingFilteredParams,
   validateNewBookingFromLeadParams,
@@ -218,6 +220,22 @@ app.delete('/bookings/:id/notes/:noteId', async (req: Request, res: Response) =>
     res.json(wrapResponse(SUCCESS, booking));
   } catch (error: any) {
     logger.log(`[DELETE /bookings/:bookingId/notes/:noteId] Error ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.get('/departure-tours/:departureTourId/bookings', validateGetBookingFilteredParams(), async (req: Request, res: Response) => {
+  try {
+    // Get all bookings related to tenant
+    const { tenant } = getCurrentUserInfo(req.headers.authorization!);
+    const { departureTourId } = req.params;
+    const bookings = await getBookingsByDepartureTourIdUseCase.invoke(
+      tenant,
+      departureTourId,
+    );
+    res.json(wrapResponse(SUCCESS, bookings));
+  } catch (error: any) {
+    logger.log(`[app.get] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });

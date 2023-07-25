@@ -8,6 +8,7 @@ import {
   BOOKING_INDEX,
   BOOKING_STATUS_INDEX,
   CUSTOMER_INDEX,
+  DEPARTURE_TOUR_INDEX,
   LEAD_INDEX,
   TENANT_INDEX,
   TOUR_TEMPLATE_INDEX,
@@ -48,22 +49,16 @@ export default class BookingRepositoryImpl implements BookingRepository {
    * Update booking data for tenant
    * @param tenant Tenant id
    * @param bookingId Booking code
-   * @param booking Booking data to update
+   * @param bookingToUpdate Booking data to update
    * @returns Updated booking data
    */
-  update = async (tenant: string, bookingId: string, booking: Partial<Booking>) => {
-    const expressionNamesAndValues = helper.generateUpdateExpressionNamesAndValues(booking);
-    const result = await dynamoProvider.rawUpdateItem({
-      TableName: await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
-      Key: {
-        pk: `${TENANT_INDEX}#${tenant}#${BOOKING_INDEX}`,
-        sk: bookingId,
-      },
-      UpdateExpression: helper.generateUpdateExpression(booking),
-      ReturnValues: 'ALL_NEW',
-      ExpressionAttributeValues: expressionNamesAndValues.values,
-      ExpressionAttributeNames: expressionNamesAndValues.names,
-    });
+  update = async (tenant: string, bookingId: string, bookingToUpdate: Partial<Booking>) => {
+    const result = await dynamoProvider.updateItemWithSetExpression(
+      await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
+      `${TENANT_INDEX}#${tenant}#${BOOKING_INDEX}`,
+      bookingId,
+      bookingToUpdate,
+    );
 
     return result.Attributes as Booking;
   };
@@ -256,18 +251,41 @@ export default class BookingRepositoryImpl implements BookingRepository {
    * @returns A Promise that resolves to the updated booking.
    */
   confirm = async (tenant: string, bookingId: string, dataToUpdate: Partial<Booking>) => {
-    const expressionNamesAndValues = helper.generateUpdateExpressionNamesAndValues(dataToUpdate);
-    const result = await dynamoProvider.rawUpdateItem({
-      TableName: await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
-      Key: {
-        pk: `${TENANT_INDEX}#${tenant}#${BOOKING_INDEX}`,
-        sk: `${bookingId}`,
-      },
-      UpdateExpression: helper.generateUpdateExpression(dataToUpdate),
-      ReturnValues: 'ALL_NEW',
-      ExpressionAttributeValues: expressionNamesAndValues.values,
-      ExpressionAttributeNames: expressionNamesAndValues.names,
-    });
+    const result = await dynamoProvider.updateItemWithSetExpression(
+      await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
+      `${TENANT_INDEX}#${tenant}#${BOOKING_INDEX}`,
+      bookingId,
+      dataToUpdate,
+    );
+
     return result.Attributes as Booking;
+  };
+
+  /**
+   * Get list of booking by given departureTourId
+   * @param tenant Tenant id
+   * @param departureTourId departureTourId of booking
+   * @returns List of bookings that filtered by departureTourId
+   */
+  getListByDepartureTourId = async (tenant: string, departureTourId: string) => {
+    const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const params: QueryInput = {
+      TableName: travelTable,
+      IndexName: 'Index4',
+      KeyConditionExpression: 'pk = :pk and lsi4 = :lsi4',
+      ExpressionAttributeValues: {
+        ':pk': `${TENANT_INDEX}#${tenant}#${BOOKING_INDEX}`,
+        ':lsi4': `${DEPARTURE_TOUR_INDEX}#${departureTourId}`,
+      },
+    };
+
+    logger.log(`Get all bookings for given tenant ${tenant} with departureTourId ${departureTourId}`);
+
+    const bookings = await dynamoProvider.query(params);
+
+    // Formatting the items and adding the id property
+    return bookings.map(
+      (booking) => helper.excludeDataFromObject(booking) as Booking,
+    );
   };
 }

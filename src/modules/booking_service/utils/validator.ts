@@ -116,6 +116,11 @@ export function validateUpdateBookingParams() {
       .notEmpty()
       .withMessage(VALIDATE_NUMBER_MSG)
       .isInt({ min: 0 }),
+    body('departureTourId').optional()
+      .notEmpty()
+      .withMessage(VALIDATE_NON_EMPTY_STRING_MSG)
+      .isString()
+      .withMessage(VALIDATE_STRING_MSG),
   ];
 }
 

@@ -41,3 +41,5 @@ export const TOUR_TEMPLATE_INDEX = 'TOUR_TEMPLATE';
 export const VALIDATE_STRING_MSG = 'property must be a string';
 
 export const NO_REPLY_DEFAULT_EMAIL = 'no-reply@bahat.space';
+
+export const DEPARTURE_TOUR_INDEX = 'DEPARTURE_TOUR';
