@@ -3,7 +3,7 @@ import { CognitoUser } from '../models/CognitoUser';
 import { bookingRepository, departureTourRepository } from '../repositories';
 import { Booking, BookingStatusEnum, statusTransitionRules } from '../models/booking/Booking';
 import { ConfirmBookingDto } from '../models/dto/ConfirmBookingDto';
-import { BOOKING_STATUS_INDEX } from '../utils/constants';
+import { BOOKING_STATUS_INDEX, DEPARTURE_TOUR_INDEX } from '../utils/constants';
 
 export default class ConfirmBookingUseCaseImpl implements ConfirmBookingUseCase {
   /**
@@ -37,6 +37,7 @@ export default class ConfirmBookingUseCaseImpl implements ConfirmBookingUseCase 
       bookingStatus: BookingStatusEnum.CONFIRMED,
       updatedAt: Date.now(),
       lsi3: `${BOOKING_STATUS_INDEX}#${BookingStatusEnum.CONFIRMED}`,
+      lsi4: `${DEPARTURE_TOUR_INDEX}#${departureTourId}`,
     };
 
     await bookingRepository.confirm(tenant, bookingId, dataToUpdate);

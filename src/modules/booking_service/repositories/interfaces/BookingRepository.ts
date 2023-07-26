@@ -13,4 +13,5 @@ export interface BookingRepository {
   cancel: (userInfo: CognitoUser, booking: Booking, reason: string) => Promise<Booking>,
   confirm: (tenant: string, bookingId: string, dataToUpdate: Partial<Booking>) => Promise<Booking>,
   fetchBookingsRelatedItems: (tenant: string, bookings: Booking[]) => Promise<BookingsRelatedItems>,
+  getListByDepartureTourId: (tenant: string, departureTourId: string) => Promise<Array<Booking>>,
 }

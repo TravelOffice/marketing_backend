@@ -2,10 +2,15 @@ import { helper } from 'core';
 import logger from '../utils/logger';
 import { Booking, BookingStatusEnum } from '../models/booking/Booking';
 import {
-  bookingRepository, customerRepository, sourceRepository, userRepository,
+  bookingRepository,
+  customerRepository,
+  departureTourRepository,
+  sourceRepository,
+  userRepository,
 } from '../repositories';
 import { UpdateBookingUseCase } from './interfaces/UpdateBookingUseCase';
 import { UpdateBookingDto } from '../models/dto/UpdateBookingDto';
+import { DEPARTURE_TOUR_INDEX } from '../utils/constants';
 
 export default class UpdateBookingUseCaseImpl implements UpdateBookingUseCase {
   allowedUpdatingKeys: (keyof UpdateBookingDto)[] = [
@@ -78,7 +83,8 @@ export default class UpdateBookingUseCaseImpl implements UpdateBookingUseCase {
   /**
    * Parse dto to data which should be used to update. This method is useful to optimize
    * the amount of data to update.
-   * @param customer original customer object before updating
+   * @param tenantId Tenant id
+   * @param booking original booking object before updating
    * @param updateBookingDto data to update
    * @private
    */
@@ -101,6 +107,22 @@ export default class UpdateBookingUseCaseImpl implements UpdateBookingUseCase {
         dataToUpdate = { ...dataToUpdate, [prop]: updateBookingDto[prop] };
       }
     });
+
+    const { departureTourId } = dataToUpdate;
+    if (departureTourId) {
+      const departureTour = await departureTourRepository.getDepartureTour(
+        tenantId,
+        departureTourId,
+      );
+      if (!departureTour) throw new Error(`Departure tour [${departureTourId}] not found`);
+      dataToUpdate = {
+        ...dataToUpdate,
+        departureTourId,
+        departureTourName: departureTour.name,
+        departureDate: departureTour.startDate,
+        lsi4: `${DEPARTURE_TOUR_INDEX}#${departureTourId}`,
+      };
+    }
 
     dataToUpdate.updatedAt = now;
 
