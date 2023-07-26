@@ -43,3 +43,5 @@ export const VALIDATE_STRING_MSG = 'property must be a string';
 export const NO_REPLY_DEFAULT_EMAIL = 'no-reply@bahat.space';
 
 export const DEPARTURE_TOUR_INDEX = 'DEPARTURE_TOUR';
+
+export const PAYMENT_PENDING_RULE = 'payment-pending';

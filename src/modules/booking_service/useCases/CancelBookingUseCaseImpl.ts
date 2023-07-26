@@ -3,6 +3,7 @@ import { bookingRepository } from '../repositories';
 import { CancelBookingUseCase } from './interfaces/CancelBookingUseCase';
 import logger from '../utils/logger';
 import { CognitoUser } from '../models/CognitoUser';
+import { PAYMENT_PENDING_RULE } from '../utils/constants';
 
 export default class CancelBookingUseCaseImpl implements CancelBookingUseCase {
   /**
@@ -32,6 +33,13 @@ export default class CancelBookingUseCaseImpl implements CancelBookingUseCase {
     // Cancel the booking
     logger.log(`[CancelBookingUseCaseImpl]: Booking ${bookingId} was canceled with the reason '${reason}'`);
     // TODO: notification
+
+    // Delete payment pending event bridge
+    if (booking.bookingStatus === BookingStatusEnum.PAYMENT_PENDING) {
+      const ruleName = `${tenant}-${booking}-${PAYMENT_PENDING_RULE}`;
+      await bookingRepository.deletePaymentDeadline(ruleName);
+    }
+
     return bookingRepository.cancel(userInfo, booking, reason);
   };
 }

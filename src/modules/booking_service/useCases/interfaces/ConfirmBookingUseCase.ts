@@ -1,4 +1,5 @@
 import { CognitoUser } from '../../models/CognitoUser';
+import { Booking } from '../../models/booking/Booking';
 import { ConfirmBookingDto } from '../../models/dto/ConfirmBookingDto';
 
 export interface ConfirmBookingUseCase {
@@ -6,5 +7,5 @@ export interface ConfirmBookingUseCase {
     currentUser: CognitoUser,
     bookingId: string,
     dto: ConfirmBookingDto,
-  ) => Promise<void>,
+  ) => Promise<Partial<Booking>>,
 }

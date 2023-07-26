@@ -86,6 +86,14 @@ locals {
       SECRET_MANAGER_ID              = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
       SEND_NOTIFICATION_SERVICE_NAME = "${var.ENV}-${var.FEATURE_NAME}-send_notification"
       NO_REPLY_DEFAULT_EMAIL         = "no-reply@${local.domain_name}"
+      HANDLE_PAYMENT_OVERDUE_LAMBDA  = "arn:aws:states:${var.AWS_REGION}:${data.aws_caller_identity.current.account_id}:function:${var.ENV}-${var.FEATURE_NAME}-handle_payment_overdue"
+    },
+    handle_payment_overdue_lambda_vars = {
+      REGION                         = var.AWS_REGION
+      NODE_ENV                       = var.ENV
+      SECRET_MANAGER_ID              = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
+      SEND_NOTIFICATION_SERVICE_NAME = "${var.ENV}-${var.FEATURE_NAME}-send_notification"
+      NO_REPLY_DEFAULT_EMAIL         = "no-reply@${local.domain_name}"
     },
     departure_tour_service_lambda_vars = {
       REGION                         = var.AWS_REGION

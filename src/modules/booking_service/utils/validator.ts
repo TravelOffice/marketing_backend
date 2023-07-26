@@ -29,7 +29,10 @@ export function validateNewBookingParams() {
     body('tourTemplateId').notEmpty().isString(),
     body('sourceId').notEmpty().isString(),
     body('tourType').notEmpty().isIn(tourTypes).withMessage(`allow only in ${tourTypes}`),
-    body('departureDate').optional().custom((value) => !Number.isNaN(new Date(value))),
+    body('departureDate').optional().custom((value: string) => {
+      const date = Date.parse(value);
+      return !Number.isNaN(date);
+    }),
     body('assigneeId').notEmpty().isString(),
     body('customer').isObject().withMessage('Customer information must not be empty'),
     body('customer.email').notEmpty().isEmail(),
@@ -45,7 +48,10 @@ export function validateNewBookingFromLeadParams() {
     body('leadId').notEmpty().isString(),
     body('tourTemplateId').notEmpty().isString(),
     body('tourType').notEmpty().isIn(tourTypes).withMessage(`allow only in ${tourTypes}`),
-    body('departureDate').notEmpty().custom((value) => !Number.isNaN(new Date(value))),
+    body('departureDate').optional().custom((value: string) => {
+      const date = Date.parse(value);
+      return !Number.isNaN(date);
+    }),
     body('note').optional().isString(),
   ];
 }
@@ -54,6 +60,14 @@ export function validateCancelBookingDataInput() {
   return [
     body('reason', VALIDATE_NON_EMPTY_STRING_MSG).notEmpty().isString(),
   ];
+}
+
+export function validatePaymentPendingInput() {
+  return [
+    body('waitingExpiredAt').optional().custom((value: string) => {
+      const date = Date.parse(value);
+      return !Number.isNaN(date);
+    })];
 }
 
 export function validateGetBookingFilteredParams() {

@@ -51,7 +51,7 @@ interface DdbBookingModel extends BaseDdbModel {
   canceledAtPhase?: BookingStatus,
   services: Service[],
   tourTemplateId?: string,
-  departureDate?: number,
+  departureDate?: string,
   departureTourId?: string,
   departureTourName?: string,
 
@@ -88,7 +88,7 @@ interface DdbBookingModel extends BaseDdbModel {
   checkout?: number, // DateTime
   bookingAt?: number, // DateTime
   waitingAt?: number, // Time for waiting payment
-  waitingExpiredAt?: number, // The time resavation expired
+  waitingExpiredAt?: string, // The time resavation expired
   doneAt?: string,
   // success // executiveNote // guideRecashMoney // commission
   totalPax?: number, // Total travellers

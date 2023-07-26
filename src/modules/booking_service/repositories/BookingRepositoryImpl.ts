@@ -1,6 +1,6 @@
-import { getAwsSecretValue } from 'get-env';
+import { getAwsSecretValue, getEnv } from 'get-env';
 import {
-  dynamoProvider, helper, KeyList, QueryInput, UpdateItemInput,
+  dynamoProvider, eventBridgeProvider, helper, KeyList, QueryInput, UpdateItemInput,
 } from 'core';
 import { Booking, BookingStatus, BookingStatusEnum } from '../models/booking/Booking';
 import {
@@ -10,6 +10,7 @@ import {
   CUSTOMER_INDEX,
   DEPARTURE_TOUR_INDEX,
   LEAD_INDEX,
+  PAYMENT_PENDING_RULE,
   TENANT_INDEX,
   TOUR_TEMPLATE_INDEX,
 } from '../utils/constants';
@@ -258,7 +259,52 @@ export default class BookingRepositoryImpl implements BookingRepository {
       dataToUpdate,
     );
 
-    return result.Attributes as Booking;
+    return helper.excludeDataFromObject(result.Attributes as Booking);
+  };
+
+  /**
+   * Creates a payment deadline for a booking using AWS EventBridge rules.
+   *
+   * @param {string} tenant - The ID of the tenant.
+   * @param {string} bookingId - The ID of the booking.
+   * @param {string} waitingExpiredAt - The date and time when the payment deadline expires in
+   * ISO 8601 format.
+   * @returns {Promise<any>} - A promise that resolves to the result of the rule creation process.
+   */
+  createPaymentDeadline = async (
+    tenant: string,
+    bookingId: string,
+    waitingExpiredAt: string,
+  ) => {
+    // Retrieve the Lambda function name for handling payment overdue
+    const handlePaymentOverDueLambda = getEnv('HANDLE_PAYMENT_OVERDUE_LAMBDA');
+
+    // Generate a unique rule name for the payment deadline
+    const ruleName = `${tenant}-${bookingId}-${PAYMENT_PENDING_RULE}`;
+
+    // Parse the waitingExpiredAt string to extract the date and time components
+    const deadlineDate = new Date(waitingExpiredAt);
+    const year = deadlineDate.getFullYear();
+    const month = deadlineDate.getMonth() + 1;
+    const date = deadlineDate.getDate();
+    const hours = deadlineDate.getHours();
+    const minute = deadlineDate.getMinutes();
+
+    // Create the EventBridge rule with the specified schedule and Lambda function target
+    return eventBridgeProvider.createRule(
+      ruleName, // Rule name
+      `cron(${minute} ${hours} ${date} ${month} ? ${year})`, // Schedule in cron format
+      handlePaymentOverDueLambda, // Lambda function target for the rule
+      JSON.stringify({
+        tenant,
+        bookingId,
+        ruleName,
+      }), // Custom event data to be sent to the Lambda function
+    );
+  };
+
+  deletePaymentDeadline = async (ruleName: string) => {
+    await eventBridgeProvider.deleteRule(ruleName);
   };
 
   /**

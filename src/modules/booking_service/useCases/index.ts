@@ -22,8 +22,12 @@ import { UpdateNoteUseCase } from './interfaces/UpdateNoteUseCase';
 import UpdateNoteUseCaseImpl from './UpdateNoteUseCaseImpl';
 import DeleteNoteUseCaseImpl from './DeleteNoteUseCaseImpl';
 import { DeleteNoteUseCase } from './interfaces/DeleteNoteUseCase';
-import { GetBookingsByDepartureTourIdUseCase } from './interfaces/GetBookingsByDepartureTourIdUseCase';
+import { HandlePaymentOverdueUseCase } from './interfaces/HandlePaymentOverdueUseCase';
+import { HandlePaymentPendingUseCase } from './interfaces/HandlePaymentPendingUseCase';
+import HandlePaymentPendingUseCaseImpl from './HandlePaymentPendingUseCaseImpl';
+import HandlePaymentOverdueUseCaseImpl from './HandlePaymentOverdueUseCaseImpl';
 import GetBookingsByDepartureTourIdUseCaseImpl from './GetBookingsByDepartureTourIdUseCaseImpl';
+import { GetBookingsByDepartureTourIdUseCase } from './interfaces/GetBookingsByDepartureTourIdUseCase';
 
 interface UseCases {
   createBookingUseCase: CreateBookingUseCase,
@@ -32,13 +36,15 @@ interface UseCases {
   getBookingByGivenIdUseCase: GetBookingByGivenIdUseCase,
   getAllBookingsUseCase: GetAllBookingUseCase,
   getBookingsByStatusUseCase: GetBookingsByStatusUseCase,
-  cancelBookingsUseCase: CancelBookingUseCase,
+  cancelBookingUseCase: CancelBookingUseCase,
   sendEmailToTourOperator: SendEmailToTourOperatorUseCase,
   confirmBookingUseCase: ConfirmBookingUseCase,
   addNoteUseCase: AddNoteUseCase,
   updateNoteUseCase: UpdateNoteUseCase,
   deleteNoteUseCase: DeleteNoteUseCase,
   getBookingsByDepartureTourIdUseCase: GetBookingsByDepartureTourIdUseCase,
+  handlePaymentPendingUseCase: HandlePaymentPendingUseCase,
+  handlePaymentOverdueUseCase: HandlePaymentOverdueUseCase,
 }
 
 const useCases: UseCases = {
@@ -48,12 +54,14 @@ const useCases: UseCases = {
   getBookingByGivenIdUseCase: new GetBookingByGivenIdUseCaseImpl(),
   getAllBookingsUseCase: new GetAllBookingUseCaseImpl(),
   getBookingsByStatusUseCase: new GetBookingsByStatusUseCaseImpl(),
-  cancelBookingsUseCase: new CancelBookingUseCaseImpl(),
+  cancelBookingUseCase: new CancelBookingUseCaseImpl(),
   sendEmailToTourOperator: new SendEmailToTourOperatorImpl(),
   confirmBookingUseCase: new ConfirmBookingUseCaseImpl(),
   addNoteUseCase: new AddNoteUseCaseImpl(),
   updateNoteUseCase: new UpdateNoteUseCaseImpl(),
   deleteNoteUseCase: new DeleteNoteUseCaseImpl(),
+  handlePaymentPendingUseCase: new HandlePaymentPendingUseCaseImpl(),
+  handlePaymentOverdueUseCase: new HandlePaymentOverdueUseCaseImpl(),
   getBookingsByDepartureTourIdUseCase: new GetBookingsByDepartureTourIdUseCaseImpl(),
 };
 
@@ -64,11 +72,13 @@ export const {
   getBookingByGivenIdUseCase,
   getAllBookingsUseCase,
   getBookingsByStatusUseCase,
-  cancelBookingsUseCase,
+  cancelBookingUseCase,
   sendEmailToTourOperator,
   confirmBookingUseCase,
   addNoteUseCase,
   updateNoteUseCase,
   deleteNoteUseCase,
+  handlePaymentPendingUseCase,
+  handlePaymentOverdueUseCase,
   getBookingsByDepartureTourIdUseCase,
 } = useCases;

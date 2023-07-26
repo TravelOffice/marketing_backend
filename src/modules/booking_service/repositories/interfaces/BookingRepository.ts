@@ -10,8 +10,16 @@ export interface BookingRepository {
   getAll: (tenant: string) => Promise<Array<Booking>>,
   getListByStatus: (tenant: string, status: BookingStatus) => Promise<Array<Booking>>,
   generateCode: (tenant: string) => Promise<string>,
-  cancel: (userInfo: CognitoUser, booking: Booking, reason: string) => Promise<Booking>,
-  confirm: (tenant: string, bookingId: string, dataToUpdate: Partial<Booking>) => Promise<Booking>,
+  cancel: (userInfo: CognitoUser, booking: Booking, reason: string) => Promise<Partial<Booking>>,
+  confirm: (
+    tenant: string, bookingId: string, dataToUpdate: Partial<Booking>
+  ) => Promise<Partial<Booking>>,
+  createPaymentDeadline: (
+    tenant: string, bookingId: string, waitingExpiredAt: string
+  ) => Promise<string>,
+  deletePaymentDeadline: (
+    ruleName: string
+  ) => Promise<void>;
   fetchBookingsRelatedItems: (tenant: string, bookings: Booking[]) => Promise<BookingsRelatedItems>,
   getListByDepartureTourId: (tenant: string, departureTourId: string) => Promise<Array<Booking>>,
 }
