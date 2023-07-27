@@ -46,7 +46,7 @@ export default class ConfirmBookingUseCaseImpl implements ConfirmBookingUseCase 
     const updatedBooking = await bookingRepository.confirm(tenant, bookingId, dataToUpdate);
 
     // Delete payment pending event bridge
-    const ruleName = `${tenant}-${booking}-${PAYMENT_PENDING_RULE}`;
+    const ruleName = `${tenant}-${bookingId}-${PAYMENT_PENDING_RULE}`;
     await bookingRepository.deletePaymentDeadline(ruleName);
 
     return updatedBooking;

@@ -53,6 +53,14 @@ export default class EventBridgeProvider {
    * @returns {Promise<void>} - A promise that resolves when the rule is successfully deleted.
    */
   deleteRule = async (ruleName: string) => {
+    const listTargets = await eventBridge.listTargetsByRule({
+      Rule: ruleName,
+    }).promise();
+    const ids = listTargets.Targets?.map((item) => item.Id) ?? [];
+    await eventBridge.removeTargets({
+      Rule: ruleName,
+      Ids: ids,
+    }).promise();
     // Use the `eventBridge.deleteRule` method to remove the EventBridge rule
     await eventBridge.deleteRule({
       Name: ruleName, // Name of the EventBridge rule to be deleted
