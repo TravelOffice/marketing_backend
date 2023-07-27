@@ -1,5 +1,7 @@
 import { bookingRepository } from '../repositories';
 import { HandlePaymentPendingUseCase } from './interfaces/HandlePaymentPendingUseCase';
+import { BookingStatusEnum } from '../models/booking/Booking';
+import { BOOKING_STATUS_INDEX } from '../utils/constants';
 
 export default class HandlePaymentPendingUseCaseImpl implements HandlePaymentPendingUseCase {
   /**
@@ -15,6 +17,12 @@ export default class HandlePaymentPendingUseCaseImpl implements HandlePaymentPen
   invoke = async (tenant: string, bookingId: string, deadline: string) => {
     const booking = await bookingRepository.getByGivenId(tenant, bookingId);
     if (!booking) throw new Error('Booking does not exist!');
+    await bookingRepository.update(tenant, bookingId, {
+      bookingStatus: BookingStatusEnum.PAYMENT_PENDING,
+      waitingExpiredAt: deadline,
+      updatedAt: Date.now(),
+      lsi3: `${BOOKING_STATUS_INDEX}#${BookingStatusEnum.PAYMENT_PENDING}`, // <status>,
+    });
     return bookingRepository.createPaymentDeadline(tenant, bookingId, deadline);
   };
 }
