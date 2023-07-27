@@ -4,7 +4,7 @@ import compression from 'compression';
 import { getCurrentUserInfo } from 'decode-token';
 import {
   addNoteUseCase,
-  cancelBookingsUseCase,
+  cancelBookingUseCase,
   confirmBookingUseCase,
   createBookingFromLeadUseCase,
   createBookingUseCase,
@@ -13,6 +13,7 @@ import {
   getBookingByGivenIdUseCase,
   getBookingsByDepartureTourIdUseCase,
   getBookingsByStatusUseCase,
+  handlePaymentPendingUseCase,
   sendEmailToTourOperator,
   updateBookingUseCase,
   updateNoteUseCase,
@@ -27,6 +28,7 @@ import validate, {
   validateGetBookingFilteredParams,
   validateNewBookingFromLeadParams,
   validateNewBookingParams,
+  validatePaymentPendingInput,
   validateSendEmailToTourGuideParams,
   validateUpdateBookingParams,
 } from './utils/validator';
@@ -154,7 +156,7 @@ app.put('/bookings/:id/cancel', validateCancelBookingDataInput(), async (req: Re
     const userInfo = getCurrentUserInfo(req.headers.authorization!);
     const { id } = req.params;
     const { reason } = req.body;
-    const booking = await cancelBookingsUseCase.invoke(userInfo, id, reason);
+    const booking = await cancelBookingUseCase.invoke(userInfo, id, reason);
     res.json(wrapResponse(SUCCESS, booking));
   } catch (error: any) {
     logger.log(`[PUT /bookings/:id/cancel] Error ${error}`);
@@ -167,6 +169,20 @@ app.put('/bookings/:id/confirm', confirmBookingValidator(), async (req: Request,
     validate(req);
     const currentUser = getCurrentUserInfo(req.headers.authorization!);
     await confirmBookingUseCase.invoke(currentUser, req.params.id, req.body);
+    res.json(wrapResponse(SUCCESS));
+  } catch (error: any) {
+    logger.log(`[PUT /bookings/:id/confirm] Error ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.put('/bookings/:id/payment-pending', validatePaymentPendingInput(), async (req: Request, res: Response) => {
+  try {
+    validate(req);
+    const { id: bookingId } = req.params;
+    const { waitingExpiredAt } = req.body;
+    const { tenant } = getCurrentUserInfo(req.headers.authorization!);
+    await handlePaymentPendingUseCase.invoke(tenant, bookingId, waitingExpiredAt);
     res.json(wrapResponse(SUCCESS));
   } catch (error: any) {
     logger.log(`[PUT /bookings/:id/confirm] Error ${error}`);

@@ -1,9 +1,11 @@
 import { ConfirmBookingUseCase } from './interfaces/ConfirmBookingUseCase';
 import { CognitoUser } from '../models/CognitoUser';
 import { bookingRepository, departureTourRepository } from '../repositories';
-import { Booking, BookingStatusEnum, statusTransitionRules } from '../models/booking/Booking';
+import {
+  Booking, BookingPaymentStatusEnum, BookingStatusEnum, statusTransitionRules,
+} from '../models/booking/Booking';
 import { ConfirmBookingDto } from '../models/dto/ConfirmBookingDto';
-import { BOOKING_STATUS_INDEX, DEPARTURE_TOUR_INDEX } from '../utils/constants';
+import { BOOKING_STATUS_INDEX, DEPARTURE_TOUR_INDEX, PAYMENT_PENDING_RULE } from '../utils/constants';
 
 export default class ConfirmBookingUseCaseImpl implements ConfirmBookingUseCase {
   /**
@@ -36,10 +38,17 @@ export default class ConfirmBookingUseCaseImpl implements ConfirmBookingUseCase 
       departureDate: departureTour.startDate,
       bookingStatus: BookingStatusEnum.CONFIRMED,
       updatedAt: Date.now(),
+      doneAt: Date.now().toString(), // The time that completing payment
+      paymentStatus: BookingPaymentStatusEnum.PAID,
       lsi3: `${BOOKING_STATUS_INDEX}#${BookingStatusEnum.CONFIRMED}`,
       lsi4: `${DEPARTURE_TOUR_INDEX}#${departureTourId}`,
     };
+    const updatedBooking = await bookingRepository.confirm(tenant, bookingId, dataToUpdate);
 
-    await bookingRepository.confirm(tenant, bookingId, dataToUpdate);
+    // Delete payment pending event bridge
+    const ruleName = `${tenant}-${booking}-${PAYMENT_PENDING_RULE}`;
+    await bookingRepository.deletePaymentDeadline(ruleName);
+
+    return updatedBooking;
   };
 }
