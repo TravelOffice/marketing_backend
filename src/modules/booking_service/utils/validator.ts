@@ -2,11 +2,15 @@ import { Request } from 'express';
 import { body, ValidationError, validationResult } from 'express-validator';
 import { bookingPaymentStatuses, tourTypes } from '../models/booking/Booking';
 import {
+  VALIDATE_INTEGER_MSG,
   VALIDATE_NON_EMPTY_STRING_MSG,
   VALIDATE_NUMBER_MSG,
   VALIDATE_POSITIVE_NUMBER,
   VALIDATE_STRING_MSG,
+  VALIDATE_VAT_MSG,
 } from './constants';
+import { serviceTypes } from '../models/Supplier';
+import { payerTypes, vatStatuses } from '../models/Estimation';
 
 export default function validate(req: Request) {
   const errors = validationResult(req);
@@ -179,5 +183,81 @@ export function updateNoteValidator() {
     body('title').optional().isString(),
     body('description').optional().isString(),
     body('type').optional().isString(),
+  ];
+}
+
+export function createEstimationValidator() {
+  return [
+    body('name', VALIDATE_NON_EMPTY_STRING_MSG)
+      .notEmpty()
+      .isString(),
+    body('supplierId', VALIDATE_NON_EMPTY_STRING_MSG)
+      .notEmpty()
+      .isString(),
+    body('supplierService')
+      .notEmpty().withMessage(VALIDATE_NON_EMPTY_STRING_MSG)
+      .isIn(serviceTypes)
+      .withMessage(`property allow only in ${serviceTypes}`),
+    body('estimatedPrice', VALIDATE_NUMBER_MSG)
+      .notEmpty()
+      .isInt({ gt: 0 })
+      .withMessage(VALIDATE_INTEGER_MSG),
+    body('estimatedQuantity', VALIDATE_NUMBER_MSG)
+      .notEmpty()
+      .isInt({ gt: 0 })
+      .withMessage(VALIDATE_INTEGER_MSG),
+    body('note', VALIDATE_NON_EMPTY_STRING_MSG)
+      .optional()
+      .isString(),
+    body('vat', VALIDATE_NUMBER_MSG)
+      .notEmpty()
+      .isNumeric()
+      .custom(
+        (value: number) => value > 0 && value < 100,
+      )
+      .withMessage(VALIDATE_VAT_MSG),
+    body('vatStatus')
+      .notEmpty().withMessage(VALIDATE_NON_EMPTY_STRING_MSG)
+      .isIn(vatStatuses)
+      .withMessage(`property allow only in ${vatStatuses}`),
+    body('payer')
+      .notEmpty().withMessage(VALIDATE_NON_EMPTY_STRING_MSG)
+      .isIn(payerTypes)
+      .withMessage(`property allow only in ${payerTypes}`),
+  ];
+}
+
+export function updateEstimationValidator() {
+  return [
+    body('name', VALIDATE_NON_EMPTY_STRING_MSG)
+      .notEmpty()
+      .isString(),
+    body('supplierId', VALIDATE_NON_EMPTY_STRING_MSG)
+      .notEmpty()
+      .isString(),
+    body('supplierService')
+      .notEmpty().withMessage(VALIDATE_NON_EMPTY_STRING_MSG)
+      .isIn(serviceTypes)
+      .withMessage(`property allow only in ${serviceTypes}`),
+    body('estimatedPrice', VALIDATE_NUMBER_MSG)
+      .notEmpty()
+      .isNumeric(),
+    body('estimatedQuantity', VALIDATE_NUMBER_MSG)
+      .notEmpty()
+      .isNumeric(),
+    body('note', VALIDATE_NON_EMPTY_STRING_MSG)
+      .optional()
+      .isString(),
+    body('vat', VALIDATE_NUMBER_MSG)
+      .notEmpty()
+      .isNumeric(),
+    body('vatStatus')
+      .notEmpty().withMessage(VALIDATE_NON_EMPTY_STRING_MSG)
+      .isIn(vatStatuses)
+      .withMessage(`property allow only in ${vatStatuses}`),
+    body('payer')
+      .notEmpty().withMessage(VALIDATE_NON_EMPTY_STRING_MSG)
+      .isIn(payerTypes)
+      .withMessage(`property allow only in ${payerTypes}`),
   ];
 }

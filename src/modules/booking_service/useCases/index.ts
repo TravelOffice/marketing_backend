@@ -28,6 +28,16 @@ import HandlePaymentPendingUseCaseImpl from './HandlePaymentPendingUseCaseImpl';
 import HandlePaymentOverdueUseCaseImpl from './HandlePaymentOverdueUseCaseImpl';
 import GetBookingsByDepartureTourIdUseCaseImpl from './GetBookingsByDepartureTourIdUseCaseImpl';
 import { GetBookingsByDepartureTourIdUseCase } from './interfaces/GetBookingsByDepartureTourIdUseCase';
+import { GetEstimationListUseCase } from './interfaces/estimation/GetEstimationListUseCase';
+import { CreateEstimationUseCase } from './interfaces/estimation/CreateEstimationUseCase';
+import { GetEstimationUseCase } from './interfaces/estimation/GetEstimationUseCase';
+import { UpdateEstimationUseCase } from './interfaces/estimation/UpdateEstimationUseCase';
+import { DeleteEstimationUseCase } from './interfaces/estimation/DeleteEstimationUseCase';
+import GetEstimationListUseCaseImpl from './estimation/GetEstimationListUseCaseImpl';
+import CreateEstimationUseCaseImpl from './estimation/CreateEstimationUseCaseImpl';
+import GetEstimationUseCaseImpl from './estimation/GetEstimationUseCaseImpl';
+import UpdateEstimationUseCaseImpl from './estimation/UpdateEstimationUseCaseImpl';
+import DeleteEstimationUseCaseImpl from './estimation/DeleteEstimationUseCaseImpl';
 
 interface UseCases {
   createBookingUseCase: CreateBookingUseCase,
@@ -45,6 +55,11 @@ interface UseCases {
   getBookingsByDepartureTourIdUseCase: GetBookingsByDepartureTourIdUseCase,
   handlePaymentPendingUseCase: HandlePaymentPendingUseCase,
   handlePaymentOverdueUseCase: HandlePaymentOverdueUseCase,
+  getEstimationListUseCase: GetEstimationListUseCase,
+  createEstimationUseCase: CreateEstimationUseCase,
+  getEstimationUseCase: GetEstimationUseCase,
+  updateEstimationUseCase: UpdateEstimationUseCase,
+  deleteEstimationUseCase: DeleteEstimationUseCase,
 }
 
 const useCases: UseCases = {
@@ -63,6 +78,11 @@ const useCases: UseCases = {
   handlePaymentPendingUseCase: new HandlePaymentPendingUseCaseImpl(),
   handlePaymentOverdueUseCase: new HandlePaymentOverdueUseCaseImpl(),
   getBookingsByDepartureTourIdUseCase: new GetBookingsByDepartureTourIdUseCaseImpl(),
+  getEstimationListUseCase: new GetEstimationListUseCaseImpl(),
+  createEstimationUseCase: new CreateEstimationUseCaseImpl(),
+  getEstimationUseCase: new GetEstimationUseCaseImpl(),
+  updateEstimationUseCase: new UpdateEstimationUseCaseImpl(),
+  deleteEstimationUseCase: new DeleteEstimationUseCaseImpl(),
 };
 
 export const {
@@ -81,4 +101,9 @@ export const {
   handlePaymentPendingUseCase,
   handlePaymentOverdueUseCase,
   getBookingsByDepartureTourIdUseCase,
+  getEstimationListUseCase,
+  createEstimationUseCase,
+  getEstimationUseCase,
+  updateEstimationUseCase,
+  deleteEstimationUseCase,
 } = useCases;
