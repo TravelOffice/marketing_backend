@@ -9,7 +9,13 @@ import {
 import logger from '../utils/logger';
 
 export default class ZaloMessagePlatformProvider {
-  private readonly messagePlatformBaseUrl: string = 'https://openapi.zalo.me/v2.0';
+  private readonly messagePlatformV2BaseUrl: string = 'https://openapi.zalo.me/v2.0';
+
+  /**
+   * Zalo OpenAPI v3 is the latest version of the API and now supported the sendMessage operation.
+   * It introduces new features, and Zalo will continuously migrate APIs from v2 to v3 soon.
+   */
+  private readonly messagePlatformV3BaseUrl: string = 'https://openapi.zalo.me/v3.0';
 
   private readonly oauthBaseUrl: string = 'https://oauth.zaloapp.com/v4';
 
@@ -65,7 +71,7 @@ export default class ZaloMessagePlatformProvider {
     messagePayload: SendZaloMessageRequestPayload,
   ): Promise<SendZaloMessageResponsePayload> => {
     const response = await this.axiosInstance.post(
-      `${this.messagePlatformBaseUrl}/oa/message`,
+      `${this.messagePlatformV3BaseUrl}/oa/message/cs`,
       messagePayload,
       {
         headers: {
@@ -97,7 +103,7 @@ export default class ZaloMessagePlatformProvider {
     count: number = 10,
   ): Promise<ZaloMessageResponsePayload> => {
     const response = await this.axiosInstance.get(
-      `${this.messagePlatformBaseUrl}/oa/listrecentchat`,
+      `${this.messagePlatformV2BaseUrl}/oa/listrecentchat`,
       {
         headers: {
           access_token: pageToken,
@@ -134,7 +140,7 @@ export default class ZaloMessagePlatformProvider {
     count: number = 10,
   ): Promise<ZaloMessageResponsePayload> => {
     const response = await this.axiosInstance.get(
-      `${this.messagePlatformBaseUrl}/oa/conversation`,
+      `${this.messagePlatformV2BaseUrl}/oa/conversation`,
       {
         headers: {
           access_token: pageToken,
