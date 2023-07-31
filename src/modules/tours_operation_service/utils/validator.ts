@@ -6,6 +6,11 @@ import {
 } from 'express-validator';
 import moment from 'moment';
 import { TourPlan, tourPlanActivityTypes } from '../models/tour/TourPlan';
+import {
+  VALIDATE_INTEGER_MSG, VALIDATE_NON_EMPTY_STRING_MSG, VALIDATE_NUMBER_MSG, VALIDATE_VAT_MSG,
+} from './constants';
+import { serviceTypes } from '../models/Supplier';
+import { payerTypes, vatStatuses } from '../models/Estimation';
 
 /**
  * Validate daily plan item
@@ -73,5 +78,81 @@ export function updateTourPlanValidator() {
       return isValidDailyPlan;
     }).withMessage('Daily plan is invalid.'),
     param('departureTourId').notEmpty().withMessage('Departure tour id must not be empty.'),
+  ];
+}
+
+export function createEstimationValidator() {
+  return [
+    body('name', VALIDATE_NON_EMPTY_STRING_MSG)
+      .notEmpty()
+      .isString(),
+    body('supplierId', VALIDATE_NON_EMPTY_STRING_MSG)
+      .notEmpty()
+      .isString(),
+    body('supplierService')
+      .notEmpty().withMessage(VALIDATE_NON_EMPTY_STRING_MSG)
+      .isIn(serviceTypes)
+      .withMessage(`property allow only in ${serviceTypes}`),
+    body('estimatedPrice', VALIDATE_NUMBER_MSG)
+      .notEmpty()
+      .isInt({ gt: 0 })
+      .withMessage(VALIDATE_INTEGER_MSG),
+    body('estimatedQuantity', VALIDATE_NUMBER_MSG)
+      .notEmpty()
+      .isInt({ gt: 0 })
+      .withMessage(VALIDATE_INTEGER_MSG),
+    body('note', VALIDATE_NON_EMPTY_STRING_MSG)
+      .optional()
+      .isString(),
+    body('vat', VALIDATE_NUMBER_MSG)
+      .notEmpty()
+      .isNumeric()
+      .custom(
+        (value: number) => value > 0 && value < 100,
+      )
+      .withMessage(VALIDATE_VAT_MSG),
+    body('vatStatus')
+      .notEmpty().withMessage(VALIDATE_NON_EMPTY_STRING_MSG)
+      .isIn(vatStatuses)
+      .withMessage(`property allow only in ${vatStatuses}`),
+    body('payer')
+      .notEmpty().withMessage(VALIDATE_NON_EMPTY_STRING_MSG)
+      .isIn(payerTypes)
+      .withMessage(`property allow only in ${payerTypes}`),
+  ];
+}
+
+export function updateEstimationValidator() {
+  return [
+    body('name', VALIDATE_NON_EMPTY_STRING_MSG)
+      .notEmpty()
+      .isString(),
+    body('supplierId', VALIDATE_NON_EMPTY_STRING_MSG)
+      .notEmpty()
+      .isString(),
+    body('supplierService')
+      .notEmpty().withMessage(VALIDATE_NON_EMPTY_STRING_MSG)
+      .isIn(serviceTypes)
+      .withMessage(`property allow only in ${serviceTypes}`),
+    body('estimatedPrice', VALIDATE_NUMBER_MSG)
+      .notEmpty()
+      .isNumeric(),
+    body('estimatedQuantity', VALIDATE_NUMBER_MSG)
+      .notEmpty()
+      .isNumeric(),
+    body('note', VALIDATE_NON_EMPTY_STRING_MSG)
+      .optional()
+      .isString(),
+    body('vat', VALIDATE_NUMBER_MSG)
+      .notEmpty()
+      .isNumeric(),
+    body('vatStatus')
+      .notEmpty().withMessage(VALIDATE_NON_EMPTY_STRING_MSG)
+      .isIn(vatStatuses)
+      .withMessage(`property allow only in ${vatStatuses}`),
+    body('payer')
+      .notEmpty().withMessage(VALIDATE_NON_EMPTY_STRING_MSG)
+      .isIn(payerTypes)
+      .withMessage(`property allow only in ${payerTypes}`),
   ];
 }

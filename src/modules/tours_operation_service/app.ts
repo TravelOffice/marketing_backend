@@ -30,12 +30,12 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
   next();
 });
 
-app.get('/tours-operation/plan/:departureTourId', getTourPlanValidator(), async (req: Request, res: Response) => {
+app.get('/tours/:tourId/operation/plan', getTourPlanValidator(), async (req: Request, res: Response) => {
   try {
     const currentUser = getCurrentUserInfo(req.headers.authorization!);
     const { tenant } = currentUser;
-    const { departureTourId } = req.params;
-    const tourPlan = await getTourPlanUseCase.invoke(tenant, departureTourId);
+    const { tourId } = req.params;
+    const tourPlan = await getTourPlanUseCase.invoke(tenant, tourId);
     res.json(wrapResponse(SUCCESS, tourPlan));
   } catch (error: any) {
     logger.log(
@@ -46,14 +46,14 @@ app.get('/tours-operation/plan/:departureTourId', getTourPlanValidator(), async 
   }
 });
 
-app.put('/tours-operation/plan/:departureTourId', updateTourPlanValidator(), async (req: Request, res: Response) => {
+app.put('/tours/:tourId/operation/plan', updateTourPlanValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
     const currentUser = getCurrentUserInfo(req.headers.authorization!);
     const { tenant } = currentUser;
-    const { departureTourId } = req.params;
+    const { tourId } = req.params;
     const { tourPlan } = req.body;
-    const updatedTourPlan = await updateTourPlanUseCase.invoke(tenant, departureTourId, tourPlan);
+    const updatedTourPlan = await updateTourPlanUseCase.invoke(tenant, tourId, tourPlan);
     res.json(wrapResponse(SUCCESS, updatedTourPlan));
   } catch (error: any) {
     logger.log(
