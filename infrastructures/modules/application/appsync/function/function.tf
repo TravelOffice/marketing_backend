@@ -9,12 +9,15 @@ locals {
 }
 
 resource "aws_appsync_function" "functions" {
-  for_each                  = var.APPSYNC_FUNCTIONS
-  api_id                    = var.APPSYNC_API_ID
-  data_source               = lower("${var.ENV}_${each.value.data_source}")
-  name                      = lower("${var.ENV}_${each.key}")
-  request_mapping_template  = file(format("%s/%s", local.root_path, each.value.request_template.path))
-  response_mapping_template = file(format("%s/%s", local.root_path, each.value.response_template.path))
+  for_each    = var.APPSYNC_FUNCTIONS
+  api_id      = var.APPSYNC_API_ID
+  data_source = lower("${var.ENV}_${each.value.data_source}")
+  name        = lower("${var.ENV}_${each.key}")
+  code        = file(format("%s/%s", local.root_path, each.value.code.path))
+  runtime {
+    name            = "APPSYNC_JS"
+    runtime_version = "1.0.0"
+  }
 }
 
 output "appsync_function_ids" {
