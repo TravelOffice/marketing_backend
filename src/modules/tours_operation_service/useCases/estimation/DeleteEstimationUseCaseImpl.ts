@@ -4,7 +4,7 @@ import { DeleteEstimationUseCase } from '../../repositories/interfaces/estimatio
 
 export default class DeleteEstimationUseCaseImpl implements DeleteEstimationUseCase {
   /**
-   * Invokes the DeleteEstimationUseCase to delete a estimation.
+   * Invokes the DeleteEstimationUseCase to delete an estimation.
    *
    * @param currentUser - The current user invoking the use case.
    * @param tourId - The ID of the tour operation
