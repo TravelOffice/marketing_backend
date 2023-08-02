@@ -89,7 +89,7 @@ export function createEstimationValidator() {
     body('supplierId', VALIDATE_NON_EMPTY_STRING_MSG)
       .notEmpty()
       .isString(),
-    body('supplierService')
+    body('serviceType')
       .notEmpty().withMessage(VALIDATE_NON_EMPTY_STRING_MSG)
       .isIn(serviceTypes)
       .withMessage(`property allow only in ${serviceTypes}`),
@@ -127,13 +127,6 @@ export function updateEstimationValidator() {
     body('name', VALIDATE_NON_EMPTY_STRING_MSG)
       .notEmpty()
       .isString(),
-    body('supplierId', VALIDATE_NON_EMPTY_STRING_MSG)
-      .notEmpty()
-      .isString(),
-    body('supplierService')
-      .notEmpty().withMessage(VALIDATE_NON_EMPTY_STRING_MSG)
-      .isIn(serviceTypes)
-      .withMessage(`property allow only in ${serviceTypes}`),
     body('estimatedPrice', VALIDATE_NUMBER_MSG)
       .notEmpty()
       .isNumeric(),

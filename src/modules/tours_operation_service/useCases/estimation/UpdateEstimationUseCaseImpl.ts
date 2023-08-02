@@ -1,13 +1,23 @@
 import { helper } from 'core';
 import { CognitoUser } from '../../models/CognitoUser';
 import { Estimation } from '../../models/Estimation';
-import { estimationRepository, supplierRepository, tourOperationRepository } from '../../repositories';
+import { estimationRepository, tourOperationRepository } from '../../repositories';
 import { UpdateEstimationUseCase } from '../../repositories/interfaces/estimation/UpdateEstimationUseCase';
 import { UpdateEstimationDto } from '../../dto/estimation/UpdateEstimationDto';
 
 export default class UpdateEstimationUseCaseImpl implements UpdateEstimationUseCase {
+  private allowedUpdatingKeys: (keyof UpdateEstimationDto)[] = [
+    'name',
+    'estimatedPrice',
+    'estimatedQuantity',
+    'note',
+    'vat',
+    'vatStatus',
+    'payer',
+  ];
+
   /**
-   * Invokes the UpdateEstimationUseCase to update a estimation.
+   * Invokes the UpdateEstimationUseCase to update an estimation.
    *
    * @param currentUser - The current user invoking the use case.
    * @param tourId - The operation tour ID
@@ -35,14 +45,6 @@ export default class UpdateEstimationUseCaseImpl implements UpdateEstimationUseC
       currentEstimation, currentUser, estimationId, updateEstimationDto,
     });
 
-    const { supplierId, serviceType } = dataToUpdate;
-
-    if (supplierId) {
-      const supplier = await supplierRepository.get(tenant, supplierId);
-      if (!supplier) throw new Error(`Could not found supplier with code ${supplierId}`);
-      if (!serviceType || !supplier.services.includes(serviceType)) throw new Error(`Could not found service ${serviceType} in supplier ${supplierId}`);
-    }
-
     const estimation = await estimationRepository.update(
       currentUser.tenant,
       tourId,
@@ -67,7 +69,11 @@ export default class UpdateEstimationUseCaseImpl implements UpdateEstimationUseC
     const { currentEstimation, updateEstimationDto } = options;
     const now = Date.now();
     let dataToUpdate: Partial<Estimation> = {};
-    const props = Object.keys(updateEstimationDto);
+    const updateEstimation = helper.extractDataFromObject(
+      updateEstimationDto,
+      this.allowedUpdatingKeys,
+    );
+    const props = Object.keys(updateEstimation);
     props.forEach((key) => {
       const prop = key as keyof UpdateEstimationDto;
       if (currentEstimation[prop] !== updateEstimationDto[prop]) {
