@@ -7,10 +7,8 @@ import { STATUS_INDEX, UPDATED_AT_INDEX } from '../utils/constants';
 export default class UpdatePaymentVoucherUseCaseImpl implements UpdatePaymentVoucherUseCase {
   private allowedUpdatingKeys: (keyof PaymentVoucher)[] = [
     'amount',
-    'receiver',
     'description',
     'note',
-    'bookingId',
     'deadline',
     'method',
     'signGroup',

@@ -5,7 +5,7 @@ import { getCurrentUserInfo } from 'decode-token';
 import {
   createPaymentVoucherUseCase,
   deletePaymentVoucherUseCase,
-  getPaymentVoucherListUseCase,
+  getPaymentVoucherListUseCase, getPaymentVouchersFromOpTourUseCase,
   getPaymentVoucherUseCase,
   updatePaymentVoucherUseCase,
 } from './useCases';
@@ -50,6 +50,18 @@ app.get('/payment-vouchers', async (req: Request, res: Response) => {
     const { tenant } = getCurrentUserInfo(req.headers.authorization!);
     const paymentVoucher = await getPaymentVoucherListUseCase.invoke(tenant);
     res.json(wrapResponse(SUCCESS, paymentVoucher));
+  } catch (error: any) {
+    logger.log('Error retrieving payment voucher:', error.message);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.get('/tours/:tourId/payment-vouchers', async (req: Request, res: Response) => {
+  try {
+    const { tourId } = req.params;
+    const { tenant } = getCurrentUserInfo(req.headers.authorization!);
+    const paymentVouchers = await getPaymentVouchersFromOpTourUseCase.invoke(tenant, tourId);
+    res.json(wrapResponse(SUCCESS, paymentVouchers));
   } catch (error: any) {
     logger.log('Error retrieving payment voucher:', error.message);
     res.json(wrapResponse(FAILED, undefined, error.message));
