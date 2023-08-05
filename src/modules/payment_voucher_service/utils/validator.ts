@@ -3,7 +3,7 @@ import { body, ValidationError, validationResult } from 'express-validator';
 import {
   VALIDATE_BOOLEAN_MSG, VALIDATE_DATE_MSG, VALIDATE_NON_EMPTY_STRING_MSG, VALIDATE_NUMBER_MSG,
 } from './constants';
-import { PaymentVoucherStatus } from '../models/PaymentVoucher';
+import { paymentVoucherMethods, PaymentVoucherStatus } from '../models/PaymentVoucher';
 
 export default function validate(req: Request) {
   const errors = validationResult(req);
@@ -35,17 +35,18 @@ export function createPaymentVoucherValidator() {
       .if(body('note').exists())
       .isString()
       .notEmpty(),
-    body('bookingId', VALIDATE_NON_EMPTY_STRING_MSG)
-      .if(body('bookingId').exists())
-      .isString()
-      .notEmpty(),
+    body('tourId', VALIDATE_NON_EMPTY_STRING_MSG)
+      .notEmpty()
+      .isString(),
     body('deadline', VALIDATE_DATE_MSG)
       .if(body('deadline').exists())
       .notEmpty()
       .custom((value) => !Number.isNaN(Date.parse(value))),
     body('method', VALIDATE_NON_EMPTY_STRING_MSG)
       .isString()
-      .notEmpty(),
+      .notEmpty()
+      .isIn(paymentVoucherMethods)
+      .withMessage(`property allow only in ${Object.values(paymentVoucherMethods)}`),
     body('signGroup', VALIDATE_NON_EMPTY_STRING_MSG)
       .optional()
       .isString()
@@ -72,10 +73,6 @@ export function updatePaymentVoucherValidator() {
       .notEmpty(),
     body('note', VALIDATE_NON_EMPTY_STRING_MSG)
       .if(body('note').exists())
-      .isString()
-      .notEmpty(),
-    body('bookingId', VALIDATE_NON_EMPTY_STRING_MSG)
-      .if(body('bookingId').exists())
       .isString()
       .notEmpty(),
     body('deadline', VALIDATE_DATE_MSG)

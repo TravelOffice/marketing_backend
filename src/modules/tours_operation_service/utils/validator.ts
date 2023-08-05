@@ -108,7 +108,7 @@ export function createEstimationValidator() {
       .notEmpty()
       .isNumeric()
       .custom(
-        (value: number) => value > 0 && value < 100,
+        (value: number) => value >= 0 && value < 100,
       )
       .withMessage(VALIDATE_VAT_MSG),
     body('vatStatus')

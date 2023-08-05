@@ -42,7 +42,7 @@ app.get('/tours/:tourId/operation/plan', getTourPlanValidator(), async (req: Req
       `[${req.method}] An error occurred while retrieving tour plan on route '${req.originalUrl}':`,
       error,
     );
-    res.json(wrapResponse(FAILED, error.message));
+    res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });
 
@@ -60,7 +60,7 @@ app.put('/tours/:tourId/operation/plan', updateTourPlanValidator(), async (req: 
       `[${req.method}] An error occurred while updating tour plan on route '${req.originalUrl}':`,
       error,
     );
-    res.json(wrapResponse(FAILED, error.message));
+    res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });
 

@@ -9,18 +9,20 @@ export enum PaymentVoucherStatus {
   TRANSFERRED = 'TRANSFERRED'
 }
 
-export enum PaymentVoucherMethod {
-  CASH = 'CASH',
-  TRANSFER = 'TRANSFER'
-}
+export const paymentVoucherMethods = [
+  'CASH',
+  'TRANSFER',
+];
+
+export type PaymentVoucherMethod = typeof paymentVoucherMethods[number]
 
 export interface PaymentVoucher extends BaseDdbModel {
   code: string,
   amount: number,
-  receiver: string,
+  receiver: string, // Supplier
   description: string,
   note?: string,
-  bookingId?: string,
+  tourId: string, // Tour operation
   deadline?: string,
   method: PaymentVoucherMethod,
   signGroup: string,
