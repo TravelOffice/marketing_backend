@@ -19,7 +19,8 @@ export type PaymentVoucherMethod = typeof paymentVoucherMethods[number]
 export interface PaymentVoucher extends BaseDdbModel {
   code: string,
   amount: number,
-  receiver: string, // Supplier
+  receiverId: string, // Supplier Id
+  receiverName: string, // Supplier Name
   description: string,
   note?: string,
   tourId: string, // Tour operation

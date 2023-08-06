@@ -25,7 +25,7 @@ export function createPaymentVoucherValidator() {
   return [
     body('amount', VALIDATE_NUMBER_MSG)
       .isNumeric(),
-    body('receiver', VALIDATE_NON_EMPTY_STRING_MSG)
+    body('receiverId', VALIDATE_NON_EMPTY_STRING_MSG)
       .notEmpty()
       .isString(),
     body('description', VALIDATE_NON_EMPTY_STRING_MSG)
@@ -66,7 +66,7 @@ export function updatePaymentVoucherValidator() {
   return [
     body('amount', VALIDATE_NUMBER_MSG)
       .isNumeric(),
-    body('receiver', VALIDATE_NON_EMPTY_STRING_MSG)
+    body('receiverId', VALIDATE_NON_EMPTY_STRING_MSG)
       .isNumeric(),
     body('description', VALIDATE_NON_EMPTY_STRING_MSG)
       .isString()

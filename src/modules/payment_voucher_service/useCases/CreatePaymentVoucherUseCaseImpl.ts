@@ -10,7 +10,7 @@ import { CognitoUser } from '../models/CognitoUser';
 export default class CreatePaymentVoucherUseCaseImpl implements CreatePaymentVoucherUseCase {
   private allowedCreatingKeys: (keyof PaymentVoucher)[] = [
     'amount',
-    'receiver',
+    'receiverId',
     'description',
     'note',
     'tourId',
@@ -33,8 +33,8 @@ export default class CreatePaymentVoucherUseCaseImpl implements CreatePaymentVou
     const departureTour = await departureTourRepository.get(tenant, tourId);
     if (!departureTour) throw new Error(`Could not found tour with code ${tourId}`);
 
-    const supplier = await supplierRepository.get(tenant, paymentVoucher.receiver);
-    if (!supplier) throw new Error(`Could not found receiver with code ${paymentVoucher.receiver}`);
+    const supplier = await supplierRepository.get(tenant, paymentVoucher.receiverId);
+    if (!supplier) throw new Error(`Could not found receiver with code ${paymentVoucher.receiverId}`);
 
     const code = await paymentVoucherRepository.generatePaymentVoucherCode(tenant);
     const paymentVoucherToAdd: PaymentVoucher = {
@@ -45,6 +45,7 @@ export default class CreatePaymentVoucherUseCaseImpl implements CreatePaymentVou
       updatedAt: now,
       creatorId: username,
       creatorName: name,
+      receiverName: supplier.name,
       lsi1: `${CREATED_AT_INDEX}#${now}`,
       lsi2: `${UPDATED_AT_INDEX}#${now}`,
       lsi3: `${STATUS_INDEX}#${PaymentVoucherStatus.WAIT_FOR_APPROVAL}`,
