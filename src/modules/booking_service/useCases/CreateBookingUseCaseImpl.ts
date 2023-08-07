@@ -57,36 +57,6 @@ export default class CreateBookingUseCaseImpl implements CreateBookingUseCase {
     const creatorName = name;
     const assigneeId = username;
     const assigneeName = name;
-    if (!customer) {
-      const code = await customerRepository.generateCode(tenant);
-      customer = await customerRepository.create(tenant, {
-        code,
-        email,
-        address,
-        honorific,
-        name: fullName,
-        primaryPhoneNumber: phone,
-        level: CustomerLevel.STANDARD,
-        createdAt: now,
-        updatedAt: now,
-        creatorId,
-        creatorName,
-        assigneeId,
-        assigneeName,
-        sourceId,
-        sourceName,
-        lsi1: `${CREATED_AT_INDEX}#${now}`, // createdAt lsi
-        lsi2: `${UPDATED_AT_INDEX}#${now}`, // updatedAt lsi
-        lsi3: `${PHONE_INDEX}#${phone}`, // primaryPhoneNumber lsi
-        lsi4: `${CREATOR_INDEX}#${creatorId}`, // creatorId lsi
-        lsi5: `${ASSIGNEE_INDEX}#${creatorId}`, // assignee lsi
-      });
-      await customerRepository.create(tenant, customer);
-    }
-
-    // Prepare booking information for storing to database
-    // such as: Tour template, tour type, departure date, assignee, source, note
-    const customerId = customer!.code;
 
     // Prepare and save booking to database
     const code = await bookingRepository.generateCode(tenant);
@@ -99,7 +69,7 @@ export default class CreateBookingUseCaseImpl implements CreateBookingUseCase {
     const status: BookingStatus = 'INITIALIZED';
     const newBooking: Booking = {
       code,
-      customerId,
+      customerId: customer ? customer.code : '',
       tourType,
       createdAt: now,
       updatedAt: now,
@@ -115,15 +85,17 @@ export default class CreateBookingUseCaseImpl implements CreateBookingUseCase {
       assigneeId,
       assigneeName,
       lsi3: `${BOOKING_STATUS_INDEX}#${status}`, // <status>,
-      lsi5: `${CUSTOMER_INDEX}#${customerId}`, // <customer_code>
+      lsi5: customer ? `${CUSTOMER_INDEX}#${customer.code}` : '', // <customer_code>
     };
     const createdBooking = await bookingRepository.create(tenant, newBooking);
-    await customerRepository.updateLatestBooking(tenant, customerId, {
-      id: code,
-      creatorId,
-      creatorName,
-      createdAt: now,
-    });
+    if (customer) {
+      await customerRepository.updateLatestBooking(tenant, customer.code, {
+        id: code,
+        creatorId,
+        creatorName,
+        createdAt: now,
+      });
+    }
     return createdBooking;
   };
 }

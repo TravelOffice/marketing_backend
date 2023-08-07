@@ -33,31 +33,6 @@ export default class CreateLeadUseCaseImpl extends BaseRepositoryImpl implements
     const { tenant, username, name } = currentUser;
     let customer = await customerRepository.findOneByPhone(tenant, createLeadDto.phoneNumber);
     const now = Date.now();
-    if (!customer) {
-      const creatorId = username;
-      const creatorName = name;
-      const customerCode = await customerRepository.generateCode(tenant);
-      customer = await customerRepository.create(tenant, {
-        code: customerCode,
-        email: createLeadDto.email,
-        address: createLeadDto.address ?? '',
-        honorific: createLeadDto.honorific,
-        name: createLeadDto.name,
-        primaryPhoneNumber: createLeadDto.phoneNumber,
-        source: SourceType.OTHER,
-        level: CustomerLevel.STANDARD,
-        createdAt: now,
-        updatedAt: now,
-        creatorId,
-        creatorName,
-        lsi1: `${CREATED_AT_INDEX}#${now}`, // createdAt lsi
-        lsi2: `${UPDATED_AT_INDEX}#${now}`, // updatedAt lsi
-        lsi3: `${PHONE_INDEX}#${createLeadDto.phoneNumber}`, // primaryPhoneNumber lsi
-        lsi4: `${CREATOR_INDEX}#${creatorId}`, // creatorId lsi
-        lsi5: `${ASSIGNEE_INDEX}#${creatorId}`, // assignee lsi
-      });
-      await customerRepository.create(tenant, customer);
-    }
 
     // Create a new Lead
     const leadToAdd = await this.buildLeadToAdd({
@@ -75,7 +50,7 @@ export default class CreateLeadUseCaseImpl extends BaseRepositoryImpl implements
   private async buildLeadToAdd(data: {
     currentUser: CognitoUser,
     createLeadDto: CreateLeadDto,
-    customer: Customer,
+    customer?: Customer,
   }) {
     const { currentUser, createLeadDto, customer } = data;
     const {
@@ -101,7 +76,7 @@ export default class CreateLeadUseCaseImpl extends BaseRepositoryImpl implements
       lsi2: `${UPDATED_AT_INDEX}#${now.toString()}`,
       lsi3: `${LEAD_STATUS_INDEX}#${status}`,
       lsi4: `${ASSIGNEE_INDEX}#${assigneeId || NONE_VALUE}`,
-      lsi5: `${CUSTOMER_INDEX}#${customer.code}`,
+      lsi5: customer ? `${CUSTOMER_INDEX}#${customer.code}` : '',
       ...createLeadDto,
       creatorId: username,
       creatorName: name,
@@ -117,7 +92,7 @@ export default class CreateLeadUseCaseImpl extends BaseRepositoryImpl implements
       tags: [],
       createdAt: now,
       updatedAt: now,
-      customerId: customer.code,
+      customerId: customer ? customer.code : '',
     };
 
     return leadToAdd;
