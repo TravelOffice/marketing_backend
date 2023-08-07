@@ -15,6 +15,7 @@ import {
   getBookingsByStatusUseCase,
   handlePaymentPendingUseCase,
   sendEmailToTourOperator,
+  updateBookingCustomerUseCase,
   updateBookingUseCase,
   updateNoteUseCase,
 } from './useCases';
@@ -30,6 +31,7 @@ import validate, {
   validateNewBookingParams,
   validatePaymentPendingInput,
   validateSendEmailToTourGuideParams,
+  validateUpdateBookingCustomerParams,
   validateUpdateBookingParams,
 } from './utils/validator';
 import logger from './utils/logger';
@@ -250,6 +252,19 @@ app.get('/departure-tours/:id/bookings', validateGetBookingFilteredParams(), asy
       id,
     );
     res.json(wrapResponse(SUCCESS, bookings));
+  } catch (error: any) {
+    logger.log(`[app.get] Error ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.put('/bookings/:id/customers', validateUpdateBookingCustomerParams(), async (req: Request, res: Response) => {
+  try {
+    validate(req);
+    const { tenant } = getCurrentUserInfo(req.headers.authorization!);
+    const { id } = req.params;
+    const updatedCustomer = await updateBookingCustomerUseCase.invoke(tenant, id, req.body);
+    res.json(wrapResponse(SUCCESS, updatedCustomer));
   } catch (error: any) {
     logger.log(`[app.get] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));

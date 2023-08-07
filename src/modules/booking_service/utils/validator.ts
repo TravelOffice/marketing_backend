@@ -2,11 +2,19 @@ import { Request } from 'express';
 import { body, ValidationError, validationResult } from 'express-validator';
 import { bookingPaymentStatuses, tourTypes } from '../models/booking/Booking';
 import {
+  VALIDATE_ARRAY_MSG,
+  VALIDATE_DATE_MSG,
   VALIDATE_NON_EMPTY_STRING_MSG,
-  VALIDATE_NUMBER_MSG,
+  VALIDATE_PHONE_ARRAY_MSG,
+  VALIDATE_PHONE_MSG,
   VALIDATE_POSITIVE_NUMBER,
+  VALIDATE_STRING_ARRAY_MSG,
   VALIDATE_STRING_MSG,
+  VALIDATE_URL_MSG,
 } from './constants';
+import {
+  CustomerLevel, HonorificType, MaritalStatus, SexType,
+} from '../models/Customer';
 
 export default function validate(req: Request) {
   const errors = validationResult(req);
@@ -36,10 +44,21 @@ export function validateNewBookingParams() {
     body('assigneeId').notEmpty().isString(),
     body('customer').isObject().withMessage('Customer information must not be empty'),
     body('customer.email').notEmpty().isEmail(),
-    body('customer.phone').notEmpty().isMobilePhone('any'),
+    body('customer.primaryPhoneNumber').notEmpty().isMobilePhone('any'),
     body('customer.honorific').optional().isString(),
-    body('customer.fullName').optional().isString(),
+    body('customer.name').optional().isString(),
     body('customer.address').optional().isString(),
+    body('services').optional().isArray().withMessage(VALIDATE_ARRAY_MSG),
+    body('services.*.serviceName').notEmpty().isString(),
+    body('services.*.quantity', VALIDATE_POSITIVE_NUMBER)
+      .notEmpty()
+      .isInt({ min: 0 }),
+    body('services.*.price', VALIDATE_POSITIVE_NUMBER)
+      .notEmpty()
+      .isInt({ min: 0 }),
+    body('services.*.tax', VALIDATE_POSITIVE_NUMBER)
+      .notEmpty()
+      .isInt({ min: 0 }),
   ];
 }
 
@@ -53,6 +72,17 @@ export function validateNewBookingFromLeadParams() {
       return !Number.isNaN(date);
     }),
     body('note').optional().isString(),
+    body('services').optional().isArray().withMessage(VALIDATE_ARRAY_MSG),
+    body('services.*.serviceName').notEmpty().isString(),
+    body('services.*.quantity', VALIDATE_POSITIVE_NUMBER)
+      .notEmpty()
+      .isInt({ min: 0 }),
+    body('services.*.price', VALIDATE_POSITIVE_NUMBER)
+      .notEmpty()
+      .isInt({ min: 0 }),
+    body('services.*.tax', VALIDATE_POSITIVE_NUMBER)
+      .notEmpty()
+      .isInt({ min: 0 }),
   ];
 }
 
@@ -120,15 +150,16 @@ export function validateUpdateBookingParams() {
     body('bookingAt').optional().isNumeric(),
     body('doneAt').optional().isNumeric(),
     body('totalPax').optional().isNumeric(),
-    body('services').optional().isArray().withMessage('Booking services must be an array.'),
+    body('services').optional().isArray().withMessage(VALIDATE_ARRAY_MSG),
     body('services.*.serviceName').notEmpty().isString(),
     body('services.*.quantity', VALIDATE_POSITIVE_NUMBER)
       .notEmpty()
-      .withMessage(VALIDATE_NUMBER_MSG)
       .isInt({ min: 0 }),
     body('services.*.price', VALIDATE_POSITIVE_NUMBER)
       .notEmpty()
-      .withMessage(VALIDATE_NUMBER_MSG)
+      .isInt({ min: 0 }),
+    body('services.*.tax', VALIDATE_POSITIVE_NUMBER)
+      .notEmpty()
       .isInt({ min: 0 }),
     body('departureTourId').optional()
       .notEmpty()
@@ -179,5 +210,94 @@ export function updateNoteValidator() {
     body('title').optional().isString(),
     body('description').optional().isString(),
     body('type').optional().isString(),
+  ];
+}
+
+export function validateUpdateBookingCustomerParams() {
+  return [
+    body('name', VALIDATE_NON_EMPTY_STRING_MSG)
+      .if(body('name').notEmpty())
+      .isString(),
+
+    body('honorific')
+      .if(body('honorific').notEmpty())
+      .isIn(Object.values(HonorificType)).withMessage(`property allow only in ${Object.values(HonorificType)}`),
+
+    body('birthday', VALIDATE_DATE_MSG)
+      .if(body('birthday').notEmpty())
+      .custom((value: string) => {
+        const date = Date.parse(value);
+        return !Number.isNaN(date);
+      }),
+
+    body('sex')
+      .if(body('sex').notEmpty())
+      .isIn(Object.values(SexType)).withMessage(`property allow only in ${Object.values(SexType)}`),
+
+    body('maritalStatus')
+      .if(body('maritalStatus').notEmpty())
+      .isIn(Object.values(MaritalStatus)).withMessage(`property allow only in ${Object.values(MaritalStatus)}`),
+
+    body('primaryPhoneNumber', VALIDATE_PHONE_MSG)
+      .if(body('primaryPhoneNumber').notEmpty())
+      .custom((value: string) => {
+        const regex = /^(0)(\d){9,10}$/;
+        return value.match(regex);
+      }),
+
+    body('otherPhoneNumbers', VALIDATE_PHONE_ARRAY_MSG)
+      .if(body('otherPhoneNumbers').notEmpty())
+      .custom((value: Array<string>) => {
+        if (!Array.isArray(value)) return false;
+        const regex = /^(0)(\d){9,10}$/;
+        return value.every((item: string) => item.toString().match(regex));
+      }),
+
+    body('email', VALIDATE_NON_EMPTY_STRING_MSG)
+      .if(body('email').notEmpty())
+      .isEmail(),
+
+    body('address', VALIDATE_NON_EMPTY_STRING_MSG)
+      .if(body('address').notEmpty())
+      .isString(),
+
+    body('tags', VALIDATE_STRING_ARRAY_MSG)
+      .if(body('tags').notEmpty())
+      .custom((value: Array<string>) => {
+        if (!Array.isArray(value)) return false;
+        return value.every((item: string) => typeof item === 'string' && item.length > 0);
+      }),
+
+    body('sourceId', VALIDATE_NON_EMPTY_STRING_MSG)
+      .if(body('sourceId').notEmpty())
+      .isString(),
+
+    body('assigneeId', VALIDATE_NON_EMPTY_STRING_MSG)
+      .if(body('assigneeId').notEmpty())
+      .isString(),
+
+    body('interest', VALIDATE_NON_EMPTY_STRING_MSG)
+      .if(body('interest').notEmpty())
+      .isString(),
+
+    body('group', VALIDATE_NON_EMPTY_STRING_MSG)
+      .if(body('group').notEmpty())
+      .isString(),
+
+    body('genitive', VALIDATE_NON_EMPTY_STRING_MSG)
+      .if(body('genitive').notEmpty())
+      .isString(),
+
+    body('taxCode', VALIDATE_NON_EMPTY_STRING_MSG)
+      .if(body('taxCode').notEmpty())
+      .isString(),
+
+    body('level')
+      .if(body('level').notEmpty())
+      .isIn(Object.values(CustomerLevel)).withMessage(`property allow only in ${Object.values(CustomerLevel)}`),
+
+    body('socialLink', VALIDATE_URL_MSG)
+      .if(body('socialLink').notEmpty())
+      .isURL(),
   ];
 }

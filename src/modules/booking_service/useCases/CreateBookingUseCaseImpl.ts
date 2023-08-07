@@ -1,19 +1,10 @@
-import { CustomerLevel } from '../models/Customer';
+import { helper } from 'core';
 import { Booking, BookingStatus } from '../models/booking/Booking';
 import { CreateBookingInput } from '../models/rawApiData/CreateBookingInput';
-import { TourServicePrice } from '../models/tour/TourServicePrice';
 import {
   bookingRepository, customerRepository, sourceRepository, tourTemplateRepository,
 } from '../repositories';
-import {
-  ASSIGNEE_INDEX,
-  BOOKING_STATUS_INDEX,
-  CREATED_AT_INDEX,
-  CREATOR_INDEX,
-  CUSTOMER_INDEX,
-  PHONE_INDEX,
-  UPDATED_AT_INDEX,
-} from '../utils/constants';
+import { BOOKING_STATUS_INDEX, CUSTOMER_INDEX } from '../utils/constants';
 import { CreateBookingUseCase } from './interfaces/CreateBookingUseCase';
 
 export default class CreateBookingUseCaseImpl implements CreateBookingUseCase {
@@ -27,16 +18,10 @@ export default class CreateBookingUseCaseImpl implements CreateBookingUseCase {
     username: string,
     name: any,
   }, newBookingInput: CreateBookingInput) => {
-    // Verify customer data,
-    // new customer will be created if customer data sent from client is not existed
     const now = Date.now();
-    const { tenant, username, name } = currentUserInfo;
+    const { tenant, username: creatorUserName, name: creatorName } = currentUserInfo;
     const {
-      email, phone, honorific, fullName, address,
-    } = newBookingInput.customer;
-
-    const {
-      tourType, tourTemplateId, departureDate, sourceId,
+      tourType, tourTemplateId, departureDate, sourceId, services, customer,
     } = newBookingInput;
 
     // Verify source
@@ -52,54 +37,10 @@ export default class CreateBookingUseCaseImpl implements CreateBookingUseCase {
       throw new Error(`Tour template with id ${tourTemplateId} of tenant ${tenant} not found.`);
     }
 
-    let customer = await customerRepository.findOneByPhone(tenant, phone);
-    const creatorId = username;
-    const creatorName = name;
-    const assigneeId = username;
-    const assigneeName = name;
-    if (!customer) {
-      const code = await customerRepository.generateCode(tenant);
-      customer = await customerRepository.create(tenant, {
-        code,
-        email,
-        address,
-        honorific,
-        name: fullName,
-        primaryPhoneNumber: phone,
-        level: CustomerLevel.STANDARD,
-        createdAt: now,
-        updatedAt: now,
-        creatorId,
-        creatorName,
-        assigneeId,
-        assigneeName,
-        sourceId,
-        sourceName,
-        lsi1: `${CREATED_AT_INDEX}#${now}`, // createdAt lsi
-        lsi2: `${UPDATED_AT_INDEX}#${now}`, // updatedAt lsi
-        lsi3: `${PHONE_INDEX}#${phone}`, // primaryPhoneNumber lsi
-        lsi4: `${CREATOR_INDEX}#${creatorId}`, // creatorId lsi
-        lsi5: `${ASSIGNEE_INDEX}#${creatorId}`, // assignee lsi
-      });
-      await customerRepository.create(tenant, customer);
-    }
-
-    // Prepare booking information for storing to database
-    // such as: Tour template, tour type, departure date, assignee, source, note
-    const customerId = customer!.code;
-
-    // Prepare and save booking to database
     const code = await bookingRepository.generateCode(tenant);
-    const services = tourTemplate.services?.map((service: TourServicePrice) => ({
-      serviceName: service.name,
-      price: service.price,
-      quantity: 1,
-      tax: 0,
-    })) ?? [];
     const status: BookingStatus = 'INITIALIZED';
-    const newBooking: Booking = {
+    let newBooking: Booking = {
       code,
-      customerId,
       tourType,
       createdAt: now,
       updatedAt: now,
@@ -110,20 +51,36 @@ export default class CreateBookingUseCaseImpl implements CreateBookingUseCase {
       departureDate,
       sourceId,
       sourceName,
-      creatorId,
+      creatorId: creatorUserName,
       creatorName,
-      assigneeId,
-      assigneeName,
-      lsi3: `${BOOKING_STATUS_INDEX}#${status}`, // <status>,
-      lsi5: `${CUSTOMER_INDEX}#${customerId}`, // <customer_code>
+      assigneeId: creatorUserName,
+      assigneeName: creatorName,
+      lsi3: `${BOOKING_STATUS_INDEX}#${status}`, // <status>
     };
-    const createdBooking = await bookingRepository.create(tenant, newBooking);
-    await customerRepository.updateLatestBooking(tenant, customerId, {
-      id: code,
-      creatorId,
-      creatorName,
-      createdAt: now,
-    });
-    return createdBooking;
+
+    const existingCustomer = await customerRepository.findOneByPhone(
+      tenant,
+      customer.primaryPhoneNumber,
+    );
+
+    // Check if the customer already exists in database
+    if (existingCustomer) {
+      // If the customer exists, create a new booking with customerId
+      newBooking = {
+        ...newBooking,
+        customerId: existingCustomer.code,
+        lsi5: `${CUSTOMER_INDEX}#${existingCustomer.code}`, // <customer_code>
+      };
+    } else {
+      // If the customer does not exist in database, create a new booking with customer information
+      newBooking = {
+        ...newBooking,
+        customer: newBookingInput.customer,
+      };
+    }
+
+    // Prepare and save booking to database
+    const createdBooking = await bookingRepository.create(tenant, newBooking as Booking);
+    return helper.excludeDataFromObject(createdBooking) as Booking;
   };
 }

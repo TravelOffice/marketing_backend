@@ -1,6 +1,7 @@
 import { bookingRepository } from '../repositories';
 import { GetAllBookingUseCase } from './interfaces/GetAllBookingUseCase';
 import { Booking } from '../models/booking/Booking';
+import { Customer } from '../models/Customer';
 
 export default class GetAllBookingUseCaseImpl implements GetAllBookingUseCase {
   invoke = async (tenant: string) => {
@@ -19,7 +20,9 @@ export default class GetAllBookingUseCaseImpl implements GetAllBookingUseCase {
           adjustedBooking.lead = leads.find((lead) => lead.code === tourLeadId);
         }
         if (customerId) {
-          adjustedBooking.customer = customers.find((customer) => customer.code === customerId);
+          adjustedBooking.customer = customers.find(
+            (customer) => customer.code === customerId,
+          ) as Partial<Customer>;
         }
         if (tourTemplateId) {
           adjustedBooking.tourTemplate = tourTemplates.find(

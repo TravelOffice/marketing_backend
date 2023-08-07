@@ -1,12 +1,8 @@
 import { helper } from 'core';
 import logger from '../utils/logger';
-import { Booking, BookingStatusEnum } from '../models/booking/Booking';
+import { Booking } from '../models/booking/Booking';
 import {
-  bookingRepository,
-  customerRepository,
-  departureTourRepository,
-  sourceRepository,
-  userRepository,
+  bookingRepository, departureTourRepository, sourceRepository, userRepository,
 } from '../repositories';
 import { UpdateBookingUseCase } from './interfaces/UpdateBookingUseCase';
 import { UpdateBookingDto } from '../models/dto/UpdateBookingDto';
@@ -45,6 +41,7 @@ export default class UpdateBookingUseCaseImpl implements UpdateBookingUseCase {
     'waitingExpiredAt',
     'doneAt',
     'totalPax',
+    'customer',
   ];
 
   invoke = async (
@@ -63,19 +60,6 @@ export default class UpdateBookingUseCaseImpl implements UpdateBookingUseCase {
 
     logger.log(`Start updating booking data for tenant ${tenant} bookingId ${bookingId}`);
     const updatedBooking = await bookingRepository.update(tenant, bookingId, dataToUpdate);
-
-    // TODO: move this to Completing booking
-    // Check if the booking status is "COMPLETED" and update customer revenue
-    if (updatedBooking.bookingStatus === BookingStatusEnum.COMPLETED) {
-      // Update the customer's revenue using customerRepository.updateRevenue
-      await customerRepository.updateRevenue(
-        tenant,
-        updatedBooking.customerId,
-        updatedBooking.totalPayment!,
-      );
-      // Log a success message indicating the customer's revenue has been updated
-      logger.log(`Update customer ${updatedBooking.customerId} revenue successfully`);
-    }
 
     return helper.excludeDataFromObject(updatedBooking) as Booking;
   };

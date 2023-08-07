@@ -220,7 +220,7 @@ export default class BookingRepositoryImpl implements BookingRepository {
     const leadIds = uniqueItems(compact(bookings.map((booking) => booking.tourLeadId)));
     const tourTemplateIds = uniqueItems(compact(bookings.map((booking) => booking.tourTemplateId)));
     const keys: KeyList = ([] as KeyList)
-      .concat(buildBatchReqItems(customerPk, customerIds))
+      .concat(buildBatchReqItems(customerPk, customerIds as string[]))
       .concat(buildBatchReqItems(leadPk, leadIds as string[]))
       .concat(buildBatchReqItems(tourTemplatePk, tourTemplateIds as string[]));
 

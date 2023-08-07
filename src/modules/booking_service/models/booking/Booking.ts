@@ -5,8 +5,8 @@ import { Note } from '../Note';
 import { Task } from '../Task';
 import { Service } from './Service';
 import { Lead } from '../Lead';
-import { Customer } from '../Customer';
 import { TourTemplate } from '../tour/TourTemplate';
+import { Customer } from '../Customer';
 
 export enum BookingStatusEnum {
   INITIALIZED = 'INITIALIZED',
@@ -35,7 +35,7 @@ export type BookingTourType = keyof typeof BookingTourTypeEnum;
 interface DdbBookingModel extends BaseDdbModel {
   code: string, // Format BK+<number>
   tourLeadId?: string, // Sk value of Lead item
-  customerId: string, // Sk value of Customer item
+  customerId?: string, // Sk value of Customer item
   tourType: BookingTourType,
   deletedAt?: number,
   deletedBy?: string,
@@ -60,7 +60,7 @@ interface DdbBookingModel extends BaseDdbModel {
    * Such as Lead, Customer, TourTemplate
    */
   lead?: Lead,
-  customer?: Customer,
+  customer?: Partial<Customer>,
   tourTemplate?: TourTemplate,
 
   /**
