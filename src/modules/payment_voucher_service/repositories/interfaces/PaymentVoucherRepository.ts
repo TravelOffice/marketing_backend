@@ -8,4 +8,5 @@ export interface PaymentVoucherRepository {
   get: (tenantId: string, receiptId: string) => Promise<PaymentVoucher>
   update: (tenantId: string, id: string, paymentVoucher: PaymentVoucher) => Promise<PaymentVoucher>
   delete: (tenantId: string, id: string) => Promise<string>
+  deleteAttachment: (attachment: string) => Promise<void>
 }

@@ -1,6 +1,6 @@
 import AWS from 'aws';
-import { getAwsSecretValue } from 'get-env';
-import { dynamoProvider, helper } from 'core';
+import { getAwsSecretValue, getEnv } from 'get-env';
+import { dynamoProvider, s3Provider, helper } from 'core';
 import { PaymentVoucher } from '../models/PaymentVoucher';
 import {
   CREATED_AT_INDEX, PAYMENT_VOUCHER_INDEX, TENANT_INDEX, TOUR_OPERATION_INDEX,
@@ -177,5 +177,16 @@ export default class PaymentVoucherRepositoryImpl implements PaymentVoucherRepos
     logger.log(`Payment voucher deleted successfully for tenant ${tenantId}`);
 
     return id;
+  };
+
+  /**
+   * Delete a payment voucher attachment
+   * @param attachment The cdn link of attachment file
+   */
+  deleteAttachment = async (attachment: string) => {
+    const cdnUrl = await getAwsSecretValue('CHAT_FILE_CDN');
+    const s3Bucket = getEnv('ATTACHMENT_BUCKET');
+    const s3Key = attachment.replace(`${cdnUrl}/`, '');
+    await s3Provider.deleteObject(s3Bucket, s3Key);
   };
 }

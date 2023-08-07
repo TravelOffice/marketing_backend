@@ -2,7 +2,7 @@ import { helper } from 'core';
 import { PaymentVoucher } from '../models/PaymentVoucher';
 import { paymentVoucherRepository } from '../repositories';
 import { UpdatePaymentVoucherUseCase } from './interfaces/UpdatePaymentVoucherUseCase';
-import { STATUS_INDEX, UPDATED_AT_INDEX } from '../utils/constants';
+import { STATUS_INDEX, TOUR_OPERATION_INDEX, UPDATED_AT_INDEX } from '../utils/constants';
 
 export default class UpdatePaymentVoucherUseCaseImpl implements UpdatePaymentVoucherUseCase {
   private allowedUpdatingKeys: (keyof PaymentVoucher)[] = [
@@ -16,6 +16,7 @@ export default class UpdatePaymentVoucherUseCaseImpl implements UpdatePaymentVou
     'quickApproval',
     'attachment',
     'status',
+    'tourId',
   ];
 
   invoke = async (
@@ -24,16 +25,25 @@ export default class UpdatePaymentVoucherUseCaseImpl implements UpdatePaymentVou
     paymentVoucher: PaymentVoucher,
   ) => {
     const now = Date.now();
-    const existingTourLocation = await paymentVoucherRepository.get(tenantId, id);
-    if (!existingTourLocation) {
-      throw new Error(`Tour Location [${id}] not found for tenant ${tenantId}`);
+    const existingPaymentVoucher = await paymentVoucherRepository.get(tenantId, id);
+    if (!existingPaymentVoucher) {
+      throw new Error(`Payment voucher [${id}] not found for tenant ${tenantId}`);
     }
+
+    // Delete old attachment
+    if (paymentVoucher.attachment !== ''
+      && existingPaymentVoucher.attachment !== ''
+      && paymentVoucher.attachment !== existingPaymentVoucher.attachment) {
+      await paymentVoucherRepository.deleteAttachment(existingPaymentVoucher.attachment!);
+    }
+    const { tourId } = paymentVoucher;
     const receiptToUpdate: PaymentVoucher = {
-      ...existingTourLocation,
+      ...existingPaymentVoucher,
       ...helper.extractDataFromObject(paymentVoucher, this.allowedUpdatingKeys),
       updatedAt: now,
       lsi2: `${UPDATED_AT_INDEX}#${now}`,
       lsi3: `${STATUS_INDEX}#${paymentVoucher.status}`,
+      lsi5: tourId ? `${TOUR_OPERATION_INDEX}#${tourId}` : existingPaymentVoucher.lsi5,
     };
 
     await paymentVoucherRepository.update(
