@@ -50,7 +50,7 @@ export default class CreatePaymentVoucherUseCaseImpl implements CreatePaymentVou
       lsi2: `${UPDATED_AT_INDEX}#${now}`,
       lsi3: `${STATUS_INDEX}#${PaymentVoucherStatus.WAIT_FOR_APPROVAL}`,
       lsi4: `${CREATOR_INDEX}#${username}`,
-      lsi5: `${TOUR_OPERATION_INDEX}#${tourId}`,
+      lsi5: tourId ? `${TOUR_OPERATION_INDEX}#${tourId}` : '',
     };
     await paymentVoucherRepository.create(tenant, paymentVoucherToAdd);
     return helper.excludeDataFromObject(paymentVoucherToAdd) as PaymentVoucher;

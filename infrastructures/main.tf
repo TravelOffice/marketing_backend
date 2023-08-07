@@ -103,6 +103,12 @@ locals {
       NO_REPLY_DEFAULT_EMAIL         = "no-reply@${local.domain_name}",
       DEPARTURE_TOUR_URL             = "${local.domain_name}/apps/tour/departure"
     },
+    payment_voucher_service_lambda_vars = {
+      REGION                         = var.AWS_REGION
+      NODE_ENV                       = var.ENV
+      SECRET_MANAGER_ID              = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
+      ATTACHMENT_BUCKET              = module.REMOTE_STATE.STATE.MARKETING.frontend.sale_web.attachment_s3_bucket
+    },
   }
 }
 
