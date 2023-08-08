@@ -28,6 +28,8 @@ import HandlePaymentPendingUseCaseImpl from './HandlePaymentPendingUseCaseImpl';
 import HandlePaymentOverdueUseCaseImpl from './HandlePaymentOverdueUseCaseImpl';
 import GetBookingsByDepartureTourIdUseCaseImpl from './GetBookingsByDepartureTourIdUseCaseImpl';
 import { GetBookingsByDepartureTourIdUseCase } from './interfaces/GetBookingsByDepartureTourIdUseCase';
+import { UpdateBookingCustomerUseCase } from './interfaces/UpdateBookingCustomerUseCase';
+import UpdateBookingCustomerUseCaseImpl from './UpdateBookingCustomerUseCaseImpl';
 
 interface UseCases {
   createBookingUseCase: CreateBookingUseCase,
@@ -45,6 +47,7 @@ interface UseCases {
   getBookingsByDepartureTourIdUseCase: GetBookingsByDepartureTourIdUseCase,
   handlePaymentPendingUseCase: HandlePaymentPendingUseCase,
   handlePaymentOverdueUseCase: HandlePaymentOverdueUseCase,
+  updateBookingCustomerUseCase: UpdateBookingCustomerUseCase,
 }
 
 const useCases: UseCases = {
@@ -63,6 +66,7 @@ const useCases: UseCases = {
   handlePaymentPendingUseCase: new HandlePaymentPendingUseCaseImpl(),
   handlePaymentOverdueUseCase: new HandlePaymentOverdueUseCaseImpl(),
   getBookingsByDepartureTourIdUseCase: new GetBookingsByDepartureTourIdUseCaseImpl(),
+  updateBookingCustomerUseCase: new UpdateBookingCustomerUseCaseImpl(),
 };
 
 export const {
@@ -81,4 +85,5 @@ export const {
   handlePaymentPendingUseCase,
   handlePaymentOverdueUseCase,
   getBookingsByDepartureTourIdUseCase,
+  updateBookingCustomerUseCase,
 } = useCases;

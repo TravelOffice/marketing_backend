@@ -1,6 +1,7 @@
 import { BookingStatus } from '../models/booking/Booking';
 import { bookingRepository } from '../repositories';
 import { GetBookingsByStatusUseCase } from './interfaces/GetBookingsByStatusUseCase';
+import { Customer } from '../models/Customer';
 
 export default class GetBookingsByStatusUseCaseImpl implements GetBookingsByStatusUseCase {
   /**
@@ -28,7 +29,9 @@ export default class GetBookingsByStatusUseCaseImpl implements GetBookingsByStat
           adjustedBooking.lead = leads.find((lead) => lead.code === tourLeadId);
         }
         if (customerId) {
-          adjustedBooking.customer = customers.find((customer) => customer.code === customerId);
+          adjustedBooking.customer = customers.find(
+            (customer) => customer.code === customerId,
+          ) as Partial<Customer>;
         }
         if (tourTemplateId) {
           adjustedBooking.tourTemplate = tourTemplates

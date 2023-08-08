@@ -3,10 +3,7 @@ import {
   body, param, ValidationError, validationResult,
 } from 'express-validator';
 import {
-  CustomerLevel,
-  SexType,
-  HonorificType,
-  MaritalStatus,
+  CustomerLevel, HonorificType, MaritalStatus, SexType,
 } from '../models/Customer';
 import {
   VALIDATE_DATE_MSG,
@@ -134,7 +131,7 @@ export function updateCustomerValidator() {
       .isString(),
 
     body('assigneeId', VALIDATE_NON_EMPTY_STRING_MSG)
-      .if(body('address').notEmpty())
+      .if(body('assigneeId').notEmpty())
       .isString(),
 
     body('interest', VALIDATE_NON_EMPTY_STRING_MSG)

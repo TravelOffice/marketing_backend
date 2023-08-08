@@ -67,6 +67,28 @@ export default class CustomerRepositoryImpl implements CustomerRepository {
   };
 
   /**
+   * Update customer
+   * @param tenant Tenant id
+   * @param customerId ID of Customer
+   * @returns customer Data to update
+   */
+  update = async (tenantId: string, customerId: string, customer: Partial<Customer>) => {
+    const expressionNamesAndValues = helper.generateUpdateExpressionNamesAndValues(customer);
+    const result = await dynamoProvider.rawUpdateItem({
+      TableName: await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
+      Key: {
+        pk: `${TENANT_INDEX}#${tenantId}#${CUSTOMER_INDEX}`,
+        sk: `${customerId}`,
+      },
+      UpdateExpression: helper.generateUpdateExpression(customer),
+      ReturnValues: 'ALL_NEW',
+      ExpressionAttributeValues: expressionNamesAndValues.values,
+      ExpressionAttributeNames: expressionNamesAndValues.names,
+    });
+    return result.Attributes as Customer;
+  };
+
+  /**
    * Create new customer
    * @param tenant Tenant id
    * @param customer Customer information

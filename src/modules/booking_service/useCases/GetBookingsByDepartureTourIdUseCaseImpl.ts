@@ -1,13 +1,14 @@
 import { bookingRepository } from '../repositories';
 import { GetBookingsByDepartureTourIdUseCase } from './interfaces/GetBookingsByDepartureTourIdUseCase';
+import { Customer } from '../models/Customer';
 
 export default class GetBookingsByDepartureTourIdUseCaseImpl
 implements GetBookingsByDepartureTourIdUseCase {
   /**
    * Get list of bookings by given departureTourId
    * @param tenant Tenant id
-   * @param status Status of booking
-   * @returns List of bookings that have given status
+   * @param departureTourId id of departure tour for filtering booking
+   * @returns List of bookings that have given departureTourId
    */
   invoke = async (
     tenant: string,
@@ -28,7 +29,9 @@ implements GetBookingsByDepartureTourIdUseCase {
           adjustedBooking.lead = leads.find((lead) => lead.code === tourLeadId);
         }
         if (customerId) {
-          adjustedBooking.customer = customers.find((customer) => customer.code === customerId);
+          adjustedBooking.customer = customers.find(
+            (customer) => customer.code === customerId,
+          ) as Partial<Customer>;
         }
         if (tourTemplateId) {
           adjustedBooking.tourTemplate = tourTemplates

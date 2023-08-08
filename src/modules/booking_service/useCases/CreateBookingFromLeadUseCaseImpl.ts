@@ -1,7 +1,6 @@
-import { CustomerLevel } from '../models/Customer';
+import { helper } from 'core';
 import { Booking, BookingStatus } from '../models/booking/Booking';
 import { CreateBookingFromLeadInput } from '../models/rawApiData/CreateBookingFromLeadInput';
-import { TourServicePrice } from '../models/tour/TourServicePrice';
 import {
   bookingRepository,
   customerRepository,
@@ -9,15 +8,7 @@ import {
   tourTemplateRepository,
   userRepository,
 } from '../repositories';
-import {
-  ASSIGNEE_INDEX,
-  BOOKING_STATUS_INDEX,
-  CREATED_AT_INDEX,
-  CREATOR_INDEX,
-  CUSTOMER_INDEX,
-  PHONE_INDEX,
-  UPDATED_AT_INDEX,
-} from '../utils/constants';
+import { BOOKING_STATUS_INDEX, CUSTOMER_INDEX } from '../utils/constants';
 import { CreateBookingFromLeadUseCase } from './interfaces/CreateBookingFromLeadUseCase';
 
 export default class CreateBookingFromLeadUseCaseImpl implements CreateBookingFromLeadUseCase {
@@ -31,22 +22,20 @@ export default class CreateBookingFromLeadUseCaseImpl implements CreateBookingFr
     username: string,
     name: any,
   }, newBookingInput: CreateBookingFromLeadInput) => {
-    // Verify customer data,
-    // new customer will be created if customer data sent from client is not existed
     const now = Date.now();
-    const { tenant, username, name } = currentUserInfo;
+    const { tenant, username: creatorUserName, name: creatorName } = currentUserInfo;
 
     // Get and extract data attributes from Lead
-    const { leadId, assigneeId } = newBookingInput;
+    const { leadId, assigneeId, services } = newBookingInput;
     const lead = await leadRepository.getById(tenant, leadId);
     if (!lead) { // Lead should not be empty
       throw new Error(`Lead with id ${leadId} of tenant ${tenant} not found.`);
     }
     const {
       email,
-      phoneNumber: phone,
+      phoneNumber,
       honorific,
-      name: fullName,
+      name,
       address,
       tourTemplateId,
       sourceId,
@@ -70,53 +59,15 @@ export default class CreateBookingFromLeadUseCaseImpl implements CreateBookingFr
     const { firstName, lastName, username: saleUsername } = sale;
     const assigneeName = (firstName && lastName) ? `${firstName} ${lastName}` : saleUsername;
 
-    let customer = await customerRepository.findOneByPhone(tenant, phone);
-    const creatorId = username;
-    const creatorName = name;
-    if (!customer) {
-      const code = await customerRepository.generateCode(tenant);
-      customer = await customerRepository.create(tenant, {
-        code,
-        email,
-        address: address || '',
-        honorific,
-        name: fullName,
-        primaryPhoneNumber: phone,
-        level: CustomerLevel.STANDARD,
-        createdAt: now,
-        updatedAt: now,
-        creatorId,
-        creatorName,
-        assigneeId,
-        assigneeName,
-        sourceId,
-        sourceName,
-        lsi1: `${CREATED_AT_INDEX}#${now}`, // createdAt lsi
-        lsi2: `${UPDATED_AT_INDEX}#${now}`, // updatedAt lsi
-        lsi3: `${PHONE_INDEX}#${phone}`, // primaryPhoneNumber lsi
-        lsi4: `${CREATOR_INDEX}#${creatorId}`, // creatorId lsi
-        lsi5: `${ASSIGNEE_INDEX}#${creatorId}`, // assignee lsi
-      });
-      await customerRepository.create(tenant, customer);
-    }
-
     // Prepare booking information for storing to database
     // such as: Tour template, tour type, departure date, assignee, source, note
-    const customerId = customer!.code;
     const { tourType, departureDate } = newBookingInput;
     const code = await bookingRepository.generateCode(tenant);
     const status: BookingStatus = 'INITIALIZED';
-    const services = tourTemplate?.services?.map((service: TourServicePrice) => ({
-      serviceName: service.name,
-      price: service.price,
-      quantity: 1,
-      tax: 0,
-    })) ?? [];
     // Prepare and save booking to database
-    const newBooking: Booking = {
+    let newBooking: Booking = {
       code,
       tourLeadId: leadId,
-      customerId,
       tourType,
       createdAt: now,
       updatedAt: now,
@@ -127,20 +78,37 @@ export default class CreateBookingFromLeadUseCaseImpl implements CreateBookingFr
       departureDate,
       sourceId,
       sourceName,
-      creatorId,
+      creatorId: creatorUserName,
       creatorName,
       assigneeId,
       assigneeName,
       lsi3: `${BOOKING_STATUS_INDEX}#${status}`, // <status>,
-      lsi5: `${CUSTOMER_INDEX}#${customerId}`, // <customer_code>
     };
+
+    const existingCustomer = await customerRepository.findOneByPhone(
+      tenant,
+      phoneNumber,
+    );
+
+    // Check if the customer already exists in database
+    if (existingCustomer) {
+      // If the customer exists, create a new booking with customerId
+      newBooking = {
+        ...newBooking,
+        customerId: existingCustomer.code,
+        lsi5: `${CUSTOMER_INDEX}#${existingCustomer.code}`, // <customer_code>
+      };
+    } else {
+      // If the customer does not exist in database, create a new booking with customer information
+      newBooking = {
+        ...newBooking,
+        customer: {
+          email, primaryPhoneNumber: phoneNumber, honorific, name, address,
+        },
+      };
+    }
+
     const createdBooking = await bookingRepository.create(tenant, newBooking);
-    await customerRepository.updateLatestBooking(tenant, customerId, {
-      id: code,
-      creatorId,
-      creatorName,
-      createdAt: now,
-    });
-    return createdBooking;
+    return helper.excludeDataFromObject(createdBooking) as Booking;
   };
 }

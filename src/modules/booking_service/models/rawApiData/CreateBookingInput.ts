@@ -1,13 +1,14 @@
 import { BookingTourType } from '../booking/Booking';
 import { HonorificType } from '../Customer';
+import { Service } from '../booking/Service';
 
 export interface CreateBookingInput {
   // Customer information, new customer will be created in database if not existed
   customer: {
     email: string
-    phone: string
+    primaryPhoneNumber: string
     honorific: HonorificType
-    fullName: string
+    name: string
     address: string
   },
   // Reference to TourTemplate model, each TourTemplate is identified by pk+sk pair
@@ -20,4 +21,6 @@ export interface CreateBookingInput {
   assigneeId: string,
   // Reference to source model
   sourceId: string,
+
+  services: Service[]
 }
