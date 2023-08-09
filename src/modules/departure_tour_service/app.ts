@@ -4,6 +4,7 @@ import express, { NextFunction, Request, Response } from 'express';
 import compression from 'compression';
 import {
   changeAssigneeUseCase,
+  changeOperationStatusUseCase,
   createDepartureTourUseCase,
   deleteDepartureTourUseCase,
   getDepartureTourListUseCase,
@@ -12,7 +13,7 @@ import {
 } from './useCases';
 import wrapResponse from './utils/wrapResponse';
 import { FAILED, SUCCESS } from './utils/constants';
-import validate, { createOrUpdateDepartureTourValidator } from './utils/validator';
+import validate, { changeOperatorStatusValidator, createOrUpdateDepartureTourValidator } from './utils/validator';
 import logger from './utils/logger';
 
 const app = express();
@@ -124,6 +125,21 @@ app.put('/me/take-care-tour', async (req: Request, res: Response) => {
     res.json(wrapResponse(SUCCESS, departureTour));
   } catch (error: any) {
     logger.log(`[${req.method}] An error occurred while taking care departure tour on route '${req.originalUrl}':`, error);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.put('/departure-tours/:id/operation-status', changeOperatorStatusValidator(), async (req: Request, res: Response) => {
+  try {
+    validate(req);
+    const { id } = req.params;
+    const { tenant } = getCurrentUserInfo(req.headers.authorization!);
+    const { operationStatus } = req.body;
+    logger.log(`[${req.method}] Request received for tenant '${tenant}' on route '${req.originalUrl}'`);
+    const departureTour = await changeOperationStatusUseCase.invoke(tenant, id, operationStatus);
+    res.json(wrapResponse(SUCCESS, departureTour));
+  } catch (error: any) {
+    logger.log(`[${req.method}] An error occurred while updating departure tour on route '${req.originalUrl}':`, error);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });

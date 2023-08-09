@@ -59,13 +59,19 @@ export default class Helper {
    * @param table The name of the DynamoDB table.
    * @param pk The partition key.
    * @param sk The sort key.
+   * @param quantity The quantity of the generating codes.
    * @returns The generated code.
    */
-  generateCode = async (table: string, pk: string, sk: string): Promise<number> => {
+  generateCode = async (
+    table: string,
+    pk: string,
+    sk: string,
+    quantity?: number,
+  ): Promise<number> => {
     const updateExpression = 'SET incrIndex = if_not_exists(incrIndex, :start) + :increment';
     const expressionAttributeValues = {
       ':start': 0, // Initial value if the attribute doesn't exist
-      ':increment': 1, // Increment value
+      ':increment': quantity ?? 1, // Increment value
     };
 
     const result = await dynamoProvider.updateItem(

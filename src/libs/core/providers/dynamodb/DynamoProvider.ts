@@ -8,6 +8,7 @@ export type UpdateItemInput = AWS.DynamoDB.DocumentClient.UpdateItemInput;
 export type QueryInput = AWS.DynamoDB.DocumentClient.QueryInput;
 export type DeleteItemInput = AWS.DynamoDB.DocumentClient.DeleteItemInput;
 export type BatchGetItemInput = AWS.DynamoDB.DocumentClient.BatchGetItemInput;
+export type BatchWriteItemInput = AWS.DynamoDB.DocumentClient.BatchWriteItemInput;
 export type KeyList = AWS.DynamoDB.DocumentClient.KeyList;
 
 const dynamoDB: AWS.DynamoDB.DocumentClient = new AWS.DynamoDB.DocumentClient({ region: getEnv('AWS_REGION') });
@@ -142,4 +143,14 @@ export default class DynamoProvider {
     const { Responses: tableItems = [] } = await dynamoDB.batchGet(batchGetInput).promise();
     return tableItems as AWS.DynamoDB.DocumentClient.BatchGetResponseMap;
   };
+
+  /**
+   * Batch write items into DynamoDB
+   * @param batchWriteInput Batch write input
+   */
+  batchWriteItem = async (
+    batchWriteInput: BatchWriteItemInput,
+  ) => dynamoDB.batchWrite(batchWriteInput).promise();
+
+  marshall = (data: any) => AWS.DynamoDB.Converter.marshall(data);
 }

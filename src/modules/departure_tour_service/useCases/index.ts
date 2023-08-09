@@ -10,6 +10,8 @@ import { UpdateDepartureTourUseCase } from './interfaces/UpdateDepartureTourUseC
 import UpdateDepartureTourUseCaseImpl from './UpdateDepartureTourUseCaseImpl';
 import { ChangeAssigneeUseCase } from './interfaces/ChangeAssigneeUseCase';
 import ChangeAssigneeUseCaseImpl from './ChangeAssigneeUseCaseImpl';
+import ChangeOperationStatusUseCaseImpl from './ChangeOperationStatusUseCaseImpl';
+import { ChangeOperationStatusUseCase } from './interfaces/ChangeOperationStatusUseCase';
 
 interface UseCases {
   getDepartureTourListUseCase: GetDepartureTourListUseCase,
@@ -18,6 +20,7 @@ interface UseCases {
   updateDepartureTourUseCase: UpdateDepartureTourUseCase,
   deleteDepartureTourUseCase: DeleteDepartureTourUseCase,
   changeAssigneeUseCase: ChangeAssigneeUseCase,
+  changeOperationStatusUseCase: ChangeOperationStatusUseCase,
 }
 
 const useCases: UseCases = {
@@ -27,6 +30,7 @@ const useCases: UseCases = {
   updateDepartureTourUseCase: new UpdateDepartureTourUseCaseImpl(),
   deleteDepartureTourUseCase: new DeleteDepartureTourUseCaseImpl(),
   changeAssigneeUseCase: new ChangeAssigneeUseCaseImpl(),
+  changeOperationStatusUseCase: new ChangeOperationStatusUseCaseImpl(),
 };
 
 export const {
@@ -36,4 +40,5 @@ export const {
   updateDepartureTourUseCase,
   deleteDepartureTourUseCase,
   changeAssigneeUseCase,
+  changeOperationStatusUseCase,
 } = useCases;
