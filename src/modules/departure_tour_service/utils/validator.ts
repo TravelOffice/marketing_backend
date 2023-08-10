@@ -10,7 +10,6 @@ import {
 } from './constants';
 import { TourType } from '../models/TourType';
 import { TourStatus } from '../models/TourStatus';
-import TourOperationStatus from '../models/TourOperationstatus';
 
 /**
  * Checks if a date is after or same the current date (considering only the year, month, and day).
@@ -43,12 +42,6 @@ export default function validate(req: Request) {
 export function createOrUpdateDepartureTourValidator() {
   return [
     body('name')
-      .notEmpty().withMessage(VALIDATE_NON_EMPTY_STRING_MSG),
-
-    body('tourTemplate')
-      .notEmpty().withMessage(VALIDATE_NON_EMPTY_STRING_MSG),
-
-    body('tourTemplateCode')
       .notEmpty().withMessage(VALIDATE_NON_EMPTY_STRING_MSG),
 
     body('type')
@@ -105,10 +98,6 @@ export function createOrUpdateDepartureTourValidator() {
       .if(body('policiesAndRegulations.inclusionAndExclusion').exists())
       .notEmpty()
       .isString(),
-
-    body('operationStatus')
-      .if(body('code').exists())
-      .isIn(Object.values(TourOperationStatus)).withMessage(`allow only in ${Object.values(TourOperationStatus)}`),
 
     // TODO: Validate tour plan later
   ];
