@@ -122,18 +122,22 @@ export default class DepartureTourRepositoryImpl implements DepartureTourReposit
    * @returns The updated DepartureTour.
    */
   update = async (tenantId: string, departureTourId: string, departureTour: DepartureTour) => {
-    const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
     const pk = `${TENANT_INDEX}#${tenantId}#${DEPARTURE_TOUR_INDEX}`;
     const sk = `${departureTourId}`;
 
     logger.log(`Updating DepartureTour for tenant ${tenantId} with pk: ${pk}, sk: ${sk}`);
     logger.log(`Tenant ${tenantId} - DepartureTour:`, departureTour);
 
-    await dynamoProvider.putItem(table, pk, sk, departureTour);
+    const result = await dynamoProvider.updateItemWithSetExpression(
+      await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
+      pk,
+      sk,
+      departureTour,
+    );
 
     logger.log(`DepartureTour updated successfully for tenant ${tenantId}`);
 
-    return departureTour;
+    return result.Attributes as DepartureTour;
   };
 
   /**
@@ -161,6 +165,7 @@ export default class DepartureTourRepositoryImpl implements DepartureTourReposit
    * @param tenantId The ID of the tanent
    * @param departureTourId The ID of the departure tour
    * @param assignee The new assignee
+   * @param isFirstAssignee Whether the assignee is the first assignee
    * @returns The departure tour after updated
    */
   changeAssignee = async (

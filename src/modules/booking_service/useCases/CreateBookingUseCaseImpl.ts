@@ -1,5 +1,5 @@
 import { helper } from 'core';
-import { Booking, BookingStatus } from '../models/booking/Booking';
+import { Booking, BookingStatus, BookingStatusEnum } from '../models/booking/Booking';
 import { CreateBookingInput } from '../models/rawApiData/CreateBookingInput';
 import {
   bookingRepository, customerRepository, sourceRepository, tourTemplateRepository,
@@ -38,7 +38,7 @@ export default class CreateBookingUseCaseImpl implements CreateBookingUseCase {
     }
 
     const code = await bookingRepository.generateCode(tenant);
-    const status: BookingStatus = 'INITIALIZED';
+    const status: BookingStatus = BookingStatusEnum.IN_PROCESS;
     let newBooking: Booking = {
       code,
       tourType,
