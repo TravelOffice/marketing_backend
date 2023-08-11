@@ -1,8 +1,6 @@
 import { Request } from 'express';
 import {
-  body, param,
-  ValidationError, validationResult,
-
+  body, param, ValidationError, validationResult,
 } from 'express-validator';
 import moment from 'moment';
 import { TourPlan, tourPlanActivityTypes } from '../models/tour/TourPlan';
@@ -58,7 +56,7 @@ export default function validate(req: Request) {
 
 export function getTourPlanValidator() {
   return [
-    param('departureTourId').notEmpty().withMessage('Departure tour id must not be empty.'),
+    param('tourId').notEmpty().withMessage('Departure tour id must not be empty.'),
   ];
 }
 
@@ -69,15 +67,12 @@ export function updateTourPlanValidator() {
     body('tourPlan').custom((data) => Object.keys(data).every((key) => /^(DAY_?)(\d+.*)$/g.test(key))).withMessage('Daily plan key must follow format DAY_{number}.'),
     // Validate daily data of plan
     // Each key value contain daily plan items as an array
-    body('tourPlan').custom((data: TourPlan) => {
-      const isValidDailyPlan = Object.values(data).every((dailyPlan) => {
-        const isDailyPlanAsArray = Array.isArray(dailyPlan);
-        const isDailyPlanItemsValid = dailyPlan.every((item: any) => validateDailyPlanItem(item));
-        return isDailyPlanAsArray && isDailyPlanItemsValid;
-      });
-      return isValidDailyPlan;
-    }).withMessage('Daily plan is invalid.'),
-    param('departureTourId').notEmpty().withMessage('Departure tour id must not be empty.'),
+    body('tourPlan').custom((data: TourPlan) => Object.values(data).every((dailyPlan) => {
+      const isDailyPlanAsArray = Array.isArray(dailyPlan);
+      const isDailyPlanItemsValid = dailyPlan.every((item: any) => validateDailyPlanItem(item));
+      return isDailyPlanAsArray && isDailyPlanItemsValid;
+    })).withMessage('Daily plan is invalid.'),
+    param('tourId').notEmpty().withMessage('Departure tour id must not be empty.'),
   ];
 }
 

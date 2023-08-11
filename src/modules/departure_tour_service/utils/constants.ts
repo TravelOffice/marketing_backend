@@ -45,3 +45,5 @@ export const PHONE_INDEX = 'PHONE';
 export const CREATOR_INDEX = 'CREATOR';
 
 export const CUSTOMER_COUNTER_INDEX = 'CUSTOMER_COUNTER';
+
+export const BOOKING_STATUS_INDEX = 'BOOKING_STATUS';

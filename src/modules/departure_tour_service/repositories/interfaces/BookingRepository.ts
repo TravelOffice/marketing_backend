@@ -6,4 +6,5 @@ export interface BookingRepository {
     tenant: string,
     booking: Booking[],
   ) => { PutRequest: { Item: any } }[],
+  calculateRevenue: (booking: Booking) => number;
 }

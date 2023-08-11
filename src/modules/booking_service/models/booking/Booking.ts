@@ -11,10 +11,10 @@ import { Customer } from '../Customer';
 export enum BookingStatusEnum {
   INITIALIZED = 'INITIALIZED',
   CONFIRMED = 'CONFIRMED',
-  IN_PROCESS = 'IN_PROCESS',
+  IN_PROCESS = 'IN_PROCESS', // When booking has assignee, the status change to IN_PROCESS
   PAYMENT_PENDING = 'PAYMENT_PENDING',
   CANCELED = 'CANCELED',
-  COMPLETED = 'COMPLETED',
+  COMPLETED = 'COMPLETED', // When departure tour completed, the status of related bookings change to COMPLETED
 }
 
 export enum BookingPaymentStatusEnum {
