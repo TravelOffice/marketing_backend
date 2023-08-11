@@ -98,6 +98,13 @@ export default class CreateBookingFromLeadUseCaseImpl implements CreateBookingFr
         customerId: existingCustomer.code,
         lsi5: `${CUSTOMER_INDEX}#${existingCustomer.code}`, // <customer_code>
       };
+      // Save latest booking information into Customer record
+      await customerRepository.updateLatestBooking(tenant, existingCustomer.code, {
+        id: code,
+        creatorId: creatorUserName,
+        creatorName,
+        createdAt: now,
+      });
     } else {
       // If the customer does not exist in database, create a new booking with customer information
       newBooking = {

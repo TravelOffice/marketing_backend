@@ -35,3 +35,13 @@ export const ASSIGNEE_INDEX = 'ASSIGNEE';
 export const EMPLOYEE_INDEX = 'EMPLOYEE';
 
 export const OPERATOR_MANAGER_ROLE = 'OPERATOR_MANAGER';
+
+export const BOOKING_INDEX = 'BOOKING';
+
+export const CUSTOMER_INDEX = 'CUSTOMER';
+
+export const PHONE_INDEX = 'PHONE';
+
+export const CREATOR_INDEX = 'CREATOR';
+
+export const CUSTOMER_COUNTER_INDEX = 'CUSTOMER_COUNTER';

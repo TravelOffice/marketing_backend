@@ -304,7 +304,12 @@ export default class BookingRepositoryImpl implements BookingRepository {
   };
 
   deletePaymentDeadline = async (ruleName: string) => {
-    await eventBridgeProvider.deleteRule(ruleName);
+    try {
+      await eventBridgeProvider.deleteRule(ruleName);
+    } catch (error) {
+      // Log any errors that occur during the cancellation process
+      logger.log(`Error delete Event Bridge rule ${ruleName}: ${error}`);
+    }
   };
 
   /**

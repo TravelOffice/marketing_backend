@@ -1,6 +1,6 @@
 import { helper } from 'core';
 import logger from '../utils/logger';
-import { Booking } from '../models/booking/Booking';
+import { Booking, BookingStatusEnum } from '../models/booking/Booking';
 import {
   bookingRepository, departureTourRepository, sourceRepository, userRepository,
 } from '../repositories';
@@ -55,11 +55,22 @@ export default class UpdateBookingUseCaseImpl implements UpdateBookingUseCase {
       updateBookingDto,
       this.allowedUpdatingKeys,
     );
-
     const dataToUpdate = await this.getDataToUpdate(tenant, booking, allowedUpdatingData);
 
+    let totalPayment = 0;
+    // Calculate booking total payment when completed booking
+    if (dataToUpdate.bookingStatus === BookingStatusEnum.COMPLETED) {
+      dataToUpdate.services?.forEach((service) => {
+        const payment = (service.price * service.quantity) * (100 + service.tax);
+        totalPayment += payment / 100;
+      });
+    }
+
     logger.log(`Start updating booking data for tenant ${tenant} bookingId ${bookingId}`);
-    const updatedBooking = await bookingRepository.update(tenant, bookingId, dataToUpdate);
+    const updatedBooking = await bookingRepository.update(tenant, bookingId, {
+      ...dataToUpdate,
+      totalPayment,
+    });
 
     return helper.excludeDataFromObject(updatedBooking) as Booking;
   };

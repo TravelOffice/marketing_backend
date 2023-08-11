@@ -88,7 +88,7 @@ export default class DepartureTourRepositoryImpl implements DepartureTourReposit
     );
     if (!item) throw new Error(`Departure tour [${departureTourId}] not found`);
 
-    logger.log('DepartureTour retrieved:', item);
+    // logger.log('DepartureTour retrieved:', item);
 
     return item as DepartureTour;
   };
