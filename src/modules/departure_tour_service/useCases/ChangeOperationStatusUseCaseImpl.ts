@@ -9,7 +9,7 @@ import {
 } from '../repositories';
 import logger from '../utils/logger';
 import sendEmail from '../utils/email';
-import { OPERATOR_MANAGER_ROLE } from '../utils/constants';
+import { BOOKING_STATUS_INDEX, OPERATOR_MANAGER_ROLE } from '../utils/constants';
 import { MailTemplate } from '../models/MailTemplate';
 import { DepartureTour, operationStatusTransitionRules } from '../models/DepartureTour';
 import { ChangeOperationStatusUseCase } from './interfaces/ChangeOperationStatusUseCase';
@@ -92,71 +92,82 @@ export default class ChangeOperationStatusUseCaseImpl implements ChangeOperation
         departureTour.code,
       );
 
+      // Update booking with total payment and change status to COMPLETED
+      const bookingsWithPayment = bookings.map((booking) => {
+        const totalPayment = bookingRepository.calculateRevenue(booking);
+        return {
+          ...booking,
+          totalPayment,
+          bookingStatus: 'COMPLETED',
+          lsi3: `${BOOKING_STATUS_INDEX}#COMPLETED`, // <status>,
+        } as Booking;
+      });
+
+      const bookingsWithCustomer = bookingsWithPayment.filter(
+        (booking) => booking.customerId,
+      );
+
       // Filter and process bookings with new customers
-      let bookingsWithNewCustomer = bookings.filter(
+      let bookingsWithPotentialCustomer = bookingsWithPayment.filter(
         (item) => !item.customerId,
       );
 
       // Determine the quantity of new customers
-      const quantityCode = bookingsWithNewCustomer.length;
-      if (quantityCode) {
-        // Generate codes for new customers
-        let currentCode = await customerRepository.generateCustomerCode(
-          tenantId,
-          bookingsWithNewCustomer.length,
-        );
+      const quantityCustomer = bookingsWithPotentialCustomer.length;
+      // Generate codes for new customers
+      let currentCode = await customerRepository.generateCustomerCode(
+        tenantId,
+        quantityCustomer,
+      );
 
-        // Update bookings and customers with generated codes
-        bookingsWithNewCustomer = bookingsWithNewCustomer.map((booking: Booking) => {
-          const code = currentCode.toString();
-          currentCode -= 1;
-          const revenue = booking.totalPayment;
-          const latestBooking: LatestBooking = {
-            id: booking.code,
-            creatorId: booking.creatorId!,
-            creatorName: booking.creatorName!,
-            createdAt: booking.createdAt!,
-          };
-          return {
-            ...booking,
-            customerId: code,
-            customer: {
-              ...booking.customer,
-              code,
-              revenue,
-              latestBooking,
-              creatorId: booking.creatorId,
-              creatorName: booking.creatorName,
-            },
-          } as Booking;
-        });
+      // Update bookings and customers with generated codes
+      bookingsWithPotentialCustomer = bookingsWithPotentialCustomer.map((booking: Booking) => {
+        const code = currentCode.toString();
+        currentCode -= 1;
+        const latestBooking: LatestBooking = {
+          id: booking.code,
+          creatorId: booking.creatorId!,
+          creatorName: booking.creatorName!,
+          createdAt: booking.createdAt!,
+        };
+        return {
+          ...booking,
+          customerId: code,
+          customer: {
+            ...booking.customer,
+            code,
+            latestBooking,
+            creatorId: booking.creatorId,
+            creatorName: booking.creatorName,
+          },
+        } as Booking;
+      });
 
-        // Extract new customers and updating bookings
-        const newCustomers = bookingsWithNewCustomer.map((booking) => booking.customer!);
-        const updatingBookings = bookingsWithNewCustomer.map((booking) => {
-          const { customer, ...rest } = booking;
-          return rest;
-        });
+      // Extract new customers and updating bookings
+      const newCustomers = bookingsWithPotentialCustomer.map((booking) => booking.customer!);
+      const updatingBookings = bookingsWithPotentialCustomer.map((booking) => {
+        const { customer, ...rest } = booking;
+        return rest;
+      }).concat(bookingsWithCustomer);
 
-        // Build batch write requests for customer and booking updates
-        const customersPutRequest = customerRepository.buildBatchWriteCustomers(
-          tenantId,
-          newCustomers,
-        );
-        const bookingsPutRequest = bookingRepository.buildBatchWriteBookings(
-          tenantId,
-          updatingBookings,
-        );
+      // Build batch write requests for customer and booking updates
+      const customersPutRequest = customerRepository.buildBatchWriteCustomers(
+        tenantId,
+        newCustomers,
+      );
+      const bookingsPutRequest = bookingRepository.buildBatchWriteBookings(
+        tenantId,
+        updatingBookings,
+      );
 
-        // Logging: Notify the start of the customer and booking updates
-        logger.log('Updating new customers and associated bookings.');
+      // Logging: Notify the start of the customer and booking updates
+      logger.log('Updating new customers and associated bookings.');
 
-        // Execute the batch write requests to update customers and bookings
-        await databaseRepository.executeBatchWrite(customersPutRequest.concat(bookingsPutRequest));
+      // Execute the batch write requests to update customers and bookings
+      await databaseRepository.executeBatchWrite(customersPutRequest.concat(bookingsPutRequest));
 
-        // Logging: Notify the successful completion of customer and booking updates
-        logger.log('New customers and associated bookings updated successfully.');
-      }
+      // Logging: Notify the successful completion of customer and booking updates
+      logger.log('New customers and associated bookings updated successfully.');
     }
 
     return helper.excludeDataFromObject(updatedDepartureTour) as DepartureTour;

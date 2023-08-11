@@ -56,4 +56,19 @@ export default class BookingRepositoryImpl implements BookingRepository {
       },
     };
   });
+
+  /**
+   * Calculate revenue of booking
+   * @param booking The booking object
+   * @return The revenue of booking
+   */
+  calculateRevenue = (booking: Booking) => {
+    let revenue = 0;
+    // Calculate booking total payment when completed booking
+    booking.services?.forEach((service) => {
+      const payment = (service.price * service.quantity) * (100 + service.tax);
+      revenue += payment / 100;
+    });
+    return revenue;
+  };
 }
