@@ -61,7 +61,7 @@ export default class BookingRepositoryImpl implements BookingRepository {
       bookingToUpdate,
     );
 
-    return result.Attributes as Booking;
+    return helper.excludeDataFromObject(result.Attributes as Booking) as Booking;
   };
 
   createFromLead = async (tenant: string, leadId: string, booking: Booking) => {

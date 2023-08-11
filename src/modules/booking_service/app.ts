@@ -170,8 +170,8 @@ app.put('/bookings/:id/confirm', confirmBookingValidator(), async (req: Request,
   try {
     validate(req);
     const currentUser = getCurrentUserInfo(req.headers.authorization!);
-    await confirmBookingUseCase.invoke(currentUser, req.params.id, req.body);
-    res.json(wrapResponse(SUCCESS));
+    const booking = await confirmBookingUseCase.invoke(currentUser, req.params.id, req.body);
+    res.json(wrapResponse(SUCCESS, booking));
   } catch (error: any) {
     logger.log(`[PUT /bookings/:id/confirm] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
@@ -184,8 +184,8 @@ app.put('/bookings/:id/payment-pending', validatePaymentPendingInput(), async (r
     const { id: bookingId } = req.params;
     const { waitingExpiredAt } = req.body;
     const { tenant } = getCurrentUserInfo(req.headers.authorization!);
-    await handlePaymentPendingUseCase.invoke(tenant, bookingId, waitingExpiredAt);
-    res.json(wrapResponse(SUCCESS));
+    const booking = await handlePaymentPendingUseCase.invoke(tenant, bookingId, waitingExpiredAt);
+    res.json(wrapResponse(SUCCESS, booking));
   } catch (error: any) {
     logger.log(`[PUT /bookings/:id/confirm] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
