@@ -83,8 +83,20 @@ export function getPostsValidator() {
       .isString()
       .notEmpty()
       .withMessage('nextToken must be a string'),
+    query('token').if(query('token').exists())
+      .isString()
+      .withMessage('token must be a string'),
     query('limit').if(query('limit').exists())
       .isInt()
       .withMessage('limit must be a number'),
+    query('sortDesc').if(query('sortDesc').exists())
+      .isBoolean()
+      .withMessage('sortDesc must be a boolean'),
+  ];
+}
+
+export function bookmarkPostValidtor() {
+  return [
+    param('postId').notEmpty().withMessage('postId is required'),
   ];
 }

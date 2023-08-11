@@ -3,14 +3,18 @@ import { getCurrentUserInfo } from 'decode-token';
 import express, { Request, Response, NextFunction } from 'express';
 import compression from 'compression';
 import {
+  bookmarkTourPostUseCase,
   createTourPostUseCase,
   getTourPostListUseCase,
   getTourPostUseCase,
+  unbookmarkTourPostUseCase,
   updateTourPostUseCase,
 } from './useCases';
 import wrapResponse from './utils/wrapResponse';
 import { FAILED, SUCCESS } from './utils/constants';
-import validate, { createTourPostValidator, getPostsValidator, updateTourPostValidator } from './utils/validator';
+import validate, {
+  bookmarkPostValidtor, createTourPostValidator, getPostsValidator, updateTourPostValidator,
+} from './utils/validator';
 import logger from './utils/logger';
 
 const app = express();
@@ -32,14 +36,25 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
   next();
 });
 
-app.get('/marketplace/posts', getPostsValidator(), async (req: Request, res: Response) => {
+app.get('/marketplace/posts/me', getPostsValidator(), async (req: Request, res: Response) => {
   try {
-    const { nextToken, limit } = req.query;
+    const currentUser = getCurrentUserInfo(req.headers.authorization!);
     const tourPosts = await getTourPostListUseCase.invoke(
-      nextToken as string,
-      parseInt(limit as string, 10),
+      currentUser,
+      req.query,
     );
     res.json(wrapResponse(SUCCESS, tourPosts));
+  } catch (error: any) {
+    logger.log(`[app.get] Error ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.get('/marketplace/posts', getPostsValidator(), async (req: Request, res: Response) => {
+  try {
+    // TODO: Implement this in next PR
+    // Get all posts for admin user role only
+    throw new Error('Not implemented');
   } catch (error: any) {
     logger.log(`[app.get] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
@@ -76,6 +91,43 @@ app.put('/marketplace/posts/:id', updateTourPostValidator(), async (req: Request
     const currentUser = getCurrentUserInfo(req.headers.authorization!);
     const tourPost = await updateTourPostUseCase.invoke(currentUser, id, req.body);
     res.json(wrapResponse(SUCCESS, tourPost));
+  } catch (error: any) {
+    logger.log(`[app.get] Error ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.post('/marketplace/bookmarked-posts', async (_: Request, res: Response) => {
+  try {
+    // TODO: Implement this in next PR
+    // Get bookmarked posts of current user
+    throw new Error('Not implemented');
+  } catch (error: any) {
+    logger.log(`[app.get] Error ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.post('/marketplace/posts/:postId/bookmark', bookmarkPostValidtor(), async (req: Request, res: Response) => {
+  try {
+    validate(req);
+    const { postId } = req.params;
+    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const bookmarkedItem = await bookmarkTourPostUseCase.invoke(currentUser, postId);
+    res.json(wrapResponse(SUCCESS, bookmarkedItem));
+  } catch (error: any) {
+    logger.log(`[app.get] Error ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.delete('/marketplace/posts/:postId/bookmark', bookmarkPostValidtor(), async (req: Request, res: Response) => {
+  try {
+    validate(req);
+    const { postId } = req.params;
+    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    await unbookmarkTourPostUseCase.invoke(currentUser, postId);
+    res.json(wrapResponse(SUCCESS, undefined));
   } catch (error: any) {
     logger.log(`[app.get] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
