@@ -36,7 +36,7 @@ export default class CancelBookingUseCaseImpl implements CancelBookingUseCase {
 
     // Delete payment pending event bridge
     if (booking.bookingStatus === BookingStatusEnum.PAYMENT_PENDING) {
-      const ruleName = `${tenant}-${booking}-${PAYMENT_PENDING_RULE}`;
+      const ruleName = `${tenant}-${bookingId}-${PAYMENT_PENDING_RULE}`;
       await bookingRepository.deletePaymentDeadline(ruleName);
     }
 
