@@ -13,6 +13,22 @@ export type KeyList = AWS.DynamoDB.DocumentClient.KeyList;
 
 const dynamoDB: AWS.DynamoDB.DocumentClient = new AWS.DynamoDB.DocumentClient({ region: getEnv('AWS_REGION') });
 
+export type PaginationResponsePayload = {
+  data: any;
+  paging: {
+    cursors: {
+      before: string,
+      after: string
+    }
+  };
+}
+
+export type PaginationParams = {
+  nextToken?: string,
+  limit?: number,
+  sortDesc?: boolean,
+}
+
 export default class DynamoProvider {
   /**
    * Insert an item into the DynamoDB table.
@@ -46,6 +62,53 @@ export default class DynamoProvider {
       return undefined;
     }
     return Item as T;
+  };
+
+  /**
+   * Executes a paginated query on the DynamoDB table based on the provided query parameters
+   * and pagination settings.
+   *
+   * @param {QueryInput} queryParams - The query parameters for the DynamoDB query.
+   * @param {PaginationParams} paginationParams - The pagination settings.
+   * @returns {Promise<PaginationResponsePayload>} - A promise resolving to a paginated response.
+   */
+  queryPagination = async (
+    queryParams: QueryInput,
+    paginationParams: PaginationParams,
+  ): Promise<PaginationResponsePayload | undefined> => {
+    // Set a default pagination limit
+    const defaultPaginationLimit = 10;
+
+    // Extract pagination parameters from the input
+    const { nextToken, limit, sortDesc } = paginationParams;
+
+    // Determine the pagination limit
+    const paginationLimit = limit || defaultPaginationLimit;
+
+    // Perform the DynamoDB query
+    const { Items, LastEvaluatedKey } = await dynamoDB.query({
+      ...queryParams,
+      ScanIndexForward: !sortDesc, // Reverse sorting if sortDesc is true
+      Limit: paginationLimit,
+      ExclusiveStartKey: nextToken ? JSON.parse(nextToken) : undefined,
+    }).promise();
+
+    // Process the query result
+    if (Items) {
+      // If there are items, create the paginated response payload
+      return {
+        data: Items.map((item: any) => helper.excludeDataFromObject(item)),
+        paging: {
+          cursors: {
+            before: LastEvaluatedKey ? JSON.stringify(LastEvaluatedKey) : '', // Set the 'before' cursor
+            after: nextToken || '', // Set the 'after' cursor
+          },
+        },
+      } as PaginationResponsePayload;
+    }
+
+    // If no items are found, return undefined
+    return undefined;
   };
 
   /**
