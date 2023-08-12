@@ -26,10 +26,15 @@ function validateDailyPlanItem(item: any) {
   if (!start.isValid() || !end.isValid() || !start.isBefore(end)) {
     return false;
   }
-  // Estimation id must not be empty
-  if (!estimationId || estimationId.length === 0) {
-    return false;
+
+  // Validate estimationId if exists
+  if (estimationId) {
+    // Check if estimationId is an array
+    if (!Array.isArray(estimationId)) return false;
+    // Check if estimationId is an array of integer
+    return estimationId.every((element) => /^\d+$/.test(element));
   }
+
   // Activity type must be one of tourPlanActivityTypes
   // Refer detailed types at src\modules\tours_operation\models\tour\TourPlan.ts
   if (!tourPlanActivityTypes.includes(activityType)) {
