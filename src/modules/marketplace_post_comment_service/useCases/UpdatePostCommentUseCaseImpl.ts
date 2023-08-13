@@ -59,7 +59,12 @@ export default class UpdatePostCommentUseCaseImpl implements UpdatePostCommentUs
     const updatingCommentData = await this.getDataToUpdate(comment, allowedUpdatingData);
 
     // Update the comment using the repository
-    return postCommentRepository.update(tourPostId, postCommentId, updatingCommentData);
+    const updatedComment = await postCommentRepository.update(
+      tourPostId,
+      postCommentId,
+      updatingCommentData,
+    );
+    return helper.excludeDataFromObject(updatedComment) as PostComment;
   };
 
   /**

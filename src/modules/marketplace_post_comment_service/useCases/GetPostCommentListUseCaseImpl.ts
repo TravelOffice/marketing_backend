@@ -5,7 +5,7 @@ import { postCommentRepository } from '../repositories';
 
 export default class GetPostCommentListUseCaseImpl implements GetPostCommentListUseCase {
   /**
-   * Invokes the GetPostCommentListUseCase to delete a comment.
+   * Retrieves the list comment of tour post by the associated tour post ID.
    *
    * @param tourPostId
    * @param paginationParams
