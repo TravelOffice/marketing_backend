@@ -21,5 +21,5 @@ export interface TourPost extends BaseDdbModel {
     // If undefined, the post will be considered as unlimited buy or sell
     maximumPaxToTrade?: number,
     isBookmarked?: boolean, // Whether the tour post is bookmarked by the current user
-    isFavorite?: boolean, // Whether the tour post is favorited by the current user
+    isFollowed?: boolean, // Whether the tour post is followed by the current user
 }

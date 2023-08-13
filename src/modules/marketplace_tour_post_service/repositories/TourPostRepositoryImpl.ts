@@ -8,29 +8,71 @@ import {
   MARKETPLACE_USER_INDEX, POST_INDEX,
   TOUR_POST_BOOKMARK_INDEX,
   TOUR_POST_COUNTER_INDEX,
+  TOUR_POST_FOLLOW_INDEX,
 } from '../utils/constants';
 import logger from '../utils/logger';
 import { BookmarkedTourPost } from '../models/BookmarkedTourPost';
+import { FollowedTourPost } from '../models/FollowedTourPost';
 
 export default class TourPostRepositoryImpl implements TourPostRepository {
   /**
+   * Lists all tour posts
+   * @param currentUserId - The ID of the user that own access token in the request.
+   * @param {PaginationParams} paginationParams - The pagination settings.
+   * @returns {Promise<PaginationResponsePayload<TourPost> | undefined>}
+   * A promise resolving to a paginated response.
+   * Each tour post will have additional data such as isBookmarked, isFav, etc.
+   */
+  list = async (currentUserId: string, paginationParams: PaginationParams) => {
+    const marketplaceTable = await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE');
+    const queryParams = {
+      TableName: marketplaceTable,
+      KeyConditionExpression: 'pk = :pk',
+      ExpressionAttributeValues: {
+        ':pk': POST_INDEX,
+      },
+    };
+    const queryResult = await dynamoProvider.queryPagination<TourPost>(
+      queryParams,
+      paginationParams,
+    );
+
+    // Transform the data such as:
+    // - Add bookmarked flag to each post if the user has bookmarked it
+    // - Add fav flag if the user has liked it
+    if (queryResult) {
+      const transformedPosts = await this.transformTourPostList(queryResult.data, currentUserId);
+      return {
+        ...queryResult,
+        data: transformedPosts,
+      };
+    }
+
+    return queryResult;
+  };
+
+  /**
    * Lists all tour posts for the specified user.
    *
-   * @param userId - The ID of the user.
+   * @param byUserId - The ID of the user.
    * @param {PaginationParams} paginationParams - The pagination settings.
    * @returns {Promise<PaginationResponsePayload<TourPost> | undefined>}
    * A promise resolving to a paginated response.
    */
-  listByUser = async (userId: string, paginationParams: PaginationParams) => {
+  listByUser = async (
+    currentUserId: string,
+    author: string,
+    paginationParams: PaginationParams,
+  ) => {
     // Prepare query params
     const marketplaceTable = await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE');
     const queryParams = {
       TableName: marketplaceTable,
-      IndexName: 'Index2',
-      KeyConditionExpression: 'pk = :pk and lsi2 = :lsi2',
+      IndexName: 'Index1',
+      KeyConditionExpression: 'pk = :pk and lsi1 = :lsi1',
       ExpressionAttributeValues: {
         ':pk': POST_INDEX,
-        ':lsi2': userId,
+        ':lsi1': author,
       },
     };
 
@@ -44,13 +86,8 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
     // Transform the data such as:
     // - Add bookmarked flag to each post if the user has bookmarked it
     // - Add fav flag if the user has liked it
-    const bookmarkedItems = await this.getAllBookmarkedItems(userId);
-    const bookmarkedTourPostIds = bookmarkedItems.map((item) => item.tourPostId);
     if (queryResult) {
-      const transformedPosts = queryResult.data.map((item) => ({
-        ...item,
-        isBookmarked: bookmarkedTourPostIds.includes(item.code),
-      }));
+      const transformedPosts = await this.transformTourPostList(queryResult.data, currentUserId);
       return {
         ...queryResult,
         data: transformedPosts,
@@ -68,25 +105,42 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
    * @returns {Promise<PaginationResponsePayload<TourPost> | undefined>}
    * A promise resolving to a paginated response.
    */
-  listByOrganization = async (organizationId: string, paginationParams: PaginationParams) => {
+  listByOrganization = async (
+    currentUserId: string,
+    organizationId: string,
+    paginationParams: PaginationParams,
+  ) => {
     // Prepare query params
     const marketplaceTable = await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE');
     const queryParams = {
       TableName: marketplaceTable,
       IndexName: 'Index1',
-      KeyConditionExpression: 'pk = :pk and lsi1 = :lsi1',
+      KeyConditionExpression: 'pk = :pk and begins_with(lsi1, :lsi1_filter)',
       ExpressionAttributeValues: {
         ':pk': POST_INDEX,
-        ':lsi1': organizationId,
+        ':lsi1_filter': `${organizationId}#`,
       },
     };
 
     // Get list of tour posts by user
     // The data is paginated
-    return dynamoProvider.queryPagination(
+    const queryResult = await dynamoProvider.queryPagination<TourPost>(
       queryParams,
       paginationParams,
     );
+
+    // Transform the data such as:
+    // - Add bookmarked flag to each post if the user has bookmarked it
+    // - Add fav flag if the user has liked it
+    if (queryResult) {
+      const transformedPosts = await this.transformTourPostList(queryResult.data, currentUserId);
+      return {
+        ...queryResult,
+        data: transformedPosts,
+      };
+    }
+
+    return queryResult;
   };
 
   /**
@@ -211,6 +265,81 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
   };
 
   /**
+   * Lists all followed items for the specified user.
+   * Each followed item only contains userId and tourPostId not the whole tour post.
+   *
+   * @param userId User id
+   * @returns A Promise that resolves to the list of followed items.
+   */
+  getAllFollowedItems = async (userId: string) => {
+    const marketplaceTable = await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE');
+    const queryParams = {
+      TableName: marketplaceTable,
+      KeyConditionExpression: 'pk = :pk and begins_with(sk, :sk_filter)',
+      ExpressionAttributeValues: {
+        ':pk': `${MARKETPLACE_USER_INDEX}#${userId}`,
+        ':sk_filter': TOUR_POST_FOLLOW_INDEX,
+      },
+    };
+    return dynamoProvider.query<FollowedTourPost>(queryParams);
+  };
+
+  /**
+   * Retrieves a followed item by its ID and tenant ID.
+   * Followed item only contains userId and tourPostId not the whole tour post.
+   *
+   * @param userId User id
+   * @param tourPostId Tour post id
+   * @returns A Promise that resolves to the retrieved followed item, or undefined if not found.
+   */
+  getFollowedItem = async (userId: string, tourPostId: string) => {
+    const marketplaceTable = await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE');
+    return dynamoProvider.getItem(
+      marketplaceTable,
+      `${MARKETPLACE_USER_INDEX}#${userId}`,
+      `${TOUR_POST_FOLLOW_INDEX}#${tourPostId}`,
+    );
+  };
+
+  /**
+   * Creates a new followed item for the specified user.
+   *
+   * @param userId User id
+   * @param tourPostId Tour post id
+   * @returns A Promise that resolves to the created followed item.
+   */
+  follow = async (userId: string, tourPostId: string) => {
+    const marketplaceTable = await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE');
+    const followedItem = {
+      userId,
+      tourPostId,
+      createdAt: Date.now(),
+    };
+    await dynamoProvider.putItem(
+      marketplaceTable,
+      `${MARKETPLACE_USER_INDEX}#${userId}`,
+      `${TOUR_POST_FOLLOW_INDEX}#${tourPostId}`,
+      followedItem,
+    );
+    return followedItem as Partial<FollowedTourPost>;
+  };
+
+  /**
+   * Deletes a followed item for the specified user.
+   *
+   * @param userId User id
+   * @param tourPostId Tour post id
+   */
+  unfollow = async (userId: string, tourPostId: string) => {
+    const marketplaceTable = await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE');
+    await dynamoProvider.deleteItem(
+      marketplaceTable,
+      `${MARKETPLACE_USER_INDEX}#${userId}`,
+      `${TOUR_POST_FOLLOW_INDEX}#${tourPostId}`,
+    );
+  };
+
+  /**
    * Method to generate tour post code which is user-readable
    * @returns A Promise that resolves to the generated code.
    */
@@ -227,5 +356,30 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
       logger.log('Error during increment operation for tour post');
       throw error;
     }
+  };
+
+  /**
+   * Method to transform tour post list
+   *
+   * @param tourPosts List of tour posts
+   * @param userId User id
+   * @returns A Promise that resolves to the transformed tour post list.
+   * Each tour post will have additional data such as isBookmarked, isFav, etc.
+   */
+  private transformTourPostList = async (tourPosts: Array<TourPost>, userId: string) => {
+    // Get all the bookmarked items and followed items of the user
+    const bookmarkedItems = await this.getAllBookmarkedItems(userId);
+    const followedItems = await this.getAllFollowedItems(userId);
+
+    // Convert to array of tour post ids that are bookmarked or followed by the user
+    const bookmarkedTourPostIds = bookmarkedItems.map((item) => item.tourPostId);
+    const followedTourPostIds = followedItems.map((item) => item.tourPostId);
+
+    // Add isBookmarked and isFollowed flags to each tour post
+    return tourPosts.map((item) => ({
+      ...item,
+      isBookmarked: bookmarkedTourPostIds.includes(item.code),
+      isFollowed: followedTourPostIds.includes(item.code),
+    }));
   };
 }

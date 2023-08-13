@@ -14,6 +14,8 @@ export const TOUR_POST_COUNTER_INDEX = 'TOUR_POST_COUNTER';
 
 export const TOUR_POST_BOOKMARK_INDEX = 'BM';
 
+export const TOUR_POST_FOLLOW_INDEX = 'FL';
+
 export const allowedInitialPostStatuses = [
   'DRAFT',
   'IN_PROGRESS',

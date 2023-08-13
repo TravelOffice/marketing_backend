@@ -3,7 +3,7 @@ import { tourPostRepository } from '../repositories';
 import logger from '../utils/logger';
 import { UnbookmarkTourPostUseCase } from './interfaces/UnbookmarkTourPostUseCase';
 
-export default class UnbookmarkPostUseCaseImpl implements UnbookmarkTourPostUseCase {
+export default class UnbookmarkTourPostUseCaseImpl implements UnbookmarkTourPostUseCase {
   invoke = async (currentUser: CognitoUser, tourPostId: string) => {
     // Tour post must be existed
     const tourPost = await tourPostRepository.getById(tourPostId);

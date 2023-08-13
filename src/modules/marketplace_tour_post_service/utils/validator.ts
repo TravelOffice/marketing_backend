@@ -77,7 +77,7 @@ export function updateTourPostValidator() {
   );
 }
 
-export function getPostsValidator() {
+export function getSelfPostsValidator() {
   return [
     query('nextToken').if(query('nextToken').exists())
       .isString()
@@ -95,7 +95,35 @@ export function getPostsValidator() {
   ];
 }
 
+export function getPostsValidator() {
+  return [
+    query('organization')
+      .optional().isString().notEmpty()
+      .withMessage('organization must be a string'),
+    query('author')
+      .optional().isString().notEmpty()
+      .withMessage('author must be a string'),
+
+    query('nextToken')
+      .optional().isString().notEmpty()
+      .withMessage('nextToken must be a string'),
+    query('token')
+      .optional().isString().notEmpty()
+      .withMessage('token must be a string'),
+    query('limit').optional().isInt().withMessage('limit must be a number'),
+    query('sortDesc').optional()
+      .isBoolean()
+      .withMessage('sortDesc must be a boolean'),
+  ];
+}
+
 export function bookmarkPostValidtor() {
+  return [
+    param('postId').notEmpty().withMessage('postId is required'),
+  ];
+}
+
+export function followPostValidtor() {
   return [
     param('postId').notEmpty().withMessage('postId is required'),
   ];
