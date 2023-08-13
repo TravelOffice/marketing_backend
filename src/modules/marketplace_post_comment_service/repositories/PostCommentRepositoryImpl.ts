@@ -9,21 +9,21 @@ import {
 
 export default class PostCommentRepositoryImpl implements PostCommentRepository {
   /**
-   * Lists all comments for the specified tenant.
+   * Lists all comments for the specified post.
    *
-   * @param postId - The ID of the post.
+   * @param tourPostId - The ID of the post.
    * @param {PaginationParams} paginationParams - The pagination settings.
    * @returns {Promise<PostCommentResponsePayload>} - A promise resolving to a paginated response.
    */
   async listByPost(
-    postId: string,
+    tourPostId: string,
     paginationParams: PaginationParams,
   ): Promise<PostCommentResponsePayload | undefined> {
     const queryParams = {
       TableName: await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE'),
       KeyConditionExpression: 'pk = :pk',
       ExpressionAttributeValues: {
-        ':pk': `${POST_INDEX}#${postId}#${COMMENT_INDEX}`,
+        ':pk': `${POST_INDEX}#${tourPostId}#${COMMENT_INDEX}`,
       },
     };
     return dynamoProvider.queryPagination(
@@ -33,22 +33,22 @@ export default class PostCommentRepositoryImpl implements PostCommentRepository 
   }
 
   /**
-   * Retrieves a comment by its ID and tenant ID.
+   * Retrieves a comment by its ID and post ID.
    *
-   * @param postId - The ID of the post.
+   * @param tourPostId - The ID of the post.
    * @param id - The ID of the comment.
    * @returns A Promise that resolves to the retrieved comment, or undefined if not found.
    */
-  async get(postId: string, id: string): Promise<PostComment | undefined> {
+  async get(tourPostId: string, id: string): Promise<PostComment | undefined> {
     return dynamoProvider.getItem<PostComment>(
       await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE'),
-      `${POST_INDEX}#${postId}#${COMMENT_INDEX}`,
+      `${POST_INDEX}#${tourPostId}#${COMMENT_INDEX}`,
       id,
     );
   }
 
   /**
-   * Creates a new comment for the specified tenant.
+   * Creates a new comment for the specified post.
    *
    * @param comment - The comment object to create.
    * @returns A Promise that resolves to the created comment.
@@ -64,9 +64,9 @@ export default class PostCommentRepositoryImpl implements PostCommentRepository 
   }
 
   /**
-   * Updates a comment for the specified tenant.
+   * Updates a comment for the specified post.
    *
-   * @param tourPostId
+   * @param tourPostId - The ID of the post.
    * @param id - The ID of the comment to update.
    * @param comment - The partial comment object with the updated fields.
    * @returns A Promise that resolves to the updated comment.
@@ -92,7 +92,7 @@ export default class PostCommentRepositoryImpl implements PostCommentRepository 
   }
 
   /**
-   * Deletes a comment for the specified tenant.
+   * Deletes a comment for the specified post.
    *
    * @param tourPostId
    * @param id - The ID of the comment to delete.

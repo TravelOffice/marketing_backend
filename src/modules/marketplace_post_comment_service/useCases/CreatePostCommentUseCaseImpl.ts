@@ -1,3 +1,4 @@
+import { helper } from 'core';
 import { PostComment } from '../models/PostComment';
 import { marketplaceUserRepository, postCommentRepository } from '../repositories';
 import { CreatePostCommentUseCase } from './interfaces/CreatePostCommentUseCase';
@@ -48,6 +49,7 @@ export default class CreatePostCommentUseCaseImpl implements CreatePostCommentUs
     } as PostComment;
 
     // Add the comment to DynamoDB using the repository
-    return postCommentRepository.create(postComment);
+    const createdPostComment = await postCommentRepository.create(postComment);
+    return helper.excludeDataFromObject(createdPostComment) as PostComment;
   };
 }
