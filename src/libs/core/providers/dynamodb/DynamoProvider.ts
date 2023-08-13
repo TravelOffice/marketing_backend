@@ -13,8 +13,8 @@ export type KeyList = AWS.DynamoDB.DocumentClient.KeyList;
 
 const dynamoDB: AWS.DynamoDB.DocumentClient = new AWS.DynamoDB.DocumentClient({ region: getEnv('AWS_REGION') });
 
-export type PaginationResponsePayload = {
-  data: any;
+export type PaginationResponsePayload<T extends Object = any> = {
+  data: T[];
   paging: {
     cursors: {
       before: string,
@@ -72,10 +72,10 @@ export default class DynamoProvider {
    * @param {PaginationParams} paginationParams - The pagination settings.
    * @returns {Promise<PaginationResponsePayload>} - A promise resolving to a paginated response.
    */
-  queryPagination = async (
+  queryPagination = async <T extends object = any>(
     queryParams: QueryInput,
     paginationParams: PaginationParams,
-  ): Promise<PaginationResponsePayload | undefined> => {
+  ): Promise<PaginationResponsePayload<T> | undefined> => {
     // Set a default pagination limit
     const defaultPaginationLimit = 10;
 
@@ -104,7 +104,7 @@ export default class DynamoProvider {
             after: nextToken || '', // Set the 'after' cursor
           },
         },
-      } as PaginationResponsePayload;
+      } as PaginationResponsePayload<T>;
     }
 
     // If no items are found, return undefined

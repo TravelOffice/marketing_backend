@@ -12,6 +12,8 @@ export const MARKETPLACE_COUNTER_INDEX = 'COUNTER';
 
 export const TOUR_POST_COUNTER_INDEX = 'TOUR_POST_COUNTER';
 
+export const TOUR_POST_BOOKMARK_INDEX = 'BM';
+
 export const allowedInitialPostStatuses = [
   'DRAFT',
   'IN_PROGRESS',
