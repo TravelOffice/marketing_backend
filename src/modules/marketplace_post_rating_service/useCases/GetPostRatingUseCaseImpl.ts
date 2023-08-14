@@ -7,14 +7,19 @@ export default class GetPostRatingUseCaseImpl implements GetPostRatingUseCase {
   /**
    * Retrieves a specific post rating by its ID and the associated tour post ID.
    *
+   * @param {string} organizationId - The ID of the organization associated with the post
    * @param {string} tourPostId - The ID of the tour post associated with the rating.
    * @param {string} ratingId - The ID of the rating to be retrieved.
    * @returns {Promise<PostRating | undefined>} - A promise resolving to the retrieved post rating
    * or undefined if not found.
    */
-  invoke = async (tourPostId: string, ratingId: string): Promise<PostRating | undefined> => {
+  invoke = async (
+    organizationId: string,
+    tourPostId: string,
+    ratingId: string,
+  ): Promise<PostRating | undefined> => {
     // Retrieve the rating using postRatingRepository.get
-    const rating = await postRatingRepository.get(tourPostId, ratingId);
+    const rating = await postRatingRepository.get(organizationId, tourPostId, ratingId);
 
     // Check if the rating exists
     if (!rating) {

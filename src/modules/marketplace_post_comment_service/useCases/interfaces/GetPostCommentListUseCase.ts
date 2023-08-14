@@ -1,9 +1,9 @@
-import { PaginationParams } from 'core/providers/dynamodb/DynamoProvider';
-import { PostCommentResponsePayload } from '../../models/PostComment';
+import { PaginationParams, PaginationResponsePayload } from 'core/providers/dynamodb/DynamoProvider';
+import { PostComment } from '../../models/PostComment';
 
 export interface GetPostCommentListUseCase {
   invoke(
     tourPostId: string,
     paginationParams: PaginationParams,
-  ): Promise<PostCommentResponsePayload | undefined>,
+  ): Promise<PaginationResponsePayload<PostComment> | undefined>,
 }

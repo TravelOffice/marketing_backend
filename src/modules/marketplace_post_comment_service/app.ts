@@ -40,7 +40,7 @@ app.get('/marketplace/posts/:id/comments', getPostCommentListValidator(), async 
     const { id: tourPostId } = req.params;
     const comments = await getPostCommentListUseCase.invoke(
       tourPostId,
-      req.body as PaginationParams,
+      req.query as PaginationParams,
     );
     res.json(wrapResponse(SUCCESS, comments));
   } catch (error: any) {

@@ -1,6 +1,5 @@
 import { PaginationParams } from 'core/providers/dynamodb/DynamoProvider';
 import { GetPostCommentListUseCase } from './interfaces/GetPostCommentListUseCase';
-import { PostCommentResponsePayload } from '../models/PostComment';
 import { postCommentRepository } from '../repositories';
 
 export default class GetPostCommentListUseCaseImpl implements GetPostCommentListUseCase {
@@ -14,7 +13,7 @@ export default class GetPostCommentListUseCaseImpl implements GetPostCommentList
   invoke = async (
     tourPostId: string,
     paginationParams: PaginationParams,
-  ): Promise<PostCommentResponsePayload | undefined> => postCommentRepository.listByPost(
+  ) => postCommentRepository.listByPost(
     tourPostId,
     paginationParams,
   );

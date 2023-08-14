@@ -4,6 +4,7 @@ import { CognitoUser } from '../models/CognitoUser';
 import { UpdatePostRatingUseCase } from './interfaces/UpdatePostRatingUseCase';
 import { UpdatePostRatingDto } from '../dto/UpdatePostRatingDto';
 import { PostRating } from '../models/PostRating';
+import { RATING_INDEX } from '../utils/constants';
 
 export default class UpdatePostRatingUseCaseImpl implements UpdatePostRatingUseCase {
   private allowedUpdatingKeys: (keyof UpdatePostRatingDto)[] = [
@@ -15,20 +16,19 @@ export default class UpdatePostRatingUseCaseImpl implements UpdatePostRatingUseC
    * Updates a post rating by the current marketplace user.
    *
    * @param {CognitoUser} currentUser - The current authenticated user.
-   * @param {string} tourPostId - The ID of the tour post associated with the rating.
-   * @param {string} postRatingId - The ID of the rating to be updated.
    * @param {UpdatePostRatingDto} updateRatingDto - The data for updating the rating.
    * @returns {Promise<PostRating>} - A promise indicating the success of the update.
    */
   invoke = async (
     currentUser: CognitoUser,
-    tourPostId: string,
-    postRatingId: string,
     updateRatingDto: UpdatePostRatingDto,
   ): Promise<PostRating> => {
     // Extract necessary information from the current user
     const { tenant, username } = currentUser;
     const marketplaceUserId = `${tenant}#${username}`;
+
+    // Extract necessary information from updateRatingDto
+    const { code: ratingId, tourPostId, organizationId } = updateRatingDto;
 
     // Retrieve the marketplace user from the repository
     const marketplaceUser = await marketplaceUserRepository.getById(marketplaceUserId);
@@ -40,7 +40,7 @@ export default class UpdatePostRatingUseCaseImpl implements UpdatePostRatingUseC
     const currentUserId = marketplaceUser.id;
 
     // Retrieve the rating to be updated
-    const rating = await postRatingRepository.get(tourPostId, postRatingId);
+    const rating = await postRatingRepository.get(organizationId, tourPostId, ratingId);
     if (!rating) {
       throw new Error('Tour rating not found');
     }
@@ -61,8 +61,9 @@ export default class UpdatePostRatingUseCaseImpl implements UpdatePostRatingUseC
 
     // Update the rating using the repository
     const updatedPostRating = await postRatingRepository.update(
+      organizationId,
       tourPostId,
-      postRatingId,
+      ratingId,
       updatingRatingData,
     );
     return helper.excludeDataFromObject(updatedPostRating) as PostRating;
@@ -81,6 +82,7 @@ export default class UpdatePostRatingUseCaseImpl implements UpdatePostRatingUseC
     // New data to update
     return {
       ...updatingRatingData,
+      lsi2: `${RATING_INDEX}#${updatingRatingData.star}`,
       updatedAt: Date.now(),
     };
   }

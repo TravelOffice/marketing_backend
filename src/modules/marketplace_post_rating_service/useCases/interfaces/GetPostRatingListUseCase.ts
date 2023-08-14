@@ -1,9 +1,8 @@
-import { PaginationParams } from 'core/providers/dynamodb/DynamoProvider';
-import { PostRatingResponsePayload } from '../../models/PostRating';
+import { PostRating } from '../../models/PostRating';
 
 export interface GetPostRatingListUseCase {
   invoke(
+    organizationId: string,
     tourPostId: string,
-    paginationParams: PaginationParams,
-  ): Promise<PostRatingResponsePayload | undefined>,
+  ): Promise<PostRating[]>,
 }

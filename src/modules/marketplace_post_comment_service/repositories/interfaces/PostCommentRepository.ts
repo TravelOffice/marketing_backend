@@ -1,11 +1,11 @@
-import { PaginationParams } from 'core/providers/dynamodb/DynamoProvider';
-import { PostComment, PostCommentResponsePayload } from '../../models/PostComment';
+import { PaginationParams, PaginationResponsePayload } from 'core/providers/dynamodb/DynamoProvider';
+import { PostComment } from '../../models/PostComment';
 
 export interface PostCommentRepository {
   listByPost(
     postId: string,
     paginationParams: PaginationParams,
-  ): Promise<PostCommentResponsePayload | undefined>,
+  ): Promise<PaginationResponsePayload<PostComment> | undefined>,
 
   create(comment: PostComment): Promise<PostComment>,
 
