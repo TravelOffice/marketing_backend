@@ -27,7 +27,7 @@ export interface DailyTourPlanItem {
   endTime: string,
   activityType: TourPlanActivityType,
   description: string,
-  estimationId: string,
+  estimationId: string[],
 }
 
 export interface TourPlan {
