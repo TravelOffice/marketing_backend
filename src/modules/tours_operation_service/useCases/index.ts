@@ -12,6 +12,10 @@ import { CreateEstimationUseCase } from '../repositories/interfaces/estimation/C
 import { GetEstimationUseCase } from '../repositories/interfaces/estimation/GetEstimationUseCase';
 import { UpdateEstimationUseCase } from '../repositories/interfaces/estimation/UpdateEstimationUseCase';
 import { DeleteEstimationUseCase } from '../repositories/interfaces/estimation/DeleteEstimationUseCase';
+import { UpdateTourTrackingUseCase } from './interfaces/UpdateTourTrackingUseCase';
+import UpdateTourTrackingUseCaseImpl from './UpdateTourTrackingUseCaseImpl';
+import { GetTourTrackingUseCase } from './interfaces/GetTourTrackingUseCase';
+import GetTourTrackingUseCaseImpl from './GetTourTrackingUseCaseImpl';
 
 interface UseCases {
   getTourPlanUseCase: GetTourPlanUseCase,
@@ -21,6 +25,8 @@ interface UseCases {
   getEstimationUseCase: GetEstimationUseCase,
   updateEstimationUseCase: UpdateEstimationUseCase,
   deleteEstimationUseCase: DeleteEstimationUseCase,
+  updateTourTrackingUseCase: UpdateTourTrackingUseCase,
+  getTourTrackingUseCase: GetTourTrackingUseCase,
 }
 
 const useCases: UseCases = {
@@ -31,6 +37,8 @@ const useCases: UseCases = {
   getEstimationUseCase: new GetEstimationUseCaseImpl(),
   updateEstimationUseCase: new UpdateEstimationUseCaseImpl(),
   deleteEstimationUseCase: new DeleteEstimationUseCaseImpl(),
+  updateTourTrackingUseCase: new UpdateTourTrackingUseCaseImpl(),
+  getTourTrackingUseCase: new GetTourTrackingUseCaseImpl(),
 };
 
 export const {
@@ -41,4 +49,6 @@ export const {
   getEstimationUseCase,
   updateEstimationUseCase,
   deleteEstimationUseCase,
+  updateTourTrackingUseCase,
+  getTourTrackingUseCase,
 } = useCases;

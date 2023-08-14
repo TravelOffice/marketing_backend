@@ -2,6 +2,7 @@ import TourOperationStatus from './TourOperationstatus';
 import { TourPlan } from './TourPlan';
 import { TourStatus } from './TourStatus';
 import { TourTemplate } from './TourTemplate';
+import { TourTracking } from './TourTracking';
 
 export interface DepartureTour extends TourTemplate {
   tourTemplate: string,
@@ -13,6 +14,7 @@ export interface DepartureTour extends TourTemplate {
   operationStatus: TourOperationStatus,
   operator?: string,
   tourPlan?: TourPlan,
+  tourTracking?: TourTracking
 }
 
 export const operationStatusTransitionRules = [
