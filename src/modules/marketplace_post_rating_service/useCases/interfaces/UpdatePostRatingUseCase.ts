@@ -5,8 +5,6 @@ import { CognitoUser } from '../../models/CognitoUser';
 export interface UpdatePostRatingUseCase {
   invoke(
     currentUser: CognitoUser,
-    tourPostId: string,
-    postRatingId: string,
     updateRatingDto: UpdatePostRatingDto,
   ): Promise<PostRating>,
 }

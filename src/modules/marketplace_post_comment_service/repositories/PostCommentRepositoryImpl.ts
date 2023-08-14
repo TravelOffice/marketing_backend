@@ -1,7 +1,7 @@
 import { dynamoProvider, helper, logger } from 'core';
 import { getAwsSecretValue } from 'get-env';
-import { PaginationParams } from 'core/providers/dynamodb/DynamoProvider';
-import { PostComment, PostCommentResponsePayload } from '../models/PostComment';
+import { PaginationParams, PaginationResponsePayload } from 'core/providers/dynamodb/DynamoProvider';
+import { PostComment } from '../models/PostComment';
 import { PostCommentRepository } from './interfaces/PostCommentRepository';
 import {
   COMMENT_COUNTER_INDEX, COMMENT_INDEX, MARKETPLACE_COUNTER_INDEX, POST_INDEX,
@@ -13,12 +13,13 @@ export default class PostCommentRepositoryImpl implements PostCommentRepository 
    *
    * @param tourPostId - The ID of the post.
    * @param {PaginationParams} paginationParams - The pagination settings.
-   * @returns {Promise<PostCommentResponsePayload>} - A promise resolving to a paginated response.
+   * @returns {Promise<PaginationResponsePayload<PostComment>>>}
+   * - A promise resolving to a paginated response.
    */
   async listByPost(
     tourPostId: string,
     paginationParams: PaginationParams,
-  ): Promise<PostCommentResponsePayload | undefined> {
+  ): Promise<PaginationResponsePayload<PostComment> | undefined> {
     const queryParams = {
       TableName: await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE'),
       KeyConditionExpression: 'pk = :pk',

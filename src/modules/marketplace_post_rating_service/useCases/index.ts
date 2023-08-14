@@ -10,9 +10,12 @@ import { GetPostRatingListUseCase } from './interfaces/GetPostRatingListUseCase'
 import { GetPostRatingUseCase } from './interfaces/GetPostRatingUseCase';
 import { UpdatePostRatingUseCase } from './interfaces/UpdatePostRatingUseCase';
 import UpdatePostRatingUseCaseImpl from './UpdatePostRatingUseCaseImpl';
+import { GetOrgRatingListUseCase } from './interfaces/GetOrgRatingListUseCase';
+import GetOrgRatingListUseCaseImpl from './GetOrgRatingListUseCaseImpl';
 
 interface UseCases {
   getPostRatingListUseCase: GetPostRatingListUseCase,
+  getOrgRatingListUseCase: GetOrgRatingListUseCase,
   createPostRatingUseCase: CreatePostRatingUseCase,
   getPostRatingUseCase: GetPostRatingUseCase,
   updatePostRatingUseCase: UpdatePostRatingUseCase,
@@ -21,6 +24,7 @@ interface UseCases {
 
 const useCases: UseCases = {
   getPostRatingListUseCase: new GetPostRatingListUseCaseImpl(),
+  getOrgRatingListUseCase: new GetOrgRatingListUseCaseImpl(),
   createPostRatingUseCase: new CreatePostRatingUseCaseImpl(),
   getPostRatingUseCase: new GetPostRatingUseCaseImpl(),
   updatePostRatingUseCase: new UpdatePostRatingUseCaseImpl(),
@@ -29,6 +33,7 @@ const useCases: UseCases = {
 
 export const {
   getPostRatingListUseCase,
+  getOrgRatingListUseCase,
   createPostRatingUseCase,
   getPostRatingUseCase,
   updatePostRatingUseCase,

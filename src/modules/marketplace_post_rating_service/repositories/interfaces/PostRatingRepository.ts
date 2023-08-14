@@ -1,19 +1,27 @@
-import { PaginationParams } from 'core/providers/dynamodb/DynamoProvider';
-import { PostRating, PostRatingResponsePayload } from '../../models/PostRating';
+import { PaginationParams, PaginationResponsePayload } from 'core/providers/dynamodb/DynamoProvider';
+import { PostRating } from '../../models/PostRating';
 
 export interface PostRatingRepository {
-  listByPost(
-    postId: string,
-    paginationParams: PaginationParams,
-  ): Promise<PostRatingResponsePayload | undefined>,
+  listByPost(organizationId: string, tourPostId: string): Promise<PostRating[]>,
+
+  listByOrganization(
+    organizationId: string,
+    numberStar: string,
+    paginationParams?: PaginationParams,
+  ): Promise<PaginationResponsePayload<PostRating> | undefined>,
 
   create(rating: PostRating): Promise<PostRating>,
 
-  get(tourPostId: string, id: string): Promise<PostRating | undefined>,
+  get(organizationId: string, tourPostId: string, id: string): Promise<PostRating | undefined>,
 
-  update(tourPostId: string, id: string, rating: Partial<PostRating>): Promise<PostRating>,
+  update(
+    organizationId: string,
+    tourPostId: string,
+    id: string,
+    rating: Partial<PostRating>
+  ): Promise<PostRating>,
 
-  delete(tourPostId: string, id: string): Promise<void>,
+  delete(organizationId: string, tourPostId: string, id: string): Promise<void>,
 
   generateCode(): Promise<string>,
 }

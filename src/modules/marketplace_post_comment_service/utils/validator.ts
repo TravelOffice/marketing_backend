@@ -1,6 +1,6 @@
 import { Request } from 'express';
 import {
-  body, param, ValidationError, validationResult,
+  body, param, query, ValidationError, validationResult,
 } from 'express-validator';
 
 export default function validate(req: Request) {
@@ -42,7 +42,8 @@ export function updateCommentValidator() {
 
 export function getPostCommentListValidator() {
   return [
-    body('nextToken').if(body('nextToken').exists())
+    query('nextToken')
+      .optional()
       .custom((value: string) => {
         try {
           JSON.parse(value);
@@ -52,10 +53,12 @@ export function getPostCommentListValidator() {
         }
       })
       .withMessage('must be a JSON string'),
-    body('limit').if(body('limit').exists())
+    query('limit')
+      .optional()
       .isInt()
       .withMessage('limit must be a number'),
-    body('sortDesc').if(body('sortDesc').exists())
+    query('sortDesc')
+      .optional()
       .isBoolean()
       .withMessage('sortDesc must be a boolean'),
   ];

@@ -3,17 +3,23 @@ import { getCurrentUserInfo } from 'decode-token';
 import express, { NextFunction, Request, Response } from 'express';
 import compression from 'compression';
 import { logger } from 'core';
-import { PaginationParams } from 'core/providers/dynamodb/DynamoProvider';
 import {
   createPostRatingUseCase,
   deletePostRatingUseCase,
+  getOrgRatingListUseCase,
   getPostRatingListUseCase,
   getPostRatingUseCase,
   updatePostRatingUseCase,
 } from './useCases';
 import wrapResponse from './utils/wrapResponse';
 import { FAILED, SUCCESS } from './utils/constants';
-import validate, { createRatingValidator, getPostRatingListValidator, updateRatingValidator } from './utils/validator';
+import validate, {
+  createRatingValidator,
+  deletePostRatingValidator,
+  getOrgRatingListValidator,
+  getPostRatingListValidator,
+  updateRatingValidator,
+} from './utils/validator';
 
 const app = express();
 
@@ -38,10 +44,8 @@ app.get('/marketplace/posts/:id/ratings', getPostRatingListValidator(), async (r
   try {
     validate(req);
     const { id: tourPostId } = req.params;
-    const ratings = await getPostRatingListUseCase.invoke(
-      tourPostId,
-      req.body as PaginationParams,
-    );
+    const { organizationId } = req.query;
+    const ratings = await getPostRatingListUseCase.invoke(organizationId as string, tourPostId);
     res.json(wrapResponse(SUCCESS, ratings));
   } catch (error: any) {
     logger.log(`[app.get] Error ${error}`);
@@ -64,8 +68,32 @@ app.post('/marketplace/posts/:id/ratings', createRatingValidator(), async (req: 
 
 app.get('/marketplace/posts/:id/ratings/:ratingId', async (req: Request, res: Response) => {
   try {
-    const { id, ratingId } = req.params;
-    const rating = await getPostRatingUseCase.invoke(id, ratingId);
+    const { id: tourPostId, ratingId } = req.params;
+    const { organizationId } = req.query;
+    const rating = await getPostRatingUseCase.invoke(
+      organizationId as string,
+      tourPostId,
+      ratingId,
+    );
+    res.json(wrapResponse(SUCCESS, rating));
+  } catch (error: any) {
+    logger.log(`[app.get] Error ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.get('/marketplace/organizations/:id/ratings', getOrgRatingListValidator(), async (req: Request, res: Response) => {
+  try {
+    validate(req);
+    const { id: organizationId } = req.params;
+    const {
+      numberStar, ...paginationParams
+    } = req.query;
+    const rating = await getOrgRatingListUseCase.invoke(
+      organizationId,
+      numberStar as string,
+      paginationParams,
+    );
     res.json(wrapResponse(SUCCESS, rating));
   } catch (error: any) {
     logger.log(`[app.get] Error ${error}`);
@@ -77,12 +105,15 @@ app.put('/marketplace/posts/:id/ratings/:ratingId', updateRatingValidator(), asy
   try {
     validate(req);
     const currentUser = getCurrentUserInfo(req.headers.authorization!);
-    const { id: tourPostId, ratingId } = req.params;
+    const { id: tourPostId, ratingId: code } = req.params;
+    const { organizationId } = req.query;
     const rating = await updatePostRatingUseCase.invoke(
       currentUser,
-      tourPostId,
-      ratingId,
-      req.body,
+      {
+        ...req.body,
+        code,
+        tourPostId,
+      },
     );
     res.json(wrapResponse(SUCCESS, rating));
   } catch (error: any) {
@@ -91,11 +122,18 @@ app.put('/marketplace/posts/:id/ratings/:ratingId', updateRatingValidator(), asy
   }
 });
 
-app.delete('/marketplace/posts/:id/ratings/:ratingId', async (req: Request, res: Response) => {
+app.delete('/marketplace/posts/:id/ratings/:ratingId', deletePostRatingValidator(), async (req: Request, res: Response) => {
   try {
+    validate(req);
     const { id: tourPostId, ratingId } = req.params;
+    const { organizationId } = req.body;
     const currentUser = getCurrentUserInfo(req.headers.authorization!);
-    await deletePostRatingUseCase.invoke(currentUser, tourPostId, ratingId);
+    await deletePostRatingUseCase.invoke(
+      currentUser,
+      organizationId,
+      tourPostId,
+      ratingId,
+    );
     res.json(wrapResponse(SUCCESS, {}));
   } catch (error: any) {
     logger.log(`[app.delete] Error ${error}`);

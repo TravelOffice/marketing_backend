@@ -1,9 +1,10 @@
 import { helper } from 'core';
 import { PostRating } from '../models/PostRating';
-import { marketplaceUserRepository, postRatingRepository } from '../repositories';
+import { marketplaceUserRepository, postRatingRepository, tourPostRepository } from '../repositories';
 import { CreatePostRatingUseCase } from './interfaces/CreatePostRatingUseCase';
 import { CognitoUser } from '../models/CognitoUser';
 import { CreatePostRatingDto } from '../dto/CreatePostRatingDto';
+import { RATING_INDEX } from '../utils/constants';
 
 export default class CreatePostRatingUseCaseImpl implements CreatePostRatingUseCase {
   /**
@@ -29,6 +30,12 @@ export default class CreatePostRatingUseCaseImpl implements CreatePostRatingUseC
       throw new Error('Marketplace user not found');
     }
 
+    // Retrieve the tour post form the repository
+    const tourPost = await tourPostRepository.getById(tourPostId);
+    if (!tourPost) {
+      throw new Error('Tour post not found');
+    }
+
     // TODO: Check current user ordered in this post successfully
 
     // Get the current timestamp
@@ -43,11 +50,13 @@ export default class CreatePostRatingUseCaseImpl implements CreatePostRatingUseC
       code: ratingIndex,
       authorId: marketplaceUserId,
       tourPostId,
+      organizationId: tourPost.tenant,
       createdAt: now,
       updatedAt: now,
       // Local secondary index with format <tenant>#<username>
       // for getting ratings created by specific user
       lsi1: marketplaceUserId,
+      lsi2: `${RATING_INDEX}#${createRatingDto.star}`,
     } as PostRating;
 
     // Add the rating to DynamoDB using the repository

@@ -1,6 +1,6 @@
 import { Request } from 'express';
 import {
-  body, param, ValidationError, validationResult,
+  body, param, query, ValidationError, validationResult,
 } from 'express-validator';
 
 export default function validate(req: Request) {
@@ -37,9 +37,11 @@ export function updateRatingValidator() {
     param('id').notEmpty().withMessage('Tour Post ID is required'),
     param('ratingId').notEmpty().withMessage('Post Rating ID is required'),
     body('star')
+      .optional()
       .isInt({ min: 1, max: 5 })
       .withMessage('Star must be a number between 1 and 5'),
-    body('description').if(body('description').exists())
+    body('description')
+      .optional()
       .isString()
       .notEmpty()
       .withMessage('description must be a string'),
@@ -48,7 +50,26 @@ export function updateRatingValidator() {
 
 export function getPostRatingListValidator() {
   return [
-    body('nextToken').if(body('nextToken').exists())
+    query('organizationId')
+      .isString()
+      .notEmpty()
+      .withMessage('Organization Id must be a string'),
+  ];
+}
+
+export function deletePostRatingValidator() {
+  return [
+    body('organizationId')
+      .isString()
+      .notEmpty()
+      .withMessage('Organization Id must be a string'),
+  ];
+}
+
+export function getOrgRatingListValidator() {
+  return [
+    query('nextToken')
+      .optional()
       .custom((value: string) => {
         try {
           JSON.parse(value);
@@ -57,11 +78,13 @@ export function getPostRatingListValidator() {
           return false;
         }
       })
-      .withMessage('must be a JSON string'),
-    body('limit').if(body('limit').exists())
+      .withMessage('nextToken must be a JSON string'),
+    query('limit')
+      .optional()
       .isInt()
       .withMessage('limit must be a number'),
-    body('sortDesc').if(body('sortDesc').exists())
+    query('sortDesc')
+      .optional()
       .isBoolean()
       .withMessage('sortDesc must be a boolean'),
   ];
