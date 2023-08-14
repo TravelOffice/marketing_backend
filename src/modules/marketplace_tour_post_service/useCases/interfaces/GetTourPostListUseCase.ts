@@ -4,7 +4,7 @@ import { CognitoUser } from '../../models/CognitoUser';
 
 export interface GetTourPostListUseCase {
   invoke(
-    user: CognitoUser,
+    currentUser: CognitoUser,
     params: PaginationParams,
   ): Promise<PaginationResponsePayload<TourPost> | undefined>,
 }

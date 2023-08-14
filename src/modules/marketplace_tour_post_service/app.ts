@@ -5,15 +5,25 @@ import compression from 'compression';
 import {
   bookmarkTourPostUseCase,
   createTourPostUseCase,
+  getTourPostListByOrgUseCase,
+  getSelfTourPostListByUserUseCase,
   getTourPostListUseCase,
   getTourPostUseCase,
   unbookmarkTourPostUseCase,
   updateTourPostUseCase,
+  getTourPostListByUserUseCase,
+  followTourPostUseCase,
+  unfollowTourPostUseCase,
 } from './useCases';
 import wrapResponse from './utils/wrapResponse';
 import { FAILED, SUCCESS } from './utils/constants';
 import validate, {
-  bookmarkPostValidtor, createTourPostValidator, getPostsValidator, updateTourPostValidator,
+  bookmarkPostValidtor,
+  createTourPostValidator,
+  getSelfPostsValidator,
+  getPostsValidator,
+  updateTourPostValidator,
+  followPostValidtor,
 } from './utils/validator';
 import logger from './utils/logger';
 
@@ -36,13 +46,14 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
   next();
 });
 
-app.get('/marketplace/posts/me', getPostsValidator(), async (req: Request, res: Response) => {
+app.get('/marketplace/posts/me', getSelfPostsValidator(), async (req: Request, res: Response) => {
   try {
     const currentUser = getCurrentUserInfo(req.headers.authorization!);
-    const tourPosts = await getTourPostListUseCase.invoke(
+    const tourPosts = await getSelfTourPostListByUserUseCase.invoke(
       currentUser,
       req.query,
     );
+    logger.log(`[app.get] Get posts of current user successfully ${JSON.stringify(tourPosts)}`);
     res.json(wrapResponse(SUCCESS, tourPosts));
   } catch (error: any) {
     logger.log(`[app.get] Error ${error}`);
@@ -52,9 +63,33 @@ app.get('/marketplace/posts/me', getPostsValidator(), async (req: Request, res: 
 
 app.get('/marketplace/posts', getPostsValidator(), async (req: Request, res: Response) => {
   try {
-    // TODO: Implement this in next PR
-    // Get all posts for admin user role only
-    throw new Error('Not implemented');
+    // The posts can be get by organization
+    // If organization is not specified, get all posts
+    const { organization, author, ...paginationParams } = req.query;
+    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    let tourPosts;
+    if (organization) {
+      // Fetch posts by organization
+      tourPosts = await getTourPostListByOrgUseCase.invoke(
+        currentUser,
+        organization as string,
+        paginationParams,
+      );
+      logger.log(`[app.get] Get posts by organization ${organization} successfully ${JSON.stringify(tourPosts)}`);
+    } else if (author) {
+      // Fetch posts by author
+      tourPosts = await getTourPostListByUserUseCase.invoke(
+        currentUser,
+        author as string,
+        paginationParams,
+      );
+      logger.log(`[app.get] Get posts by author ${author} successfully ${JSON.stringify(tourPosts)}`);
+    } else {
+      // Fetch all posts
+      tourPosts = await getTourPostListUseCase.invoke(currentUser, paginationParams);
+      logger.log(`[app.get] Get all posts successfully ${JSON.stringify(tourPosts)}`);
+    }
+    res.json(wrapResponse(SUCCESS, tourPosts));
   } catch (error: any) {
     logger.log(`[app.get] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
@@ -65,6 +100,7 @@ app.get('/marketplace/posts/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const tourPost = await getTourPostUseCase.invoke(id);
+    logger.log(`[app.get] Get post ${id} successfully ${JSON.stringify(tourPost)}`);
     res.json(wrapResponse(SUCCESS, tourPost));
   } catch (error: any) {
     logger.log(`[app.get] Error ${error}`);
@@ -77,6 +113,7 @@ app.post('/marketplace/posts', createTourPostValidator(), async (req: Request, r
     validate(req);
     const currentUser = getCurrentUserInfo(req.headers.authorization!);
     const tourPost = await createTourPostUseCase.invoke(currentUser, req.body);
+    logger.log(`[app.post] Create post successfully ${JSON.stringify(tourPost)}`);
     res.json(wrapResponse(SUCCESS, tourPost));
   } catch (error: any) {
     logger.log(`[app.get] Error ${error}`);
@@ -90,6 +127,7 @@ app.put('/marketplace/posts/:id', updateTourPostValidator(), async (req: Request
     const { id } = req.params;
     const currentUser = getCurrentUserInfo(req.headers.authorization!);
     const tourPost = await updateTourPostUseCase.invoke(currentUser, id, req.body);
+    logger.log(`[app.put] Update post ${id} successfully ${JSON.stringify(tourPost)}`);
     res.json(wrapResponse(SUCCESS, tourPost));
   } catch (error: any) {
     logger.log(`[app.get] Error ${error}`);
@@ -108,12 +146,24 @@ app.post('/marketplace/bookmarked-posts', async (_: Request, res: Response) => {
   }
 });
 
+app.post('/marketplace/followed-posts', async (_: Request, res: Response) => {
+  try {
+    // TODO: Implement this in next PR
+    // Get followed posts of current user
+    throw new Error('Not implemented');
+  } catch (error: any) {
+    logger.log(`[app.get] Error ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
 app.post('/marketplace/posts/:postId/bookmark', bookmarkPostValidtor(), async (req: Request, res: Response) => {
   try {
     validate(req);
     const { postId } = req.params;
     const currentUser = getCurrentUserInfo(req.headers.authorization!);
     const bookmarkedItem = await bookmarkTourPostUseCase.invoke(currentUser, postId);
+    logger.log(`[app.get] Bookmark post ${postId} successfully ${JSON.stringify(bookmarkedItem)}`);
     res.json(wrapResponse(SUCCESS, bookmarkedItem));
   } catch (error: any) {
     logger.log(`[app.get] Error ${error}`);
@@ -127,6 +177,35 @@ app.delete('/marketplace/posts/:postId/bookmark', bookmarkPostValidtor(), async 
     const { postId } = req.params;
     const currentUser = getCurrentUserInfo(req.headers.authorization!);
     await unbookmarkTourPostUseCase.invoke(currentUser, postId);
+    logger.log(`[app.get] Unbookmark post ${postId} for user ${currentUser} successfully`);
+    res.json(wrapResponse(SUCCESS, undefined));
+  } catch (error: any) {
+    logger.log(`[app.get] Error ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.post('/marketplace/posts/:postId/follow', followPostValidtor(), async (req: Request, res: Response) => {
+  try {
+    validate(req);
+    const { postId } = req.params;
+    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const bookmarkedItem = await followTourPostUseCase.invoke(currentUser, postId);
+    logger.log(`[app.get] Follow post ${postId} successfully ${JSON.stringify(bookmarkedItem)}`);
+    res.json(wrapResponse(SUCCESS, bookmarkedItem));
+  } catch (error: any) {
+    logger.log(`[app.get] Error ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.delete('/marketplace/posts/:postId/follow', followPostValidtor(), async (req: Request, res: Response) => {
+  try {
+    validate(req);
+    const { postId } = req.params;
+    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    await unfollowTourPostUseCase.invoke(currentUser, postId);
+    logger.log(`[app.get] Unfollow post ${postId} for user ${currentUser} successfully`);
     res.json(wrapResponse(SUCCESS, undefined));
   } catch (error: any) {
     logger.log(`[app.get] Error ${error}`);
