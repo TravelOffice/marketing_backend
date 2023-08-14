@@ -1,10 +1,10 @@
 import { helper } from 'core';
-import { TourPost } from '../models/TourPost';
-import { UpdateTourPostUseCase } from './interfaces/UpdateTourPostUseCase';
 import { UpdateTourPostDto } from '../dto/UpdateTourPostDto';
-import { marketplaceUserRepository, tourPostRepository } from '../repositories';
 import { CognitoUser } from '../models/CognitoUser';
+import { TourPost } from '../models/TourPost';
 import { statusTransitionRules } from '../models/TourPostStatus';
+import { marketplaceUserRepository, tourPostRepository } from '../repositories';
+import { UpdateTourPostUseCase } from './interfaces/UpdateTourPostUseCase';
 
 export default class UpdateTourPostUseCaseImpl implements UpdateTourPostUseCase {
   allowedUpdatingKeys: (keyof UpdateTourPostDto)[] = [

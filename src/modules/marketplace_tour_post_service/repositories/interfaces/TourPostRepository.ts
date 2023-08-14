@@ -1,7 +1,7 @@
 import { PaginationParams, PaginationResponsePayload } from 'core/providers/dynamodb/DynamoProvider';
 import { BookmarkedTourPost } from '../../models/BookmarkedTourPost';
-import { TourPost } from '../../models/TourPost';
 import { FollowedTourPost } from '../../models/FollowedTourPost';
+import { TourPost } from '../../models/TourPost';
 
 export interface TourPostRepository {
   // CRUD functions
@@ -19,6 +19,14 @@ export interface TourPostRepository {
     organizationId: string,
     params: PaginationParams
   ): Promise<PaginationResponsePayload<TourPost> | undefined>,
+  listBookmarkedByUser(
+    userId: string,
+    params: PaginationParams,
+  ): Promise<PaginationResponsePayload<TourPost> | undefined>,
+  listFollowedByUser(
+    userId: string,
+    params: PaginationParams,
+  ): Promise<PaginationResponsePayload<TourPost> | undefined>,
   create(tourPost: TourPost): Promise<TourPost>,
   getById(id: string): Promise<TourPost | undefined>,
   update(id: string, tourPost: Partial<TourPost>): Promise<TourPost>,
@@ -29,7 +37,7 @@ export interface TourPostRepository {
   bookmark(userId: string, tourPostId: string): Promise<Partial<BookmarkedTourPost>>,
   unbookmark(userId: string, tourPostId: string): Promise<void>,
 
-  // Favoutite functions
+  // Followed functions
   getAllFollowedItems(userId: string): Promise<Array<FollowedTourPost>>,
   getFollowedItem(userId: string, tourPostId: string): Promise<FollowedTourPost | undefined>,
   follow(userId: string, tourPostId: string): Promise<Partial<FollowedTourPost>>,

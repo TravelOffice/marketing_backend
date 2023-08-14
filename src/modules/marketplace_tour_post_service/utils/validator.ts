@@ -79,17 +79,19 @@ export function updateTourPostValidator() {
 
 export function getSelfPostsValidator() {
   return [
-    query('nextToken').if(query('nextToken').exists())
-      .isString()
-      .notEmpty()
-      .withMessage('nextToken must be a string'),
-    query('token').if(query('token').exists())
-      .isString()
-      .withMessage('token must be a string'),
-    query('limit').if(query('limit').exists())
-      .isInt()
-      .withMessage('limit must be a number'),
-    query('sortDesc').if(query('sortDesc').exists())
+    query('nextToken')
+      .optional()
+      .custom((value: string) => {
+        try {
+          JSON.parse(value);
+          return true;
+        } catch {
+          return false;
+        }
+      })
+      .withMessage('nextToken must be a JSON string'),
+    query('limit').optional().isInt().withMessage('limit must be a number'),
+    query('sortDesc').optional()
       .isBoolean()
       .withMessage('sortDesc must be a boolean'),
   ];
@@ -105,11 +107,36 @@ export function getPostsValidator() {
       .withMessage('author must be a string'),
 
     query('nextToken')
-      .optional().isString().notEmpty()
-      .withMessage('nextToken must be a string'),
-    query('token')
-      .optional().isString().notEmpty()
-      .withMessage('token must be a string'),
+      .optional()
+      .custom((value: string) => {
+        try {
+          JSON.parse(value);
+          return true;
+        } catch {
+          return false;
+        }
+      })
+      .withMessage('nextToken must be a JSON string'),
+    query('limit').optional().isInt().withMessage('limit must be a number'),
+    query('sortDesc').optional()
+      .isBoolean()
+      .withMessage('sortDesc must be a boolean'),
+  ];
+}
+
+export function getBookmarkedOrFollowedPostsValidator() {
+  return [
+    query('nextToken')
+      .optional()
+      .custom((value: string) => {
+        try {
+          JSON.parse(value);
+          return true;
+        } catch {
+          return false;
+        }
+      })
+      .withMessage('nextToken must be a JSON string'),
     query('limit').optional().isInt().withMessage('limit must be a number'),
     query('sortDesc').optional()
       .isBoolean()

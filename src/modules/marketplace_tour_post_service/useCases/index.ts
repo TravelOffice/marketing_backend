@@ -1,31 +1,37 @@
 import BookmarkPostUseCaseImpl from './BookmarkTourPostUseCaseImpl';
 import CreateTourPostUseCaseImpl from './CreateTourPostUseCaseImpl';
+import FollowTourPostUseCaseImpl from './FollowTourPostUseCaseImpl';
+import GetBookmarkedTourPostsUseCaseImpl from './GetBookmarkedTourPostsUseCaseImpl';
+import GetFollowedTourPostsUseCaseImpl from './GetFollowedTourPostsUseCaseImpl';
+import GetSelfTourPostListByUserUseCaseImpl from './GetSelfTourPostListByUserUseCaseImpl';
 import GetTourPostListByOrgUseCaseImpl from './GetTourPostListByOrgUseCaseImpl';
+import GetTourPostListByUserUseCaseImpl from './GetTourPostListByUserUseCaseImpl';
 import GetTourPostListUseCaseImpl from './GetTourPostListUseCaseImpl';
 import GetTourPostUseCaseImpl from './GetTourPostUseCaseImpl';
 import UnbookmarkTourPostUseCaseImpl from './UnbookmarkTourPostUseCaseImpl';
+import UnfollowTourPostUseCaseImpl from './UnfollowTourPostUseCaseImpl';
 import UpdateTourPostUseCaseImpl from './UpdateTourPostUseCaseImpl';
 import { BookmarkTourPostUseCase } from './interfaces/BookmarkTourPostUseCase';
 import { CreateTourPostUseCase } from './interfaces/CreateTourPostUseCase';
-import { GetTourPostListByOrgUseCase } from './interfaces/GetTourPostListByOrgUseCase';
+import { FollowTourPostUseCase } from './interfaces/FollowTourPostUseCase';
+import { GetBookmarkedTourPostsUseCase } from './interfaces/GetBookmarkedTourPostsUseCase';
+import { GetFollowedTourPostsUseCase } from './interfaces/GetFollowedTourPostsUseCase';
 import { GetSelfTourPostListByUserUseCase } from './interfaces/GetSelfTourPostListByUserUseCase';
+import { GetTourPostListByOrgUseCase } from './interfaces/GetTourPostListByOrgUseCase';
+import { GetTourPostListByUserUseCase } from './interfaces/GetTourPostListByUserUseCase';
 import { GetTourPostListUseCase } from './interfaces/GetTourPostListUseCase';
 import { GetTourPostUseCase } from './interfaces/GetTourPostUseCase';
 import { UnbookmarkTourPostUseCase } from './interfaces/UnbookmarkTourPostUseCase';
-import { UpdateTourPostUseCase } from './interfaces/UpdateTourPostUseCase';
-import { GetTourPostListByUserUseCase } from './interfaces/GetTourPostListByUserUseCase';
-import GetTourPostListByUserUseCaseImpl from './GetTourPostListByUserUseCaseImpl';
-import GetSelfTourPostListByUserUseCaseImpl from './GetSelfTourPostListByUserUseCaseImpl';
-import { FollowTourPostUseCase } from './interfaces/FollowTourPostUseCase';
-import FollowTourPostUseCaseImpl from './FollowTourPostUseCaseImpl';
 import { UnfollowTourPostUseCase } from './interfaces/UnfollowTourPostUseCase';
-import UnfollowTourPostUseCaseImpl from './UnfollowTourPostUseCaseImpl';
+import { UpdateTourPostUseCase } from './interfaces/UpdateTourPostUseCase';
 
 interface UseCases {
   getTourPostListUseCase: GetTourPostListUseCase,
   getSelfTourPostListByUserUseCase: GetSelfTourPostListByUserUseCase,
   getTourPostListByUserUseCase: GetTourPostListByUserUseCase,
   getTourPostListByOrgUseCase: GetTourPostListByOrgUseCase,
+  getBookmarkedTourPostsUseCase: GetBookmarkedTourPostsUseCase,
+  getFollowedTourPostsUseCase: GetFollowedTourPostsUseCase,
   createTourPostUseCase: CreateTourPostUseCase,
   getTourPostUseCase: GetTourPostUseCase,
   updateTourPostUseCase: UpdateTourPostUseCase,
@@ -40,6 +46,8 @@ const useCases : UseCases = {
   getSelfTourPostListByUserUseCase: new GetSelfTourPostListByUserUseCaseImpl(),
   getTourPostListByUserUseCase: new GetTourPostListByUserUseCaseImpl(),
   getTourPostListByOrgUseCase: new GetTourPostListByOrgUseCaseImpl(),
+  getBookmarkedTourPostsUseCase: new GetBookmarkedTourPostsUseCaseImpl(),
+  getFollowedTourPostsUseCase: new GetFollowedTourPostsUseCaseImpl(),
   createTourPostUseCase: new CreateTourPostUseCaseImpl(),
   getTourPostUseCase: new GetTourPostUseCaseImpl(),
   updateTourPostUseCase: new UpdateTourPostUseCaseImpl(),
@@ -54,6 +62,8 @@ export const {
   getSelfTourPostListByUserUseCase,
   getTourPostListByUserUseCase,
   getTourPostListByOrgUseCase,
+  getBookmarkedTourPostsUseCase,
+  getFollowedTourPostsUseCase,
   createTourPostUseCase,
   getTourPostUseCase,
   updateTourPostUseCase,
