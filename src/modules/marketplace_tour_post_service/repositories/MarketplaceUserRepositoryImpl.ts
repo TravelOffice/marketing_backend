@@ -1,8 +1,8 @@
-import { getAwsSecretValue } from 'get-env';
 import { QueryInput, dynamoProvider, helper } from 'core';
+import { getAwsSecretValue } from 'get-env';
 import { MarketplaceUser } from '../models/MarketplaceUser';
-import { MarketplaceUserRepository } from './interfaces/MarketplaceUserRepository';
 import { MARKETPLACE_USER_INDEX } from '../utils/constants';
+import { MarketplaceUserRepository } from './interfaces/MarketplaceUserRepository';
 
 export default class MarketplaceUserRepositoryImpl implements MarketplaceUserRepository {
   getById = async (id: string) => {

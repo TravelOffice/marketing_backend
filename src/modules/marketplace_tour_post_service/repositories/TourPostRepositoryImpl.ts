@@ -1,8 +1,9 @@
-import { getAwsSecretValue } from 'get-env';
 import { dynamoProvider, helper } from 'core';
 import { PaginationParams } from 'core/providers/dynamodb/DynamoProvider';
+import { getAwsSecretValue } from 'get-env';
+import { BookmarkedTourPost } from '../models/BookmarkedTourPost';
+import { FollowedTourPost } from '../models/FollowedTourPost';
 import { TourPost } from '../models/TourPost';
-import { TourPostRepository } from './interfaces/TourPostRepository';
 import {
   MARKETPLACE_COUNTER_INDEX,
   MARKETPLACE_USER_INDEX, POST_INDEX,
@@ -11,8 +12,9 @@ import {
   TOUR_POST_FOLLOW_INDEX,
 } from '../utils/constants';
 import logger from '../utils/logger';
-import { BookmarkedTourPost } from '../models/BookmarkedTourPost';
-import { FollowedTourPost } from '../models/FollowedTourPost';
+import { TourPostRepository } from './interfaces/TourPostRepository';
+
+type BookmarkOrFollowedTourPost = BookmarkedTourPost | FollowedTourPost;
 
 export default class TourPostRepositoryImpl implements TourPostRepository {
   /**
@@ -141,6 +143,62 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
     }
 
     return queryResult;
+  };
+
+  /**
+   * List bookmarked tour posts of the specified user.
+   * @param userId - The ID of the user.
+   * @param {PaginationParams} paginationParams - The pagination settings.
+   * @returns {Promise<PaginationResponsePayload<BookmarkedTourPost> | undefined>}
+   * A promise resolving to a paginated response.
+   */
+  listBookmarkedByUser = async (
+    userId: string,
+    params: PaginationParams,
+  ) => {
+    // Query bookmarked items
+    const queryResult = await this.getBookmarkedItemsWithPagination(userId, params);
+    if (!queryResult) {
+      logger.log(`No bookmarked tour post found for user ${userId}`);
+      return undefined;
+    }
+
+    // Get tour posts from the bookmarked items
+    const { data } = queryResult;
+    const tourPosts = await this.batchQueryTourPosts(data);
+
+    return {
+      ...queryResult,
+      data: tourPosts,
+    };
+  };
+
+  /**
+   * List followed tour posts of the specified user.
+   * @param userId - The ID of the user.
+   * @param {PaginationParams} paginationParams - The pagination settings.
+   * @returns {Promise<PaginationResponsePayload<FollowedTourPost> | undefined>}
+   * A promise resolving to a paginated response.
+   */
+  listFollowedByUser = async (
+    userId: string,
+    params: PaginationParams,
+  ) => {
+    // Query followed items
+    const queryResult = await this.getFollowedItemsWithPagination(userId, params);
+    if (!queryResult) {
+      logger.log(`No followed tour post found for user ${userId}`);
+      return undefined;
+    }
+
+    // Get tour posts from the followed items
+    const { data } = queryResult;
+    const tourPosts = await this.batchQueryTourPosts(data);
+
+    return {
+      ...queryResult,
+      data: tourPosts,
+    };
   };
 
   /**
@@ -381,5 +439,90 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
       isBookmarked: bookmarkedTourPostIds.includes(item.code),
       isFollowed: followedTourPostIds.includes(item.code),
     }));
+  };
+
+  /**
+   * Get bookmarked items with pagination
+   * @param userId User id
+   * @param paginationParams Pagination params
+   * @returns A Promise that resolves to the list of bookmarked items.
+   */
+  private getBookmarkedItemsWithPagination = async (
+    userId: string,
+    paginationParams: PaginationParams,
+  ) => {
+    const marketplaceTable = await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE');
+    const queryParams = {
+      TableName: marketplaceTable,
+      KeyConditionExpression: 'pk = :pk and begins_with(sk, :sk_filter)',
+      ExpressionAttributeValues: {
+        ':pk': `${MARKETPLACE_USER_INDEX}#${userId}`,
+        ':sk_filter': TOUR_POST_BOOKMARK_INDEX,
+      },
+    };
+    const queryResult = await dynamoProvider.queryPagination<BookmarkedTourPost>(
+      queryParams,
+      paginationParams,
+    );
+
+    return queryResult;
+  };
+
+  /**
+   * Get followed items with pagination
+   * @param userId User id
+   * @param paginationParams Pagination params
+   * @returns A Promise that resolves to the list of followed items.
+   */
+  private getFollowedItemsWithPagination = async (
+    userId: string,
+    paginationParams: PaginationParams,
+  ) => {
+    const marketplaceTable = await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE');
+    const queryParams = {
+      TableName: marketplaceTable,
+      KeyConditionExpression: 'pk = :pk and begins_with(sk, :sk_filter)',
+      ExpressionAttributeValues: {
+        ':pk': `${MARKETPLACE_USER_INDEX}#${userId}`,
+        ':sk_filter': TOUR_POST_FOLLOW_INDEX,
+      },
+    };
+    const queryResult = await dynamoProvider.queryPagination<FollowedTourPost>(
+      queryParams,
+      paginationParams,
+    );
+
+    return queryResult;
+  };
+
+  /**
+   * Batch query tour posts from bookmarked / followed items
+   * @param bookmarkOrFollowedItems List of bookmarked / followed items
+   * @returns A Promise that resolves to the list of tour posts.
+   */
+  private batchQueryTourPosts = async (bookmarkOrFollowedItems: BookmarkOrFollowedTourPost[]) => {
+    if (bookmarkOrFollowedItems.length === 0) {
+      // Return immediately if there is no bookmarked or followed item
+      return [];
+    }
+    // Batch query tour posts
+    const marketplaceTable = await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE');
+    const queryParams = {
+      RequestItems: {
+        [marketplaceTable]: {
+          Keys: bookmarkOrFollowedItems.map((item) => ({
+            pk: POST_INDEX,
+            sk: item.tourPostId,
+          })),
+        },
+      },
+    };
+    const responses = await dynamoProvider.batchGetItems(queryParams);
+
+    // Remove unnecessary data from the response
+    const tourPosts = responses[marketplaceTable]
+      .map((tourPost) => helper.excludeDataFromObject(tourPost) as TourPost);
+
+    return tourPosts;
   };
 }

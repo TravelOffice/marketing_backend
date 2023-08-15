@@ -1,7 +1,7 @@
 import { PaginationParams } from 'core/providers/dynamodb/DynamoProvider';
+import { CognitoUser } from '../models/CognitoUser';
 import { tourPostRepository } from '../repositories';
 import { GetTourPostListByOrgUseCase } from './interfaces/GetTourPostListByOrgUseCase';
-import { CognitoUser } from '../models/CognitoUser';
 
 export default class GetTourPostListByOrgUseCaseImpl implements GetTourPostListByOrgUseCase {
   invoke = async (currentUser: CognitoUser, organization: string, params: PaginationParams) => {

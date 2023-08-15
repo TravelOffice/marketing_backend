@@ -1,6 +1,6 @@
 import { PaginationParams } from 'core/providers/dynamodb/DynamoProvider';
-import { tourPostRepository } from '../repositories';
 import { CognitoUser } from '../models/CognitoUser';
+import { tourPostRepository } from '../repositories';
 import { GetTourPostListByUserUseCase } from './interfaces/GetTourPostListByUserUseCase';
 
 export default class GetTourPostListByUserUseCaseImpl implements GetTourPostListByUserUseCase {

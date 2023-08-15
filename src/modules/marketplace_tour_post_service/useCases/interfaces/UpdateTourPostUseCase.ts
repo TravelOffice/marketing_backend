@@ -1,6 +1,6 @@
-import { TourPost } from '../../models/TourPost';
 import { UpdateTourPostDto } from '../../dto/UpdateTourPostDto';
 import { CognitoUser } from '../../models/CognitoUser';
+import { TourPost } from '../../models/TourPost';
 
 export interface UpdateTourPostUseCase {
   invoke(

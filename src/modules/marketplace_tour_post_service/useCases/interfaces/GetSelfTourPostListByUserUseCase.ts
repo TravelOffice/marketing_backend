@@ -1,6 +1,6 @@
 import { PaginationParams, PaginationResponsePayload } from 'core/providers/dynamodb/DynamoProvider';
-import { TourPost } from '../../models/TourPost';
 import { CognitoUser } from '../../models/CognitoUser';
+import { TourPost } from '../../models/TourPost';
 
 export interface GetSelfTourPostListByUserUseCase {
   invoke(

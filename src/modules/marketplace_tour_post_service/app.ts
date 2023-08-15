@@ -1,31 +1,35 @@
+import compression from 'compression';
 import cors from 'cors';
 import { getCurrentUserInfo } from 'decode-token';
-import express, { Request, Response, NextFunction } from 'express';
-import compression from 'compression';
+import express, { NextFunction, Request, Response } from 'express';
 import {
   bookmarkTourPostUseCase,
   createTourPostUseCase,
-  getTourPostListByOrgUseCase,
+  followTourPostUseCase,
+  getBookmarkedTourPostsUseCase,
+  getFollowedTourPostsUseCase,
   getSelfTourPostListByUserUseCase,
+  getTourPostListByOrgUseCase,
+  getTourPostListByUserUseCase,
   getTourPostListUseCase,
   getTourPostUseCase,
   unbookmarkTourPostUseCase,
-  updateTourPostUseCase,
-  getTourPostListByUserUseCase,
-  followTourPostUseCase,
   unfollowTourPostUseCase,
+  updateTourPostUseCase,
 } from './useCases';
-import wrapResponse from './utils/wrapResponse';
 import { FAILED, SUCCESS } from './utils/constants';
+import logger from './utils/logger';
 import validate, {
   bookmarkPostValidtor,
   createTourPostValidator,
-  getSelfPostsValidator,
-  getPostsValidator,
-  updateTourPostValidator,
   followPostValidtor,
+  getBookmarkedOrFollowedPostsValidator,
+  getPostsValidator,
+  getSelfPostsValidator,
+  getTourPostValidator,
+  updateTourPostValidator,
 } from './utils/validator';
-import logger from './utils/logger';
+import wrapResponse from './utils/wrapResponse';
 
 const app = express();
 
@@ -47,6 +51,7 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
 });
 
 app.get('/marketplace/posts/me', getSelfPostsValidator(), async (req: Request, res: Response) => {
+  validate(req);
   try {
     const currentUser = getCurrentUserInfo(req.headers.authorization!);
     const tourPosts = await getSelfTourPostListByUserUseCase.invoke(
@@ -63,6 +68,7 @@ app.get('/marketplace/posts/me', getSelfPostsValidator(), async (req: Request, r
 
 app.get('/marketplace/posts', getPostsValidator(), async (req: Request, res: Response) => {
   try {
+    validate(req);
     // The posts can be get by organization
     // If organization is not specified, get all posts
     const { organization, author, ...paginationParams } = req.query;
@@ -96,8 +102,9 @@ app.get('/marketplace/posts', getPostsValidator(), async (req: Request, res: Res
   }
 });
 
-app.get('/marketplace/posts/:id', async (req: Request, res: Response) => {
+app.get('/marketplace/posts/:id', getTourPostValidator(), async (req: Request, res: Response) => {
   try {
+    validate(req);
     const { id } = req.params;
     const tourPost = await getTourPostUseCase.invoke(id);
     logger.log(`[app.get] Get post ${id} successfully ${JSON.stringify(tourPost)}`);
@@ -135,22 +142,34 @@ app.put('/marketplace/posts/:id', updateTourPostValidator(), async (req: Request
   }
 });
 
-app.post('/marketplace/bookmarked-posts', async (_: Request, res: Response) => {
+app.get('/marketplace/me/bookmarked-posts', getBookmarkedOrFollowedPostsValidator(), async (req: Request, res: Response) => {
   try {
-    // TODO: Implement this in next PR
+    validate(req);
     // Get bookmarked posts of current user
-    throw new Error('Not implemented');
+    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const tourPosts = await getBookmarkedTourPostsUseCase.invoke(
+      currentUser,
+      req.query,
+    );
+    logger.log(`[app.get] Get bookmarked posts of current user ${currentUser} successfully ${JSON.stringify(tourPosts)}`);
+    res.json(wrapResponse(SUCCESS, tourPosts));
   } catch (error: any) {
     logger.log(`[app.get] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });
 
-app.post('/marketplace/followed-posts', async (_: Request, res: Response) => {
+app.get('/marketplace/me/followed-posts', getBookmarkedOrFollowedPostsValidator(), async (req: Request, res: Response) => {
   try {
-    // TODO: Implement this in next PR
+    validate(req);
     // Get followed posts of current user
-    throw new Error('Not implemented');
+    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const tourPosts = await getFollowedTourPostsUseCase.invoke(
+      currentUser,
+      req.query,
+    );
+    logger.log(`[app.get] Get followed posts of current user ${currentUser} successfully ${JSON.stringify(tourPosts)}`);
+    res.json(wrapResponse(SUCCESS, tourPosts));
   } catch (error: any) {
     logger.log(`[app.get] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
