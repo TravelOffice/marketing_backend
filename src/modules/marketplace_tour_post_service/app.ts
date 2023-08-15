@@ -20,9 +20,9 @@ import {
 import { FAILED, SUCCESS } from './utils/constants';
 import logger from './utils/logger';
 import validate, {
-  bookmarkPostValidtor,
+  bookmarkPostValidator,
   createTourPostValidator,
-  followPostValidtor,
+  followPostValidator,
   getBookmarkedOrFollowedPostsValidator,
   getPostsValidator,
   getSelfPostsValidator,
@@ -176,10 +176,10 @@ app.get('/marketplace/me/followed-posts', getBookmarkedOrFollowedPostsValidator(
   }
 });
 
-app.post('/marketplace/posts/:postId/bookmark', bookmarkPostValidtor(), async (req: Request, res: Response) => {
+app.post('/marketplace/posts/:id/bookmark', bookmarkPostValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
-    const { postId } = req.params;
+    const { id: postId } = req.params;
     const currentUser = getCurrentUserInfo(req.headers.authorization!);
     const bookmarkedItem = await bookmarkTourPostUseCase.invoke(currentUser, postId);
     logger.log(`[app.get] Bookmark post ${postId} successfully ${JSON.stringify(bookmarkedItem)}`);
@@ -190,10 +190,10 @@ app.post('/marketplace/posts/:postId/bookmark', bookmarkPostValidtor(), async (r
   }
 });
 
-app.delete('/marketplace/posts/:postId/bookmark', bookmarkPostValidtor(), async (req: Request, res: Response) => {
+app.delete('/marketplace/posts/:id/bookmark', bookmarkPostValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
-    const { postId } = req.params;
+    const { id: postId } = req.params;
     const currentUser = getCurrentUserInfo(req.headers.authorization!);
     await unbookmarkTourPostUseCase.invoke(currentUser, postId);
     logger.log(`[app.get] Unbookmark post ${postId} for user ${currentUser} successfully`);
@@ -204,10 +204,10 @@ app.delete('/marketplace/posts/:postId/bookmark', bookmarkPostValidtor(), async 
   }
 });
 
-app.post('/marketplace/posts/:postId/follow', followPostValidtor(), async (req: Request, res: Response) => {
+app.post('/marketplace/posts/:id/follow', followPostValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
-    const { postId } = req.params;
+    const { id: postId } = req.params;
     const currentUser = getCurrentUserInfo(req.headers.authorization!);
     const bookmarkedItem = await followTourPostUseCase.invoke(currentUser, postId);
     logger.log(`[app.get] Follow post ${postId} successfully ${JSON.stringify(bookmarkedItem)}`);
@@ -218,10 +218,10 @@ app.post('/marketplace/posts/:postId/follow', followPostValidtor(), async (req: 
   }
 });
 
-app.delete('/marketplace/posts/:postId/follow', followPostValidtor(), async (req: Request, res: Response) => {
+app.delete('/marketplace/posts/:id/follow', followPostValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
-    const { postId } = req.params;
+    const { id: postId } = req.params;
     const currentUser = getCurrentUserInfo(req.headers.authorization!);
     await unfollowTourPostUseCase.invoke(currentUser, postId);
     logger.log(`[app.get] Unfollow post ${postId} for user ${currentUser} successfully`);
