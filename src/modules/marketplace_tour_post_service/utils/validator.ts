@@ -144,13 +144,13 @@ export function getBookmarkedOrFollowedPostsValidator() {
   ];
 }
 
-export function bookmarkPostValidtor() {
+export function bookmarkPostValidator() {
   return [
     param('postId').notEmpty().withMessage('postId is required'),
   ];
 }
 
-export function followPostValidtor() {
+export function followPostValidator() {
   return [
     param('postId').notEmpty().withMessage('postId is required'),
   ];
