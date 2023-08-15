@@ -5,10 +5,17 @@ import { getCurrentUserInfo } from 'decode-token';
 import express, { NextFunction, Request, Response } from 'express';
 import {
   getTourPlanUseCase,
+  getTourTrackingUseCase,
   updateTourPlanUseCase,
+  updateTourTrackingUseCase,
 } from './useCases';
 import { FAILED, SUCCESS } from './utils/constants';
-import validate, { getTourPlanValidator, updateTourPlanValidator } from './utils/validator';
+import validate, {
+  getTourPlanValidator,
+  getTourTrackingValidator,
+  updateTourPlanValidator,
+  updateTourTrackingValidator,
+} from './utils/validator';
 import wrapResponse from './utils/wrapResponse';
 
 const app = express();
@@ -58,6 +65,44 @@ app.put('/tours/:tourId/operation/plan', updateTourPlanValidator(), async (req: 
   } catch (error: any) {
     logger.log(
       `[${req.method}] An error occurred while updating tour plan on route '${req.originalUrl}':`,
+      error,
+    );
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.put('/tours/:tourId/operation/tracking', updateTourTrackingValidator(), async (req: Request, res: Response) => {
+  try {
+    validate(req);
+    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const { tenant } = currentUser;
+    const { tourId } = req.params;
+    const { tourTracking } = req.body;
+    const updatedTourTracking = await updateTourTrackingUseCase.invoke(
+      tenant,
+      tourId,
+      tourTracking,
+    );
+    res.json(wrapResponse(SUCCESS, updatedTourTracking));
+  } catch (error: any) {
+    logger.log(
+      `[${req.method}] An error occurred while updating tour tracking on route '${req.originalUrl}':`,
+      error,
+    );
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.get('/tours/:tourId/operation/tracking', getTourTrackingValidator(), async (req: Request, res: Response) => {
+  try {
+    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const { tenant } = currentUser;
+    const { tourId } = req.params;
+    const tourTracking = await getTourTrackingUseCase.invoke(tenant, tourId);
+    res.json(wrapResponse(SUCCESS, tourTracking));
+  } catch (error: any) {
+    logger.log(
+      `[${req.method}] An error occurred while retrieving tour tracking on route '${req.originalUrl}':`,
       error,
     );
     res.json(wrapResponse(FAILED, undefined, error.message));

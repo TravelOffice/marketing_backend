@@ -5,10 +5,15 @@ import {
 import moment from 'moment';
 import { TourPlan, tourPlanActivityTypes } from '../models/tour/TourPlan';
 import {
-  VALIDATE_INTEGER_MSG, VALIDATE_NON_EMPTY_STRING_MSG, VALIDATE_NUMBER_MSG, VALIDATE_VAT_MSG,
+  VALIDATE_INTEGER_MSG,
+  VALIDATE_NON_EMPTY_STRING_MSG,
+  VALIDATE_NUMBER_MSG,
+  VALIDATE_STRING_MSG,
+  VALIDATE_VAT_MSG,
 } from './constants';
 import { serviceTypes } from '../models/Supplier';
 import { payerTypes, vatStatuses } from '../models/Estimation';
+import { tourTrackingActivityStatusTypes } from '../models/tour/TourTracking';
 
 /**
  * Validate daily plan item
@@ -77,6 +82,25 @@ export function updateTourPlanValidator() {
       const isDailyPlanItemsValid = dailyPlan.every((item: any) => validateDailyPlanItem(item));
       return isDailyPlanAsArray && isDailyPlanItemsValid;
     })).withMessage('Daily plan is invalid.'),
+    param('tourId').notEmpty().withMessage('Departure tour id must not be empty.'),
+  ];
+}
+
+export function getTourTrackingValidator() {
+  return [
+    param('tourId').notEmpty().withMessage('Departure tour id must not be empty.'),
+  ];
+}
+
+export function updateTourTrackingValidator() {
+  return [
+    // Validate keys of tour tracking
+    // Key must follow format DAY_{number}
+    body('tourTracking').custom((data) => Object.keys(data).every((key) => /^(DAY_?)(\d+.*)$/g.test(key))).withMessage('Daily key must follow format DAY_{number}.'),
+    body('tourTracking.*.status').notEmpty().withMessage('Status must not be empty.')
+      .isIn(tourTrackingActivityStatusTypes)
+      .withMessage(`must be one of ${tourTrackingActivityStatusTypes}`),
+    body('tourTracking.*.note').optional().isString().withMessage(VALIDATE_STRING_MSG),
     param('tourId').notEmpty().withMessage('Departure tour id must not be empty.'),
   ];
 }
