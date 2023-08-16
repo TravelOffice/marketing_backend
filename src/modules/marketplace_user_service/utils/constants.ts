@@ -1,0 +1,65 @@
+export const SUCCESS = 'Successfully!';
+
+export const FAILED = 'Failed!';
+
+export const ENABLED = 'ENABLED';
+
+export const DISABLED = 'DISABLED';
+
+export const VALIDATE_NON_EMPTY_STRING_MSG = 'property must be a non-empty string';
+
+export const VALIDATE_STRING_MSG = 'property must be a string';
+
+export const VALIDATE_STRING_ARRAY_MSG = 'property must be an array of string';
+
+export const VALIDATE_NUMBER_MSG = 'property must be a number';
+
+export const VALIDATE_EMAIL_MSG = 'property must be an email address';
+
+export const VALIDATE_DATE_MSG = 'property must be a date';
+
+export const VALIDATE_BOOLEAN_MSG = 'property must be a boolean';
+
+export const VALIDATE_USERNAME_SYNTAX_STRING_MSG = 'username must not contain # character';
+
+export const VALIDATE_USERNAME_RESERVED_STRING_MSG = 'Invalid username';
+
+export const VALIDATE_ARRAY_MSG = 'property must be an array';
+
+export const VALIDATE_ROLE_MSG = 'property cant not contains ROOT role';
+
+export const TENANT_INDEX = 'TENANT';
+
+export const LEAD_INDEX = 'LEAD';
+
+export const OPPORTUNITY_INDEX = 'OPPORTUNITY';
+
+export const EMPLOYEE_INDEX = 'EMPLOYEE';
+
+export const QUOTE_INDEX = 'QUOTE';
+
+export const LATEST_QUOTE_INDEX = 'LATEST_QUOTE';
+
+export const USERNAME_DELIMITER = '#';
+
+export const ROLE_STRING_DELIMITER = '#';
+
+export const PARTITION_KEY_DELIMITER = '#';
+
+export const PAGE_INDEX = 'PAGE';
+
+export const ROLE_INDEX = 'ROLE';
+
+export const USER_INDEX = 'USR';
+
+export const SEARCH_INDEX = 'SEARCH';
+
+export const SEARCH_API_KEY_INDEX = 'API_KEY';
+
+export const OMITTED_USER_ATTRIBUTES = ['tenant', 'pk', 'sk', 'lsi1', 'lsi2', 'lsi3', 'lsi4', 'lsi5', 'wct', 'nacs', 'roleStr', 'searchApiKey'];
+
+export const DEFAULT_ROLES = ['ROOT', 'ADMIN', 'SALE', 'OPERATOR', 'OPERATOR_MANAGER'];
+
+export const ROOT_ROLE = 'ROOT';
+
+export const ROLE_PERMISSION_TABLE_KEY = 'DYNAMO_MARKETPLACE_ROLE_PERMISSION_TABLE';
