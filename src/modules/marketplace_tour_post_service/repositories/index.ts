@@ -1,5 +1,3 @@
-// TODO: Declare repository objects which can be used in this service here
-
 import MarketplaceUserRepositoryImpl from './MarketplaceUserRepositoryImpl';
 import TourPostRepositoryImpl from './TourPostRepositoryImpl';
 import { MarketplaceUserRepository } from './interfaces/MarketplaceUserRepository';

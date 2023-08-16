@@ -192,3 +192,12 @@ module "AUTO_ASSIGN_MODULE_CONFIGURATION" {
   NEW_CONVERSATION_QUEUE_ARN  = module.REMOTE_STATE.STATE.MARKETING.queue.auto_assign_chat_queue
   TAGS                        = local.tags
 }
+
+module "MARKETPLACE_DDB_STREAM_CONFIGURATION" {
+  source                      = "../../modules/application/dynamodb_stream"
+  ENV                         = var.ENV
+  FEATURE_NAME                = var.FEATURE_NAME
+  TAGS                        = local.tags
+  MARKETPLACE_DDB_STREAM_ARN  = module.REMOTE_STATE.STATE.MARKETING.backend.dynamodb.marketplace_table.stream_arn
+  MARKETPLACE_LAMBDA_STREAM_HANDLER_ARN = module.LAMBDA_FUNCTION.lambda_arns["marketplace_data_stream_service"]
+}
