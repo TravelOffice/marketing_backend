@@ -68,7 +68,7 @@ export default class MarketplaceUserRepositoryImpl implements MarketplaceUserRep
     await dynamoProvider.putItem(table, pk, sk, marketplaceUser);
 
     // Return the added MarketplaceUser
-    return marketplaceUser as MarketplaceUser;
+    return helper.excludeDataFromObject(marketplaceUser) as MarketplaceUser;
   };
 
   /**
@@ -79,7 +79,7 @@ export default class MarketplaceUserRepositoryImpl implements MarketplaceUserRep
    * with updated information.
    * @returns {Promise<MarketplaceUser>} - A promise resolving to the updated MarketplaceUser.
    */
-  async update(id: string, user: Partial<MarketplaceUser>): Promise<MarketplaceUser> {
+  update = async (id: string, user: Partial<MarketplaceUser>): Promise<MarketplaceUser> => {
     // Generate update expression names and values
     const expressionNamesAndValues = helper.generateUpdateExpressionNamesAndValues(user);
 
@@ -97,6 +97,6 @@ export default class MarketplaceUserRepositoryImpl implements MarketplaceUserRep
     });
 
     // Return the updated MarketplaceUser
-    return result.Attributes as MarketplaceUser;
-  }
+    return helper.excludeDataFromObject(result.Attributes as MarketplaceUser) as MarketplaceUser;
+  };
 }
