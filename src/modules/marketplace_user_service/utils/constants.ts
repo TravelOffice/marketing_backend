@@ -10,6 +10,8 @@ export const VALIDATE_NON_EMPTY_STRING_MSG = 'property must be a non-empty strin
 
 export const VALIDATE_STRING_MSG = 'property must be a string';
 
+export const VALIDATE_URL_MSG = 'property must be a URL';
+
 export const VALIDATE_STRING_ARRAY_MSG = 'property must be an array of string';
 
 export const VALIDATE_NUMBER_MSG = 'property must be a number';
@@ -24,7 +26,7 @@ export const VALIDATE_USERNAME_SYNTAX_STRING_MSG = 'username must not contain # 
 
 export const VALIDATE_USERNAME_RESERVED_STRING_MSG = 'Invalid username';
 
-export const VALIDATE_ARRAY_MSG = 'property must be an array';
+export const VALIDATE_ARRAY_MSG = 'property must be an non-empty array';
 
 export const VALIDATE_ROLE_MSG = 'property cant not contains ROOT role';
 

@@ -4,9 +4,9 @@ import {
   AuthorizerPolicyRequest,
   ClaimVerifyRequest,
 } from '../models';
-import {appSyncProvider, authPolicyProvider, cognitoProvider} from '../providers';
+import { appSyncProvider, authPolicyProvider, cognitoProvider } from '../providers';
 import logger from '../utils/logger';
-import {AuthorizationRepository} from './interfaces/AuthorizationRepository';
+import { AuthorizationRepository } from './interfaces/AuthorizationRepository';
 
 export default class AuthorizationRepositoryImpl implements AuthorizationRepository {
   /**
@@ -16,13 +16,13 @@ export default class AuthorizationRepositoryImpl implements AuthorizationReposit
    */
   generateAllowPolicy = (policy: AuthorizerPolicyRequest) => {
     logger.log(`Generate Allow Policy: policy [${JSON.stringify(policy)}]`);
-    const {type} = policy;
+    const { type } = policy;
     if (type === 'API') {
-      const {principalId, resource} = policy;
+      const { principalId, resource } = policy;
       return authPolicyProvider.generatePolicy(principalId, 'Allow', resource);
     }
     if (type === 'APPSYNC') {
-      const {deniedFields, ttlOverride, context} = policy;
+      const { deniedFields, ttlOverride, context } = policy;
       return appSyncProvider.generatePolicy(true, deniedFields, ttlOverride, context);
     }
     throw new Error(`generateAllowPolicy: Unsupported policy ${JSON.stringify(policy)}`);
@@ -36,9 +36,9 @@ export default class AuthorizationRepositoryImpl implements AuthorizationReposit
    */
   generateDenyPolicy = (policy: AuthorizerPolicyRequest, errorMessage: string) => {
     logger.log(`Generate Deny Policy: policy [${JSON.stringify(policy)}]`);
-    const {type} = policy;
+    const { type } = policy;
     if (type === 'API') {
-      const {principalId, resource, context} = policy;
+      const { principalId, resource, context } = policy;
       const resultContext: APIGatewayAuthorizerResultContext = {
         ...context,
         errorMessage,
@@ -46,7 +46,7 @@ export default class AuthorizationRepositoryImpl implements AuthorizationReposit
       return authPolicyProvider.generatePolicy(principalId, 'Deny', resource, resultContext);
     }
     if (type === 'APPSYNC') {
-      const {deniedFields, ttlOverride, context} = policy;
+      const { deniedFields, ttlOverride, context } = policy;
       const resultContext: AppSyncResolverResultContext = {
         ...context,
         errorMessage,

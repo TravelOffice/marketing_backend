@@ -4,4 +4,4 @@ export * from './ApiGateway';
 export * from './AppSyncAuthorizer';
 export * from './APIGatewayAuthorizer';
 export * from './RolePermission';
-export * from './User';
+export * from './MarketplaceUser';

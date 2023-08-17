@@ -1,6 +1,9 @@
 import { getCurrentUserInfo } from 'decode-token';
 import {
-  ApiGatewayPolicyRequest, APIGatewayRequestAuthorizerEvent, AuthorizerReponse, PermissionStatement,
+  ApiGatewayPolicyRequest,
+  APIGatewayRequestAuthorizerEvent,
+  AuthorizerReponse,
+  PermissionStatement,
 } from '../models';
 import { authorizationRepository, rolePermissionRepository, userRepository } from '../repositories';
 import { DEFAULT_DENY_MESSAGE } from '../utils/constants';
@@ -29,7 +32,10 @@ class APIGatewayRequestEventHandler extends AuthorizerHandler<APIGatewayRequestA
     const userAttributes = await userRepository.getUserAttributes(tenant, username);
     if (!userAttributes) throw new Error(`APIGatewayRequestEventHandler: Your account [${username}] not existed!`);
 
-    const { roles } = userAttributes;
+    const { roles, enabled } = userAttributes;
+    // Verify current user is available to join marketplace or not
+    if (!enabled) throw new Error(`APIGatewayRequestEventHandler: Your accoutn [${username}] not available`);
+
     const permissionStatement: PermissionStatement = {
       path: resource,
       action: httpMethod,

@@ -1,6 +1,6 @@
 import { getAwsSecretValue } from 'get-env';
 import { dynamoProvider } from 'core';
-import { Permission, Role, User } from '../models';
+import { Permission, Role } from '../models';
 import {
   DEFAULT_ROLES,
   MARKETPLACE_TABLE_KEY,
@@ -11,6 +11,7 @@ import {
 } from '../utils/constants';
 import logger from '../utils/logger';
 import { UserRepository } from './interfaces/UserRepository';
+import { MarketplaceUser } from '../models/MarketplaceUser';
 
 export default class UserRepositoryImpl implements UserRepository {
   /**
@@ -21,7 +22,7 @@ export default class UserRepositoryImpl implements UserRepository {
    */
   getUserAttributes = async (tenantId: string, userId: string) => {
     const ddbTable = await getAwsSecretValue(MARKETPLACE_TABLE_KEY);
-    return dynamoProvider.getItem<User>(
+    return dynamoProvider.getItem<MarketplaceUser>(
       ddbTable,
       USER_INDEX,
       `${tenantId}#${userId}`,
@@ -56,7 +57,7 @@ export default class UserRepositoryImpl implements UserRepository {
    * @param user The information of the user
    * @returns Promise<User> All information of User object with permission
    */
-  getUserPermissions = async (tenantId: string, user: User) => {
+  getUserPermissions = async (tenantId: string, user: MarketplaceUser) => {
     logger.log(`Tenant: ${tenantId}, User: ${user.username}`);
     const table = await getAwsSecretValue(ROLE_PERMISSION_TABLE_KEY);
     const { roles } = user;

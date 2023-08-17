@@ -1,3 +1,3 @@
 export * from './RolePermission';
-export * from './User';
+export * from './TravelUser';
 export * from './MarketplaceUser';
