@@ -10,6 +10,7 @@ export type DeleteItemInput = AWS.DynamoDB.DocumentClient.DeleteItemInput;
 export type BatchGetItemInput = AWS.DynamoDB.DocumentClient.BatchGetItemInput;
 export type BatchWriteItemInput = AWS.DynamoDB.DocumentClient.BatchWriteItemInput;
 export type KeyList = AWS.DynamoDB.DocumentClient.KeyList;
+export type AttributeValues = AWS.DynamoDB.AttributeMap;
 
 const dynamoDB: AWS.DynamoDB.DocumentClient = new AWS.DynamoDB.DocumentClient({ region: getEnv('AWS_REGION') });
 
@@ -216,4 +217,6 @@ export default class DynamoProvider {
   ) => dynamoDB.batchWrite(batchWriteInput).promise();
 
   marshall = (data: any) => AWS.DynamoDB.Converter.marshall(data);
+
+  unmarshall = (obj: AttributeValues) => AWS.DynamoDB.Converter.unmarshall(obj);
 }
