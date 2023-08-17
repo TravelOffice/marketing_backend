@@ -1,7 +1,7 @@
 import { helper } from 'core';
 import { MarketplaceUser } from '../models';
-import { userRepository } from '../repositories';
 import { GetTenantUserListUseCase } from './interfaces/GetTenantUserListUseCase';
+import { marketplaceUserRepository } from '../repositories';
 
 export default class GetTenantUserListUseCaseImpl implements GetTenantUserListUseCase {
   /**
@@ -10,7 +10,7 @@ export default class GetTenantUserListUseCaseImpl implements GetTenantUserListUs
    * @returns Promise<User> All information of list tenant user
    */
   invoke = async (tenantId: string) => {
-    const users = await userRepository.list(tenantId);
+    const users = await marketplaceUserRepository.list(tenantId);
     // Remove root user
     return users.map((user) => helper.excludeDataFromObject(user) as MarketplaceUser);
   };

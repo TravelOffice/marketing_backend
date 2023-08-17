@@ -33,6 +33,10 @@ export default class AppSyncEventHandler extends AuthorizerHandler<AppSyncAuthor
     const { tenant, username } = getCurrentUserInfo(authorizationToken);
     const userAttributes = await userRepository.getUserAttributes(tenant, username);
     if (!userAttributes) throw new Error(`AppSyncEventHandler: Your account [${username}] not existed!`);
+    const { enabled } = userAttributes;
+    // Verify current user is available to join marketplace or not
+    if (!enabled) throw new Error(`APIGatewayRequestEventHandler: Your accoutn [${username}] not available`);
+
     const permissions = await userRepository.getUserPermissions(tenant, userAttributes);
 
     const policy: AppSyncPolicyRequest = {

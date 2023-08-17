@@ -1,16 +1,19 @@
-import { UserRepository } from './interfaces/UserRepository';
-import UserRepositoryImpl from './UserRepositoryImpl';
+import { MarketplaceUserRepository } from './interfaces/MarketplaceUserRepository';
+import MarketplaceUserRepositoryImpl from './MarketplaceUserRepositoryImpl';
+import TravelUserRepositoryImpl from './TravelUserRepositoryImpl';
+import { TravelUserRepository } from './interfaces/TravelUserRepository';
 
 interface Repositories {
-  userRepository: UserRepository,
+  travelUserRepository: TravelUserRepository,
+  marketplaceUserRepository: MarketplaceUserRepository,
 }
 
 const repositories: Repositories = {
-  userRepository: new UserRepositoryImpl(),
+  travelUserRepository: new TravelUserRepositoryImpl(),
+  marketplaceUserRepository: new MarketplaceUserRepositoryImpl(),
 };
 
-// TODO: Remove below line if there are two or more repository
-// eslint-disable-next-line import/prefer-default-export
 export const {
-  userRepository,
+  travelUserRepository,
+  marketplaceUserRepository,
 } = repositories;

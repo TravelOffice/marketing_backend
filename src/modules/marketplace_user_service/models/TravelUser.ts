@@ -24,7 +24,7 @@ export enum UserStatusEnum {
   inactive = 'inactive',
 }
 
-export interface User extends BaseDdbModel {
+export interface TravelUser extends BaseDdbModel {
   username: string,
   firstName?: string,
   lastName?: string,
@@ -50,6 +50,6 @@ export interface User extends BaseDdbModel {
   searchApiKey?: string,
 }
 
-export interface UserWithPermission extends User {
+export interface UserWithPermission extends TravelUser {
   permissions: Array<string>
 }

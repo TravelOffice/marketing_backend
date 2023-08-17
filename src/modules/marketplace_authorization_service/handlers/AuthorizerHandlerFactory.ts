@@ -1,4 +1,4 @@
-import {AuthorizerEvent} from '../models';
+import { AuthorizerEvent } from '../models';
 import APIGatewayRequestEventHandler from './APIGatewayRequestEventHandler';
 import APIGatewayTokenEventHandler from './APIGatewayTokenEventHandler';
 import AppSyncEventHandler from './AppSyncEventHandler';

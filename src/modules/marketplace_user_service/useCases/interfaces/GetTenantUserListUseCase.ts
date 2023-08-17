@@ -1,5 +1,5 @@
-import { User } from '../../models';
+import { TravelUser } from '../../models';
 
 export interface GetTenantUserListUseCase {
-  invoke: (tenantId: string) => Promise<Array<Partial<User>>>;
+  invoke: (tenantId: string) => Promise<Array<Partial<TravelUser>>>;
 }
