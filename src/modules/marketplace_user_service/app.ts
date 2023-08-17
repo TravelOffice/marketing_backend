@@ -2,11 +2,16 @@ import compression from 'compression';
 import cors from 'cors';
 import { getCurrentUserInfo } from 'decode-token';
 import express, { NextFunction, Request, Response } from 'express';
-import { createMarketplaceUserUseCase, getTenantUserListUseCase, updateMarketplaceUserUseCase } from './useCases';
+import {
+  createMarketplaceUserUseCase,
+  enableMarketplaceUserUseCase,
+  getTenantUserListUseCase,
+  updateMarketplaceUserUseCase,
+} from './useCases';
 import { FAILED, SUCCESS } from './utils/constants';
 import logger from './utils/logger';
 import wrapResponse from './utils/wrapResponse';
-import validate, { createUserValidator, updateUserValidator } from './utils/validator';
+import validate, { createUserValidator, enableUserValidator, updateUserValidator } from './utils/validator';
 
 const app = express();
 
@@ -55,6 +60,18 @@ app.put('/marketplace/me', updateUserValidator(), async (req: Request, res: Resp
     validate(req);
     const { tenant, username } = getCurrentUserInfo(req.headers.authorization!);
     const users = await updateMarketplaceUserUseCase.invoke(tenant, username, req.body);
+    res.json(wrapResponse(SUCCESS, users));
+  } catch (error: any) {
+    logger.log(`[app.get] Error ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.put('/marketplace/enable-user', enableUserValidator(), async (req: Request, res: Response) => {
+  try {
+    validate(req);
+    const { tenant, username, enable } = req.body;
+    const users = await enableMarketplaceUserUseCase.invoke(tenant, username, enable);
     res.json(wrapResponse(SUCCESS, users));
   } catch (error: any) {
     logger.log(`[app.get] Error ${error}`);

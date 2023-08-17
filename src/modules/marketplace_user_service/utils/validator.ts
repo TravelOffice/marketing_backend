@@ -4,6 +4,7 @@ import { LANGUAGES_TYPE, THEMES_TYPE } from '../models';
 import {
   ROOT_ROLE,
   VALIDATE_ARRAY_MSG,
+  VALIDATE_BOOLEAN_MSG,
   VALIDATE_NON_EMPTY_STRING_MSG,
   VALIDATE_ROLE_MSG,
   VALIDATE_URL_MSG,
@@ -79,5 +80,18 @@ export function updateUserValidator() {
       .optional()
       .isIn(Object.values(LANGUAGES_TYPE))
       .withMessage(`allow only in ${Object.values(LANGUAGES_TYPE)}`),
+  ];
+}
+
+export function enableUserValidator() {
+  return [
+    body('tenant', VALIDATE_NON_EMPTY_STRING_MSG)
+      .isString()
+      .notEmpty(),
+    body('username', VALIDATE_NON_EMPTY_STRING_MSG)
+      .isString()
+      .notEmpty(),
+    body('enable', VALIDATE_BOOLEAN_MSG)
+      .isBoolean(),
   ];
 }
