@@ -5,6 +5,7 @@ import { TourPost } from '../models/TourPost';
 import { statusTransitionRules } from '../models/TourPostStatus';
 import { marketplaceUserRepository, tourPostRepository } from '../repositories';
 import { UpdateTourPostUseCase } from './interfaces/UpdateTourPostUseCase';
+import { CreateTourPostDto } from '../dto/CreateTourPostDto';
 
 export default class UpdateTourPostUseCaseImpl implements UpdateTourPostUseCase {
   allowedUpdatingKeys: (keyof UpdateTourPostDto)[] = [
@@ -16,6 +17,8 @@ export default class UpdateTourPostUseCaseImpl implements UpdateTourPostUseCase 
     'expiry',
     'autoClose',
     'maximumPaxToTrade',
+    'endingLocation',
+    'departureDate',
   ];
 
   invoke = async (
@@ -48,14 +51,15 @@ export default class UpdateTourPostUseCaseImpl implements UpdateTourPostUseCase 
       this.allowedUpdatingKeys,
     );
     const updatingTourPostData = await this.getDataToUpdate(tourPost, allowedUpdatingData);
-    return tourPostRepository.update(tourPostId, updatingTourPostData);
+    const updatedTourPost = await tourPostRepository.update(tourPostId, updatingTourPostData);
+    return helper.excludeDataFromObject(updatedTourPost as TourPost) as TourPost;
   };
 
   /**
    * Transform dto to expected data which should be used to update.
    * Also, some kinds of data should be validated before updating.
    * @param tourPost Current tour post
-   * @param updateBookingDto Data to update
+   * @param updatingTourPostData Data to update
    */
   private async getDataToUpdate(
     tourPost: TourPost,
@@ -72,13 +76,17 @@ export default class UpdateTourPostUseCaseImpl implements UpdateTourPostUseCase 
       }
     }
 
+    const updatedAt = Date.now();
+    const {
+      endingLocation: newEndingLocation, departureDate: newDepartureDate,
+    } = updatingTourPostData;
     // New data to update
-    const tourPostToUpdate = {
+    return {
       ...updatingTourPostData,
-      updatedAt: Date.now(),
+      updatedAt,
       lsi2: newStatus, // Local index for getting all posts by specific status
-    };
-
-    return tourPostToUpdate;
+      lsi4: `${newEndingLocation ?? tourPost.endingLocation}#${tourPost.createdAt}`,
+      lsi5: `${newDepartureDate ?? tourPost.departureDate}`,
+    } as CreateTourPostDto;
   }
 }

@@ -30,41 +30,52 @@ export function getTourPostValidator() {
 
 export function createTourPostValidator() {
   return [
-    body('name').notEmpty().withMessage('name is required'),
+    body('name').notEmpty().withMessage('is required'),
 
     body('description')
       .optional()
       .if(
         body('description').exists(),
       ).isString()
-      .withMessage('description must be a string'),
+      .withMessage('must be a string'),
 
     body('type')
-      .notEmpty().withMessage('type is required')
+      .notEmpty().withMessage('is required')
       .isIn(tourPostTypes)
       .withMessage(`allow only in ${tourPostTypes}`),
 
     body('linkedToTarget').notEmpty().withMessage('linkedLeadOfTenant is required and not be empty'),
 
-    body('expiry').optional()
-      .if(body('expiry').exists())
+    body('expiry')
+      .optional()
       .isNumeric()
-      .withMessage('expiry must be a number'),
+      .withMessage('must be a number'),
 
-    body('autoClose').optional()
-      .if(body('autoClose').exists())
+    body('autoClose')
+      .optional()
       .isBoolean()
-      .withMessage('autoClose must be a boolean'),
+      .withMessage('must be a boolean'),
 
     body('maximumPaxToTrade').optional()
-      .if(body('maximumPaxToTrade').exists())
       .isInt()
-      .withMessage('maximumPaxToTrade must be a number'),
+      .withMessage('must be a number'),
 
     body('status')
-      .notEmpty().withMessage('status is required')
+      .notEmpty().withMessage('is required')
       .isIn(allowedInitialPostStatuses)
       .withMessage(`allow only in ${allowedInitialPostStatuses}`),
+
+    body('endingLocation')
+      .optional()
+      .notEmpty()
+      .isString()
+      .withMessage('must be a non-empty string'),
+
+    body('departureDate')
+      .optional()
+      .notEmpty()
+      .custom((value) => !Number.isNaN(new Date(value)))
+      .withMessage('must be a date'),
   ];
 }
 
@@ -72,7 +83,7 @@ export function updateTourPostValidator() {
   const validateBody = createTourPostValidator();
   return validateBody.concat(
     [
-      param('id').notEmpty().withMessage('id is required'),
+      param('id').notEmpty().withMessage('is required'),
     ],
   );
 }
@@ -90,10 +101,10 @@ export function getSelfPostsValidator() {
         }
       })
       .withMessage('nextToken must be a JSON string'),
-    query('limit').optional().isInt().withMessage('limit must be a number'),
+    query('limit').optional().isInt().withMessage('must be a number'),
     query('sortDesc').optional()
       .isBoolean()
-      .withMessage('sortDesc must be a boolean'),
+      .withMessage('must be a boolean'),
   ];
 }
 
@@ -101,10 +112,10 @@ export function getPostsValidator() {
   return [
     query('organization')
       .optional().isString().notEmpty()
-      .withMessage('organization must be a string'),
+      .withMessage('must be a string'),
     query('author')
       .optional().isString().notEmpty()
-      .withMessage('author must be a string'),
+      .withMessage('must be a string'),
 
     query('nextToken')
       .optional()
@@ -116,11 +127,11 @@ export function getPostsValidator() {
           return false;
         }
       })
-      .withMessage('nextToken must be a JSON string'),
+      .withMessage('must be a JSON string'),
     query('limit').optional().isInt().withMessage('limit must be a number'),
     query('sortDesc').optional()
       .isBoolean()
-      .withMessage('sortDesc must be a boolean'),
+      .withMessage('must be a boolean'),
   ];
 }
 
@@ -136,11 +147,11 @@ export function getBookmarkedOrFollowedPostsValidator() {
           return false;
         }
       })
-      .withMessage('nextToken must be a JSON string'),
+      .withMessage('must be a JSON string'),
     query('limit').optional().isInt().withMessage('limit must be a number'),
     query('sortDesc').optional()
       .isBoolean()
-      .withMessage('sortDesc must be a boolean'),
+      .withMessage('must be a boolean'),
   ];
 }
 

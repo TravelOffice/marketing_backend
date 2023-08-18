@@ -6,7 +6,8 @@ import { FollowedTourPost } from '../models/FollowedTourPost';
 import { TourPost } from '../models/TourPost';
 import {
   MARKETPLACE_COUNTER_INDEX,
-  MARKETPLACE_USER_INDEX, POST_INDEX,
+  MARKETPLACE_USER_INDEX,
+  POST_INDEX,
   TOUR_POST_BOOKMARK_INDEX,
   TOUR_POST_COUNTER_INDEX,
   TOUR_POST_FOLLOW_INDEX,
@@ -18,7 +19,7 @@ type BookmarkOrFollowedTourPost = BookmarkedTourPost | FollowedTourPost;
 
 export default class TourPostRepositoryImpl implements TourPostRepository {
   /**
-   * Lists all tour posts
+   * Lists all tour posts sorted by createdAt
    * @param currentUserId - The ID of the user that own access token in the request.
    * @param {PaginationParams} paginationParams - The pagination settings.
    * @returns {Promise<PaginationResponsePayload<TourPost> | undefined>}
@@ -29,6 +30,7 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
     const marketplaceTable = await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE');
     const queryParams = {
       TableName: marketplaceTable,
+      IndexName: 'Index3',
       KeyConditionExpression: 'pk = :pk',
       ExpressionAttributeValues: {
         ':pk': POST_INDEX,
@@ -56,7 +58,8 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
   /**
    * Lists all tour posts for the specified user.
    *
-   * @param byUserId - The ID of the user.
+   * @param currentUserId
+   * @param author
    * @param {PaginationParams} paginationParams - The pagination settings.
    * @returns {Promise<PaginationResponsePayload<TourPost> | undefined>}
    * A promise resolving to a paginated response.
@@ -71,10 +74,10 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
     const queryParams = {
       TableName: marketplaceTable,
       IndexName: 'Index1',
-      KeyConditionExpression: 'pk = :pk and lsi1 = :lsi1',
+      KeyConditionExpression: 'pk = :pk and begins_with(lsi1, :lsi1_filter)',
       ExpressionAttributeValues: {
         ':pk': POST_INDEX,
-        ':lsi1': author,
+        ':lsi1_filter': `${author}#`,
       },
     };
 
@@ -102,6 +105,7 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
   /**
    * Lists all tour posts for the specified organization.
    * This method is used for organization admin to get all posts of the organization.
+   * @param currentUserId - The ID of the current user
    * @param organizationId - The ID of the organization.
    * @param {PaginationParams} paginationParams - The pagination settings.
    * @returns {Promise<PaginationResponsePayload<TourPost> | undefined>}
@@ -148,7 +152,7 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
   /**
    * List bookmarked tour posts of the specified user.
    * @param userId - The ID of the user.
-   * @param {PaginationParams} paginationParams - The pagination settings.
+   * @param params - The pagination params
    * @returns {Promise<PaginationResponsePayload<BookmarkedTourPost> | undefined>}
    * A promise resolving to a paginated response.
    */
@@ -176,7 +180,7 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
   /**
    * List followed tour posts of the specified user.
    * @param userId - The ID of the user.
-   * @param {PaginationParams} paginationParams - The pagination settings.
+   * @param params - The pagination params
    * @returns {Promise<PaginationResponsePayload<FollowedTourPost> | undefined>}
    * A promise resolving to a paginated response.
    */
@@ -460,12 +464,10 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
         ':sk_filter': TOUR_POST_BOOKMARK_INDEX,
       },
     };
-    const queryResult = await dynamoProvider.queryPagination<BookmarkedTourPost>(
+    return dynamoProvider.queryPagination<BookmarkedTourPost>(
       queryParams,
       paginationParams,
     );
-
-    return queryResult;
   };
 
   /**
@@ -487,12 +489,10 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
         ':sk_filter': TOUR_POST_FOLLOW_INDEX,
       },
     };
-    const queryResult = await dynamoProvider.queryPagination<FollowedTourPost>(
+    return dynamoProvider.queryPagination<FollowedTourPost>(
       queryParams,
       paginationParams,
     );
-
-    return queryResult;
   };
 
   /**
@@ -520,9 +520,7 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
     const responses = await dynamoProvider.batchGetItems(queryParams);
 
     // Remove unnecessary data from the response
-    const tourPosts = responses[marketplaceTable]
+    return responses[marketplaceTable]
       .map((tourPost) => helper.excludeDataFromObject(tourPost) as TourPost);
-
-    return tourPosts;
   };
 }
