@@ -91,8 +91,8 @@ app.get('/marketplace/organizations/:id/ratings', getOrgRatingListValidator(), a
     } = req.query;
     const rating = await getOrgRatingListUseCase.invoke(
       organizationId,
-      numberStar as string,
       paginationParams,
+      numberStar as string,
     );
     res.json(wrapResponse(SUCCESS, rating));
   } catch (error: any) {

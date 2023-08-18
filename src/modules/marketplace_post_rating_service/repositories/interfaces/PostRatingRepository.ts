@@ -6,8 +6,8 @@ export interface PostRatingRepository {
 
   listByOrganization(
     organizationId: string,
-    numberStar: string,
-    paginationParams?: PaginationParams,
+    paginationParams: PaginationParams,
+    numberStar?: string,
   ): Promise<PaginationResponsePayload<PostRating> | undefined>,
 
   create(rating: PostRating): Promise<PostRating>,

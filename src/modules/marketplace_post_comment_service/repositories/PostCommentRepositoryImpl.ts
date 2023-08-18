@@ -22,6 +22,7 @@ export default class PostCommentRepositoryImpl implements PostCommentRepository 
   ): Promise<PaginationResponsePayload<PostComment> | undefined> {
     const queryParams = {
       TableName: await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE'),
+      IndexName: 'Index3', // CreatedAt lsi to get latest comments
       KeyConditionExpression: 'pk = :pk',
       ExpressionAttributeValues: {
         ':pk': `${POST_INDEX}#${tourPostId}#${COMMENT_INDEX}`,

@@ -127,28 +127,27 @@ export default class PostRatingRepositoryImpl implements PostRatingRepository {
   };
 
   /**
-   * Retrieves a paginated list of post ratings for a specific organization
-   * and a specific number of stars.
+   * List post ratings for a specific organization, potentially filtered by star rating.
    *
-   * @param {string} organizationId - The ID of the organization for which to retrieve ratings.
-   * @param {string} numberStar - The number of stars for which to retrieve ratings.
-   * @param {PaginationParams} paginationParams - The parameters for pagination.
+   * @param {string} organizationId - The ID of the organization.
+   * @param {PaginationParams} paginationParams - Parameters for pagination.
+   * @param {string} numberStar - Optional. The star rating to filter by.
    * @returns {Promise<PaginationResponsePayload<PostRating> | undefined>}
-   * - A promise resolving to the paginated list of post ratings or undefined if not found.
+   * - A promise that resolves with the paginated list of post ratings or undefined.
    */
   listByOrganization = async (
     organizationId: string,
-    numberStar: string,
     paginationParams: PaginationParams,
+    numberStar?: string,
   ): Promise<PaginationResponsePayload<PostRating> | undefined> => {
-  // Prepare the query parameters
+    // Prepare the query parameters
     const queryParams = {
       TableName: await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE'),
       IndexName: 'Index2',
-      KeyConditionExpression: 'pk = :pk AND lsi2 = :lsi2_filter_value',
+      KeyConditionExpression: 'pk = :pk AND begins_with(lsi2, :lsi2_filter_value)',
       ExpressionAttributeValues: {
         ':pk': `${ORGANIZATION_INDEX}#${organizationId}#${RATING_INDEX}`,
-        ':lsi2_filter_value': `${RATING_INDEX}#${numberStar}`,
+        ':lsi2_filter_value': numberStar ? `${RATING_INDEX}#${numberStar}` : RATING_INDEX,
       },
     };
 
