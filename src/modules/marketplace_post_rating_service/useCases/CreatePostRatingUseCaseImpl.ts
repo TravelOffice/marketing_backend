@@ -43,6 +43,8 @@ export default class CreatePostRatingUseCaseImpl implements CreatePostRatingUseC
 
     // Generate a unique index for the rating
     const ratingIndex = await postRatingRepository.generateCode();
+    const createdAt = now;
+    const updatedAt = now;
 
     // Create the rating object
     const postRating = {
@@ -51,12 +53,13 @@ export default class CreatePostRatingUseCaseImpl implements CreatePostRatingUseC
       authorId: marketplaceUserId,
       tourPostId,
       organizationId: tourPost.tenant,
-      createdAt: now,
-      updatedAt: now,
+      createdAt,
+      updatedAt,
       // Local secondary index with format <tenant>#<username>
       // for getting ratings created by specific user
-      lsi1: marketplaceUserId,
-      lsi2: `${RATING_INDEX}#${createRatingDto.star}`,
+      lsi1: `${marketplaceUserId}#${createdAt}`,
+      lsi2: `${RATING_INDEX}#${createRatingDto.star}#${createdAt}`,
+      lsi3: `${createdAt}`,
     } as PostRating;
 
     // Add the rating to DynamoDB using the repository

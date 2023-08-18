@@ -31,6 +31,8 @@ export default class CreatePostCommentUseCaseImpl implements CreatePostCommentUs
 
     // Get the current timestamp
     const now = Date.now();
+    const createdAt = now;
+    const updatedAt = now;
 
     // Generate a unique index for the comment
     const commentIndex = await postCommentRepository.generateCode();
@@ -41,11 +43,12 @@ export default class CreatePostCommentUseCaseImpl implements CreatePostCommentUs
       code: commentIndex,
       authorId: marketplaceUserId,
       tourPostId,
-      createdAt: now,
-      updatedAt: now,
+      createdAt,
+      updatedAt,
       // Local secondary index with format <tenant>#<username>
       // for getting comments created by specific user
-      lsi1: marketplaceUserId,
+      lsi1: `${marketplaceUserId}#${createdAt}`,
+      lsi3: `${createdAt}`,
     } as PostComment;
 
     // Add the comment to DynamoDB using the repository

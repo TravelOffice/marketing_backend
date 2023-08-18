@@ -31,6 +31,8 @@ export default class CreateOrgFeedbackUseCaseImpl implements CreateOrgFeedbackUs
 
     // Get the current timestamp
     const now = Date.now();
+    const createdAt = now;
+    const updatedAt = now;
 
     // Generate a unique index for the feedback
     const feedbackIndex = await orgFeedbackRepository.generateCode();
@@ -41,11 +43,12 @@ export default class CreateOrgFeedbackUseCaseImpl implements CreateOrgFeedbackUs
       code: feedbackIndex,
       authorId: marketplaceUserId,
       organizationId,
-      createdAt: now,
-      updatedAt: now,
+      createdAt,
+      updatedAt,
       // Local secondary index with format <tenant>#<username>
       // for getting feedback created by specific user
-      lsi1: marketplaceUserId,
+      lsi1: `${marketplaceUserId}#${createdAt}`,
+      lsi3: `${createdAt}`,
     } as OrgFeedback;
 
     // Add the feedback to DynamoDB using the repository

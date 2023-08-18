@@ -82,7 +82,7 @@ export default class UpdatePostRatingUseCaseImpl implements UpdatePostRatingUseC
     // New data to update
     return {
       ...updatingRatingData,
-      lsi2: `${RATING_INDEX}#${updatingRatingData.star}`,
+      lsi2: `${RATING_INDEX}#${updatingRatingData.star}#${rating.createdAt}`,
       updatedAt: Date.now(),
     };
   }

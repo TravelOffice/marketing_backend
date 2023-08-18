@@ -1,4 +1,5 @@
-import { PaginationParams } from 'core/providers/dynamodb/DynamoProvider';
+import { PaginationParams, PaginationResponsePayload } from 'core/providers/dynamodb/DynamoProvider';
+import { PostRating } from '../models/PostRating';
 import { postRatingRepository } from '../repositories';
 import { GetOrgRatingListUseCase } from './interfaces/GetOrgRatingListUseCase';
 
@@ -15,11 +16,11 @@ export default class GetOrgRatingListUseCaseImpl implements GetOrgRatingListUseC
    */
   invoke = async (
     organizationId: string,
-    numberStar: string,
     paginationParams: PaginationParams,
+    numberStar?: string,
   ) => postRatingRepository.listByOrganization(
     organizationId,
-    numberStar,
     paginationParams,
+    numberStar,
   );
 }

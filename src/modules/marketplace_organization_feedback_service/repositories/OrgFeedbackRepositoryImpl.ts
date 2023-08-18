@@ -21,6 +21,7 @@ export default class OrgFeedbackRepositoryImpl implements OrgFeedbackRepository 
   listByOrg = async (organizationId: string, paginationParams: PaginationParams) => {
     const queryParams = {
       TableName: await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE'),
+      IndexName: 'Index3', // CreatedAt LSI to get latest feedback
       KeyConditionExpression: 'pk = :pk',
       ExpressionAttributeValues: {
         ':pk': `${ORGANIZATION_INDEX}#${organizationId}#${FEEDBACK_INDEX}`,
