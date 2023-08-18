@@ -6,6 +6,8 @@ export const POST_INDEX = 'P';
 
 export const OFFER_INDEX = 'OF';
 
+export const ORG_INDEX = 'ORG';
+
 export const MARKETPLACE_COUNTER_INDEX = 'COUNTER';
 
 export const OFFER_COUNTER_INDEX = 'OFFER_COUNTER';

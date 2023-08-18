@@ -2,19 +2,19 @@ import { PaginationParams, PaginationResponsePayload } from 'core/providers/dyna
 import { offerRepository } from '../repositories';
 import { Offer, OfferStatus, OfferStatusTypes } from '../models/Offer';
 import { CognitoUser } from '../models/CognitoUser';
-import { GetOfferListSendFromCurrentUserOrgUseCase } from './interfaces/GetOfferListSendFromCurrentUserOrgUseCase';
+import { GetSentOffersOfOrgUseCase } from './interfaces/GetSentOffersOfOrgUseCase';
 
-export default class GetOfferListSendFromCurrentUserOrgUseCaseImpl
-implements GetOfferListSendFromCurrentUserOrgUseCase {
+export default class GetSentOffersOfOrgUseCaseImpl
+implements GetSentOffersOfOrgUseCase {
   /**
-   * Retrieves a paginated list of offers send from current user's organization
+   * Retrieves a paginated list of sent offers of current user's organization
    * and a specific status.
    *
    * @param {CognitoUser} currentUser - The current authenticated user.
    * @param {OfferStatus} offerStatus - The status of the offer.
    * @param {PaginationParams} paginationParams - The parameters for pagination.
    * @returns {Promise<PaginationResponsePayload<Offer> | undefined>}
-   * - A promise resolving to the paginated list of offers or undefined if not found.
+   * - A promise resolving to the paginated list of sent offers or undefined if not found.
    */
   invoke = async (
     currentUser: CognitoUser,
@@ -26,14 +26,14 @@ implements GetOfferListSendFromCurrentUserOrgUseCase {
 
     // If the offer status is valid, retrieve the list of offers send from organization by status
     if (OfferStatusTypes.includes(offerStatus)) {
-      return offerRepository.listOffersSendFromOrganizationByOfferStatus(
+      return offerRepository.listSentOffersOfOrganizationByOfferStatus(
         organizationId,
         offerStatus,
         paginationParams,
       );
     }
     // Otherwise, retrieve the list of offers send from organization with all statuses
-    return offerRepository.listOffersSendFromOrganization(
+    return offerRepository.listSentOffersOfOrganization(
       organizationId,
       paginationParams,
     );

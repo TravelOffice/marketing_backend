@@ -105,14 +105,14 @@ export default class OfferRepositoryImpl implements OfferRepository {
   };
 
   /**
-   * Retrieves a paginated list of offer send from a specific organization with all statuses.
+   * Retrieves a paginated list of sent offers of a specific organization with all statuses.
    *
    * @param {string} organizationId - The ID of the organization for which to retrieve offers.
    * @param {PaginationParams} paginationParams - The parameters for pagination.
    * @returns {Promise<PaginationResponsePayload<Offer> | undefined>}
-   * - A promise resolving to the paginated list of offers or undefined if not found.
+   * - A promise resolving to the paginated list of sent offers or undefined if not found.
    */
-  listOffersSendFromOrganization = async (
+  listSentOffersOfOrganization = async (
     organizationId: string,
     paginationParams: PaginationParams,
   ): Promise<PaginationResponsePayload<Offer> | undefined> => {
@@ -130,16 +130,16 @@ export default class OfferRepositoryImpl implements OfferRepository {
   };
 
   /**
-   * Retrieves a paginated list of offer send from a specific organization
+   * Retrieves a paginated list of sent offers of a specific organization
    * and a specific status.
    *
    * @param {string} organizationId - The ID of the organization for which to retrieve offers.
    * @param {string} offerStatus - The status of the offer.
    * @param {PaginationParams} paginationParams - The parameters for pagination.
    * @returns {Promise<PaginationResponsePayload<Offer> | undefined>}
-   * - A promise resolving to the paginated list of offers or undefined if not found.
+   * - A promise resolving to the paginated list of sent offers or undefined if not found.
    */
-  listOffersSendFromOrganizationByOfferStatus = async (
+  listSentOffersOfOrganizationByOfferStatus = async (
     organizationId: string,
     offerStatus: OfferStatus,
     paginationParams: PaginationParams,
@@ -152,6 +152,32 @@ export default class OfferRepositoryImpl implements OfferRepository {
       ExpressionAttributeValues: {
         ':pk': `${ORGANIZATION_INDEX}#${organizationId}#${OFFER_INDEX}`,
         ':lsi2_filter_value': `${OFFER_INDEX}#${offerStatus}`,
+      },
+    };
+
+    // Perform the query using queryPagination and return the result
+    return dynamoProvider.queryPagination(queryParams, paginationParams);
+  };
+
+  /**
+   * Retrieves a paginated list of received offers of a specific organization.
+   *
+   * @param {string} organizationId - The ID of the organization for which to retrieve offers.
+   * @param {PaginationParams} paginationParams - The parameters for pagination.
+   * @returns {Promise<PaginationResponsePayload<Offer> | undefined>}
+   * - A promise resolving to the paginated list of received offers or undefined if not found.
+   */
+  listReceivedOffersOfOrganization = async (
+    organizationId: string,
+    paginationParams: PaginationParams,
+  ): Promise<PaginationResponsePayload<Offer> | undefined> => {
+    // Prepare the query parameters
+    const queryParams = {
+      TableName: await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE'),
+      IndexName: 'ReceivedOrgIndex',
+      KeyConditionExpression: 'receivedOrg = :receivedOrg_filter_value',
+      ExpressionAttributeValues: {
+        ':receivedOrg_filter_value': `${OFFER_INDEX}#${ORGANIZATION_INDEX}#${organizationId}`,
       },
     };
 

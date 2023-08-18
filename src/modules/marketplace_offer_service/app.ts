@@ -9,8 +9,9 @@ import {
   createOfferUseCase,
   getOfferListOfAuthorUseCase,
   getOfferListOfPostUseCase,
-  getOfferListSendFromCurrentUserOrgUseCase,
   getOfferUseCase,
+  getReceivedOffersOfOrgUseCase,
+  getSentOffersOfOrgUseCase,
   rejectOfferUseCase,
   updateOfferUseCase,
 } from './useCases';
@@ -74,16 +75,34 @@ app.post('/marketplace/posts/:id/offers', createOfferValidator(), async (req: Re
   }
 });
 
-app.get('/marketplace/me/organizations/offers', getOfferListOfOrgValidator(), async (req: Request, res: Response) => {
+app.get('/marketplace/me/organizations/sent-offers', getOfferListOfOrgValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
     const currentUser = getCurrentUserInfo(req.headers.authorization!);
     const {
       offerStatus, ...paginationParams
     } = req.query;
-    const offers = await getOfferListSendFromCurrentUserOrgUseCase.invoke(
+    const offers = await getSentOffersOfOrgUseCase.invoke(
       currentUser,
       offerStatus as OfferStatus,
+      paginationParams,
+    );
+    res.json(wrapResponse(SUCCESS, offers));
+  } catch (error: any) {
+    logger.log(`[app.get] Error ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.get('/marketplace/me/organizations/received-offers', getOfferListOfOrgValidator(), async (req: Request, res: Response) => {
+  try {
+    validate(req);
+    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const {
+      ...paginationParams
+    } = req.query;
+    const offers = await getReceivedOffersOfOrgUseCase.invoke(
+      currentUser,
       paginationParams,
     );
     res.json(wrapResponse(SUCCESS, offers));

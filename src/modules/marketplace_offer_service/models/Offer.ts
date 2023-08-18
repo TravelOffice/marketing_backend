@@ -26,4 +26,5 @@ export interface Offer extends BaseDdbModel {
     canceledAt?: number, // The time the offer was cancelled
     acceptedAt?: number, // The time the offer was accepted
     rejectedAt?: number, // The time the offer was rejected
+    receivedOrg: string, // The ID of organization that received the offer
 }
