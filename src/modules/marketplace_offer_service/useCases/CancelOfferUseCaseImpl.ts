@@ -3,7 +3,6 @@ import { offerRepository } from '../repositories';
 import { Offer, OfferStatus } from '../models/Offer';
 import { CancelOfferUseCase } from './interfaces/CancelOfferUseCase';
 import { CognitoUser } from '../models/CognitoUser';
-import { OFFER_INDEX } from '../utils/constants';
 
 export default class CancelOfferUseCaseImpl implements CancelOfferUseCase {
   /**
@@ -18,7 +17,6 @@ export default class CancelOfferUseCaseImpl implements CancelOfferUseCase {
    */
   invoke = async (
     currentUser: CognitoUser,
-    tourPostId: string,
     offerId: string,
     cancelReason: string,
   ): Promise<Offer> => {
@@ -27,7 +25,7 @@ export default class CancelOfferUseCaseImpl implements CancelOfferUseCase {
     const marketplaceUserId = `${organizationId}#${username}`;
 
     // Retrieve the offer to be canceled
-    const offer = await offerRepository.get(organizationId, tourPostId, offerId);
+    const offer = await offerRepository.get(offerId);
     // If offer not found, throw an error you are not authorized to cancel this offer
     if (!offer) {
       throw new Error('You are not authorized to cancel this offer');
@@ -44,9 +42,8 @@ export default class CancelOfferUseCaseImpl implements CancelOfferUseCase {
     }
 
     // Cancel the offer
-    const canceledOffer = await offerRepository.update(organizationId, tourPostId, offerId, {
+    const canceledOffer = await offerRepository.update(offerId, {
       offerStatus: OfferStatus.CANCELLED,
-      lsi2: `${OFFER_INDEX}#${OfferStatus.CANCELLED}`,
       cancelReason,
       canceledAt: Date.now(),
     });

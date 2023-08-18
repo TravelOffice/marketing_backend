@@ -29,15 +29,12 @@ export function createOfferValidator() {
       .isString()
       .withMessage(VALIDATE_STRING_MSG),
     body('totalPax')
-      .notEmpty()
       .isInt({ min: 1 })
       .withMessage(VALIDATE_INTEGER_MSG),
     body('pricePerPax')
-      .optional()
       .isInt({ min: 1 })
       .withMessage(VALIDATE_INTEGER_MSG),
     body('commissionRate')
-      .optional()
       .isInt({ min: 0, max: 100 })
       .withMessage(VALIDATE_COMMISSION_RATE_MSG),
   ];
@@ -46,21 +43,22 @@ export function createOfferValidator() {
 export function updateOfferValidator() {
   return [
     param('id').notEmpty().withMessage('Offer ID is required'),
-    body('tourPostId').notEmpty().isString().withMessage(VALIDATE_STRING_MSG),
-    body('organizationId').notEmpty().isString().withMessage(VALIDATE_STRING_MSG),
     body('description')
       .optional()
       .isString()
       .withMessage(VALIDATE_STRING_MSG),
     body('totalPax')
+      .optional()
       .notEmpty()
       .isInt({ min: 1 })
       .withMessage(VALIDATE_INTEGER_MSG),
     body('pricePerPax')
+      .optional()
       .notEmpty()
       .isInt({ min: 1 })
       .withMessage(VALIDATE_INTEGER_MSG),
     body('commissionRate')
+      .optional()
       .notEmpty()
       .isInt({ min: 0 })
       .withMessage(VALIDATE_INTEGER_MSG),
@@ -73,19 +71,6 @@ export function getOfferListOfPostValidator() {
       .isString()
       .notEmpty()
       .withMessage('Tour post ID must be a string'),
-  ];
-}
-
-export function getOfferValidator() {
-  return [
-    query('organizationId')
-      .isString()
-      .notEmpty()
-      .withMessage('Organization Id must be a string'),
-    query('tourPostId')
-      .isString()
-      .notEmpty()
-      .withMessage('Tour post Id must be a string'),
   ];
 }
 
@@ -141,10 +126,6 @@ export function getOfferListOfAuthorValidator() {
 export function cancelOfferValidator() {
   return [
     param('id').notEmpty().withMessage('Offer ID is required'),
-    body('tourPostId')
-      .notEmpty()
-      .isString()
-      .withMessage(VALIDATE_STRING_MSG),
     body('cancelReason')
       .notEmpty()
       .isString()
@@ -155,24 +136,12 @@ export function cancelOfferValidator() {
 export function acceptOfferValidator() {
   return [
     param('id').notEmpty().withMessage('Offer ID is required'),
-    body('tourPostId')
-      .notEmpty()
-      .isString()
-      .withMessage(VALIDATE_STRING_MSG),
-    body('organizationId')
-      .notEmpty()
-      .isString()
-      .withMessage(VALIDATE_STRING_MSG),
   ];
 }
 
 export function rejectOfferValidator() {
   return [
     param('id').notEmpty().withMessage('Offer ID is required'),
-    body('tourPostId')
-      .notEmpty()
-      .isString()
-      .withMessage(VALIDATE_STRING_MSG),
     body('rejectReason')
       .notEmpty()
       .isString()

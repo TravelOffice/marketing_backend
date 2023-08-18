@@ -33,7 +33,7 @@ export default class GetOfferListOfPostUseCaseImpl implements GetOfferListOfPost
       throw new Error('You are not authorized to access this resource');
     }
 
-    const offers = await offerRepository.listByPost(tourPostOrganizationId, tourPostId);
+    const offers = await offerRepository.listByPost(tourPostId);
     return offers.map(
       (offer) => helper.excludeDataFromObject(offer) as Offer,
     );

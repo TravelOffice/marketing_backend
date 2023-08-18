@@ -26,7 +26,7 @@ export default class UpdateOfferUseCaseImpl implements UpdateOfferUseCase {
     const marketplaceUserId = `${tenant}#${username}`;
 
     // Extract necessary information from updateOfferDto
-    const { code: offerId, tourPostId, organizationId } = updateOfferDto;
+    const { code: offerId, tourPostId, sentOrg } = updateOfferDto;
 
     // Retrieve the marketplace user from the repository
     const marketplaceUser = await marketplaceUserRepository.getById(marketplaceUserId);
@@ -38,9 +38,9 @@ export default class UpdateOfferUseCaseImpl implements UpdateOfferUseCase {
     const currentUserId = marketplaceUser.id;
 
     // Retrieve the offer to be updated
-    const offer = await offerRepository.get(organizationId, tourPostId, offerId);
+    const offer = await offerRepository.get(offerId);
     if (!offer) {
-      throw new Error(`Offer not found with ID ${offerId}, tour post ID ${tourPostId}, organization ID ${organizationId}`);
+      throw new Error(`Offer not found with ID ${offerId}`);
     }
 
     // Check if the current user is the owner of the offer
@@ -65,8 +65,6 @@ export default class UpdateOfferUseCaseImpl implements UpdateOfferUseCase {
 
     // Update the offer using the repository
     const updatedOffer = await offerRepository.update(
-      organizationId,
-      tourPostId,
       offerId,
       updatingOfferData,
     );
