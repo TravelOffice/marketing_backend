@@ -1,7 +1,6 @@
 import { helper } from 'core';
 import { marketplaceUserRepository, offerRepository, tourPostRepository } from '../repositories';
 import { CognitoUser } from '../models/CognitoUser';
-import { OFFER_INDEX, ORG_INDEX } from '../utils/constants';
 import { CreateOfferUseCase } from './interfaces/CreateOfferUseCase';
 import { CreateOfferDto } from '../dto/CreateOfferDto';
 import { Offer, OfferStatus } from '../models/Offer';
@@ -21,11 +20,11 @@ export default class CreateOfferUseCaseImpl implements CreateOfferUseCase {
     createOfferDto: CreateOfferDto,
   ): Promise<Offer> => {
     // Extract necessary information from the current user
-    const { tenant, username } = currentUser;
-    const marketplaceUserId = `${tenant}#${username}`;
+    const { tenant: sentOrg, username } = currentUser;
+    const authorId = `${sentOrg}#${username}`;
 
     // Retrieve the marketplace user from the repository
-    const marketplaceUser = await marketplaceUserRepository.getById(marketplaceUserId);
+    const marketplaceUser = await marketplaceUserRepository.getById(authorId);
     if (!marketplaceUser) {
       throw new Error('Marketplace user not found');
     }
@@ -36,8 +35,13 @@ export default class CreateOfferUseCaseImpl implements CreateOfferUseCase {
       throw new Error('Tour post not found');
     }
 
+    const receivedOrg = tourPost.tenant;
+    const receivedUser = tourPost.authorId;
+
     // Get the current timestamp
     const now = Date.now();
+    const createdAt = now;
+    const updatedAt = now;
 
     // Generate a unique index for the rating
     const offerIndex = await offerRepository.generateCode();
@@ -46,18 +50,20 @@ export default class CreateOfferUseCaseImpl implements CreateOfferUseCase {
     const offer = {
       ...createOfferDto,
       code: offerIndex,
-      authorId: marketplaceUserId,
+      authorId,
       tourPostId,
-      organizationId: tourPost.tenant,
-      createdAt: now,
-      updatedAt: now,
+      sentOrg,
+      createdAt,
+      updatedAt,
       summitedAt: now,
       offerStatus: OfferStatus.IN_PROCESS,
-      // Local secondary index with format <tenant>#<username>
-      // for getting offer created by specific user
-      lsi1: marketplaceUserId,
-      lsi2: `${OFFER_INDEX}#${OfferStatus.IN_PROCESS}`,
-      receivedOrg: `${OFFER_INDEX}#${ORG_INDEX}#${tourPost.tenant}`,
+      lsi1: `${sentOrg}#${createdAt}`, // Get all sent offers of the organization
+      lsi2: `${authorId}#${createdAt}`, // Get all sent offers of the user
+      lsi3: `${tourPostId}#${createdAt}`, // Get all offers of the post
+      lsi4: `${receivedOrg}#${createdAt}`, // Get all received offers by organization
+      lsi5: `${receivedUser}#${createdAt}`, // Get all received offers by user
+      receivedOrg,
+      receivedUser,
     } as Offer;
 
     // Add the offer to DynamoDB using the repository

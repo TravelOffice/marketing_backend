@@ -1,9 +1,8 @@
 import { helper } from 'core';
-import { offerRepository, tourPostRepository } from '../repositories';
+import { offerRepository } from '../repositories';
 import { Offer, OfferStatus } from '../models/Offer';
 import { RejectOfferUseCase } from './interfaces/RejectOfferUseCase';
 import { CognitoUser } from '../models/CognitoUser';
-import { OFFER_INDEX } from '../utils/constants';
 
 export default class RejectOfferUseCaseImpl implements RejectOfferUseCase {
   /**
@@ -18,7 +17,6 @@ export default class RejectOfferUseCaseImpl implements RejectOfferUseCase {
    */
   invoke = async (
     currentUser: CognitoUser,
-    tourPostId: string,
     offerId: string,
     rejectReason: string,
   ): Promise<Offer> => {
@@ -27,7 +25,7 @@ export default class RejectOfferUseCaseImpl implements RejectOfferUseCase {
     const marketplaceUserId = `${organizationId}#${username}`;
 
     // Retrieve the offer to be rejected
-    const offer = await offerRepository.get(organizationId, tourPostId, offerId);
+    const offer = await offerRepository.get(offerId);
     // Check if the offer exists, if not, throw an error you are not authorized to reject this offer
     if (!offer) {
       throw new Error('You are not authorized to reject this offer');
@@ -38,22 +36,15 @@ export default class RejectOfferUseCaseImpl implements RejectOfferUseCase {
       throw new Error('Only reject offer with status IN_PROCESS');
     }
 
-    // Retrieve the tour post
-    const tourPost = await tourPostRepository.getById(tourPostId);
-    if (!tourPost) {
-      throw new Error('Tour post not found');
-    }
-
     // Check if the current user is the owner of the tour post
-    if (tourPost.authorId !== marketplaceUserId) {
+    if (offer.receivedUser !== marketplaceUserId) {
       throw new Error('Only the owner of the tour post can reject it');
     }
 
     // Reject the offer
-    const rejectedOffer = await offerRepository.update(organizationId, tourPostId, offerId, {
+    const rejectedOffer = await offerRepository.update(offerId, {
       offerStatus: OfferStatus.REJECTED,
       rejectReason,
-      lsi2: `${OFFER_INDEX}#${OfferStatus.REJECTED}`,
       rejectedAt: Date.now(),
     });
 

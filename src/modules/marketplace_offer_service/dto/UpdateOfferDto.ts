@@ -1,11 +1,11 @@
 import { Offer } from '../models/Offer';
 
 export type UpdateOfferDto = Pick<Offer,
-    'code' |
-    'tourPostId' |
-    'organizationId' |
-    'description' |
-    'totalPax' |
-    'pricePerPax' |
-    'commissionRate'
+  'code' |
+  'tourPostId' |
+  'sentOrg' |
+  'description' |
+  'totalPax' |
+  'pricePerPax' |
+  'commissionRate'
 >;

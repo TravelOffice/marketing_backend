@@ -3,9 +3,7 @@ import { CognitoUser } from '../../models/CognitoUser';
 
 export interface AcceptOfferUseCase {
   invoke(
-      currentUser: CognitoUser,
-      organizationId: string,
-      tourPostId: string,
-      offerId: string,
+    currentUser: CognitoUser,
+    offerId: string,
   ): Promise<Offer>,
 }

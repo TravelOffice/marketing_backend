@@ -1,9 +1,8 @@
 import { helper } from 'core';
-import { offerRepository, tourPostRepository } from '../repositories';
+import { offerRepository } from '../repositories';
 import { Offer, OfferStatus } from '../models/Offer';
 import { CognitoUser } from '../models/CognitoUser';
 import { AcceptOfferUseCase } from './interfaces/AcceptOfferUseCase';
-import { OFFER_INDEX } from '../utils/constants';
 
 export default class AcceptOfferUseCaseImpl implements AcceptOfferUseCase {
   /**
@@ -18,30 +17,22 @@ export default class AcceptOfferUseCaseImpl implements AcceptOfferUseCase {
    */
   invoke = async (
     currentUser: CognitoUser,
-    organizationId: string,
-    tourPostId: string,
     offerId: string,
   ): Promise<Offer> => {
     // Extract necessary information from the current user
     const { tenant: userOrganizationId, username } = currentUser;
     const marketplaceUserId = `${userOrganizationId}#${username}`;
 
-    // Retrieve the tour post
-    const tourPost = await tourPostRepository.getById(tourPostId);
-    if (!tourPost) {
-      throw new Error('Tour post not found');
+    // Retrieve the offer to be accepted
+    const offer = await offerRepository.get(offerId);
+    // Check if the offer exists
+    if (!offer) {
+      throw new Error(`Offer ${offerId} not found`);
     }
 
     // Check if the current user is the owner of the tour post
-    if (tourPost.authorId !== marketplaceUserId) {
+    if (offer.receivedUser !== marketplaceUserId) {
       throw new Error('Only the owner of the tour post can accept it');
-    }
-
-    // Retrieve the offer to be accepted
-    const offer = await offerRepository.get(organizationId, tourPostId, offerId);
-    // Check if the offer exists
-    if (!offer) {
-      throw new Error(`Offer ${offerId} not found for tour post ${tourPostId} and organization ${organizationId}`);
     }
 
     // Check if status of offer is IN_PROCESS
@@ -50,9 +41,8 @@ export default class AcceptOfferUseCaseImpl implements AcceptOfferUseCase {
     }
 
     // Accept the offer
-    const acceptedOffer = await offerRepository.update(organizationId, tourPostId, offerId, {
+    const acceptedOffer = await offerRepository.update(offerId, {
       offerStatus: OfferStatus.ACCEPTED,
-      lsi2: `${OFFER_INDEX}#${OfferStatus.ACCEPTED}`,
       acceptedAt: Date.now(),
     });
 

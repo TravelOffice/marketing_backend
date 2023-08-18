@@ -24,7 +24,6 @@ import validate, {
   getOfferListOfAuthorValidator,
   getOfferListOfOrgValidator,
   getOfferListOfPostValidator,
-  getOfferValidator,
   rejectOfferValidator,
   updateOfferValidator,
 } from './utils/validator';
@@ -112,16 +111,13 @@ app.get('/marketplace/me/organizations/received-offers', getOfferListOfOrgValida
   }
 });
 
-app.get('/marketplace/offers/:id', getOfferValidator(), async (req: Request, res: Response) => {
+app.get('/marketplace/offers/:id', async (req: Request, res: Response) => {
   try {
     validate(req);
     const { id: offerId } = req.params;
     const currentUser = getCurrentUserInfo(req.headers.authorization!);
-    const { organizationId, tourPostId } = req.query;
     const offer = await getOfferUseCase.invoke(
       currentUser,
-      organizationId as string,
-      tourPostId as string,
       offerId,
     );
     res.json(wrapResponse(SUCCESS, offer));
@@ -155,10 +151,9 @@ app.put('/marketplace/offers/:id/cancel', cancelOfferValidator(), async (req: Re
     validate(req);
     const currentUser = getCurrentUserInfo(req.headers.authorization!);
     const { id: offerId } = req.params;
-    const { cancelReason, tourPostId } = req.body;
+    const { cancelReason } = req.body;
     const offer = await cancelOfferUseCase.invoke(
       currentUser,
-      tourPostId,
       offerId,
       cancelReason,
     );
@@ -174,11 +169,8 @@ app.put('/marketplace/offers/:id/accept', acceptOfferValidator(), async (req: Re
     validate(req);
     const currentUser = getCurrentUserInfo(req.headers.authorization!);
     const { id: offerId } = req.params;
-    const { organizationId, tourPostId } = req.body;
     const offer = await acceptOfferUseCase.invoke(
       currentUser,
-      organizationId,
-      tourPostId,
       offerId,
     );
     res.json(wrapResponse(SUCCESS, offer));
@@ -193,10 +185,9 @@ app.put('/marketplace/offers/:id/reject', rejectOfferValidator(), async (req: Re
     validate(req);
     const currentUser = getCurrentUserInfo(req.headers.authorization!);
     const { id: offerId } = req.params;
-    const { tourPostId, rejectReason } = req.body;
+    const { rejectReason } = req.body;
     const offer = await rejectOfferUseCase.invoke(
       currentUser,
-      tourPostId,
       offerId,
       rejectReason,
     );

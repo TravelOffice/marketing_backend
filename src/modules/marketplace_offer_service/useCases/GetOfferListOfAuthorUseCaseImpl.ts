@@ -27,6 +27,6 @@ export default class GetOfferListOfAuthorUseCaseImpl implements GetOfferListOfAu
       throw new Error('Marketplace user not found');
     }
 
-    return offerRepository.listByAuthor(organizationId, marketplaceUserId, paginationParams);
+    return offerRepository.listByAuthor(marketplaceUserId, paginationParams);
   };
 }
