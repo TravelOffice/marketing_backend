@@ -5,5 +5,6 @@ export type CreateTourPostDto = Pick<
   // Initial status can only be 'DRAFT' or 'IN_PROGRESS'
   'maximumPaxToTrade' | 'type' |
   'name' | 'linkedToTarget' | 'status' |
-  'description' | 'expiry' | 'autoClose'
+  'description' | 'expiry' | 'autoClose' |
+  'endingLocation' | 'departureDate'
 >;

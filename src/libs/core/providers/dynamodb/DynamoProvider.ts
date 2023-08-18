@@ -89,7 +89,7 @@ export default class DynamoProvider {
     // Perform the DynamoDB query
     const { Items, LastEvaluatedKey } = await dynamoDB.query({
       ...queryParams,
-      ScanIndexForward: !sortDesc, // Reverse sorting if sortDesc is true
+      ScanIndexForward: !!sortDesc, // Default, sort record DESC
       Limit: paginationLimit,
       ExclusiveStartKey: nextToken ? JSON.parse(nextToken) : undefined,
     }).promise();
