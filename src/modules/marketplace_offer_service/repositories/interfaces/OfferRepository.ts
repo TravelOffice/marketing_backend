@@ -4,14 +4,19 @@ import { Offer, OfferStatus } from '../../models/Offer';
 export interface OfferRepository {
   listByPost(organizationId: string, tourPostId: string): Promise<Offer[]>,
 
-  listOffersSendFromOrganization(
+  listSentOffersOfOrganization(
     organizationId: string,
     paginationParams?: PaginationParams,
   ): Promise<PaginationResponsePayload<Offer> | undefined>,
 
-  listOffersSendFromOrganizationByOfferStatus(
+  listSentOffersOfOrganizationByOfferStatus(
       organizationId: string,
       offerStatus: OfferStatus,
+      paginationParams?: PaginationParams,
+  ): Promise<PaginationResponsePayload<Offer> | undefined>,
+
+  listReceivedOffersOfOrganization(
+      organizationId: string,
       paginationParams?: PaginationParams,
   ): Promise<PaginationResponsePayload<Offer> | undefined>,
 

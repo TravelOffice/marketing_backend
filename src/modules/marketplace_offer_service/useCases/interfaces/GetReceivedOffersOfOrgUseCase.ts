@@ -2,10 +2,9 @@ import { PaginationParams, PaginationResponsePayload } from 'core/providers/dyna
 import { Offer } from '../../models/Offer';
 import { CognitoUser } from '../../models/CognitoUser';
 
-export interface GetOfferListSendFromCurrentUserOrgUseCase {
+export interface GetReceivedOffersOfOrgUseCase {
   invoke(
     currentUser: CognitoUser,
-    offerStatus: string,
     paginationParams: PaginationParams,
   ): Promise<PaginationResponsePayload<Offer> | undefined>,
 }

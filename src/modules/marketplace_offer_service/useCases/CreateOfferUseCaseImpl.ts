@@ -1,7 +1,7 @@
 import { helper } from 'core';
 import { marketplaceUserRepository, offerRepository, tourPostRepository } from '../repositories';
 import { CognitoUser } from '../models/CognitoUser';
-import { OFFER_INDEX } from '../utils/constants';
+import { OFFER_INDEX, ORG_INDEX } from '../utils/constants';
 import { CreateOfferUseCase } from './interfaces/CreateOfferUseCase';
 import { CreateOfferDto } from '../dto/CreateOfferDto';
 import { Offer, OfferStatus } from '../models/Offer';
@@ -57,6 +57,7 @@ export default class CreateOfferUseCaseImpl implements CreateOfferUseCase {
       // for getting offer created by specific user
       lsi1: marketplaceUserId,
       lsi2: `${OFFER_INDEX}#${OfferStatus.IN_PROCESS}`,
+      receivedOrg: `${OFFER_INDEX}#${ORG_INDEX}#${tourPost.tenant}`,
     } as Offer;
 
     // Add the offer to DynamoDB using the repository
