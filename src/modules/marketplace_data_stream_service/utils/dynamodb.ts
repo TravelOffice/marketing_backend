@@ -9,6 +9,5 @@ export function isOrganization(pk: string): boolean {
 }
 
 export function isTourPostOffer(pk: string): boolean {
-  const regExp = new RegExp(`^${ORGANIZATION_INDEX}.*${OFFER_INDEX}$`);
-  return regExp.test(pk);
+  return pk.startsWith(OFFER_INDEX);
 }
