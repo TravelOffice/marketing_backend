@@ -10,7 +10,7 @@ implements MarketplaceStatisticRepository {
     const marketplaceTable = await getAwsSecretValue(
       'DYNAMO_MARKETPLACE_TABLE',
     );
-    return dynamoProvider.getItem<OrganizationStatistic>(
+    return dynamoProvider.getItem<MarketplaceStatistic>(
       marketplaceTable,
       'STATS',
       'MARKETPLACE_STATS',
