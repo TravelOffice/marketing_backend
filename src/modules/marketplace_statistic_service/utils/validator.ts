@@ -1,9 +1,7 @@
 import { Request } from 'express';
 import {
-  body, param, query, ValidationError, validationResult,
+  param, ValidationError, validationResult,
 } from 'express-validator';
-import { allowedInitialPostStatuses } from './constants';
-// import { tourPostTypes } from '../models/TourPostType';
 
 export default function validate(req: Request) {
   const errors = validationResult(req);
