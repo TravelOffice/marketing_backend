@@ -13,3 +13,5 @@ export const RATING_COUNTER_INDEX = 'RATING_COUNTER';
 export const MARKETPLACE_USER_INDEX = 'USR';
 
 export const ORGANIZATION_INDEX = 'ORG';
+
+export const OFFER_INDEX = 'OF';

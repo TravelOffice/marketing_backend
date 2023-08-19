@@ -1,6 +1,8 @@
 import { helper } from 'core';
 import { PostRating } from '../models/PostRating';
-import { marketplaceUserRepository, postRatingRepository, tourPostRepository } from '../repositories';
+import {
+  marketplaceUserRepository, offerRepository, postRatingRepository, tourPostRepository,
+} from '../repositories';
 import { CreatePostRatingUseCase } from './interfaces/CreatePostRatingUseCase';
 import { CognitoUser } from '../models/CognitoUser';
 import { CreatePostRatingDto } from '../dto/CreatePostRatingDto';
@@ -8,12 +10,12 @@ import { RATING_INDEX } from '../utils/constants';
 
 export default class CreatePostRatingUseCaseImpl implements CreatePostRatingUseCase {
   /**
-   * Creates a rating on a tour post by the current marketplace user.
+   * Create a new post rating for a tour post.
    *
-   * @param {CognitoUser} currentUser - The current authenticated user.
-   * @param {string} tourPostId - The ID of the tour post for which the rating is being created.
-   * @param {CreatePostRatingDto} createRatingDto - The data for creating the rating.
-   * @returns {Promise<PostRating>} - A promise resolving to the created post rating.
+   * @param {CognitoUser} currentUser - The current user.
+   * @param {string} tourPostId - The ID of the tour post.
+   * @param {CreatePostRatingDto} createRatingDto - Data for creating the post rating.
+   * @returns {Promise<PostRating>} - A promise that resolves with the newly created post rating.
    */
   invoke = async (
     currentUser: CognitoUser,
@@ -30,13 +32,21 @@ export default class CreatePostRatingUseCaseImpl implements CreatePostRatingUseC
       throw new Error('Marketplace user not found');
     }
 
-    // Retrieve the tour post form the repository
+    // Retrieve the tour post from the repository
     const tourPost = await tourPostRepository.getById(tourPostId);
     if (!tourPost) {
       throw new Error('Tour post not found');
     }
 
-    // TODO: Check current user ordered in this post successfully
+    // Retrieve success offers of the author for the tour post
+    const successOffers = await offerRepository.listSuccessOfferByPostAndAuthor(
+      tourPostId,
+      marketplaceUserId,
+    );
+
+    if (!successOffers.length) {
+      throw new Error("You don't have permission to do this action");
+    }
 
     // Get the current timestamp
     const now = Date.now();
