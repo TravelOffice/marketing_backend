@@ -6,5 +6,5 @@ export interface PostRating extends BaseDdbModel {
   description?: string, // Description of the tour post
   tourPostId: string, // The ID of the tour post
   authorId: string, // Alias id of marketplace user that is auto-generated or set by user
-  organizationId: string // The ID of the organization
+  organization: string // The ID of the organization
 }

@@ -21,22 +21,22 @@ export default function validate(req: Request) {
 
 export function createCommentValidator() {
   return [
-    param('id').notEmpty().withMessage('Tour Post ID is required'),
+    param('id').notEmpty().withMessage('is required'),
     body('description')
       .isString()
       .notEmpty()
-      .withMessage('Description must be not empty'),
+      .withMessage('must be not empty'),
   ];
 }
 
 export function updateCommentValidator() {
   return [
-    param('id').notEmpty().withMessage('Tour Post ID is required'),
-    param('commentId').notEmpty().withMessage('Post Comment ID is required'),
+    param('id').notEmpty().withMessage('is required'),
+    param('commentId').notEmpty().withMessage('is required'),
     body('description').if(body('description').exists())
       .isString()
       .notEmpty()
-      .withMessage('description must be a string'),
+      .withMessage('must be a string'),
   ];
 }
 
@@ -56,10 +56,10 @@ export function getPostCommentListValidator() {
     query('limit')
       .optional()
       .isInt()
-      .withMessage('limit must be a number'),
+      .withMessage('must be a number'),
     query('sortDesc')
       .optional()
       .isBoolean()
-      .withMessage('sortDesc must be a boolean'),
+      .withMessage('must be a boolean'),
   ];
 }

@@ -14,14 +14,14 @@ export default class UpdateOrgFeedbackUseCaseImpl implements UpdateOrgFeedbackUs
    * Updates a post feedback by the current marketplace user.
    *
    * @param {CognitoUser} currentUser - The current authenticated user.
-   * @param {string} organizationId - The ID of the organization associated with the feedback.
+   * @param {string} organization - The ID of the organization associated with the feedback.
    * @param {string} feedbackId - The ID of the feedback to be updated.
    * @param {UpdateOrgFeedbackDto} updateOrgFeedbackDto - The data for updating the feedback.
    * @returns {Promise<OrgFeedback>} - A promise indicating the success of the update.
    */
   invoke = async (
     currentUser: CognitoUser,
-    organizationId: string,
+    organization: string,
     feedbackId: string,
     updateOrgFeedbackDto: UpdateOrgFeedbackDto,
   ): Promise<OrgFeedback> => {
@@ -39,7 +39,7 @@ export default class UpdateOrgFeedbackUseCaseImpl implements UpdateOrgFeedbackUs
     const currentUserId = marketplaceUser.id;
 
     // Retrieve the feedback to be updated
-    const feedback = await orgFeedbackRepository.get(organizationId, feedbackId);
+    const feedback = await orgFeedbackRepository.get(organization, feedbackId);
     if (!feedback) {
       throw new Error('Organization feedback not found');
     }
@@ -60,7 +60,7 @@ export default class UpdateOrgFeedbackUseCaseImpl implements UpdateOrgFeedbackUs
 
     // Update the feedback using the repository
     const updatedFeedback = await orgFeedbackRepository.update(
-      organizationId,
+      organization,
       feedbackId,
       updatingOrgFeedbackData,
     );

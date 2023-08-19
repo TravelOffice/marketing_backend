@@ -106,14 +106,14 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
    * Lists all tour posts for the specified organization.
    * This method is used for organization admin to get all posts of the organization.
    * @param currentUserId - The ID of the current user
-   * @param organizationId - The ID of the organization.
+   * @param organization - The ID of the organization.
    * @param {PaginationParams} paginationParams - The pagination settings.
    * @returns {Promise<PaginationResponsePayload<TourPost> | undefined>}
    * A promise resolving to a paginated response.
    */
   listByOrganization = async (
     currentUserId: string,
-    organizationId: string,
+    organization: string,
     paginationParams: PaginationParams,
   ) => {
     // Prepare query params
@@ -124,7 +124,7 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
       KeyConditionExpression: 'pk = :pk and begins_with(lsi1, :lsi1_filter)',
       ExpressionAttributeValues: {
         ':pk': POST_INDEX,
-        ':lsi1_filter': `${organizationId}#`,
+        ':lsi1_filter': `${organization}#`,
       },
     };
 
@@ -206,7 +206,7 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
   };
 
   /**
-   * Retrieves a tour post by its ID and tenant ID.
+   * Retrieves a tour post by its ID
    *
    * @param id - The ID of the tour post.
    * @returns A Promise that resolves to the retrieved tour post, or undefined if not found.
@@ -272,7 +272,7 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
   };
 
   /**
-   * Retrieves a bookmarked item by its ID and tenant ID.
+   * Retrieves a bookmarked item by its ID.
    * Bookmarked item only contains userId and tourPostId not the whole tour post.
    *
    * @param userId User id

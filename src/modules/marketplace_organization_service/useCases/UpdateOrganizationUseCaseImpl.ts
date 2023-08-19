@@ -22,7 +22,7 @@ export default class UpdateOrganizationUseCaseImpl implements UpdateOrganization
    * Invokes the UpdateOrganizationUseCase to update a organization.
    *
    * @param currentUser - The current user invoking the use case.
-   * @param organizationId - The ID of the organization to update.
+   * @param id - The ID of the organization to update.
    * @param updateOrganizationDto - The DTO (data transfer object) containing the
    * updated organization data.
    * @returns A Promise that resolves to the updated organization.
@@ -30,17 +30,17 @@ export default class UpdateOrganizationUseCaseImpl implements UpdateOrganization
    */
   async invoke(
     currentUser: CognitoUser,
-    organizationId: string,
+    id: string,
     updateOrganizationDto: UpdateOrganizationDto,
   ): Promise<Organization> {
-    if (currentUser.tenant !== organizationId) throw new Error('The organization is not associated with the current tenant');
-    const currentOrganization = await organizationRepository.get(organizationId);
-    if (!currentOrganization) throw new Error(`Could not found organization ${organizationId}`);
+    if (currentUser.tenant !== id) throw new Error('The organization is not associated with the current tenant');
+    const currentOrganization = await organizationRepository.get(id);
+    if (!currentOrganization) throw new Error(`Could not found organization ${id}`);
     const dataToUpdate = await this.buildDataToUpdate({
-      currentOrganization, currentUser, organizationId, updateOrganizationDto,
+      currentOrganization, currentUser, id, updateOrganizationDto,
     });
     const organization = await organizationRepository.update(
-      organizationId,
+      id,
       dataToUpdate,
     );
     return helper.excludeDataFromObject(organization) as Organization;
@@ -54,7 +54,7 @@ export default class UpdateOrganizationUseCaseImpl implements UpdateOrganization
    */
   async buildDataToUpdate(options: {
     currentUser: CognitoUser,
-    organizationId: string,
+    id: string,
     currentOrganization: Organization,
     updateOrganizationDto: UpdateOrganizationDto,
   }): Promise<Partial<Organization>> {

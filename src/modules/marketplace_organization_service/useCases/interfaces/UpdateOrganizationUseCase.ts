@@ -5,7 +5,7 @@ import { CognitoUser } from '../../models/CognitoUser';
 export interface UpdateOrganizationUseCase {
   invoke(
     currentUser: CognitoUser,
-    organizationId: string,
+    id: string,
     updateOrganizationDto: UpdateOrganizationDto,
   ): Promise<Organization>,
 }

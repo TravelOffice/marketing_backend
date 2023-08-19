@@ -18,17 +18,17 @@ export default class MarketplaceUserRepositoryImpl implements MarketplaceUserRep
 
   /**
    * Method to get all users belong to Tenant except ROOT account
-   * @param tenantId The id of the Tenant which the user should belong to
+   * @param organization The id of the Organization which the user should belong to
    * @returns Promise<Array<MarketplaceUser>> The list of users
    */
-  list = async (tenantId: string) => {
+  list = async (organization: string) => {
     const table = await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE');
     const params: QueryInput = {
       TableName: table,
       KeyConditionExpression: 'pk = :pk AND begins_with(sk, :sk_filter)',
       ExpressionAttributeValues: {
         ':pk': USER_INDEX,
-        ':sk_filter': `${tenantId}#`,
+        ':sk_filter': `${organization}#`,
         ':root_role': ROOT_ROLE,
       },
       FilterExpression: 'not contains(roleStr, :root_role)',
@@ -50,7 +50,7 @@ export default class MarketplaceUserRepositoryImpl implements MarketplaceUserRep
     const sk = `${user.tenant}#${user.username}`;
     const now = Date.now();
     const marketplaceUser = {
-      tenant: user.tenant,
+      organization: user.tenant,
       username: user.username,
       name: `${user.lastName} ${user.firstName}`,
       id: sk,
@@ -62,7 +62,7 @@ export default class MarketplaceUserRepositoryImpl implements MarketplaceUserRep
       enabled: true,
       createdAt: now,
       updatedAt: now,
-    };
+    } as MarketplaceUser;
 
     // Add the Marketplace user to the DynamoDB table
     await dynamoProvider.putItem(table, pk, sk, marketplaceUser);

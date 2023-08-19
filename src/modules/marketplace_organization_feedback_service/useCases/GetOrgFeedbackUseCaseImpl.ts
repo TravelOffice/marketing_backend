@@ -7,14 +7,14 @@ export default class GetOrgFeedbackUseCaseImpl implements GetOrgFeedbackUseCase 
   /**
    * Retrieves a specific feedback by its ID and the associated organization ID.
    *
-   * @param {string} organizationId - The ID of the organization associated with the feedback.
+   * @param {string} organization - The ID of the organization associated with the feedback.
    * @param {string} feedbackId - The ID of the feedback to be retrieved.
    * @returns {Promise<OrgFeedback | undefined>} - A promise resolving to the retrieved feedback
    * or undefined if not found.
    */
-  invoke = async (organizationId: string, feedbackId: string): Promise<OrgFeedback | undefined> => {
+  invoke = async (organization: string, feedbackId: string): Promise<OrgFeedback | undefined> => {
     // Retrieve the feedback using orgFeedbackRepository.get
-    const feedback = await orgFeedbackRepository.get(organizationId, feedbackId);
+    const feedback = await orgFeedbackRepository.get(organization, feedbackId);
 
     // Check if the comment exists
     if (!feedback) {

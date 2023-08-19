@@ -52,7 +52,7 @@ export default class CreatePostRatingUseCaseImpl implements CreatePostRatingUseC
       code: ratingIndex,
       authorId: marketplaceUserId,
       tourPostId,
-      organizationId: tourPost.tenant,
+      organization: tourPost.organization,
       createdAt,
       updatedAt,
       // Local secondary index with format <tenant>#<username>

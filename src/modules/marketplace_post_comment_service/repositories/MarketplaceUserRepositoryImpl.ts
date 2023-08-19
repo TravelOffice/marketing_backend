@@ -1,5 +1,5 @@
 import { getAwsSecretValue } from 'get-env';
-import { QueryInput, dynamoProvider, helper } from 'core';
+import { dynamoProvider, helper, QueryInput } from 'core';
 import { MarketplaceUser } from '../models/MarketplaceUser';
 import { MarketplaceUserRepository } from './interfaces/MarketplaceUserRepository';
 import { MARKETPLACE_USER_INDEX } from '../utils/constants';

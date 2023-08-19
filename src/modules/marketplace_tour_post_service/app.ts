@@ -50,7 +50,7 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
   next();
 });
 
-app.get('/marketplace/posts/me', getSelfPostsValidator(), async (req: Request, res: Response) => {
+app.get('/marketplace/me/posts', getSelfPostsValidator(), async (req: Request, res: Response) => {
   validate(req);
   try {
     const currentUser = getCurrentUserInfo(req.headers.authorization!);

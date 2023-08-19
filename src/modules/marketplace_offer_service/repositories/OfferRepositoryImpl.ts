@@ -97,13 +97,13 @@ export default class OfferRepositoryImpl implements OfferRepository {
   /**
    * Retrieves a paginated list of sent offers of a specific organization with all statuses.
    *
-   * @param {string} organizationId - The ID of the organization for which to retrieve offers.
+   * @param {string} organization - The ID of the organization for which to retrieve offers.
    * @param {PaginationParams} paginationParams - The parameters for pagination.
    * @returns {Promise<PaginationResponsePayload<Offer> | undefined>}
    * - A promise resolving to the paginated list of sent offers or undefined if not found.
    */
   listSentOffersOfOrganization = async (
-    organizationId: string,
+    organization: string,
     paginationParams: PaginationParams,
   ): Promise<PaginationResponsePayload<Offer> | undefined> => {
     // Prepare the query parameters
@@ -113,7 +113,7 @@ export default class OfferRepositoryImpl implements OfferRepository {
       KeyConditionExpression: 'pk = :pk AND begins_with(lsi1, :lsi_filter_value)',
       ExpressionAttributeValues: {
         ':pk': OFFER_INDEX,
-        ':lsi_filter_value': organizationId,
+        ':lsi_filter_value': organization,
       },
     };
 
@@ -125,14 +125,14 @@ export default class OfferRepositoryImpl implements OfferRepository {
    * Retrieves a paginated list of sent offers of a specific organization
    * and a specific status.
    *
-   * @param {string} organizationId - The ID of the organization for which to retrieve offers.
+   * @param {string} organization - The ID of the organization for which to retrieve offers.
    * @param {string} offerStatus - The status of the offer.
    * @param {PaginationParams} paginationParams - The parameters for pagination.
    * @returns {Promise<PaginationResponsePayload<Offer> | undefined>}
    * - A promise resolving to the paginated list of sent offers or undefined if not found.
    */
   listSentOffersOfOrganizationByOfferStatus = async (
-    organizationId: string,
+    organization: string,
     offerStatus: OfferStatus,
     paginationParams: PaginationParams,
   ): Promise<PaginationResponsePayload<Offer> | undefined> => {
@@ -142,7 +142,7 @@ export default class OfferRepositoryImpl implements OfferRepository {
       IndexName: 'Index2',
       KeyConditionExpression: 'pk = :pk AND lsi2 = :lsi2_filter_value',
       ExpressionAttributeValues: {
-        ':pk': `${ORGANIZATION_INDEX}#${organizationId}#${OFFER_INDEX}`,
+        ':pk': `${ORGANIZATION_INDEX}#${organization}#${OFFER_INDEX}`,
         ':lsi2_filter_value': `${OFFER_INDEX}#${offerStatus}`,
       },
     };
@@ -154,13 +154,13 @@ export default class OfferRepositoryImpl implements OfferRepository {
   /**
    * Retrieves a paginated list of received offers of a specific organization.
    *
-   * @param {string} organizationId - The ID of the organization for which to retrieve offers.
+   * @param {string} organization - The ID of the organization for which to retrieve offers.
    * @param {PaginationParams} paginationParams - The parameters for pagination.
    * @returns {Promise<PaginationResponsePayload<Offer> | undefined>}
    * - A promise resolving to the paginated list of received offers or undefined if not found.
    */
   listReceivedOffersOfOrganization = async (
-    organizationId: string,
+    organization: string,
     paginationParams: PaginationParams,
   ): Promise<PaginationResponsePayload<Offer> | undefined> => {
     // Prepare the query parameters
@@ -170,7 +170,7 @@ export default class OfferRepositoryImpl implements OfferRepository {
       KeyConditionExpression: 'pk = :pk AND begins_with(lsi4, :lsi_filter_value)',
       ExpressionAttributeValues: {
         ':pk': OFFER_INDEX,
-        ':lsi_filter_value': `${organizationId}#`,
+        ':lsi_filter_value': `${organization}#`,
       },
     };
 

@@ -22,19 +22,19 @@ implements GetSentOffersOfOrgUseCase {
     paginationParams: PaginationParams,
   ): Promise<PaginationResponsePayload<Offer> | undefined> => {
     // Extract necessary information from the current user
-    const { tenant: organizationId } = currentUser;
+    const { tenant: organization } = currentUser;
 
     // If the offer status is valid, retrieve the list of offers send from organization by status
     if (OfferStatusTypes.includes(offerStatus)) {
       return offerRepository.listSentOffersOfOrganizationByOfferStatus(
-        organizationId,
+        organization,
         offerStatus,
         paginationParams,
       );
     }
     // Otherwise, retrieve the list of offers send from organization with all statuses
     return offerRepository.listSentOffersOfOrganization(
-      organizationId,
+      organization,
       paginationParams,
     );
   };

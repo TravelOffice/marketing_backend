@@ -20,10 +20,10 @@ implements GetReceivedOffersOfOrgUseCase {
     paginationParams: PaginationParams,
   ): Promise<PaginationResponsePayload<Offer> | undefined> => {
     // Extract necessary information from the current user
-    const { tenant: organizationId } = currentUser;
+    const { tenant: organization } = currentUser;
 
     return offerRepository.listReceivedOffersOfOrganization(
-      organizationId,
+      organization,
       paginationParams,
     );
   };

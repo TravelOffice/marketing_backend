@@ -21,8 +21,8 @@ export default class RejectOfferUseCaseImpl implements RejectOfferUseCase {
     rejectReason: string,
   ): Promise<Offer> => {
     // Extract necessary information from the current user
-    const { tenant: organizationId, username } = currentUser;
-    const marketplaceUserId = `${organizationId}#${username}`;
+    const { tenant: organization, username } = currentUser;
+    const marketplaceUserId = `${organization}#${username}`;
 
     // Retrieve the offer to be rejected
     const offer = await offerRepository.get(offerId);

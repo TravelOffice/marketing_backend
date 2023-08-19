@@ -12,7 +12,7 @@ export enum LANGUAGES_TYPE {
 
 export interface MarketplaceUser extends BaseDdbModel {
   // Attributes from Travel Office TravelUser
-  tenant: string, // Tenant ID
+  organization: string, // Tenant ID
   username: string, // Username of the user in isolated tenant
   id: string, // Combination of tenant and username
   name: string, // Full name of the user

@@ -9,7 +9,7 @@ export interface TourPost extends BaseDdbModel {
   type: TourPostType, // Type of the tour post, can be 'BUY' or 'SELL'
   // Lead code or tour template code of the tenant that this tour post is linked to
   linkedToTarget?: string,
-  tenant: string, // Tenant ID
+  organization: string, // The ID of organization
   authorId: string, // Alias id of marketplace user that is auto-generated or set by user
   status: TourPostStatus, // Status of the tour post
   expiry?: number, // Expiry time of the tour post. If undefined, the post will never expire

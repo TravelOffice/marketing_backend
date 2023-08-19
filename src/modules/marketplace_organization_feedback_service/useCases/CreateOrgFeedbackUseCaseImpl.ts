@@ -10,13 +10,13 @@ export default class CreateOrgFeedbackUseCaseImpl implements CreateOrgFeedbackUs
    * Creates a feedback on a organization by the current marketplace user.
    *
    * @param {CognitoUser} currentUser - The current authenticated user.
-   * @param organizationId
+   * @param organization
    * @param {CreateOrgFeedbackDto} createOrgFeedbackDto - The data for creating the feedback.
    * @returns {Promise<OrgFeedback>} - A promise resolving to the created post feedback.
    */
   invoke = async (
     currentUser: CognitoUser,
-    organizationId: string,
+    organization: string,
     createOrgFeedbackDto: CreateOrgFeedbackDto,
   ): Promise<OrgFeedback> => {
     // Extract necessary information from the current user
@@ -42,7 +42,7 @@ export default class CreateOrgFeedbackUseCaseImpl implements CreateOrgFeedbackUs
       ...createOrgFeedbackDto,
       code: feedbackIndex,
       authorId: marketplaceUserId,
-      organizationId,
+      organization,
       createdAt,
       updatedAt,
       // Local secondary index with format <tenant>#<username>

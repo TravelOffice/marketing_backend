@@ -23,29 +23,29 @@ export default class OrganizationRepositoryImpl implements OrganizationRepositor
   /**
    * Retrieves an organization by tenant ID.
    *
-   * @param tenantId - The ID of the tenant.
+   * @param id - The ID of the tenant.
    * @returns A Promise that resolves to the retrieved organization, or undefined if not found.
    */
-  async get(tenantId: string): Promise<Organization | undefined> {
+  async get(id: string): Promise<Organization | undefined> {
     return dynamoProvider.getItem<Organization>(
       await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE'),
       ORGANIZATION_INDEX,
-      tenantId,
+      id,
     );
   }
 
   /**
    * Creates a new organization for the specified tenant.
    *
-   * @param tenantId - The ID of the tenant.
+   * @param id - The ID of the tenant.
    * @param organization - The organization object to create.
    * @returns A Promise that resolves to the created organization.
    */
-  async create(tenantId: string, organization: Organization): Promise<Organization> {
+  async create(id: string, organization: Organization): Promise<Organization> {
     await dynamoProvider.putItem(
       await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE'),
       ORGANIZATION_INDEX,
-      tenantId,
+      id,
       organization,
     );
     return organization;
@@ -54,12 +54,12 @@ export default class OrganizationRepositoryImpl implements OrganizationRepositor
   /**
    * Updates an organization for the specified tenant.
    *
-   * @param tenantId - The ID of the tenant.
+   * @param id - The ID of the tenant.
    * @param organization - The partial organization object with the updated fields.
    * @returns A Promise that resolves to the updated organization.
    */
   async update(
-    tenantId: string,
+    id: string,
     organization: Partial<Organization>,
   ): Promise<Organization> {
     const expressionNamesAndValues = helper.generateUpdateExpressionNamesAndValues(organization);
@@ -67,7 +67,7 @@ export default class OrganizationRepositoryImpl implements OrganizationRepositor
       TableName: await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE'),
       Key: {
         pk: ORGANIZATION_INDEX,
-        sk: tenantId,
+        sk: id,
       },
       UpdateExpression: helper.generateUpdateExpression(organization),
       ReturnValues: 'ALL_NEW',
@@ -80,14 +80,14 @@ export default class OrganizationRepositoryImpl implements OrganizationRepositor
   /**
    * Deletes an organization for the specified tenant.
    *
-   * @param tenantId - The ID of the tenant.
+   * @param id - The ID of the tenant.
    * @returns A Promise that resolves when the deletion is complete.
    */
-  async delete(tenantId: string): Promise<void> {
+  async delete(id: string): Promise<void> {
     await dynamoProvider.deleteItem(
       await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE'),
       ORGANIZATION_INDEX,
-      tenantId,
+      id,
     );
   }
 }

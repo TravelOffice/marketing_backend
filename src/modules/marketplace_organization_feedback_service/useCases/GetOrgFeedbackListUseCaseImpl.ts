@@ -6,15 +6,15 @@ export default class GetOrgFeedbackListUseCaseImpl implements GetOrgFeedbackList
   /**
    * Retrieves the list feedback of the organization by the associated the organization ID.
    *
-   * @param organizationId - The ID of organization.
+   * @param organization - The ID of organization.
    * @param paginationParams
    * @returns A Promise that resolves to an array of feedback.
    */
   invoke = async (
-    organizationId: string,
+    organization: string,
     paginationParams: PaginationParams,
   ) => orgFeedbackRepository.listByOrg(
-    organizationId,
+    organization,
     paginationParams,
   );
 }

@@ -28,7 +28,7 @@ export default class UpdatePostRatingUseCaseImpl implements UpdatePostRatingUseC
     const marketplaceUserId = `${tenant}#${username}`;
 
     // Extract necessary information from updateRatingDto
-    const { code: ratingId, tourPostId, organizationId } = updateRatingDto;
+    const { code: ratingId, tourPostId, organization } = updateRatingDto;
 
     // Retrieve the marketplace user from the repository
     const marketplaceUser = await marketplaceUserRepository.getById(marketplaceUserId);
@@ -40,7 +40,7 @@ export default class UpdatePostRatingUseCaseImpl implements UpdatePostRatingUseC
     const currentUserId = marketplaceUser.id;
 
     // Retrieve the rating to be updated
-    const rating = await postRatingRepository.get(organizationId, tourPostId, ratingId);
+    const rating = await postRatingRepository.get(organization, tourPostId, ratingId);
     if (!rating) {
       throw new Error('Tour rating not found');
     }
@@ -61,7 +61,7 @@ export default class UpdatePostRatingUseCaseImpl implements UpdatePostRatingUseC
 
     // Update the rating using the repository
     const updatedPostRating = await postRatingRepository.update(
-      organizationId,
+      organization,
       tourPostId,
       ratingId,
       updatingRatingData,

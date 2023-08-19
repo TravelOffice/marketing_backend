@@ -7,13 +7,13 @@ export default class DeleteOrgFeedbackUseCaseImpl implements DeleteOrgFeedbackUs
    * Deletes a post feedback by the current marketplace user.
    *
    * @param {CognitoUser} currentUser - The current authenticated user.
-   * @param organizationId - The ID of organization.
+   * @param organization - The ID of organization.
    * @param {string} feedbackId - The ID of the feedback to be deleted.
    * @returns {Promise<void>} - A promise indicating the success of the deletion.
    */
   invoke = async (
     currentUser: CognitoUser,
-    organizationId: string,
+    organization: string,
     feedbackId: string,
   ): Promise<void> => {
     // Extract necessary information from the current user
@@ -30,7 +30,7 @@ export default class DeleteOrgFeedbackUseCaseImpl implements DeleteOrgFeedbackUs
     const currentUserId = marketplaceUser.id;
 
     // Retrieve the feedback to be deleted
-    const feedback = await orgFeedbackRepository.get(organizationId, feedbackId);
+    const feedback = await orgFeedbackRepository.get(organization, feedbackId);
     if (!feedback) {
       throw new Error('Organization Feedback not found');
     }
@@ -41,6 +41,6 @@ export default class DeleteOrgFeedbackUseCaseImpl implements DeleteOrgFeedbackUs
     }
 
     // Delete the feedback using the repository
-    await orgFeedbackRepository.delete(organizationId, feedbackId);
+    await orgFeedbackRepository.delete(organization, feedbackId);
   };
 }

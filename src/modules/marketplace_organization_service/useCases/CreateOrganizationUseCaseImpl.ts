@@ -4,7 +4,6 @@ import { organizationRepository } from '../repositories';
 import { CreateOrganizationUseCase } from './interfaces/CreateOrganizationUseCase';
 import { CognitoUser } from '../models/CognitoUser';
 import { CreateOrganizationDto } from '../dto/CreateOrganizationDto';
-import { CREATED_AT_INDEX, CREATOR_INDEX, UPDATED_AT_INDEX } from '../utils/constants';
 
 export default class CreateOrganizationUseCaseImpl implements CreateOrganizationUseCase {
   /**
@@ -54,9 +53,9 @@ export default class CreateOrganizationUseCaseImpl implements CreateOrganization
       updatedAt: now,
       creatorId,
       creatorName,
-      lsi1: `${CREATED_AT_INDEX}#${now}`, // createdAt lsi
-      lsi2: `${UPDATED_AT_INDEX}#${now}`, // updatedAt lsi
-      lsi4: `${CREATOR_INDEX}#${creatorId}`, // creatorId lsi
+      lsi1: `${now}`, // createdAt lsi
+      lsi2: `${now}`, // updatedAt lsi
+      lsi4: `${creatorId}`, // creatorId lsi
     };
   }
 }
