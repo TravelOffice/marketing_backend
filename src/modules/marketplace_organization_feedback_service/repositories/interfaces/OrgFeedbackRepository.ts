@@ -3,17 +3,17 @@ import { OrgFeedback } from '../../models/OrgFeedback';
 
 export interface OrgFeedbackRepository {
   listByOrg(
-    organizationId: string,
+    organization: string,
     paginationParams: PaginationParams,
   ): Promise<PaginationResponsePayload<OrgFeedback> | undefined>,
 
   create(comment: OrgFeedback): Promise<OrgFeedback>,
 
-  get(organizationId: string, id: string): Promise<OrgFeedback | undefined>,
+  get(organization: string, id: string): Promise<OrgFeedback | undefined>,
 
-  update(organizationId: string, id: string, feedback: Partial<OrgFeedback>): Promise<OrgFeedback>,
+  update(organization: string, id: string, feedback: Partial<OrgFeedback>): Promise<OrgFeedback>,
 
-  delete(organizationId: string, id: string): Promise<void>,
+  delete(organization: string, id: string): Promise<void>,
 
   generateCode(): Promise<string>,
 }

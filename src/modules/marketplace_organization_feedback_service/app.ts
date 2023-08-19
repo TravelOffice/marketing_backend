@@ -40,9 +40,9 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
 app.get('/marketplace/organizations/:id/feedback', getOrgFeedbackListValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
-    const { id: organizationId } = req.params;
+    const { id: organization } = req.params;
     const feedback = await getOrgFeedbackListUseCase.invoke(
-      organizationId,
+      organization,
       req.query,
     );
     res.json(wrapResponse(SUCCESS, feedback));
@@ -55,9 +55,9 @@ app.get('/marketplace/organizations/:id/feedback', getOrgFeedbackListValidator()
 app.post('/marketplace/organizations/:id/feedback', createOrgFeedbackValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
-    const { id: organizationId } = req.params;
+    const { id: organization } = req.params;
     const currentUser = getCurrentUserInfo(req.headers.authorization!);
-    const comment = await createOrgFeedbackUseCase.invoke(currentUser, organizationId, req.body);
+    const comment = await createOrgFeedbackUseCase.invoke(currentUser, organization, req.body);
     res.json(wrapResponse(SUCCESS, comment));
   } catch (error: any) {
     logger.log(`[app.post] Error ${error}`);
@@ -67,8 +67,8 @@ app.post('/marketplace/organizations/:id/feedback', createOrgFeedbackValidator()
 
 app.get('/marketplace/organizations/:id/feedback/:feedbackId', async (req: Request, res: Response) => {
   try {
-    const { id: organizationId, feedbackId } = req.params;
-    const feedback = await getOrgFeedbackUseCase.invoke(organizationId, feedbackId);
+    const { id: organization, feedbackId } = req.params;
+    const feedback = await getOrgFeedbackUseCase.invoke(organization, feedbackId);
     res.json(wrapResponse(SUCCESS, feedback));
   } catch (error: any) {
     logger.log(`[app.get] Error ${error}`);
@@ -80,10 +80,10 @@ app.put('/marketplace/organizations/:id/feedback/:feedbackId', updateOrgFeedback
   try {
     validate(req);
     const currentUser = getCurrentUserInfo(req.headers.authorization!);
-    const { id: organizationId, feedbackId } = req.params;
+    const { id: organization, feedbackId } = req.params;
     const feedback = await updateOrgFeedbackUseCase.invoke(
       currentUser,
-      organizationId,
+      organization,
       feedbackId,
       req.body,
     );
@@ -96,9 +96,9 @@ app.put('/marketplace/organizations/:id/feedback/:feedbackId', updateOrgFeedback
 
 app.delete('/marketplace/organizations/:id/feedback/:feedbackId', async (req: Request, res: Response) => {
   try {
-    const { id: organizationId, feedbackId } = req.params;
+    const { id: organization, feedbackId } = req.params;
     const currentUser = getCurrentUserInfo(req.headers.authorization!);
-    await deleteOrgFeedbackUseCase.invoke(currentUser, organizationId, feedbackId);
+    await deleteOrgFeedbackUseCase.invoke(currentUser, organization, feedbackId);
     res.json(wrapResponse(SUCCESS, {}));
   } catch (error: any) {
     logger.log(`[app.delete] Error ${error}`);

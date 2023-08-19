@@ -5,7 +5,7 @@ import { CognitoUser } from '../../models/CognitoUser';
 export interface CreateOrgFeedbackUseCase {
   invoke(
     currentUser: CognitoUser,
-    organizationId: string,
+    organization: string,
     createCommentDto: CreateOrgFeedbackDto,
   ): Promise<OrgFeedback>,
 }

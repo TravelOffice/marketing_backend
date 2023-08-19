@@ -23,7 +23,7 @@ export default function validate(req: Request) {
 
 export function createOfferValidator() {
   return [
-    param('id').notEmpty().withMessage('Tour Post ID is required'),
+    param('id').notEmpty().withMessage('is required'),
     body('description')
       .optional()
       .isString()
@@ -42,7 +42,7 @@ export function createOfferValidator() {
 
 export function updateOfferValidator() {
   return [
-    param('id').notEmpty().withMessage('Offer ID is required'),
+    param('id').notEmpty().withMessage(' is required'),
     body('description')
       .optional()
       .isString()
@@ -87,15 +87,15 @@ export function getOfferListOfOrgValidator() {
           return false;
         }
       })
-      .withMessage('nextToken must be a JSON string'),
+      .withMessage('must be a JSON string'),
     query('limit')
       .optional()
       .isInt()
-      .withMessage('limit must be a number'),
+      .withMessage('must be a number'),
     query('sortDesc')
       .optional()
       .isBoolean()
-      .withMessage('sortDesc must be a boolean'),
+      .withMessage('must be a boolean'),
   ];
 }
 

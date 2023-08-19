@@ -24,19 +24,19 @@ export function createOrgFeedbackValidator() {
     body('description')
       .isString()
       .notEmpty()
-      .withMessage('Description must be not empty'),
+      .withMessage('must be not empty'),
   ];
 }
 
 export function updateOrgFeedbackValidator() {
   return [
-    param('id').notEmpty().withMessage('Organization ID is required'),
-    param('feedbackId').notEmpty().withMessage('Feedback ID is required'),
+    param('id').notEmpty().withMessage('is required'),
+    param('feedbackId').notEmpty().withMessage('is required'),
     body('description')
       .optional()
       .isString()
       .notEmpty()
-      .withMessage('Description must be a string'),
+      .withMessage('must be a string'),
   ];
 }
 
@@ -56,10 +56,10 @@ export function getOrgFeedbackListValidator() {
     query('limit')
       .optional()
       .isInt()
-      .withMessage('limit must be a number'),
+      .withMessage('must be a number'),
     query('sortDesc')
       .optional()
       .isBoolean()
-      .withMessage('sortDesc must be a boolean'),
+      .withMessage('must be a boolean'),
   ];
 }

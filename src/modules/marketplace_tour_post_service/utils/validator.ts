@@ -44,7 +44,7 @@ export function createTourPostValidator() {
       .isIn(tourPostTypes)
       .withMessage(`allow only in ${tourPostTypes}`),
 
-    body('linkedToTarget').notEmpty().withMessage('linkedLeadOfTenant is required and not be empty'),
+    body('linkedToTarget').notEmpty().withMessage('is required and not be empty'),
 
     body('expiry')
       .optional()
@@ -100,7 +100,7 @@ export function getSelfPostsValidator() {
           return false;
         }
       })
-      .withMessage('nextToken must be a JSON string'),
+      .withMessage('must be a JSON string'),
     query('limit').optional().isInt().withMessage('must be a number'),
     query('sortDesc').optional()
       .isBoolean()
@@ -128,7 +128,7 @@ export function getPostsValidator() {
         }
       })
       .withMessage('must be a JSON string'),
-    query('limit').optional().isInt().withMessage('limit must be a number'),
+    query('limit').optional().isInt().withMessage('must be a number'),
     query('sortDesc').optional()
       .isBoolean()
       .withMessage('must be a boolean'),
@@ -148,7 +148,7 @@ export function getBookmarkedOrFollowedPostsValidator() {
         }
       })
       .withMessage('must be a JSON string'),
-    query('limit').optional().isInt().withMessage('limit must be a number'),
+    query('limit').optional().isInt().withMessage('must be a number'),
     query('sortDesc').optional()
       .isBoolean()
       .withMessage('must be a boolean'),
@@ -157,12 +157,12 @@ export function getBookmarkedOrFollowedPostsValidator() {
 
 export function bookmarkPostValidator() {
   return [
-    param('postId').notEmpty().withMessage('postId is required'),
+    param('postId').notEmpty().withMessage('is required'),
   ];
 }
 
 export function followPostValidator() {
   return [
-    param('postId').notEmpty().withMessage('postId is required'),
+    param('postId').notEmpty().withMessage('is required'),
   ];
 }

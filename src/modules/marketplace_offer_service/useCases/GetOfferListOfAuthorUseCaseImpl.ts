@@ -18,8 +18,8 @@ export default class GetOfferListOfAuthorUseCaseImpl implements GetOfferListOfAu
     paginationParams: PaginationParams,
   ): Promise<PaginationResponsePayload<Offer> | undefined> => {
     // Extract necessary information from the current user
-    const { tenant: organizationId, username } = currentUser;
-    const marketplaceUserId = `${organizationId}#${username}`;
+    const { tenant: organization, username } = currentUser;
+    const marketplaceUserId = `${organization}#${username}`;
 
     // Retrieve the marketplace user from the repository
     const marketplaceUser = await marketplaceUserRepository.getById(marketplaceUserId);

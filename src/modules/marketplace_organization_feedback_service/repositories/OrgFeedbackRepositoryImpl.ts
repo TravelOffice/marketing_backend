@@ -14,17 +14,17 @@ export default class OrgFeedbackRepositoryImpl implements OrgFeedbackRepository 
   /**
    * Lists all feedback for the specified organization.
    *
-   * @param {string} organizationId - The ID of the organization.
+   * @param {string} organization - The ID of the organization.
    * @param {PaginationParams} paginationParams - The pagination settings.
    * @returns - A promise resolving to a paginated response.
    */
-  listByOrg = async (organizationId: string, paginationParams: PaginationParams) => {
+  listByOrg = async (organization: string, paginationParams: PaginationParams) => {
     const queryParams = {
       TableName: await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE'),
       IndexName: 'Index3', // CreatedAt LSI to get latest feedback
       KeyConditionExpression: 'pk = :pk',
       ExpressionAttributeValues: {
-        ':pk': `${ORGANIZATION_INDEX}#${organizationId}#${FEEDBACK_INDEX}`,
+        ':pk': `${ORGANIZATION_INDEX}#${organization}#${FEEDBACK_INDEX}`,
       },
     };
     return dynamoProvider.queryPagination(
@@ -36,13 +36,13 @@ export default class OrgFeedbackRepositoryImpl implements OrgFeedbackRepository 
   /**
    * Retrieves a feedback by its ID and organization ID.
    *
-   * @param organizationId - The ID of the organization.
+   * @param organization - The ID of the organization.
    * @param feedbackId - The ID of the feedback.
    * @returns A Promise that resolves to the retrieved feedback, or undefined if not found.
    */
-  get = async (organizationId: string, feedbackId: string) => dynamoProvider.getItem<OrgFeedback>(
+  get = async (organization: string, feedbackId: string) => dynamoProvider.getItem<OrgFeedback>(
     await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE'),
-    `${ORGANIZATION_INDEX}#${organizationId}#${FEEDBACK_INDEX}`,
+    `${ORGANIZATION_INDEX}#${organization}#${FEEDBACK_INDEX}`,
     feedbackId,
   );
 
@@ -55,7 +55,7 @@ export default class OrgFeedbackRepositoryImpl implements OrgFeedbackRepository 
   create = async (feedback: OrgFeedback) => {
     await dynamoProvider.putItem(
       await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE'),
-      `${ORGANIZATION_INDEX}#${feedback.organizationId}#${FEEDBACK_INDEX}`,
+      `${ORGANIZATION_INDEX}#${feedback.organization}#${FEEDBACK_INDEX}`,
       `${feedback.code}`,
       feedback,
     );
@@ -65,13 +65,13 @@ export default class OrgFeedbackRepositoryImpl implements OrgFeedbackRepository 
   /**
    * Updates a feedback for the specified organization.
    *
-   * @param organizationId - The ID of the organization.
+   * @param organization - The ID of the organization.
    * @param feedbackId - The ID of the feedback to update.
    * @param feedback - The partial feedback object with the updated fields.
    * @returns A Promise that resolves to the updated feedback.
    */
   update = async (
-    organizationId: string,
+    organization: string,
     feedbackId: string,
     feedback: Partial<OrgFeedback>,
   ) => {
@@ -79,7 +79,7 @@ export default class OrgFeedbackRepositoryImpl implements OrgFeedbackRepository 
     const result = await dynamoProvider.rawUpdateItem({
       TableName: await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE'),
       Key: {
-        pk: `${ORGANIZATION_INDEX}#${organizationId}#${FEEDBACK_INDEX}`,
+        pk: `${ORGANIZATION_INDEX}#${organization}#${FEEDBACK_INDEX}`,
         sk: feedbackId,
       },
       UpdateExpression: helper.generateUpdateExpression(feedback),
@@ -93,14 +93,14 @@ export default class OrgFeedbackRepositoryImpl implements OrgFeedbackRepository 
   /**
    * Deletes a feedback for the specified organization.
    *
-   * @param organizationId
+   * @param organization
    * @param feedbackId - The ID of the feedback to delete.
    * @returns A Promise that resolves when the deletion is complete.
    */
-  delete = async (organizationId: string, feedbackId: string) => {
+  delete = async (organization: string, feedbackId: string) => {
     await dynamoProvider.deleteItem(
       await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE'),
-      `${ORGANIZATION_INDEX}#${organizationId}#${FEEDBACK_INDEX}`,
+      `${ORGANIZATION_INDEX}#${organization}#${FEEDBACK_INDEX}`,
       feedbackId,
     );
   };

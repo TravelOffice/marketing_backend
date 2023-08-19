@@ -11,16 +11,16 @@ export default class PostRatingRepositoryImpl implements PostRatingRepository {
   /**
    * Lists all ratings for the specified tour post.
    *
-   * @param organizationId The ID of the organization
+   * @param organization The ID of the organization
    * @param tourPostId - The ID of the post.
    * @returns A promise resolving to a array of PostRating object.
    */
-  async listByPost(organizationId: string, tourPostId: string): Promise<PostRating[]> {
+  async listByPost(organization: string, tourPostId: string): Promise<PostRating[]> {
     return dynamoProvider.query({
       TableName: await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE'),
       KeyConditionExpression: 'pk = :pk AND begins_with(sk, :sk_filter_value)',
       ExpressionAttributeValues: {
-        ':pk': `${ORGANIZATION_INDEX}#${organizationId}#${RATING_INDEX}`,
+        ':pk': `${ORGANIZATION_INDEX}#${organization}#${RATING_INDEX}`,
         ':sk_filter_value': `${tourPostId}#`,
       },
     });
@@ -29,19 +29,19 @@ export default class PostRatingRepositoryImpl implements PostRatingRepository {
   /**
    * Retrieves a rating by its ID and tour post ID.
    *
-   * @param organizationId The ID of the organization
+   * @param organization The ID of the organization
    * @param tourPostId - The ID of the post.
    * @param id - The ID of the rating.
    * @returns A Promise that resolves to the retrieved rating, or undefined if not found.
    */
   async get(
-    organizationId: string,
+    organization: string,
     tourPostId: string,
     id: string,
   ): Promise<PostRating | undefined> {
     return dynamoProvider.getItem<PostRating>(
       await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE'),
-      `${ORGANIZATION_INDEX}#${organizationId}#${RATING_INDEX}`,
+      `${ORGANIZATION_INDEX}#${organization}#${RATING_INDEX}`,
       `${tourPostId}#${id}`,
     );
   }
@@ -55,7 +55,7 @@ export default class PostRatingRepositoryImpl implements PostRatingRepository {
   async create(rating: PostRating): Promise<PostRating> {
     await dynamoProvider.putItem(
       await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE'),
-      `${ORGANIZATION_INDEX}#${rating.organizationId}#${RATING_INDEX}`,
+      `${ORGANIZATION_INDEX}#${rating.organization}#${RATING_INDEX}`,
       `${rating.tourPostId}#${rating.code}`,
       rating,
     );
@@ -65,14 +65,14 @@ export default class PostRatingRepositoryImpl implements PostRatingRepository {
   /**
    * Updates a rating for the specified post.
    *
-   * @param organizationId The ID of the organization
+   * @param organization The ID of the organization
    * @param tourPostId The ID of the tour post
    * @param id - The ID of the rating to update.
    * @param rating - The partial rating object with the updated fields.
    * @returns A Promise that resolves to the updated rating.
    */
   async update(
-    organizationId: string,
+    organization: string,
     tourPostId: string,
     id: string,
     rating: Partial<PostRating>,
@@ -81,7 +81,7 @@ export default class PostRatingRepositoryImpl implements PostRatingRepository {
     const result = await dynamoProvider.rawUpdateItem({
       TableName: await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE'),
       Key: {
-        pk: `${ORGANIZATION_INDEX}#${organizationId}#${RATING_INDEX}`,
+        pk: `${ORGANIZATION_INDEX}#${organization}#${RATING_INDEX}`,
         sk: `${tourPostId}#${id}`,
       },
       UpdateExpression: helper.generateUpdateExpression(rating),
@@ -95,15 +95,15 @@ export default class PostRatingRepositoryImpl implements PostRatingRepository {
   /**
    * Deletes a rating for the specified tour post.
    *
-   * @param organizationId The ID of organization
+   * @param organization The ID of organization
    * @param tourPostId The ID of tourPosId
    * @param id - The ID of the rating to delete.
    * @returns A Promise that resolves when the deletion is complete.
    */
-  async delete(organizationId: string, tourPostId: string, id: string): Promise<void> {
+  async delete(organization: string, tourPostId: string, id: string): Promise<void> {
     await dynamoProvider.deleteItem(
       await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE'),
-      `${ORGANIZATION_INDEX}#${organizationId}#${RATING_INDEX}`,
+      `${ORGANIZATION_INDEX}#${organization}#${RATING_INDEX}`,
       `${tourPostId}#${id}`,
     );
   }
@@ -129,14 +129,14 @@ export default class PostRatingRepositoryImpl implements PostRatingRepository {
   /**
    * List post ratings for a specific organization, potentially filtered by star rating.
    *
-   * @param {string} organizationId - The ID of the organization.
+   * @param {string} organization - The ID of the organization.
    * @param {PaginationParams} paginationParams - Parameters for pagination.
    * @param {string} numberStar - Optional. The star rating to filter by.
    * @returns {Promise<PaginationResponsePayload<PostRating> | undefined>}
    * - A promise that resolves with the paginated list of post ratings or undefined.
    */
   listByOrganization = async (
-    organizationId: string,
+    organization: string,
     paginationParams: PaginationParams,
     numberStar?: string,
   ): Promise<PaginationResponsePayload<PostRating> | undefined> => {
@@ -146,7 +146,7 @@ export default class PostRatingRepositoryImpl implements PostRatingRepository {
       IndexName: 'Index2',
       KeyConditionExpression: 'pk = :pk AND begins_with(lsi2, :lsi2_filter_value)',
       ExpressionAttributeValues: {
-        ':pk': `${ORGANIZATION_INDEX}#${organizationId}#${RATING_INDEX}`,
+        ':pk': `${ORGANIZATION_INDEX}#${organization}#${RATING_INDEX}`,
         ':lsi2_filter_value': numberStar ? `${RATING_INDEX}#${numberStar}` : RATING_INDEX,
       },
     };

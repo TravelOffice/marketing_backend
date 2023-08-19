@@ -21,7 +21,7 @@ export default class CreateTourPostUseCaseImpl implements CreateTourPostUseCase 
     const tourPost = {
       ...createTourPostDto,
       code: `${TOUR_POST_ID_PREFIX}${tourPostIndex}`,
-      tenant,
+      organization: tenant,
       authorId: marketplaceUserId,
       createdAt,
       updatedAt,

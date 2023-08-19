@@ -3,7 +3,7 @@ import { PostRating } from '../../models/PostRating';
 
 export interface GetOrgRatingListUseCase {
   invoke(
-    organizationId: string,
+    organization: string,
     paginationParams: PaginationParams,
     numberStar?: string,
   ): Promise<PaginationResponsePayload<PostRating> | undefined>,

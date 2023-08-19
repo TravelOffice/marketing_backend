@@ -44,8 +44,8 @@ app.get('/marketplace/posts/:id/ratings', getPostRatingListValidator(), async (r
   try {
     validate(req);
     const { id: tourPostId } = req.params;
-    const { organizationId } = req.query;
-    const ratings = await getPostRatingListUseCase.invoke(organizationId as string, tourPostId);
+    const { organization } = req.query;
+    const ratings = await getPostRatingListUseCase.invoke(organization as string, tourPostId);
     res.json(wrapResponse(SUCCESS, ratings));
   } catch (error: any) {
     logger.log(`[app.get] Error ${error}`);
@@ -69,9 +69,9 @@ app.post('/marketplace/posts/:id/ratings', createRatingValidator(), async (req: 
 app.get('/marketplace/posts/:id/ratings/:ratingId', async (req: Request, res: Response) => {
   try {
     const { id: tourPostId, ratingId } = req.params;
-    const { organizationId } = req.query;
+    const { organization } = req.query;
     const rating = await getPostRatingUseCase.invoke(
-      organizationId as string,
+      organization as string,
       tourPostId,
       ratingId,
     );
@@ -85,12 +85,12 @@ app.get('/marketplace/posts/:id/ratings/:ratingId', async (req: Request, res: Re
 app.get('/marketplace/organizations/:id/ratings', getOrgRatingListValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
-    const { id: organizationId } = req.params;
+    const { id: organization } = req.params;
     const {
       numberStar, ...paginationParams
     } = req.query;
     const rating = await getOrgRatingListUseCase.invoke(
-      organizationId,
+      organization,
       paginationParams,
       numberStar as string,
     );
@@ -106,7 +106,7 @@ app.put('/marketplace/posts/:id/ratings/:ratingId', updateRatingValidator(), asy
     validate(req);
     const currentUser = getCurrentUserInfo(req.headers.authorization!);
     const { id: tourPostId, ratingId: code } = req.params;
-    const { organizationId } = req.query;
+    const { organization } = req.query;
     const rating = await updatePostRatingUseCase.invoke(
       currentUser,
       {
@@ -126,11 +126,11 @@ app.delete('/marketplace/posts/:id/ratings/:ratingId', deletePostRatingValidator
   try {
     validate(req);
     const { id: tourPostId, ratingId } = req.params;
-    const { organizationId } = req.body;
+    const { organization } = req.body;
     const currentUser = getCurrentUserInfo(req.headers.authorization!);
     await deletePostRatingUseCase.invoke(
       currentUser,
-      organizationId,
+      organization,
       tourPostId,
       ratingId,
     );

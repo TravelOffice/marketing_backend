@@ -3,7 +3,7 @@ import { LANGUAGES_TYPE, THEMES_TYPE } from './TravelUser';
 
 export interface MarketplaceUser extends BaseDdbModel {
   // Attributes from Travel Office TravelUser
-  tenant: string, // Tenant ID
+  organization: string, // Tenant ID
   username: string, // Username of the user in isolated tenant
   id: string, // Combination of tenant and username
   name: string, // Full name of the user
@@ -16,7 +16,7 @@ export interface MarketplaceUser extends BaseDdbModel {
 
   // New attributes for marketplace
   alias?: string, // Alias of the user, this will be displayed instead of user ID
-  description: string, // The description of the user
+  description?: string, // The description of the user
   roles: string[], // The roles of current user
   roleStr: string, // The roles string
   enabled: boolean,

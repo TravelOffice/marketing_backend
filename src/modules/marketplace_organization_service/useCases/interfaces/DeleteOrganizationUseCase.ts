@@ -1,5 +1,5 @@
 import { CognitoUser } from '../../models/CognitoUser';
 
 export interface DeleteOrganizationUseCase {
-  invoke(currentUser: CognitoUser, organizationId: string): Promise<void>,
+  invoke(currentUser: CognitoUser, id: string): Promise<void>,
 }

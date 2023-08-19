@@ -9,8 +9,6 @@ export default class AcceptOfferUseCaseImpl implements AcceptOfferUseCase {
    * Accept an offer by its ID and the associated tour post ID.
    *
    * @param {string} currentUser - The current authenticated user.
-   * @param {string} organizationId - The ID of the organization associated with the offer.
-   * @param {string} tourPostId - The ID of the tour post associated with the offer.
    * @param {string} offerId - The ID of the offer to be accepted.
    * @returns {Promise<Offer | undefined>} - A promise resolving to the accepted offer
    * or undefined if not found.
@@ -20,8 +18,8 @@ export default class AcceptOfferUseCaseImpl implements AcceptOfferUseCase {
     offerId: string,
   ): Promise<Offer> => {
     // Extract necessary information from the current user
-    const { tenant: userOrganizationId, username } = currentUser;
-    const marketplaceUserId = `${userOrganizationId}#${username}`;
+    const { tenant: organization, username } = currentUser;
+    const marketplaceUserId = `${organization}#${username}`;
 
     // Retrieve the offer to be accepted
     const offer = await offerRepository.get(offerId);

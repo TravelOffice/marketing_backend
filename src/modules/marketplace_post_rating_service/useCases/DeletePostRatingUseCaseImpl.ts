@@ -7,14 +7,14 @@ export default class DeletePostRatingUseCaseImpl implements DeletePostRatingUseC
    * Deletes a post rating by the current marketplace user.
    *
    * @param {CognitoUser} currentUser - The current authenticated user.
-   * @param {string} organizationId - The ID of organization.
+   * @param {string} organization - The ID of organization.
    * @param {string} tourPostId - The ID of the tour post associated with the rating.
    * @param {string} postRatingId - The ID of the rating to be deleted.
    * @returns {Promise<void>} - A promise indicating the success of the deletion.
    */
   invoke = async (
     currentUser: CognitoUser,
-    organizationId: string,
+    organization: string,
     tourPostId: string,
     postRatingId: string,
   ): Promise<void> => {
@@ -32,7 +32,7 @@ export default class DeletePostRatingUseCaseImpl implements DeletePostRatingUseC
     const currentUserId = marketplaceUser.id;
 
     // Retrieve the rating to be deleted
-    const rating = await postRatingRepository.get(organizationId, tourPostId, postRatingId);
+    const rating = await postRatingRepository.get(organization, tourPostId, postRatingId);
     if (!rating) {
       throw new Error('Tour rating not found');
     }
@@ -43,6 +43,6 @@ export default class DeletePostRatingUseCaseImpl implements DeletePostRatingUseC
     }
 
     // Delete the rating using the repository
-    await postRatingRepository.delete(organizationId, tourPostId, postRatingId);
+    await postRatingRepository.delete(organization, tourPostId, postRatingId);
   };
 }

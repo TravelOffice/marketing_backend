@@ -3,7 +3,7 @@ import { OrgFeedback } from '../../models/OrgFeedback';
 
 export interface GetOrgFeedbackListUseCase {
   invoke(
-    organizationId: string,
+    organization: string,
     paginationParams: PaginationParams,
   ): Promise<PaginationResponsePayload<OrgFeedback> | undefined>,
 }

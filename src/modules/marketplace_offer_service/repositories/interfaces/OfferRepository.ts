@@ -5,18 +5,18 @@ export interface OfferRepository {
   listByPost(tourPostId: string): Promise<Offer[]>,
 
   listSentOffersOfOrganization(
-    organizationId: string,
+    organization: string,
     paginationParams?: PaginationParams,
   ): Promise<PaginationResponsePayload<Offer> | undefined>,
 
   listSentOffersOfOrganizationByOfferStatus(
-    organizationId: string,
+    organization: string,
     offerStatus: OfferStatus,
     paginationParams?: PaginationParams,
   ): Promise<PaginationResponsePayload<Offer> | undefined>,
 
   listReceivedOffersOfOrganization(
-    organizationId: string,
+    organization: string,
     paginationParams?: PaginationParams,
   ): Promise<PaginationResponsePayload<Offer> | undefined>,
 

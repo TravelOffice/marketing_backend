@@ -21,7 +21,7 @@ export default class GetOfferListOfPostUseCaseImpl implements GetOfferListOfPost
       throw new Error('Tour post not found');
     }
 
-    const { tenant: tourPostOrganizationId } = tourPost;
+    const { tenant: tourPostorganization } = tourPost;
 
     // Extract necessary information from the current user
     const { tenant, username } = currentUser;

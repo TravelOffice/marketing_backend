@@ -9,7 +9,6 @@ export default class CancelOfferUseCaseImpl implements CancelOfferUseCase {
    * Cancel an offer by its ID and the associated tour post ID.
    *
    * @param {string} currentUser - The current authenticated user.
-   * @param {string} tourPostId - The ID of the tour post associated with the offer.
    * @param {string} offerId - The ID of the offer to be canceled.
    * @param {string} cancelReason - The reason for canceling the offer.
    * @returns {Promise<Offer | undefined>} - A promise resolving to the canceled offer
@@ -21,8 +20,8 @@ export default class CancelOfferUseCaseImpl implements CancelOfferUseCase {
     cancelReason: string,
   ): Promise<Offer> => {
     // Extract necessary information from the current user
-    const { tenant: organizationId, username } = currentUser;
-    const marketplaceUserId = `${organizationId}#${username}`;
+    const { tenant: organization, username } = currentUser;
+    const marketplaceUserId = `${organization}#${username}`;
 
     // Retrieve the offer to be canceled
     const offer = await offerRepository.get(offerId);

@@ -21,25 +21,25 @@ export default function validate(req: Request) {
 
 export function createRatingValidator() {
   return [
-    param('id').notEmpty().withMessage('Tour Post ID is required'),
+    param('id').notEmpty().withMessage('is required'),
     body('star')
       .isInt({ min: 1, max: 5 })
-      .withMessage('Star must be a number between 1 and 5'),
+      .withMessage('must be a number between 1 and 5'),
     body('description')
       .isString()
       .notEmpty()
-      .withMessage('Description must be not empty'),
+      .withMessage('must be not empty'),
   ];
 }
 
 export function updateRatingValidator() {
   return [
-    param('id').notEmpty().withMessage('Tour Post ID is required'),
-    param('ratingId').notEmpty().withMessage('Post Rating ID is required'),
+    param('id').notEmpty().withMessage('is required'),
+    param('ratingId').notEmpty().withMessage('is required'),
     body('star')
       .optional()
       .isInt({ min: 1, max: 5 })
-      .withMessage('Star must be a number between 1 and 5'),
+      .withMessage('must be a number between 1 and 5'),
     body('description')
       .optional()
       .isString()
@@ -50,19 +50,19 @@ export function updateRatingValidator() {
 
 export function getPostRatingListValidator() {
   return [
-    query('organizationId')
+    query('organization')
       .isString()
       .notEmpty()
-      .withMessage('Organization Id must be a string'),
+      .withMessage('must be a string'),
   ];
 }
 
 export function deletePostRatingValidator() {
   return [
-    body('organizationId')
+    body('organization')
       .isString()
       .notEmpty()
-      .withMessage('Organization Id must be a string'),
+      .withMessage('must be a string'),
   ];
 }
 
@@ -78,14 +78,14 @@ export function getOrgRatingListValidator() {
           return false;
         }
       })
-      .withMessage('nextToken must be a JSON string'),
+      .withMessage('must be a JSON string'),
     query('limit')
       .optional()
       .isInt()
-      .withMessage('limit must be a number'),
+      .withMessage('must be a number'),
     query('sortDesc')
       .optional()
       .isBoolean()
-      .withMessage('sortDesc must be a boolean'),
+      .withMessage('must be a boolean'),
   ];
 }
