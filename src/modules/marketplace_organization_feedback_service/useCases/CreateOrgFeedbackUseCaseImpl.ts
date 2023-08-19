@@ -1,6 +1,6 @@
 import { helper } from 'core';
 import { OrgFeedback } from '../models/OrgFeedback';
-import { marketplaceUserRepository, orgFeedbackRepository } from '../repositories';
+import { marketplaceUserRepository, offerRepository, orgFeedbackRepository } from '../repositories';
 import { CreateOrgFeedbackUseCase } from './interfaces/CreateOrgFeedbackUseCase';
 import { CognitoUser } from '../models/CognitoUser';
 import { CreateOrgFeedbackDto } from '../dto/CreateOrgFeedbackDto';
@@ -27,6 +27,16 @@ export default class CreateOrgFeedbackUseCaseImpl implements CreateOrgFeedbackUs
     const marketplaceUser = await marketplaceUserRepository.getById(marketplaceUserId);
     if (!marketplaceUser) {
       throw new Error('Marketplace user not found');
+    }
+
+    // Retrieve success offers of the author for the organization
+    const successOffers = await offerRepository.listSuccessOfferByOrgAndAuthor(
+      organization,
+      marketplaceUserId,
+    );
+
+    if (!successOffers.length) {
+      throw new Error("You don't have permission to do this action");
     }
 
     // Get the current timestamp

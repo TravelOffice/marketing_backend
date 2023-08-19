@@ -6,21 +6,26 @@ import { MarketplaceUserRepository } from './interfaces/MarketplaceUserRepositor
 import MarketplaceUserRepositoryImpl from './MarketplaceUserRepositoryImpl';
 import { TourPostRepository } from './interfaces/TourPostRepository';
 import TourPostRepositoryImpl from './TourPostRepositoryImpl';
+import { OfferRepository } from './interfaces/OfferRepository';
+import OfferRepositoryImpl from './OfferRepositoryImpl';
 
 interface Repositories {
   tourPostRepository: TourPostRepository,
   postRatingRepository: PostRatingRepository,
   marketplaceUserRepository: MarketplaceUserRepository,
+  offerRepository: OfferRepository,
 }
 
 const repositories: Repositories = {
   tourPostRepository: new TourPostRepositoryImpl(),
   postRatingRepository: new PostRatingRepositoryImpl(),
   marketplaceUserRepository: new MarketplaceUserRepositoryImpl(),
+  offerRepository: new OfferRepositoryImpl(),
 };
 
 export const {
   tourPostRepository,
   postRatingRepository,
   marketplaceUserRepository,
+  offerRepository,
 } = repositories;
