@@ -32,7 +32,6 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
 
 app.get('/marketplace/statistic', async (req: Request, res: Response) => {
   try {
-    const currentUser = getCurrentUserInfo(req.headers.authorization!);
     const marketplaceStatistics = await getMarketplaceStatisticUseCase.invoke();
     res.json(wrapResponse(SUCCESS, marketplaceStatistics));
   } catch {
