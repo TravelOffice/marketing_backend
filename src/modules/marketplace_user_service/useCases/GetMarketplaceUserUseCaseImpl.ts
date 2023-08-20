@@ -1,5 +1,5 @@
 import { helper } from 'core';
-import { travelUserRepository } from '../repositories';
+import { marketplaceUserRepository } from '../repositories';
 import { GetMarketplaceUserUseCase } from './interfaces/GetMarketplaceUserUseCase';
 import { MarketplaceUser } from '../models';
 
@@ -7,12 +7,11 @@ export default class GetMarketplaceUserUseCaseImpl implements GetMarketplaceUser
   /**
    * Method to get all users belong to Tenant excepts Root account
    * @returns Promise<MarketplaceUser> The created marketplace user
-   * @param tenant The ID of tenant
-   * @param username The username in cognito
+   * @param id The ID of the marketplace user
    */
-  invoke = async (tenant: string, username: string) => {
+  invoke = async (id: string) => {
     // Retrieve user information from travel table
-    const travelUser = await travelUserRepository.get(tenant, username);
+    const travelUser = await marketplaceUserRepository.getById(id);
     if (!travelUser) throw new Error('User does not exist');
     return helper.excludeDataFromObject(travelUser) as MarketplaceUser;
   };
