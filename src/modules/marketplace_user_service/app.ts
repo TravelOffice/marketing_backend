@@ -5,6 +5,7 @@ import express, { NextFunction, Request, Response } from 'express';
 import {
   createMarketplaceUserUseCase,
   enableMarketplaceUserUseCase,
+  getMarketplaceUserUseCase,
   getTenantUserListUseCase,
   updateMarketplaceUserUseCase,
 } from './useCases';
@@ -73,6 +74,32 @@ app.put('/marketplace/enable-user', enableUserValidator(), async (req: Request, 
     const { tenant, username, enable } = req.body;
     const users = await enableMarketplaceUserUseCase.invoke(tenant, username, enable);
     res.json(wrapResponse(SUCCESS, users));
+  } catch (error: any) {
+    logger.log(`[app.get] Error ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.get('/marketplace/me', async (req: Request, res: Response) => {
+  try {
+    validate(req);
+    const { tenant, username } = getCurrentUserInfo(req.headers.authorization!);
+    const currentUser = await getMarketplaceUserUseCase.invoke(tenant, username);
+    res.json(wrapResponse(SUCCESS, currentUser));
+  } catch (error: any) {
+    logger.log(`[app.get] Error ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.get('/marketplace/users/:id', async (req: Request, res: Response) => {
+  try {
+    validate(req);
+    const { id } = req.params;
+    const [tenant, username] = id.split('#');
+    const currentUser = await getMarketplaceUserUseCase.invoke(tenant, username);
+    console.log(currentUser);
+    res.json(wrapResponse(SUCCESS, currentUser));
   } catch (error: any) {
     logger.log(`[app.get] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
