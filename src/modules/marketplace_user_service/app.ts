@@ -82,9 +82,9 @@ app.put('/marketplace/enable-user', enableUserValidator(), async (req: Request, 
 
 app.get('/marketplace/me', async (req: Request, res: Response) => {
   try {
-    validate(req);
     const { tenant, username } = getCurrentUserInfo(req.headers.authorization!);
-    const currentUser = await getMarketplaceUserUseCase.invoke(tenant, username);
+    const id = `${tenant}#${username}`;
+    const currentUser = await getMarketplaceUserUseCase.invoke(id);
     res.json(wrapResponse(SUCCESS, currentUser));
   } catch (error: any) {
     logger.log(`[app.get] Error ${error}`);
@@ -94,11 +94,8 @@ app.get('/marketplace/me', async (req: Request, res: Response) => {
 
 app.get('/marketplace/users/:id', async (req: Request, res: Response) => {
   try {
-    validate(req);
     const { id } = req.params;
-    const [tenant, username] = id.split('#');
-    const currentUser = await getMarketplaceUserUseCase.invoke(tenant, username);
-    console.log(currentUser);
+    const currentUser = await getMarketplaceUserUseCase.invoke(id);
     res.json(wrapResponse(SUCCESS, currentUser));
   } catch (error: any) {
     logger.log(`[app.get] Error ${error}`);
