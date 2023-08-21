@@ -2,9 +2,9 @@ import { TourPost } from '../models/TourPost';
 
 export type CreateTourPostDto = Pick<
   TourPost,
-  // Initial status can only be 'DRAFT' or 'IN_PROGRESS'
+  // Initial status can only be 'IN_PROCESS'
   'maximumPaxToTrade' | 'type' |
-  'name' | 'linkedToTarget' | 'status' |
+  'name' | 'linkedToTargetKeys' | 'status' |
   'description' | 'expiry' | 'autoClose' |
   'endingLocation' | 'departureDate'
 >;

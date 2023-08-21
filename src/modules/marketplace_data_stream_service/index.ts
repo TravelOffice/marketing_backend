@@ -22,14 +22,18 @@
  */
 import { DynamoDBRecord, DynamoDBStreamEvent } from 'aws-lambda';
 import { dynamoProvider } from 'core';
-import { DdbModelChangeType } from './models/dataSubscription/DdbModelChangeType';
-import { isOrganization, isTourPost, isTourPostOffer } from './utils/dynamodb';
-import logger from './utils/logger';
-import { marketplaceStatisticRepository, organizationStatisticRepository } from './repositories';
-import { MarketplaceStatistic, MarketplaceStats } from './models/statistic/MarketplaceStatistic';
-import { MARKETPLACE_STATISTIC_INDEX, STATISTIC_INDEX } from './utils/constants';
 import { Offer } from './models/Offer';
+import { DdbModelChangeType } from './models/dataSubscription/DdbModelChangeType';
+import { MarketplaceStatistic, MarketplaceStats } from './models/statistic/MarketplaceStatistic';
 import { OrganizationsStatistic } from './models/statistic/OrganizationsStatistic';
+import { TourPostsStatistic } from './models/statistic/TourPostsStatistic';
+import { marketplaceStatisticRepository, organizationStatisticRepository, tourPostStatisticRepository } from './repositories';
+import { MARKETPLACE_STATISTIC_INDEX, STATISTIC_INDEX } from './utils/constants';
+import {
+  isOrganization, isTourPost, isTourPostOffer, isTourPostRating,
+} from './utils/dynamodb';
+import logger from './utils/logger';
+import { PostRating } from './models/PostRating';
 
 /**
  * Get model change type from DynamoDB record
@@ -53,6 +57,8 @@ function getModelChangeType(record: DynamoDBRecord): DdbModelChangeType | undefi
     return 'POST';
   } if (isTourPostOffer(pk)) {
     return 'OFFER';
+  } if (isTourPostRating(pk)) {
+    return 'RATING';
   }
 
   return 'OTHER';
@@ -99,7 +105,7 @@ async function handleMarketplaceStatisticChange(records: DynamoDBRecord[]): Prom
     totalOffers,
   };
   records.forEach((record) => {
-    logger.log(`DynamoDB Record: ${JSON.stringify(record, null, 5)}`);
+    logger.log(`DynamoDB Record for handling marketplace statistic ${JSON.stringify(record, null, 5)}`);
     const modelChangeType = getModelChangeType(record);
     if (record.eventName === 'INSERT') {
       if (modelChangeType === 'ORG') {
@@ -119,14 +125,22 @@ async function handleMarketplaceStatisticChange(records: DynamoDBRecord[]): Prom
 
 async function handleOrganizationsStatisticChange(records: DynamoDBRecord[]): Promise<void> {
   // Attribute to count number of posts, offers or success offer added for each organization
-  const orgsAddedStats: OrganizationsStatistic = {};
+  const orgsChangedStats: OrganizationsStatistic = {};
   records.forEach(async (record) => {
-    logger.log(`DynamoDB Record: ${JSON.stringify(record, null, 5)}`);
+    logger.log(`DynamoDB Record for handling organization statistic ${JSON.stringify(record, null, 5)}`);
     // New data expected to be added to database
     if (!record.dynamodb?.NewImage) {
       logger.log('No new data to handle');
       return;
     }
+
+    const modelChangeType = getModelChangeType(record);
+    // Expected data model should be TourPost or Offer
+    if (modelChangeType !== 'POST' && modelChangeType !== 'OFFER') {
+      logger.log(`Target model is not needed to handle ${modelChangeType}`);
+      return;
+    }
+
     const newModelData = dynamoProvider.unmarshall(record.dynamodb?.NewImage);
     const organization = (newModelData.sentOrg || newModelData.organization) as string;
 
@@ -137,8 +151,8 @@ async function handleOrganizationsStatisticChange(records: DynamoDBRecord[]): Pr
     }
 
     // Initialize statistic data for organization if it doesn't exist
-    if (orgsAddedStats[organization] === undefined) {
-      orgsAddedStats[organization] = {
+    if (orgsChangedStats[organization] === undefined) {
+      orgsChangedStats[organization] = {
         totalPosts: 0,
         totalOffers: 0,
         totalSuccessOffers: 0,
@@ -146,14 +160,13 @@ async function handleOrganizationsStatisticChange(records: DynamoDBRecord[]): Pr
     }
 
     // Handle new data added to database
-    const modelChangeType = getModelChangeType(record);
     if (record.eventName === 'INSERT') {
       if (modelChangeType === 'POST') {
         // Handle inserted post for tenant
-        orgsAddedStats[organization].totalPosts += 1;
+        orgsChangedStats[organization].totalPosts += 1;
       } else if (modelChangeType === 'OFFER') {
         // Handle insert offer for tenant
-        orgsAddedStats[organization].totalOffers += 1;
+        orgsChangedStats[organization].totalOffers += 1;
       }
     } else if (record.eventName === 'MODIFY') { // Handle data changed on database
       // Check whether offer is changed to `ACCEPTED`
@@ -164,12 +177,61 @@ async function handleOrganizationsStatisticChange(records: DynamoDBRecord[]): Pr
         }
         const offer = dynamoProvider.unmarshall(record.dynamodb?.NewImage) as Offer;
         if (previousOffer?.offerStatus !== offer.offerStatus && offer.offerStatus === 'ACCEPTED') {
-          orgsAddedStats[organization].totalSuccessOffers += 1;
+          orgsChangedStats[organization].totalSuccessOffers += 1;
         }
       }
     }
   });
-  await organizationStatisticRepository.batchUpdateOrganizationsStatistic(orgsAddedStats);
+  await organizationStatisticRepository.batchUpdateOrganizationsStatistic(orgsChangedStats);
+}
+
+async function handleTourPostsStatisticChange(records: DynamoDBRecord[]): Promise<void> {
+  // Attribute to count number of offers added for each post
+  // as well as total rating of each post and number of users rated for each post
+  const tourPostsChangedStats: TourPostsStatistic = {};
+  records.forEach(async (record) => {
+    logger.log(`DynamoDB Record for handling organization statistic ${JSON.stringify(record, null, 5)}`);
+
+    // New data expected to be added to database
+    if (!record.dynamodb?.NewImage) {
+      logger.log('No new data to handle');
+      return;
+    }
+
+    const modelChangeType = getModelChangeType(record);
+    // Expected data model should be Rating or Offer
+    if (modelChangeType !== 'RATING' && modelChangeType !== 'OFFER') {
+      logger.log(`Target model is not needed to handle ${modelChangeType}`);
+      return;
+    }
+
+    const newModelData = dynamoProvider.unmarshall(record.dynamodb?.NewImage);
+    const { tourPostId } = newModelData;
+
+    // Initialize statistic data for tour post if it doesn't exist
+    if (tourPostsChangedStats[tourPostId] === undefined) {
+      tourPostsChangedStats[tourPostId] = {
+        totalOffers: 0,
+        totalRatings: 0,
+        numberOfRatings: 0,
+      };
+    }
+
+    // Handle new data added to database
+    // * Rating data is not allowed to be changed, so there is no need to handle `MODIFY` event
+    if (record.eventName === 'INSERT') {
+      if (modelChangeType === 'OFFER') {
+        // Handle inserted offer for post
+        tourPostsChangedStats[tourPostId].totalOffers += 1;
+      } else if (modelChangeType === 'RATING') {
+        // Handle insert offer for tenant
+        const rating = newModelData as PostRating;
+        tourPostsChangedStats[tourPostId].totalRatings += rating.star;
+        tourPostsChangedStats[tourPostId].numberOfRatings += 1;
+      }
+    }
+  });
+  await tourPostStatisticRepository.batchUpdateTourPostsStatistic(tourPostsChangedStats);
 }
 
 // eslint-disable-next-line import/prefer-default-export
@@ -193,4 +255,7 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
 
   // 2. Handle statistic data of each organization
   await handleOrganizationsStatisticChange(records);
+
+  // 3. Handle statistic data of each tour post
+  await handleTourPostsStatisticChange(records);
 };

@@ -85,10 +85,7 @@ export function updateUserValidator() {
 
 export function enableUserValidator() {
   return [
-    body('tenant', VALIDATE_NON_EMPTY_STRING_MSG)
-      .isString()
-      .notEmpty(),
-    body('username', VALIDATE_NON_EMPTY_STRING_MSG)
+    body('userId', VALIDATE_NON_EMPTY_STRING_MSG)
       .isString()
       .notEmpty(),
     body('enable', VALIDATE_BOOLEAN_MSG)

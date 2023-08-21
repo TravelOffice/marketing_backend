@@ -71,8 +71,8 @@ app.put('/marketplace/me', updateUserValidator(), async (req: Request, res: Resp
 app.put('/marketplace/enable-user', enableUserValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
-    const { tenant, username, enable } = req.body;
-    const users = await enableMarketplaceUserUseCase.invoke(tenant, username, enable);
+    const { userId, enable } = req.body;
+    const users = await enableMarketplaceUserUseCase.invoke(userId, enable);
     res.json(wrapResponse(SUCCESS, users));
   } catch (error: any) {
     logger.log(`[app.get] Error ${error}`);

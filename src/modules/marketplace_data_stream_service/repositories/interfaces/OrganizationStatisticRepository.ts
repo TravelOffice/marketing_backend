@@ -2,6 +2,6 @@ import { OrganizationsStatistic } from '../../models/statistic/OrganizationsStat
 
 export interface OrganizationStatisticRepository {
   batchUpdateOrganizationsStatistic(
-    orgStatisticsChangeCount: OrganizationsStatistic,
+    orgsChangedStats: OrganizationsStatistic,
   ): Promise<void>;
 }

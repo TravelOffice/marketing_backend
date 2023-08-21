@@ -1,1 +1,1 @@
-export type DdbModelChangeType = 'ORG' | 'POST' | 'OFFER' | 'OTHER';
+export type DdbModelChangeType = 'ORG' | 'POST' | 'OFFER' | 'RATING' | 'OTHER';

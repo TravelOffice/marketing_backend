@@ -13,3 +13,7 @@ export const STATISTIC_INDEX = 'STATS';
 export const MARKETPLACE_STATISTIC_INDEX = 'MARKETPLACE_STATS';
 
 export const ORG_STATISTIC_INDEX = 'ORG_STATS';
+
+export const TOUR_POST_STATISTIC_INDEX = 'P_STATS';
+
+export const RATING_INDEX = 'R';

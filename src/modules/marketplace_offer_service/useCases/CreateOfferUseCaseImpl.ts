@@ -35,7 +35,7 @@ export default class CreateOfferUseCaseImpl implements CreateOfferUseCase {
       throw new Error('Tour post not found');
     }
 
-    const receivedOrg = tourPost.tenant;
+    const receivedOrg = tourPost.organization;
     const receivedUser = tourPost.authorId;
 
     // Get the current timestamp

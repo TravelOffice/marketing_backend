@@ -29,7 +29,7 @@ export default class CreateTourPostUseCaseImpl implements CreateTourPostUseCase 
       // - All latest posts that belong to tenant
       // - All latest posts that created by specific user
       lsi1: `${marketplaceUserId}#${createdAt}`,
-      lsi2: `${status}$${createdAt}`, // Local index for getting all posts by specific status
+      lsi2: `${status}${createdAt}`, // Local index for getting all posts by specific status
       lsi3: createdAt.toString(), // Local index for sort post by createdAt
       lsi4: `${endingLocation}#${createdAt}`, // Local index for filter latest post by ending location
       lsi5: departureDate, // Local index for filter post by departure date

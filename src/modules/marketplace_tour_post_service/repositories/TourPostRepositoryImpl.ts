@@ -8,12 +8,16 @@ import {
   MARKETPLACE_COUNTER_INDEX,
   MARKETPLACE_USER_INDEX,
   POST_INDEX,
+  STATISTIC_INDEX,
   TOUR_POST_BOOKMARK_INDEX,
   TOUR_POST_COUNTER_INDEX,
   TOUR_POST_FOLLOW_INDEX,
+  TOUR_POST_STATISTIC_INDEX,
 } from '../utils/constants';
 import logger from '../utils/logger';
 import { TourPostRepository } from './interfaces/TourPostRepository';
+import { TourPostStatistic } from '../models/statistic/TourPostStatistic';
+import { roundNumber } from '../utils/numeric';
 
 type BookmarkOrFollowedTourPost = BookmarkedTourPost | FollowedTourPost;
 
@@ -213,7 +217,21 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
    */
   getById = async (id: string) => {
     const marketplaceTable = await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE');
-    return dynamoProvider.getItem<TourPost>(marketplaceTable, POST_INDEX, id);
+    const tourPost = await dynamoProvider.getItem<TourPost>(marketplaceTable, POST_INDEX, id);
+    if (!tourPost) {
+      return undefined;
+    }
+    const statistic = await this.getTourStatistic(tourPost.code);
+    const { totalOffers, totalRatings, numberOfRatings } = statistic;
+    let ratingAverage = 0;
+    if (numberOfRatings > 0) {
+      ratingAverage = roundNumber(totalRatings / numberOfRatings);
+    }
+    return {
+      ...tourPost,
+      totalOffers,
+      ratingAverage,
+    };
   };
 
   /**
@@ -437,12 +455,52 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
     const bookmarkedTourPostIds = bookmarkedItems.map((item) => item.tourPostId);
     const followedTourPostIds = followedItems.map((item) => item.tourPostId);
 
-    // Add isBookmarked and isFollowed flags to each tour post
-    return tourPosts.map((item) => ({
-      ...item,
-      isBookmarked: bookmarkedTourPostIds.includes(item.code),
-      isFollowed: followedTourPostIds.includes(item.code),
-    }));
+    // Get number of offers and rating average for each tour post
+    const transformedTourPosts = await Promise.all(
+      tourPosts.map(async (item) => {
+        const statistic = await this.getTourStatistic(item.code);
+        const { totalOffers, totalRatings, numberOfRatings } = statistic;
+        let ratingAverage = 0;
+        if (numberOfRatings > 0) {
+          ratingAverage = roundNumber(totalRatings / numberOfRatings);
+        }
+        // Add isBookmarked and isFollowed flags to each tour post
+        // as well as totalOffers and ratingAverage
+        return {
+          ...item,
+          totalOffers,
+          ratingAverage,
+          isBookmarked: bookmarkedTourPostIds.includes(item.code),
+          isFollowed: followedTourPostIds.includes(item.code),
+        };
+      }),
+    );
+
+    return transformedTourPosts;
+  };
+
+  /**
+   * Method to get tour post statistic
+   * @param tourPostId Tour post id
+   * @returns A Promise that resolves to the tour post statistic.
+   * The statistic contains number of offers and rating average.
+   * If the tour post is not found, it will return undefined.
+   */
+  private getTourStatistic = async (tourPostId: string) => {
+    const statisticTable = await getAwsSecretValue('DYNAMO_STATISTIC_TABLE');
+    const tourPostStatistic = await dynamoProvider.getItem<TourPostStatistic>(
+      statisticTable,
+      STATISTIC_INDEX,
+      `${TOUR_POST_STATISTIC_INDEX}#${tourPostId}`,
+    );
+    if (!tourPostStatistic) {
+      return {
+        totalOffers: 0,
+        totalRatings: 0,
+        numberOfRatings: 0,
+      };
+    }
+    return tourPostStatistic;
   };
 
   /**

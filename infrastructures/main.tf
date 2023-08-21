@@ -104,10 +104,10 @@ locals {
       DEPARTURE_TOUR_URL             = "${local.domain_name}/apps/tour/departure"
     },
     payment_voucher_service_lambda_vars = {
-      REGION                         = var.AWS_REGION
-      NODE_ENV                       = var.ENV
-      SECRET_MANAGER_ID              = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
-      ATTACHMENT_BUCKET              = module.REMOTE_STATE.STATE.MARKETING.frontend.sale_web.attachment_s3_bucket
+      REGION            = var.AWS_REGION
+      NODE_ENV          = var.ENV
+      SECRET_MANAGER_ID = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
+      ATTACHMENT_BUCKET = module.REMOTE_STATE.STATE.MARKETING.frontend.sale_web.attachment_s3_bucket
     },
   }
 }
@@ -194,11 +194,12 @@ module "AUTO_ASSIGN_MODULE_CONFIGURATION" {
 }
 
 module "MARKETPLACE_DDB_STREAM_CONFIGURATION" {
-  source                      = "../../modules/application/dynamodb_stream"
-  ENV                         = var.ENV
-  FEATURE_NAME                = var.FEATURE_NAME
-  TAGS                        = local.tags
-  MARKETPLACE_DDB_STREAM_ARN  = module.REMOTE_STATE.STATE.MARKETING.backend.dynamodb.marketplace_table.stream_arn
-  MARKETPLACE_DDB_STREAM_BATCH_SIZE     = 100
-  MARKETPLACE_LAMBDA_STREAM_HANDLER_ARN = module.LAMBDA_FUNCTION.lambda_arns["marketplace_data_stream_service"]
+  source                                 = "../../modules/application/dynamodb_stream"
+  ENV                                    = var.ENV
+  FEATURE_NAME                           = var.FEATURE_NAME
+  TAGS                                   = local.tags
+  MARKETPLACE_DDB_STREAM_ARN             = module.REMOTE_STATE.STATE.MARKETING.backend.dynamodb.marketplace_table.stream_arn
+  MARKETPLACE_DDB_STREAM_BATCH_SIZE      = 100
+  MARKETPLACE_LAMBDA_STREAM_HANDLER_ARN  = module.LAMBDA_FUNCTION.lambda_arns["marketplace_data_stream_service"]
+  MARKETPLACE_DDB_STREAM_BATCHING_WINDOW = 300
 }

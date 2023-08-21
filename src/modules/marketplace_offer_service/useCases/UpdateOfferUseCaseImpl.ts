@@ -26,7 +26,7 @@ export default class UpdateOfferUseCaseImpl implements UpdateOfferUseCase {
     const marketplaceUserId = `${tenant}#${username}`;
 
     // Extract necessary information from updateOfferDto
-    const { code: offerId, tourPostId, sentOrg } = updateOfferDto;
+    const { code: offerId } = updateOfferDto;
 
     // Retrieve the marketplace user from the repository
     const marketplaceUser = await marketplaceUserRepository.getById(marketplaceUserId);

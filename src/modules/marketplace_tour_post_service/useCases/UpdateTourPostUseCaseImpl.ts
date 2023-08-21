@@ -12,7 +12,7 @@ export default class UpdateTourPostUseCaseImpl implements UpdateTourPostUseCase 
     'name',
     'description',
     'type',
-    'linkedToTarget',
+    'linkedToTargetKeys',
     'status',
     'expiry',
     'autoClose',

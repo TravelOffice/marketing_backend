@@ -34,7 +34,12 @@ module.exports = {
         tsx: 'never',
       },
     ],
+    'import/prefer-default-export': 'off',
     'class-methods-use-this': 'off',
+    'linebreak-style': 'off',
+    'no-shadow': 'off',
     'no-unused-vars': 'off',
+    '@typescript-eslint/no-shadow': ['error'],
+    '@typescript-eslint/no-unused-vars': ['error', { ignoreRestSiblings: true }],
   },
 };
