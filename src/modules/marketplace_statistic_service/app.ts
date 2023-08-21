@@ -33,9 +33,11 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
 app.get('/marketplace/statistic', async (req: Request, res: Response) => {
   try {
     const marketplaceStatistics = await getMarketplaceStatisticUseCase.invoke();
+    logger.log(`[GET] Successfully ${marketplaceStatistics}`);
     res.json(wrapResponse(SUCCESS, marketplaceStatistics));
-  } catch {
-    res.json(wrapResponse(FAILED, undefined));
+  } catch (error: any) {
+    logger.log(`[GET] Error ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });
 
@@ -45,12 +47,14 @@ app.get(
   async (req: Request, res: Response) => {
     try {
       validate(req);
+      const { id } = req.params;
       const currentUser = getCurrentUserInfo(req.headers.authorization!);
-      const { tenant } = currentUser;
-      const marketplaceStatistics = await getOrganizationStatisticUseCase.invoke(tenant);
+      const marketplaceStatistics = await getOrganizationStatisticUseCase.invoke(id, currentUser);
+      logger.log(`[GET - ${id}] Successfully ${marketplaceStatistics}`);
       res.json(wrapResponse(SUCCESS, marketplaceStatistics));
-    } catch {
-      res.json(wrapResponse(FAILED, undefined));
+    } catch (error: any) {
+      logger.log(`[GET] Error ${error}`);
+      res.json(wrapResponse(FAILED, undefined, error.message));
     }
   },
 );

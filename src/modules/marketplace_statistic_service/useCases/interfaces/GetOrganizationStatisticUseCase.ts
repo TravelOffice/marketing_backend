@@ -1,5 +1,12 @@
 import { OrganizationStatistic } from '../../models/OrganizationStatistic';
 
 export interface GetOrganizationStatisticUseCase {
-  invoke(orgId: string): Promise<OrganizationStatistic | undefined>,
+  invoke(
+    orgId: string,
+    currentUser: {
+      tenant: string;
+      username: string;
+      name: string;
+    }
+  ): Promise<OrganizationStatistic | undefined>;
 }

@@ -4,7 +4,16 @@ import { GetOrganizationStatisticUseCase } from './interfaces/GetOrganizationSta
 
 export default class GetOrganizationStatisticUseCaseImpl
 implements GetOrganizationStatisticUseCase {
-  invoke(orgId: string): Promise<OrganizationStatistic | undefined> {
+  invoke(
+    orgId: string,
+    currentUser: {
+      tenant: string;
+      username: string;
+      name: string;
+    },
+  ): Promise<OrganizationStatistic | undefined> {
+    const { tenant } = currentUser;
+    if (tenant !== orgId) throw new Error('The user does not belong to the organization');
     return marketplaceStatisticRepository.getOrganizationStatistic(orgId);
   }
 }
