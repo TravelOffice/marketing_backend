@@ -5,7 +5,7 @@ import { MarketplaceStatisticRepository } from './interfaces/MarketplaceStatisti
 import { OrganizationStatistic } from '../models/OrganizationStatistic';
 import {
   MARKETPLACE_STATISTIC_PK,
-  DYNAMO_STATISTIC_TABLE,
+  statisticTable,
   MARKETPLACE_STATISTIC_SK,
 } from '../utils/constants';
 
@@ -15,7 +15,7 @@ implements MarketplaceStatisticRepository {
     MarketplaceStatistic | undefined
   > => {
     const marketplaceTable = await getAwsSecretValue(
-      DYNAMO_STATISTIC_TABLE,
+      statisticTable,
     );
     return dynamoProvider.getItem<MarketplaceStatistic>(
       marketplaceTable,
@@ -28,7 +28,7 @@ implements MarketplaceStatisticRepository {
     orgId: string,
   ): Promise<OrganizationStatistic | undefined> => {
     const marketplaceTable = await getAwsSecretValue(
-      DYNAMO_STATISTIC_TABLE,
+      statisticTable,
     );
     return dynamoProvider.getItem<OrganizationStatistic>(
       marketplaceTable,
