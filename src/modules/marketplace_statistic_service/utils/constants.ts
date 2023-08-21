@@ -16,7 +16,10 @@ export const TOUR_POST_BOOKMARK_INDEX = 'BM';
 
 export const TOUR_POST_FOLLOW_INDEX = 'FL';
 
-export const allowedInitialPostStatuses = [
-  'DRAFT',
-  'IN_PROGRESS',
-];
+export const allowedInitialPostStatuses = ['DRAFT', 'IN_PROGRESS'];
+
+export const DYNAMO_STATISTIC_TABLE = 'DYNAMO_STATISTIC_TABLE';
+
+export const MARKETPLACE_STATISTIC_PK = 'STATS';
+
+export const MARKETPLACE_STATISTIC_SK = 'MARKETPLACE_STATS';

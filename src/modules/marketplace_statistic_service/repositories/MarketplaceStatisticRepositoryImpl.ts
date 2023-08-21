@@ -3,27 +3,36 @@ import { dynamoProvider } from 'core';
 import { MarketplaceStatistic } from '../models/MarketplaceStatistic';
 import { MarketplaceStatisticRepository } from './interfaces/MarketplaceStatisticRepository';
 import { OrganizationStatistic } from '../models/OrganizationStatistic';
+import {
+  MARKETPLACE_STATISTIC_PK,
+  DYNAMO_STATISTIC_TABLE,
+  MARKETPLACE_STATISTIC_SK,
+} from '../utils/constants';
 
 export default class MarketplaceStatisticRepositoryImpl
 implements MarketplaceStatisticRepository {
-  getMarketplaceStatistic = async (): Promise<MarketplaceStatistic | undefined> => {
+  getMarketplaceStatistic = async (): Promise<
+    MarketplaceStatistic | undefined
+  > => {
     const marketplaceTable = await getAwsSecretValue(
-      'DYNAMO_MARKETPLACE_TABLE',
+      DYNAMO_STATISTIC_TABLE,
     );
     return dynamoProvider.getItem<MarketplaceStatistic>(
       marketplaceTable,
-      'STATS',
-      'MARKETPLACE_STATS',
+      MARKETPLACE_STATISTIC_PK,
+      MARKETPLACE_STATISTIC_SK,
     );
   };
 
-  getOrganizationStatistic = async (orgId: string): Promise<OrganizationStatistic | undefined> => {
+  getOrganizationStatistic = async (
+    orgId: string,
+  ): Promise<OrganizationStatistic | undefined> => {
     const marketplaceTable = await getAwsSecretValue(
-      'DYNAMO_MARKETPLACE_TABLE',
+      DYNAMO_STATISTIC_TABLE,
     );
     return dynamoProvider.getItem<OrganizationStatistic>(
       marketplaceTable,
-      'STATS',
+      MARKETPLACE_STATISTIC_PK,
       `ORG_STATS#${orgId}`,
     );
   };
