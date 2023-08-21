@@ -199,5 +199,6 @@ module "MARKETPLACE_DDB_STREAM_CONFIGURATION" {
   FEATURE_NAME                = var.FEATURE_NAME
   TAGS                        = local.tags
   MARKETPLACE_DDB_STREAM_ARN  = module.REMOTE_STATE.STATE.MARKETING.backend.dynamodb.marketplace_table.stream_arn
+  MARKETPLACE_DDB_STREAM_BATCH_SIZE     = 100
   MARKETPLACE_LAMBDA_STREAM_HANDLER_ARN = module.LAMBDA_FUNCTION.lambda_arns["marketplace_data_stream_service"]
 }

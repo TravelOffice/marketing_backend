@@ -1,19 +1,46 @@
+import { getAwsSecretValue } from 'get-env';
+import { dynamoProvider } from 'core';
 import { MarketplaceStatistic } from '../models/statistic/MarketplaceStatistic';
 import { MarketplaceStatisticRepository } from './interfaces/MarketplaceStatisticRepository';
 import logger from '../utils/logger';
+import { MARKETPLACE_STATISTIC_INDEX, STATISTIC_INDEX } from '../utils/constants';
 
 export default class MarketplaceStatisticRepositoryImpl implements MarketplaceStatisticRepository {
   getMarketplaceStatistic = async () => {
-    throw new Error('Method not implemented.');
+    const marketplaceTable = await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE');
+    const statisticItem = await dynamoProvider.getItem<MarketplaceStatistic>(
+      marketplaceTable,
+      STATISTIC_INDEX,
+      MARKETPLACE_STATISTIC_INDEX,
+    );
+    if (!statisticItem) return undefined;
+
+    logger.log(`Get marketplace statistic successfully: ${JSON.stringify(statisticItem)}`);
+    return statisticItem;
   };
 
   createMarketplaceStatistic = async (marketplaceStatistic: MarketplaceStatistic) => {
-    logger.log(marketplaceStatistic);
-    throw new Error('Method not implemented.');
+    const marketplaceTable = await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE');
+    await dynamoProvider.putItem(
+      marketplaceTable,
+      STATISTIC_INDEX,
+      MARKETPLACE_STATISTIC_INDEX,
+      marketplaceStatistic,
+    );
+    logger.log(`Create marketplace statistic successfully: ${JSON.stringify(marketplaceStatistic)}`);
+    return marketplaceStatistic;
   };
 
   updateMarketplaceStatistic = async (dataToUpdate: Partial<MarketplaceStatistic>) => {
-    logger.log(dataToUpdate);
-    throw new Error('Method not implemented.');
+    const marketplaceTable = await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE');
+    const { Attributes: marketplaceStatistic } = await dynamoProvider.updateItemWithSetExpression(
+      marketplaceTable,
+      STATISTIC_INDEX,
+      MARKETPLACE_STATISTIC_INDEX,
+      dataToUpdate,
+    );
+
+    logger.log(`Update marketplace statistic successfully: ${JSON.stringify(marketplaceStatistic)}`);
+    return marketplaceStatistic as MarketplaceStatistic;
   };
 }

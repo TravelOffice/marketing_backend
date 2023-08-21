@@ -9,6 +9,7 @@ export type QueryInput = AWS.DynamoDB.DocumentClient.QueryInput;
 export type DeleteItemInput = AWS.DynamoDB.DocumentClient.DeleteItemInput;
 export type BatchGetItemInput = AWS.DynamoDB.DocumentClient.BatchGetItemInput;
 export type BatchWriteItemInput = AWS.DynamoDB.DocumentClient.BatchWriteItemInput;
+export type WriteRequest = AWS.DynamoDB.DocumentClient.WriteRequest;
 export type KeyList = AWS.DynamoDB.DocumentClient.KeyList;
 export type AttributeValues = AWS.DynamoDB.AttributeMap;
 
@@ -175,6 +176,10 @@ export default class DynamoProvider {
     };
     return dynamoDB.update(params).promise();
   };
+
+  updateItemWithPrebuiltExpression = async (itemInput: UpdateItemInput) => {
+    return dynamoDB.update(itemInput).promise();
+  }
 
   /**
    * Delete an item from the DynamoDB table.
