@@ -7,7 +7,7 @@ import { Offer } from '../models/Offer';
 
 export default class UpdateOfferUseCaseImpl implements UpdateOfferUseCase {
   private allowedUpdatingKeys: (keyof UpdateOfferDto)[] = [
-    'description', 'totalPax', 'pricePerPax', 'commissionRate',
+    'description', 'totalPax', 'pricePerPax', 'commission',
   ];
 
   /**

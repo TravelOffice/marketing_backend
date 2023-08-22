@@ -32,6 +32,8 @@ export interface TourPostRepository {
     params: PaginationParams,
   ): Promise<PaginationResponsePayload<TourPost> | undefined>,
 
+  listByIds(ids: string[]): Promise<Array<TourPost>>,
+
   create(tourPost: TourPost): Promise<TourPost>,
 
   getById(id: string): Promise<TourPost | undefined>,

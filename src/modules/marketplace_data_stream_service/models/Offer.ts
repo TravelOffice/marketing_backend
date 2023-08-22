@@ -15,7 +15,7 @@ export interface Offer extends BaseDdbModel {
   description?: string, // Description of the offer
   totalPax: number, // Total pax of the offer. Can be >0 or -1 (unlimited)
   pricePerPax: number, // Price per pax of the offer
-  commissionRate: number, // Commission rate per pax of the offer
+  commission: number, // Commission per pax of the offer
   authorId: string, // Alias id of marketplace user that is auto-generated or set by user
   sentOrg: string, // The ID of the organization that sent the offer
   tourPostId: string, // The ID of the tour post

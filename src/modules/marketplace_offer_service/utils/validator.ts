@@ -34,8 +34,8 @@ export function createOfferValidator() {
     body('pricePerPax')
       .isInt({ min: 1 })
       .withMessage(VALIDATE_INTEGER_MSG),
-    body('commissionRate')
-      .isInt({ min: 0, max: 100 })
+    body('commission')
+      .isInt({ min: 0 })
       .withMessage(VALIDATE_COMMISSION_RATE_MSG),
   ];
 }
@@ -55,7 +55,7 @@ export function updateOfferValidator() {
       .optional()
       .isInt({ min: 1 })
       .withMessage(VALIDATE_INTEGER_MSG),
-    body('commissionRate')
+    body('commission')
       .optional()
       .isInt({ min: 0 })
       .withMessage(VALIDATE_INTEGER_MSG),

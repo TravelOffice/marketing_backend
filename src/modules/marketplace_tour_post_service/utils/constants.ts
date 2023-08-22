@@ -23,3 +23,5 @@ export const allowedInitialPostStatuses = [
 export const STATISTIC_INDEX = 'STATS';
 
 export const TOUR_POST_STATISTIC_INDEX = 'P_STATS';
+
+export const TOP_TOUR_POST_STATISTIC_INDEX = 'TOP_P_STATS';
