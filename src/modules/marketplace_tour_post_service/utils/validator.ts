@@ -44,7 +44,29 @@ export function createTourPostValidator() {
       .isIn(tourPostTypes)
       .withMessage(`allow only in ${tourPostTypes}`),
 
-    body('linkedToTarget').notEmpty().withMessage('is required and not be empty'),
+    body('pricePerPax')
+      .notEmpty().withMessage('is required')
+      .isNumeric()
+      .withMessage('must be a number'),
+
+    body('commissionRate')
+      .notEmpty().withMessage('is required')
+      .isNumeric()
+      .withMessage('must be a number'),
+
+    body('linkedToTargetKeys')
+      .isObject()
+      .withMessage('is required and must be an object'),
+
+    body('linkedToTargetKeys.pk')
+      .notEmpty()
+      .isString()
+      .withMessage('must be a non-empty string'),
+
+    body('linkedToTargetKeys.sk')
+      .notEmpty()
+      .isString()
+      .withMessage('must be a non-empty string'),
 
     body('expiry')
       .optional()

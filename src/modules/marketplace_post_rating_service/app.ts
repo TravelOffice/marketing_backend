@@ -106,7 +106,6 @@ app.put('/marketplace/posts/:id/ratings/:ratingId', updateRatingValidator(), asy
     validate(req);
     const currentUser = getCurrentUserInfo(req.headers.authorization!);
     const { id: tourPostId, ratingId: code } = req.params;
-    const { organization } = req.query;
     const rating = await updatePostRatingUseCase.invoke(
       currentUser,
       {

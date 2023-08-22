@@ -7,9 +7,9 @@ import { MARKETPLACE_STATISTIC_INDEX, STATISTIC_INDEX } from '../utils/constants
 
 export default class MarketplaceStatisticRepositoryImpl implements MarketplaceStatisticRepository {
   getMarketplaceStatistic = async () => {
-    const marketplaceTable = await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE');
+    const statisticTable = await getAwsSecretValue('DYNAMO_STATISTIC_TABLE');
     const statisticItem = await dynamoProvider.getItem<MarketplaceStatistic>(
-      marketplaceTable,
+      statisticTable,
       STATISTIC_INDEX,
       MARKETPLACE_STATISTIC_INDEX,
     );
@@ -20,9 +20,9 @@ export default class MarketplaceStatisticRepositoryImpl implements MarketplaceSt
   };
 
   createMarketplaceStatistic = async (marketplaceStatistic: MarketplaceStatistic) => {
-    const marketplaceTable = await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE');
+    const statisticTable = await getAwsSecretValue('DYNAMO_STATISTIC_TABLE');
     await dynamoProvider.putItem(
-      marketplaceTable,
+      statisticTable,
       STATISTIC_INDEX,
       MARKETPLACE_STATISTIC_INDEX,
       marketplaceStatistic,
@@ -32,9 +32,9 @@ export default class MarketplaceStatisticRepositoryImpl implements MarketplaceSt
   };
 
   updateMarketplaceStatistic = async (dataToUpdate: Partial<MarketplaceStatistic>) => {
-    const marketplaceTable = await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE');
+    const statisticTable = await getAwsSecretValue('DYNAMO_STATISTIC_TABLE');
     const { Attributes: marketplaceStatistic } = await dynamoProvider.updateItemWithSetExpression(
-      marketplaceTable,
+      statisticTable,
       STATISTIC_INDEX,
       MARKETPLACE_STATISTIC_INDEX,
       dataToUpdate,

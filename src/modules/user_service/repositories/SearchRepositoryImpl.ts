@@ -18,14 +18,20 @@ export default class SearchRepositoryImpl implements SearchRepository {
    * @returns The search token
    */
   generateSearchToken = async (apiKey: string): Promise<string> => {
-    const searchApiKey = await meiliSeachProvider.getApiKey(apiKey);
-    // Allow key to exprised after 1 hour
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getTime() + 60 * 60 * 1000);
-    const searchRules = {
-      '*': {},
-    };
-    return meiliSeachProvider.generateTenantToken(searchApiKey, searchRules, expiresAt);
+    // TODO: Temporary fix
+    try {
+      const searchApiKey = await meiliSeachProvider.getApiKey(apiKey);
+      // Allow key to exprised after 1 hour
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getTime() + 60 * 60 * 1000);
+      const searchRules = {
+        '*': {},
+      };
+      return meiliSeachProvider.generateTenantToken(searchApiKey, searchRules, expiresAt);
+    } catch (error) {
+      return '';
+    }
+
   };
 
   /**

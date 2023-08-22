@@ -12,15 +12,11 @@ export default class EnableMarketplaceuserUseCaseImpl implements EnableMarketpla
    * @throws {Error} - If the user does not exist.
    */
   invoke = async (
-    tenant: string,
-    username: string,
+    userId: string,
     enable: boolean,
   ): Promise<MarketplaceUser> => {
-    // Construct the ID using tenant and username
-    const id = `${tenant}#${username}`;
-
     // Retrieve the user using the constructed ID
-    const user = await marketplaceUserRepository.getById(id);
+    const user = await marketplaceUserRepository.getById(userId);
 
     // If user doesn't exist, throw an error
     if (!user) {
@@ -28,6 +24,6 @@ export default class EnableMarketplaceuserUseCaseImpl implements EnableMarketpla
     }
 
     // Enable or disable the user
-    return marketplaceUserRepository.update(id, { enable } as Partial<MarketplaceUser>);
+    return marketplaceUserRepository.update(userId, { enable } as Partial<MarketplaceUser>);
   };
 }

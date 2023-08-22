@@ -5,6 +5,7 @@ import { OrganizationStats } from '../models/statistic/OrganizationStatistic';
 import { OrganizationsStatistic } from '../models/statistic/OrganizationsStatistic';
 import { ORG_STATISTIC_INDEX, STATISTIC_INDEX } from '../utils/constants';
 import { OrganizationStatisticRepository } from './interfaces/OrganizationStatisticRepository';
+import { isOrgStatisticChanged } from '../utils/statistic';
 
 export default class OrganizationStatisticRepositoryImpl
 implements OrganizationStatisticRepository {
@@ -12,20 +13,25 @@ implements OrganizationStatisticRepository {
    * Batch update organizations' statistic
    * Since DynamoDB doesn't support batch update, we have to update each item one by one in parallel
    *
-   * @param orgStatisticsChanges Organizations' statistic change count
+   * @param orgsChangedStats Organizations' statistic changes
    * @returns Promise<void>
    */
-  batchUpdateOrganizationsStatistic = async (orgStatisticsChanges: OrganizationsStatistic) => {
-    const marketplaceTable = await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE');
-    const promises = Object.keys(orgStatisticsChanges).map(async (organization) => {
-      const orgStatistic = orgStatisticsChanges[organization];
+  batchUpdateOrganizationsStatistic = async (orgsChangedStats: OrganizationsStatistic) => {
+    const statisticTable = await getAwsSecretValue('DYNAMO_STATISTIC_TABLE');
+    const promises = Object.keys(orgsChangedStats).map(async (organization) => {
+      const orgStatistic = orgsChangedStats[organization];
+      // Check if there is any change in organization statistic
+      if (!isOrgStatisticChanged(orgStatistic)) {
+        return;
+      }
+      // Build update item params and write to database
       const {
         updateExpression,
         expressionNames,
         expressionValues,
       } = this.buildUpdateItemParams(orgStatistic);
       const params: UpdateItemInput = {
-        TableName: marketplaceTable,
+        TableName: statisticTable,
         Key: {
           pk: STATISTIC_INDEX,
           sk: `${ORG_STATISTIC_INDEX}#${organization}`,
@@ -38,7 +44,7 @@ implements OrganizationStatisticRepository {
       await dynamoProvider.updateItemWithPrebuiltExpression(params);
     });
     await Promise.all(promises);
-    logger.log(`Update organizations' statistic successfully with data changes by ${JSON.stringify(orgStatisticsChanges)}`);
+    logger.log(`Update organizations' statistic successfully with data changes by ${JSON.stringify(orgsChangedStats)}`);
   };
 
   /**

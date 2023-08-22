@@ -1,5 +1,4 @@
-import { PaginationParams, PaginationResponsePayload } from 'core/providers/dynamodb/DynamoProvider';
-import { PostRating } from '../models/PostRating';
+import { PaginationParams } from 'core/providers/dynamodb/DynamoProvider';
 import { postRatingRepository } from '../repositories';
 import { GetOrgRatingListUseCase } from './interfaces/GetOrgRatingListUseCase';
 
