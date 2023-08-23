@@ -1,4 +1,4 @@
-import { getCurrentUserInfo } from 'decode-token';
+import { getMarketplaceUserInfo } from 'decode-token';
 import {
   AppSyncAuthorizerEvent,
   AppSyncPolicyRequest,
@@ -30,7 +30,7 @@ export default class AppSyncEventHandler extends AuthorizerHandler<AppSyncAuthor
       authorizationToken,
     );
 
-    const { tenant, username } = getCurrentUserInfo(authorizationToken);
+    const { tenant, username } = getMarketplaceUserInfo(authorizationToken);
     const userAttributes = await userRepository.getUserAttributes(tenant, username);
     if (!userAttributes) throw new Error(`AppSyncEventHandler: Your account [${username}] not existed!`);
     const { enabled } = userAttributes;

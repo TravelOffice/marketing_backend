@@ -1,5 +1,5 @@
 import cors from 'cors';
-import { getCurrentUserInfo } from 'decode-token';
+import { getMarketplaceUserInfo } from 'decode-token';
 import express, { NextFunction, Request, Response } from 'express';
 import compression from 'compression';
 import { logger } from 'core';
@@ -57,7 +57,7 @@ app.post('/marketplace/posts/:id/ratings', createRatingValidator(), async (req: 
   try {
     validate(req);
     const { id: tourPostId } = req.params;
-    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const currentUser = getMarketplaceUserInfo(req.headers.authorization!);
     const rating = await createPostRatingUseCase.invoke(currentUser, tourPostId, req.body);
     res.json(wrapResponse(SUCCESS, rating));
   } catch (error: any) {
@@ -104,7 +104,7 @@ app.get('/marketplace/organizations/:id/ratings', getOrgRatingListValidator(), a
 app.put('/marketplace/posts/:id/ratings/:ratingId', updateRatingValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
-    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const currentUser = getMarketplaceUserInfo(req.headers.authorization!);
     const { id: tourPostId, ratingId: code } = req.params;
     const rating = await updatePostRatingUseCase.invoke(
       currentUser,
@@ -126,7 +126,7 @@ app.delete('/marketplace/posts/:id/ratings/:ratingId', deletePostRatingValidator
     validate(req);
     const { id: tourPostId, ratingId } = req.params;
     const { organization } = req.body;
-    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const currentUser = getMarketplaceUserInfo(req.headers.authorization!);
     await deletePostRatingUseCase.invoke(
       currentUser,
       organization,

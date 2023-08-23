@@ -1,5 +1,5 @@
 import cors from 'cors';
-import { getCurrentUserInfo } from 'decode-token';
+import { getMarketplaceUserInfo } from 'decode-token';
 import express, { NextFunction, Request, Response } from 'express';
 import compression from 'compression';
 import { logger } from 'core';
@@ -53,7 +53,7 @@ app.post('/marketplace/posts/:id/comments', createCommentValidator(), async (req
   try {
     validate(req);
     const { id: tourPostId } = req.params;
-    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const currentUser = getMarketplaceUserInfo(req.headers.authorization!);
     const comment = await createPostCommentUseCase.invoke(currentUser, tourPostId, req.body);
     res.json(wrapResponse(SUCCESS, comment));
   } catch (error: any) {
@@ -76,7 +76,7 @@ app.get('/marketplace/posts/:id/comments/:commentId', async (req: Request, res: 
 app.put('/marketplace/posts/:id/comments/:commentId', updateCommentValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
-    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const currentUser = getMarketplaceUserInfo(req.headers.authorization!);
     const { id: tourPostId, commentId } = req.params;
     const comment = await updatePostCommentUseCase.invoke(
       currentUser,
@@ -94,7 +94,7 @@ app.put('/marketplace/posts/:id/comments/:commentId', updateCommentValidator(), 
 app.delete('/marketplace/posts/:id/comments/:commentId', async (req: Request, res: Response) => {
   try {
     const { id: tourPostId, commentId } = req.params;
-    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const currentUser = getMarketplaceUserInfo(req.headers.authorization!);
     await deletePostCommentUseCase.invoke(currentUser, tourPostId, commentId);
     res.json(wrapResponse(SUCCESS, {}));
   } catch (error: any) {

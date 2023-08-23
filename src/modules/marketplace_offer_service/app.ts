@@ -1,5 +1,5 @@
 import cors from 'cors';
-import { getCurrentUserInfo } from 'decode-token';
+import { getMarketplaceUserInfo } from 'decode-token';
 import express, { NextFunction, Request, Response } from 'express';
 import compression from 'compression';
 import { logger } from 'core';
@@ -51,7 +51,7 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
 app.get('/marketplace/posts/:id/offers', getOfferListOfPostValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
-    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const currentUser = getMarketplaceUserInfo(req.headers.authorization!);
     const { id: tourPostId } = req.params;
     const offers = await getOfferListOfPostUseCase.invoke(currentUser, tourPostId);
     res.json(wrapResponse(SUCCESS, offers));
@@ -65,7 +65,7 @@ app.post('/marketplace/posts/:id/offers', createOfferValidator(), async (req: Re
   try {
     validate(req);
     const { id: tourPostId } = req.params;
-    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const currentUser = getMarketplaceUserInfo(req.headers.authorization!);
     const offer = await createOfferUseCase.invoke(currentUser, tourPostId, req.body);
     res.json(wrapResponse(SUCCESS, offer));
   } catch (error: any) {
@@ -77,7 +77,7 @@ app.post('/marketplace/posts/:id/offers', createOfferValidator(), async (req: Re
 app.get('/marketplace/me/organizations/sent-offers', getOfferListOfOrgValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
-    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const currentUser = getMarketplaceUserInfo(req.headers.authorization!);
     const {
       offerStatus, ...paginationParams
     } = req.query;
@@ -96,7 +96,7 @@ app.get('/marketplace/me/organizations/sent-offers', getOfferListOfOrgValidator(
 app.get('/marketplace/me/organizations/received-offers', getOfferListOfOrgValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
-    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const currentUser = getMarketplaceUserInfo(req.headers.authorization!);
     const {
       ...paginationParams
     } = req.query;
@@ -115,7 +115,7 @@ app.get('/marketplace/offers/:id', async (req: Request, res: Response) => {
   try {
     validate(req);
     const { id: offerId } = req.params;
-    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const currentUser = getMarketplaceUserInfo(req.headers.authorization!);
     const offer = await getOfferUseCase.invoke(
       currentUser,
       offerId,
@@ -130,7 +130,7 @@ app.get('/marketplace/offers/:id', async (req: Request, res: Response) => {
 app.put('/marketplace/offers/:id', updateOfferValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
-    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const currentUser = getMarketplaceUserInfo(req.headers.authorization!);
     const { id: code } = req.params;
     const offer = await updateOfferUseCase.invoke(
       currentUser,
@@ -149,7 +149,7 @@ app.put('/marketplace/offers/:id', updateOfferValidator(), async (req: Request, 
 app.put('/marketplace/offers/:id/cancel', cancelOfferValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
-    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const currentUser = getMarketplaceUserInfo(req.headers.authorization!);
     const { id: offerId } = req.params;
     const { cancelReason } = req.body;
     const offer = await cancelOfferUseCase.invoke(
@@ -167,7 +167,7 @@ app.put('/marketplace/offers/:id/cancel', cancelOfferValidator(), async (req: Re
 app.put('/marketplace/offers/:id/accept', acceptOfferValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
-    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const currentUser = getMarketplaceUserInfo(req.headers.authorization!);
     const { id: offerId } = req.params;
     const offer = await acceptOfferUseCase.invoke(
       currentUser,
@@ -183,7 +183,7 @@ app.put('/marketplace/offers/:id/accept', acceptOfferValidator(), async (req: Re
 app.put('/marketplace/offers/:id/reject', rejectOfferValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
-    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const currentUser = getMarketplaceUserInfo(req.headers.authorization!);
     const { id: offerId } = req.params;
     const { rejectReason } = req.body;
     const offer = await rejectOfferUseCase.invoke(
@@ -201,7 +201,7 @@ app.put('/marketplace/offers/:id/reject', rejectOfferValidator(), async (req: Re
 app.get('/marketplace/me/offers', getOfferListOfAuthorValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
-    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const currentUser = getMarketplaceUserInfo(req.headers.authorization!);
     const { ...paginationParams } = req.query;
     const offers = await getOfferListOfAuthorUseCase.invoke(
       currentUser,

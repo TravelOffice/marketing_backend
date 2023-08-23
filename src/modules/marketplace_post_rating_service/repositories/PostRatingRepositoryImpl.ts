@@ -46,6 +46,22 @@ export default class PostRatingRepositoryImpl implements PostRatingRepository {
     );
   }
 
+  async getByUserId(organization: string, userId: string): Promise<PostRating | undefined> {
+    const marketplaceTable = await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE');
+    const queryParams = {
+      TableName: marketplaceTable,
+      IndexName: 'Index1',
+      KeyConditionExpression: 'pk = :pk and begins_with(lsi1, :lsi1_filter)',
+      ExpressionAttributeValues: {
+        ':pk': `${ORGANIZATION_INDEX}#${organization}#${RATING_INDEX}`,
+        ':lsi1_filter': `${userId}#`,
+      },
+    };
+    const result = await dynamoProvider.query(queryParams);
+    const [postRating] = result as PostRating[];
+    return postRating;
+  }
+
   /**
    * Creates a new rating for the specified post.
    *
