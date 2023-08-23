@@ -1,6 +1,6 @@
 import compression from 'compression';
 import cors from 'cors';
-import { getCurrentUserInfo } from 'decode-token';
+import { getMarketplaceUserInfo } from 'decode-token';
 import express, { NextFunction, Request, Response } from 'express';
 import {
   createMarketplaceUserUseCase,
@@ -35,7 +35,7 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
 
 app.get('/marketplace/users', async (req: Request, res: Response) => {
   try {
-    const { tenant } = getCurrentUserInfo(req.headers.authorization!);
+    const { tenant } = getMarketplaceUserInfo(req.headers.authorization!);
     const users = await getTenantUserListUseCase.invoke(tenant);
     res.json(wrapResponse(SUCCESS, users));
   } catch (error: any) {
@@ -59,7 +59,7 @@ app.post('/marketplace/users', createUserValidator(), async (req: Request, res: 
 app.put('/marketplace/me', updateUserValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
-    const { tenant, username } = getCurrentUserInfo(req.headers.authorization!);
+    const { tenant, username } = getMarketplaceUserInfo(req.headers.authorization!);
     const users = await updateMarketplaceUserUseCase.invoke(tenant, username, req.body);
     res.json(wrapResponse(SUCCESS, users));
   } catch (error: any) {
@@ -82,7 +82,7 @@ app.put('/marketplace/enable-user', enableUserValidator(), async (req: Request, 
 
 app.get('/marketplace/me', async (req: Request, res: Response) => {
   try {
-    const { tenant, username } = getCurrentUserInfo(req.headers.authorization!);
+    const { tenant, username } = getMarketplaceUserInfo(req.headers.authorization!);
     const id = `${tenant}#${username}`;
     const currentUser = await getMarketplaceUserUseCase.invoke(id);
     res.json(wrapResponse(SUCCESS, currentUser));

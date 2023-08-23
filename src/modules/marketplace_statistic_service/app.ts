@@ -1,5 +1,5 @@
 import cors from 'cors';
-import { getCurrentUserInfo } from 'decode-token';
+import { getMarketplaceUserInfo } from 'decode-token';
 import express, { Request, Response, NextFunction } from 'express';
 import compression from 'compression';
 import {
@@ -48,7 +48,7 @@ app.get(
     try {
       validate(req);
       const { id } = req.params;
-      const currentUser = getCurrentUserInfo(req.headers.authorization!);
+      const currentUser = getMarketplaceUserInfo(req.headers.authorization!);
       const marketplaceStatistics = await getOrganizationStatisticUseCase.invoke(id, currentUser);
       logger.log(`[GET - ${id}] Successfully ${marketplaceStatistics}`);
       res.json(wrapResponse(SUCCESS, marketplaceStatistics));

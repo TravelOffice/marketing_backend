@@ -32,6 +32,12 @@ export default class CreatePostRatingUseCaseImpl implements CreatePostRatingUseC
       throw new Error('Marketplace user not found');
     }
 
+    // Check if the user has already rated this post
+    const existedPostRating = await postRatingRepository.getByUserId(tenant, marketplaceUserId);
+    if (existedPostRating) {
+      throw new Error('You have already rated this post');
+    }
+
     // Retrieve the tour post from the repository
     const tourPost = await tourPostRepository.getById(tourPostId);
     if (!tourPost) {

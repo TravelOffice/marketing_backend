@@ -1,5 +1,5 @@
 import cors from 'cors';
-import { getCurrentUserInfo } from 'decode-token';
+import { getMarketplaceUserInfo } from 'decode-token';
 import express, { Request, Response, NextFunction } from 'express';
 import compression from 'compression';
 import { logger } from 'core';
@@ -46,7 +46,7 @@ app.get('/marketplace/organizations', async (req: Request, res: Response) => {
 app.post('/marketplace/organizations', createOrUpdateOrganizationValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
-    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const currentUser = getMarketplaceUserInfo(req.headers.authorization!);
     const organization = await createOrganizationUseCase.invoke(currentUser, req.body);
     res.json(wrapResponse(SUCCESS, organization));
   } catch (error: any) {
@@ -70,7 +70,7 @@ app.put('/marketplace/organizations/:id', createOrUpdateOrganizationValidator(),
   try {
     validate(req);
     const { id } = req.params;
-    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const currentUser = getMarketplaceUserInfo(req.headers.authorization!);
     const organization = await updateOrganizationUseCase.invoke(currentUser, id, req.body);
     res.json(wrapResponse(SUCCESS, organization));
   } catch (error: any) {
@@ -82,7 +82,7 @@ app.put('/marketplace/organizations/:id', createOrUpdateOrganizationValidator(),
 app.delete('/marketplace/organizations/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const currentUser = getMarketplaceUserInfo(req.headers.authorization!);
     await deleteOrganizationUseCase.invoke(currentUser, id);
     res.json(wrapResponse(SUCCESS, {}));
   } catch (error: any) {

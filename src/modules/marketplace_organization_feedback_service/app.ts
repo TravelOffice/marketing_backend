@@ -1,5 +1,5 @@
 import cors from 'cors';
-import { getCurrentUserInfo } from 'decode-token';
+import { getMarketplaceUserInfo } from 'decode-token';
 import express, { NextFunction, Request, Response } from 'express';
 import compression from 'compression';
 import { logger } from 'core';
@@ -56,7 +56,7 @@ app.post('/marketplace/organizations/:id/feedback', createOrgFeedbackValidator()
   try {
     validate(req);
     const { id: organization } = req.params;
-    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const currentUser = getMarketplaceUserInfo(req.headers.authorization!);
     const comment = await createOrgFeedbackUseCase.invoke(currentUser, organization, req.body);
     res.json(wrapResponse(SUCCESS, comment));
   } catch (error: any) {
@@ -79,7 +79,7 @@ app.get('/marketplace/organizations/:id/feedback/:feedbackId', async (req: Reque
 app.put('/marketplace/organizations/:id/feedback/:feedbackId', updateOrgFeedbackValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
-    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const currentUser = getMarketplaceUserInfo(req.headers.authorization!);
     const { id: organization, feedbackId } = req.params;
     const feedback = await updateOrgFeedbackUseCase.invoke(
       currentUser,
@@ -97,7 +97,7 @@ app.put('/marketplace/organizations/:id/feedback/:feedbackId', updateOrgFeedback
 app.delete('/marketplace/organizations/:id/feedback/:feedbackId', async (req: Request, res: Response) => {
   try {
     const { id: organization, feedbackId } = req.params;
-    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const currentUser = getMarketplaceUserInfo(req.headers.authorization!);
     await deleteOrgFeedbackUseCase.invoke(currentUser, organization, feedbackId);
     res.json(wrapResponse(SUCCESS, {}));
   } catch (error: any) {

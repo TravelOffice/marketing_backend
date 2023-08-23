@@ -1,4 +1,4 @@
-import { getCurrentUserInfo } from 'decode-token';
+import { getMarketplaceUserInfo } from 'decode-token';
 import {
   ApiGatewayPolicyRequest,
   APIGatewayRequestAuthorizerEvent,
@@ -28,7 +28,7 @@ class APIGatewayRequestEventHandler extends AuthorizerHandler<APIGatewayRequestA
       authorizationToken,
     );
 
-    const { tenant, username } = getCurrentUserInfo(authorizationToken!);
+    const { tenant, username } = getMarketplaceUserInfo(authorizationToken!);
     const userAttributes = await userRepository.getUserAttributes(tenant, username);
     if (!userAttributes) throw new Error(`APIGatewayRequestEventHandler: Your account [${username}] not existed!`);
 

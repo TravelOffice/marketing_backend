@@ -1,6 +1,6 @@
 import compression from 'compression';
 import cors from 'cors';
-import { getCurrentUserInfo } from 'decode-token';
+import { getMarketplaceUserInfo } from 'decode-token';
 import express, { NextFunction, Request, Response } from 'express';
 import {
   bookmarkTourPostUseCase,
@@ -53,7 +53,7 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
 app.get('/marketplace/me/posts', getSelfPostsValidator(), async (req: Request, res: Response) => {
   validate(req);
   try {
-    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const currentUser = getMarketplaceUserInfo(req.headers.authorization!);
     const tourPosts = await getSelfTourPostListByUserUseCase.invoke(
       currentUser,
       req.query,
@@ -72,7 +72,7 @@ app.get('/marketplace/posts', getPostsValidator(), async (req: Request, res: Res
     // The posts can be get by organization
     // If organization is not specified, get all posts
     const { organization, author, ...paginationParams } = req.query;
-    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const currentUser = getMarketplaceUserInfo(req.headers.authorization!);
     let tourPosts;
     if (organization) {
       // Fetch posts by organization
@@ -118,7 +118,7 @@ app.get('/marketplace/posts/:id', getTourPostValidator(), async (req: Request, r
 app.post('/marketplace/posts', createTourPostValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
-    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const currentUser = getMarketplaceUserInfo(req.headers.authorization!);
     const tourPost = await createTourPostUseCase.invoke(currentUser, req.body);
     logger.log(`[app.post] Create post successfully ${JSON.stringify(tourPost)}`);
     res.json(wrapResponse(SUCCESS, tourPost));
@@ -132,7 +132,7 @@ app.put('/marketplace/posts/:id', updateTourPostValidator(), async (req: Request
   try {
     validate(req);
     const { id } = req.params;
-    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const currentUser = getMarketplaceUserInfo(req.headers.authorization!);
     const tourPost = await updateTourPostUseCase.invoke(currentUser, id, req.body);
     logger.log(`[app.put] Update post ${id} successfully ${JSON.stringify(tourPost)}`);
     res.json(wrapResponse(SUCCESS, tourPost));
@@ -146,7 +146,7 @@ app.get('/marketplace/me/bookmarked-posts', getBookmarkedOrFollowedPostsValidato
   try {
     validate(req);
     // Get bookmarked posts of current user
-    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const currentUser = getMarketplaceUserInfo(req.headers.authorization!);
     const tourPosts = await getBookmarkedTourPostsUseCase.invoke(
       currentUser,
       req.query,
@@ -163,7 +163,7 @@ app.get('/marketplace/me/followed-posts', getBookmarkedOrFollowedPostsValidator(
   try {
     validate(req);
     // Get followed posts of current user
-    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const currentUser = getMarketplaceUserInfo(req.headers.authorization!);
     const tourPosts = await getFollowedTourPostsUseCase.invoke(
       currentUser,
       req.query,
@@ -180,7 +180,7 @@ app.post('/marketplace/posts/:id/bookmark', bookmarkPostValidator(), async (req:
   try {
     validate(req);
     const { id: postId } = req.params;
-    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const currentUser = getMarketplaceUserInfo(req.headers.authorization!);
     const bookmarkedItem = await bookmarkTourPostUseCase.invoke(currentUser, postId);
     logger.log(`[app.get] Bookmark post ${postId} successfully ${JSON.stringify(bookmarkedItem)}`);
     res.json(wrapResponse(SUCCESS, bookmarkedItem));
@@ -194,7 +194,7 @@ app.delete('/marketplace/posts/:id/bookmark', bookmarkPostValidator(), async (re
   try {
     validate(req);
     const { id: postId } = req.params;
-    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const currentUser = getMarketplaceUserInfo(req.headers.authorization!);
     await unbookmarkTourPostUseCase.invoke(currentUser, postId);
     logger.log(`[app.get] Unbookmark post ${postId} for user ${currentUser} successfully`);
     res.json(wrapResponse(SUCCESS, undefined));
@@ -208,7 +208,7 @@ app.post('/marketplace/posts/:id/follow', followPostValidator(), async (req: Req
   try {
     validate(req);
     const { id: postId } = req.params;
-    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const currentUser = getMarketplaceUserInfo(req.headers.authorization!);
     const bookmarkedItem = await followTourPostUseCase.invoke(currentUser, postId);
     logger.log(`[app.get] Follow post ${postId} successfully ${JSON.stringify(bookmarkedItem)}`);
     res.json(wrapResponse(SUCCESS, bookmarkedItem));
@@ -222,7 +222,7 @@ app.delete('/marketplace/posts/:id/follow', followPostValidator(), async (req: R
   try {
     validate(req);
     const { id: postId } = req.params;
-    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const currentUser = getMarketplaceUserInfo(req.headers.authorization!);
     await unfollowTourPostUseCase.invoke(currentUser, postId);
     logger.log(`[app.get] Unfollow post ${postId} for user ${currentUser} successfully`);
     res.json(wrapResponse(SUCCESS, undefined));

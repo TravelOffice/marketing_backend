@@ -1,6 +1,6 @@
 import compression from 'compression';
 import cors from 'cors';
-import { getCurrentUserInfo } from 'decode-token';
+import { getMarketplaceUserInfo } from 'decode-token';
 import express, { NextFunction, Request, Response } from 'express';
 import {
   createTenantRoleUseCase,
@@ -35,7 +35,7 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
 
 app.get('/marketplace/admin/roles', async (req: Request, res: Response) => {
   try {
-    const { tenant } = getCurrentUserInfo(req.headers.authorization!);
+    const { tenant } = getMarketplaceUserInfo(req.headers.authorization!);
     const roles = await getListTenantRolesUseCase.invoke(tenant);
     res.json(wrapResponse(SUCCESS, roles));
   } catch (error: any) {
@@ -47,7 +47,7 @@ app.get('/marketplace/admin/roles', async (req: Request, res: Response) => {
 app.post('/marketplace/admin/roles', createRoleValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
-    const { tenant } = getCurrentUserInfo(req.headers.authorization!);
+    const { tenant } = getMarketplaceUserInfo(req.headers.authorization!);
     const { name, permissions } = req.body;
     const role = await createTenantRoleUseCase.invoke(tenant, name, permissions);
     res.json(wrapResponse(SUCCESS, role));
@@ -60,7 +60,7 @@ app.post('/marketplace/admin/roles', createRoleValidator(), async (req: Request,
 app.put('/marketplace/admin/roles/:roleName', updateRoleValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
-    const { tenant } = getCurrentUserInfo(req.headers.authorization!);
+    const { tenant } = getMarketplaceUserInfo(req.headers.authorization!);
     const { roleName } = req.params;
     const { permissions } = req.body;
     const role = await updateTenantRoleUseCase.invoke(tenant, roleName, permissions);
@@ -74,7 +74,7 @@ app.put('/marketplace/admin/roles/:roleName', updateRoleValidator(), async (req:
 app.delete('/marketplace/admin/roles/:roleName', deleteRoleValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
-    const { tenant } = getCurrentUserInfo(req.headers.authorization!);
+    const { tenant } = getMarketplaceUserInfo(req.headers.authorization!);
     const { roleName } = req.params;
     const role = await deleteTenantRoleUseCase.invoke(tenant, roleName);
     res.json(wrapResponse(SUCCESS, role));

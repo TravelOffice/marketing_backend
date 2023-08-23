@@ -37,3 +37,18 @@ export function getCurrentUserInfo(jwtToken: string) {
     name: `${decoded['family_name']} ${decoded['given_name']}`.trim(),
   };
 }
+
+export function getMarketplaceUserInfo(jwtToken: string) {
+  const decoded = decodeToken(jwtToken);
+  const cognitoUsername: string = decoded['cognito:username'];
+  const usernameArr = cognitoUsername.split(USERNAME_DELIMITER);
+
+  if (usernameArr.length > 2) throw new Error('The authenticated username invalid!');
+  const [tenant, username] = usernameArr;
+
+  return {
+    tenant: tenant,
+    username: usernameArr.length === 1 ? 'root' : username,
+    name: `${decoded['family_name']} ${decoded['given_name']}`.trim(),
+  };
+}
