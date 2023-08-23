@@ -13,7 +13,7 @@ export const OfferStatusTypes = Object.keys(OfferStatus);
 export interface Offer extends BaseDdbModel {
   code: string, // Auto-generated code from DynamoDB
   description?: string, // Description of the offer
-  totalPax: string, // Total pax of the offer
+  totalPax: number, // Total pax of the offer. Can be >0 or -1 (unlimited)
   pricePerPax: number, // Price per pax of the offer
   commissionRate: number, // Commission rate per pax of the offer
   authorId: string, // Alias id of marketplace user that is auto-generated or set by user
