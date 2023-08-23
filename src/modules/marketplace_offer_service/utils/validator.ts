@@ -29,7 +29,7 @@ export function createOfferValidator() {
       .isString()
       .withMessage(VALIDATE_STRING_MSG),
     body('totalPax')
-      .isInt({ min: 1 })
+      .isInt({ min: -1 })
       .withMessage(VALIDATE_INTEGER_MSG),
     body('pricePerPax')
       .isInt({ min: 1 })
@@ -49,17 +49,14 @@ export function updateOfferValidator() {
       .withMessage(VALIDATE_STRING_MSG),
     body('totalPax')
       .optional()
-      .notEmpty()
-      .isInt({ min: 1 })
+      .isInt({ min: -1 })
       .withMessage(VALIDATE_INTEGER_MSG),
     body('pricePerPax')
       .optional()
-      .notEmpty()
       .isInt({ min: 1 })
       .withMessage(VALIDATE_INTEGER_MSG),
     body('commissionRate')
       .optional()
-      .notEmpty()
       .isInt({ min: 0 })
       .withMessage(VALIDATE_INTEGER_MSG),
   ];

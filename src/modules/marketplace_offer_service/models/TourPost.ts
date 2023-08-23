@@ -22,7 +22,7 @@ export interface TourPost extends BaseDdbModel {
   // Also, all the offers of the post will be accepted
   autoClose?: boolean,
   // Number of available pax
-  // If undefined, the post will be considered as unlimited buy or sell
+  // If ===-1, the post will be considered as unlimited buy or sell
   maximumPaxToTrade?: number,
   /**
    * Additional fields that aggregate data from other partitions

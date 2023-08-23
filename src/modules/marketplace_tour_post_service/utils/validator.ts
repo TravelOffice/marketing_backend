@@ -78,8 +78,9 @@ export function createTourPostValidator() {
       .isBoolean()
       .withMessage('must be a boolean'),
 
-    body('maximumPaxToTrade').optional()
-      .isInt()
+    body('maximumPaxToTrade')
+      .optional()
+      .isInt({ min: -1 })
       .withMessage('must be a number'),
 
     body('status')
