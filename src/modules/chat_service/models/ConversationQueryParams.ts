@@ -5,4 +5,6 @@ export interface ConversationQueryParams {
   chatPlatform: ChatPlatform,
   pageId: string,
   conversationId: string,
+  pk: string,
+  sk: string,
 }

@@ -137,44 +137,6 @@
       },
       "ResultPath": "$.assignment"
     },
-    "Auto assign notification service - Waiting sale reply": {
-      "Type": "Task",
-      "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
-      "Parameters": {
-        "FunctionName.$": "$.env.notifyChatLambdaFn",
-        "Payload": {
-          "conversation.$": "$.conversation",
-          "admins.$": "$.admins",
-          "assignment.$": "$.assignment",
-          "taskToken.$": "$$.Task.Token"
-        }
-      },
-      "Retry": [
-        {
-          "ErrorEquals": [
-            "Lambda.ServiceException",
-            "Lambda.AWSLambdaException",
-            "Lambda.SdkClientException"
-          ],
-          "IntervalSeconds": 2,
-          "MaxAttempts": 6,
-          "BackoffRate": 2
-        }
-      ],
-      "Next": "Delete task token after sale response to new chat",
-      "TimeoutSeconds": 300,
-      "Catch": [
-        {
-          "ErrorEquals": [
-            "States.Timeout"
-          ],
-          "Next": "Generate sale not response error code",
-          "ResultPath": "$.error",
-          "Comment": "Sale must reply to new chat in 5 minutes"
-        }
-      ],
-      "ResultPath": null
-    },
     "Generate sale not response error code": {
       "Type": "Pass",
       "Next": "Delete task token when sale not response",
@@ -226,8 +188,34 @@
         },
         "ReturnValues": "UPDATED_NEW"
       },
-      "Next": "Auto assign notification service - Handle error",
+      "Next": "Remove conversation assignee",
       "ResultPath": null
+    },
+    "Remove conversation assignee": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::dynamodb:updateItem",
+      "Parameters": {
+        "TableName.$": "$.env.dynamoTravelTable",
+        "Key": {
+          "pk": {
+            "S.$": "$.conversation.pk"
+          },
+          "sk": {
+            "S.$": "$.conversation.sk"
+          }
+        },
+        "UpdateExpression": "SET lsi1 = :lsi1, assignee = :assignee",
+        "ExpressionAttributeValues": {
+          ":lsi1": {
+            "S": "ASSIGNEE#unknown"
+          },
+          ":assignee": {
+            "S": "unknown"
+          }
+        },
+        "ReturnValues": "UPDATED_NEW"
+      },
+      "Next": "Auto assign notification service - Handle error"
     },
     "Delete task token after sale response to new chat": {
       "Type": "Task",
@@ -285,16 +273,54 @@
           "sales.$": "$.sales.Items"
         }
       },
-      "Next": "Generate assigning sale successfully code",
+      "Next": "Auto assign notification service - Waiting sale reply",
       "ResultPath": "$.assignment",
       "TimeoutSeconds": 3,
       "ResultSelector": {
         "assignedSale.$": "$.Payload.assignedSale"
       }
     },
+    "Auto assign notification service - Waiting sale reply": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
+      "Parameters": {
+        "FunctionName.$": "$.env.notifyChatLambdaFn",
+        "Payload": {
+          "conversation.$": "$.conversation",
+          "admins.$": "$.admins",
+          "assignment.$": "$.assignment",
+          "taskToken.$": "$$.Task.Token"
+        }
+      },
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 6,
+          "BackoffRate": 2
+        }
+      ],
+      "Next": "Generate assigning sale successfully code",
+      "TimeoutSeconds": 300,
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.Timeout"
+          ],
+          "Next": "Generate sale not response error code",
+          "ResultPath": "$.error",
+          "Comment": "Sale must reply to new chat in 5 minutes"
+        }
+      ],
+      "ResultPath": null
+    },
     "Generate assigning sale successfully code": {
       "Type": "Pass",
-      "Next": "Auto assign notification service - Waiting sale reply",
+      "Next": "Delete task token after sale response to new chat",
       "Parameters": {
         "env.$": "$.env",
         "admins.$": "$.admins",

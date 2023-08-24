@@ -117,6 +117,7 @@ export default class ChatRepositoryImpl implements ChatRepository {
       conversation.pk,
       conversation.sk,
       {
+        assignee,
         updatedAt,
         lsi1: `${ASSIGNEE_INDEX}#${assignee}`,
       },
