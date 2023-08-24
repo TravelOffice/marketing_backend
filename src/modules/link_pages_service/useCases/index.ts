@@ -10,14 +10,14 @@ import LinkZaloPageUseCaseImpl from './LinkZaloPageUseCaseImpl';
 interface UseCases {
   linkFacebookPageUseCase: LinkFacebookPageUseCase,
   linkZaloPageUseCase: LinkZaloPageUseCase,
-  generateLoginUrlUsecCase: GenerateLoginUrlUseCase,
+  generateLoginUrlUseCase: GenerateLoginUrlUseCase,
   linkTelegramPageUseCase: LinkTelegramPageUseCase,
 }
 
-const useCases : UseCases = {
+const useCases: UseCases = {
   linkFacebookPageUseCase: new LinkFacebookPageUseCaseImpl(),
   linkZaloPageUseCase: new LinkZaloPageUseCaseImpl(),
-  generateLoginUrlUsecCase: new GenerateLoginUrlUseCaseImpl(),
+  generateLoginUrlUseCase: new GenerateLoginUrlUseCaseImpl(),
   linkTelegramPageUseCase: new LinkTelegramPageUseCaseImpl(),
 };
 
@@ -25,6 +25,6 @@ const useCases : UseCases = {
 export const {
   linkFacebookPageUseCase,
   linkZaloPageUseCase,
-  generateLoginUrlUsecCase,
+  generateLoginUrlUseCase,
   linkTelegramPageUseCase,
 } = useCases;

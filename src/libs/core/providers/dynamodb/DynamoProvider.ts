@@ -1,5 +1,5 @@
 import AWS from 'aws';
-import { getEnv } from 'get-env';
+import { getAwsSecretValue, getEnv } from 'get-env';
 import { helper } from '../../utils';
 
 export type PutItemInput = AWS.DynamoDB.DocumentClient.PutItemInput;
@@ -177,9 +177,7 @@ export default class DynamoProvider {
     return dynamoDB.update(params).promise();
   };
 
-  updateItemWithPrebuiltExpression = async (itemInput: UpdateItemInput) => {
-    return dynamoDB.update(itemInput).promise();
-  }
+  updateItemWithPrebuiltExpression = async (itemInput: UpdateItemInput) => dynamoDB.update(itemInput).promise();
 
   /**
    * Delete an item from the DynamoDB table.
@@ -224,4 +222,19 @@ export default class DynamoProvider {
   marshall = (data: any) => AWS.DynamoDB.Converter.marshall(data);
 
   unmarshall = (obj: AttributeValues) => AWS.DynamoDB.Converter.unmarshall(obj);
+
+  /**
+   * Function used to get user object from userId
+   * @param tenant Tenant ID
+   * @param userId User ID
+   * @returns Promise of User
+   */
+  getTravelUserAttributes = async (tenant: string, userId: string) => {
+    const ddbTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    return this.getItem(
+      ddbTable,
+      `TENANT#${tenant}`,
+      `EMPLOYEE#${userId}`,
+    );
+  };
 }

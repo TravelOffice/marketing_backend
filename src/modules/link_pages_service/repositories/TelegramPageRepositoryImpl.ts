@@ -1,6 +1,7 @@
 import { ChatPlatform, TelegramBot } from 'common-models';
 import { getAwsSecretValue } from 'get-env';
-import { dynamoProvider, telegramProvider } from '../providers';
+import { dynamoProvider } from 'core';
+import { telegramProvider } from '../providers';
 import {
   PAGE_INDEX,
   TELEGRAM_WEBHOOK_ALLOWED_UPDATES,
@@ -28,7 +29,15 @@ export default class TelegramPageRepositoryImpl implements TelegramPageRepositor
    */
   saveToDynamo = async (tenantId: string, page: TelegramBot) => {
     const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
-    await dynamoProvider.putItem(travelTable, `${TENANT_INDEX}#${tenantId}`, `${PAGE_INDEX}#${ChatPlatform.telegram.toUpperCase()}#${page.id}`, { ...page, id: page.id.toString() });
+    await dynamoProvider.putItem(
+      travelTable,
+      `${TENANT_INDEX}#${tenantId}`,
+      `${PAGE_INDEX}#${ChatPlatform.telegram.toUpperCase()}#${page.id}`,
+      {
+        ...page,
+        id: page.id.toString(),
+      },
+    );
   };
 
   /**

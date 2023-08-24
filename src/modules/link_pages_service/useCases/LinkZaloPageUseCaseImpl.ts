@@ -1,24 +1,32 @@
 import { ChatPlatform } from 'common-models';
-import { zaloPageRepository, userRepository, pageRepository } from '../repositories';
+import { dynamoProvider } from 'core';
+import { pageRepository, zaloPageRepository } from '../repositories';
 import { LinkZaloPageUseCase } from './interfaces/LinkZaloPageUseCase';
+import { CognitoUser } from '../models/CognitoUser';
 
 export default class LinkZaloPageUseCaseImpl implements LinkZaloPageUseCase {
   /**
-   * To link a Zalo page, there are steps need to do:
+   * Link a Zalo Official Account page to a tenant's account.
    * - Step 1: Determine which tenant the current user belongs to
    * - Step 2: Check the page already linked to another tenant or not
    * - Step 3: Get code verifier from db based on state variable
    * - Step 4: Request to zalo to get official account information
    * - Step 5: Save Official account information to dynamodb
    * - Step 6: Delete code verifier in db
-   * @param currentUserId the user idenitifier who made the request to link her page.
-   * @param pageId the Facebook page id
-   * @param userAccessToken The Facebook user access token
+   *
+   * @param {CognitoUser} currentUser - The current user.
+   * @param {string} authorizationCode - The authorization code from Zalo.
+   * @param {string} state - The state parameter.
+   * @param {string} pageId - The Zalo Official Account page ID.
+   * - A promise that resolves with the linked Zalo Official Account information.
    */
-  invoke = async (userId: string, authorizationCode: string, state: string, pageId: string) => {
+  async invoke(currentUser: CognitoUser, authorizationCode: string, state: string, pageId: string) {
     // Determine which tenant the current user belongs to
-    const userAttributes = await userRepository.getUserAttributes(userId);
-    if (!userAttributes) throw new Error('User not existed!');
+    const { tenant, username } = currentUser;
+    const userAttributes = await dynamoProvider.getTravelUserAttributes(tenant, username);
+    if (!userAttributes) {
+      throw new Error('User does not exist!');
+    }
     const tenantId = userAttributes.tenant;
 
     // Check whether the page is already linked to another tenant or not
@@ -28,21 +36,25 @@ export default class LinkZaloPageUseCaseImpl implements LinkZaloPageUseCase {
       ChatPlatform.zalo,
     );
     if (isLinkedPage) {
-      throw new Error(`Page ${pageId} already linked to another Tenant`);
+      throw new Error(`Page ${pageId} is already linked to another tenant`);
     }
 
-    // Get code verifier from dynamo
+    // Get code verifier from DynamoDB
     const codeVerifier = await zaloPageRepository.getCodeVerifierFromDynamo(state);
+
     // Get Zalo official account information
     const page = await zaloPageRepository.getOfficialAccountInfo(
       authorizationCode,
       codeVerifier,
       pageId,
     );
-    // Save tokens to dynamo db
+
+    // Save tokens to DynamoDB
     await zaloPageRepository.saveOAInfoToDynamo(tenantId, page);
-    // Delete code verifier in db
+
+    // Delete code verifier in DynamoDB
     await zaloPageRepository.deleteCodeVerifierInDynamo(state);
+
     return page;
-  };
+  }
 }

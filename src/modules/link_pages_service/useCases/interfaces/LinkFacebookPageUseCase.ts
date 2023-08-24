@@ -1,3 +1,5 @@
+import { CognitoUser } from '../../models/CognitoUser';
+
 export interface LinkFacebookPageUseCase {
-  invoke : (currentUserId: string, pageId: string, userAccessToken: string) => Promise<any>
+  invoke: (currentUser: CognitoUser, pageId: string, userAccessToken: string) => Promise<any>
 }

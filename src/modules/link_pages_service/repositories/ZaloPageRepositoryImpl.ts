@@ -2,7 +2,8 @@ import { ChatPlatform, ZaloPage } from 'common-models';
 import { getAwsSecretValue, getEnv } from 'get-env';
 import { generateChallenge } from 'pkce-challenge';
 import * as randomstring from 'randomstring';
-import { dynamoProvider, zaloApiProvider } from '../providers';
+import { dynamoProvider } from 'core';
+import { zaloApiProvider } from '../providers';
 import {
   PAGE_INDEX,
   TENANT_INDEX,

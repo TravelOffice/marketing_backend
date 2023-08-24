@@ -1,6 +1,8 @@
 import { ChatPlatform } from 'common-models';
-import { facebookPageRepository, pageRepository, userRepository } from '../repositories';
+import { dynamoProvider } from 'core';
+import { facebookPageRepository, pageRepository } from '../repositories';
 import { LinkFacebookPageUseCase } from './interfaces/LinkFacebookPageUseCase';
+import { CognitoUser } from '../models/CognitoUser';
 
 export default class LinkFacebookPageUseCaseImpl implements LinkFacebookPageUseCase {
   /**
@@ -11,13 +13,14 @@ export default class LinkFacebookPageUseCaseImpl implements LinkFacebookPageUseC
    * - Step 4: Get page information, included id, name and page access token, etc..
    * - Step 5: Save the page information to correct tenant.
    * - Step 6: Sync Facebook conversations and last messages.
-   * @param currentUserId the user idenitifier who made the request to link her page.
+   * @param currentUser the Cognito User
    * @param pageId the Facebook page id
    * @param userAccessToken The Facebook user access token
    */
-  invoke = async (currentUserId: string, pageId: string, userAccessToken: string) => {
+  invoke = async (currentUser: CognitoUser, pageId: string, userAccessToken: string) => {
     // Determine which tenant the current user belongs to
-    const userAttributes = await userRepository.getUserAttributes(currentUserId);
+    const { tenant, username } = currentUser;
+    const userAttributes = await dynamoProvider.getTravelUserAttributes(tenant, username);
     if (!userAttributes) throw new Error('User not existed!');
     const tenantId = userAttributes.tenant;
 
