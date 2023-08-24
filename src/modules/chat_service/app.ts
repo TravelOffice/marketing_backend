@@ -39,10 +39,6 @@ app.post('/admin/assign-chat', manualAssignChatValidator(), async (req: Request,
       chatPlatform,
       pageId,
       conversationId,
-      // pk, sk are not used in this case
-      // So we can assign empty string value to them
-      pk: '',
-      sk: '',
     }, assignee);
     res.json(wrapResponse(SUCCESS, conversation));
   } catch (error: any) {

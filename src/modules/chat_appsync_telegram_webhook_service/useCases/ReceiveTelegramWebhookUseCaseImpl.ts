@@ -69,18 +69,17 @@ export default class ReceiveTelegramWebhookUseCaseImpl implements ReceiveTelegra
       message,
     );
 
-    if (conversation.assignee === UNKNOWN_USER) {
+    if (assignee === UNKNOWN_USER) {
       logger.log(`Conversation ${conversation.info.id} is unassigned, continue process auto assignment`);
       // Send to SQS message to process auto assignment
-      const { pk, sk } = conversation;
       await saleAssignmentRepository.notifyNewIncomingConversation({
         tenant: page.tenantId,
         pageId: page.id.toString(),
         chatPlatform: page.platform,
         conversationId: conversation.info.id.toString(),
-        pk,
-        sk,
       });
+    } else {
+      logger.log(`Conversation ${conversation.info.id} is assigned to ${conversation.assignee}, skip process auto assignment`);
     }
   };
 }

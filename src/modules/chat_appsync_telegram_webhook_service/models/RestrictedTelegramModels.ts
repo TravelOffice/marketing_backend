@@ -10,6 +10,6 @@ export interface RestrictedTelegramConversation extends RestrictedDDBModel<DDBCo
   conversationId?: TypeOfSk,
 }
 
-export interface TelegramConversationWithAssignee extends DDBConversation {
+export interface TelegramConversationWithAssignee extends RestrictedTelegramConversation {
   assignee?: string
 }
