@@ -72,7 +72,7 @@ export default class CreateLeadUseCaseImpl extends BaseRepositoryImpl implements
       lsi2: `${UPDATED_AT_INDEX}#${now.toString()}`,
       lsi3: `${LEAD_STATUS_INDEX}#${status}`,
       lsi4: `${ASSIGNEE_INDEX}#${assigneeId || NONE_VALUE}`,
-      lsi5: customer ? `${CUSTOMER_INDEX}#${customer.code}` : '',
+      lsi5: customer ? `${CUSTOMER_INDEX}#${customer.code}` : `${CUSTOMER_INDEX}#`,
       ...createLeadDto,
       creatorId: username,
       creatorName: name,
