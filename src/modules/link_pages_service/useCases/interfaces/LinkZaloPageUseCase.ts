@@ -1,8 +1,9 @@
 import { ZaloPage } from 'common-models';
+import { CognitoUser } from '../../models/CognitoUser';
 
 export interface LinkZaloPageUseCase {
-  invoke : (
-    userId: string,
+  invoke: (
+    currentUser: CognitoUser,
     authorizationCode: string,
     state: string,
     pageId: string

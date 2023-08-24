@@ -1,6 +1,7 @@
 import { ChatPlatform, FacebookPage } from 'common-models';
 import { getAwsSecretValue } from 'get-env';
-import { dynamoProvider, facebookApiProvider } from '../providers';
+import { dynamoProvider } from 'core';
+import { facebookApiProvider } from '../providers';
 import { PAGE_INDEX, TENANT_INDEX } from '../utils/constants';
 import { FacebookPageRepository } from './interfaces/FacebookPageRepository';
 
@@ -16,7 +17,7 @@ export default class FacebookPageRepositoryImpl implements FacebookPageRepositor
     return res.access_token;
   };
 
-  getPageAccessToken = async (pageId: string, userAccessToken: string) : Promise<FacebookPage> => {
+  getPageAccessToken = async (pageId: string, userAccessToken: string): Promise<FacebookPage> => {
     const params = {
       fields: 'access_token,name',
     };

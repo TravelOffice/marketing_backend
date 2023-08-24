@@ -1,5 +1,6 @@
 import { TelegramBot } from 'common-models';
+import { CognitoUser } from '../../models/CognitoUser';
 
 export interface LinkTelegramPageUseCase {
-  invoke : (username: string, token: string) => Promise<Omit<TelegramBot, 'accessToken' | 'secretToken'>>
+  invoke: (currentUser: CognitoUser, token: string) => Promise<Omit<TelegramBot, 'accessToken' | 'secretToken'>>
 }

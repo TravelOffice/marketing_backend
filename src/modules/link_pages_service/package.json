@@ -16,6 +16,7 @@
     "aws": "link:../../libs/aws-sdk",
     "axios": "^0.26.0",
     "common-models": "link:../../libs/common-models",
+    "core": "link:../../libs/core",
     "compression": "^1.7.4",
     "cors": "^2.8.5",
     "decode-token": "link:../../libs/decode-token",

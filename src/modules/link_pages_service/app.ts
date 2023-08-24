@@ -2,8 +2,12 @@ import compression from 'compression';
 import cors from 'cors';
 import { getCurrentUserInfo } from 'decode-token';
 import express, { NextFunction, Request, Response } from 'express';
+import { CognitoUser } from './models/CognitoUser';
 import {
-  generateLoginUrlUsecCase, linkFacebookPageUseCase, linkTelegramPageUseCase, linkZaloPageUseCase,
+  generateLoginUrlUseCase,
+  linkFacebookPageUseCase,
+  linkTelegramPageUseCase,
+  linkZaloPageUseCase,
 } from './useCases';
 import { FAILED, SUCCESS } from './utils/constants';
 import logger from './utils/logger';
@@ -33,8 +37,8 @@ app.post('/facebook/link', linkFacebookPageValidator(), async (req: Request, res
   try {
     validate(req);
     const { userAccessToken, pageId } = req.body;
-    const { username } = getCurrentUserInfo(req.headers.authorization!);
-    const modelNames = await linkFacebookPageUseCase.invoke(username, pageId, userAccessToken);
+    const currentUser = getCurrentUserInfo(req.headers.authorization!) as CognitoUser;
+    const modelNames = await linkFacebookPageUseCase.invoke(currentUser, pageId, userAccessToken);
     res.json(wrapResponse(SUCCESS, modelNames));
   } catch (error: any) {
     logger.log(`[POST /facebook/link] Error ${JSON.stringify(error)}`);
@@ -46,8 +50,13 @@ app.post('/zalo/link', linkZaloPageValidator(), async (req: Request, res: Respon
   try {
     validate(req);
     const { authorizationCode, state, pageId } = req.body;
-    const { username } = getCurrentUserInfo(req.headers.authorization!);
-    const zaloPage = await linkZaloPageUseCase.invoke(username, authorizationCode, state, pageId);
+    const currentUser = getCurrentUserInfo(req.headers.authorization!) as CognitoUser;
+    const zaloPage = await linkZaloPageUseCase.invoke(
+      currentUser,
+      authorizationCode,
+      state,
+      pageId,
+    );
     res.json(wrapResponse(SUCCESS, zaloPage));
   } catch (error: any) {
     logger.log(`[POST /zalo/link] Error ${error}`);
@@ -57,7 +66,7 @@ app.post('/zalo/link', linkZaloPageValidator(), async (req: Request, res: Respon
 
 app.get('/zalo/link', async (req: Request, res: Response) => {
   try {
-    const loginUrl = await generateLoginUrlUsecCase.invoke();
+    const loginUrl = await generateLoginUrlUseCase.invoke();
     res.json(wrapResponse(SUCCESS, loginUrl));
   } catch (error: any) {
     logger.log(`[GET /zalo/link] Error ${error}`);
@@ -69,8 +78,8 @@ app.post('/telegram/link', linkTelegramPageValidator(), async (req: Request, res
   try {
     validate(req);
     const { token } = req.body;
-    const { username } = getCurrentUserInfo(req.headers.authorization!);
-    const telegramPage = await linkTelegramPageUseCase.invoke(username, token);
+    const currentUser = getCurrentUserInfo(req.headers.authorization!) as CognitoUser;
+    const telegramPage = await linkTelegramPageUseCase.invoke(currentUser, token);
     res.json(wrapResponse(SUCCESS, telegramPage));
   } catch (error: any) {
     logger.log(`[GET /telegram/link] Error ${error}`);
