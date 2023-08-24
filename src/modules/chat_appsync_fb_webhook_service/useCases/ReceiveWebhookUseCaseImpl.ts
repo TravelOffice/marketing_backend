@@ -7,6 +7,7 @@ import {
 import { messageRepository, pageRepository } from '../repositories';
 import { UNKNOWN_USER } from '../utils/constants';
 import { ReceiveWebhookUseCase } from './interfaces/ReceiveWebhookUseCase';
+import logger from '../utils/logger';
 
 export default class ReceiveWebhookUseCaseImpl implements ReceiveWebhookUseCase {
   /**
@@ -76,12 +77,18 @@ export default class ReceiveWebhookUseCaseImpl implements ReceiveWebhookUseCase 
     // Send received message command to AppSync
     await messageRepository.sendReceivedMessageCommand(commandArgs);
 
-    // Send to SQS message to process auto assignment
-    await saleAssignmentRepository.notifyNewIncomingConversation({
-      tenant: page.tenantId,
-      pageId: page.id,
-      chatPlatform: page.platform,
-      conversationId: conversation.info.id.toString(),
-    });
+    if (conversation.assignee === UNKNOWN_USER) {
+      logger.log(`Conversation ${conversation.info.id} is unassigned, continue process auto assignment`);
+      // Send to SQS message to process auto assignment
+      const { pk, sk } = conversation;
+      await saleAssignmentRepository.notifyNewIncomingConversation({
+        tenant: page.tenantId,
+        pageId: page.id,
+        chatPlatform: page.platform,
+        conversationId: conversation.info.id.toString(),
+        pk,
+        sk,
+      });
+    }
   };
 }
