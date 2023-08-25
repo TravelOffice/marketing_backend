@@ -195,7 +195,7 @@
       "Type": "Task",
       "Resource": "arn:aws:states:::dynamodb:updateItem",
       "Parameters": {
-        "TableName.$": "$.env.dynamoTravelTable",
+        "TableName.$": "$.env.dynamoChatTable",
         "Key": {
           "pk": {
             "S.$": "$.conversation.pk"
