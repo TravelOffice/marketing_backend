@@ -8,6 +8,6 @@ export interface RestrictedFacebookConversation extends RestrictedDDBModel<DDBCo
   conversationId?: TypeOfSk,
 }
 
-export interface FacebookConversationWithAssignee extends DDBConversation {
+export interface FacebookConversationWithAssignee extends RestrictedFacebookConversation {
   assignee?: string
 }

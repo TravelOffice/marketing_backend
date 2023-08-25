@@ -3,7 +3,7 @@ import { getAwsSecretValue, getEnv } from 'get-env';
 import { ConversationQueryParams } from './models/ConversationQueryParams';
 import { SQSEvent, SQSHandler } from './models/types/lambda/sqs';
 import { SFN_NAME_DELIMITER } from './utils/constants';
-import { PAGE_INDEX, TASK_TOKEN_INDEX, TENANT_INDEX } from './utils/dynamodbConstants';
+import { CONVERSATION_INDEX, PAGE_INDEX, TASK_TOKEN_INDEX, TENANT_INDEX } from './utils/dynamodbConstants';
 import logger from './utils/logger';
 
 let sfnEnvironment: {
@@ -48,7 +48,11 @@ export const handler: SQSHandler = async (event: SQSEvent) => {
         pageId, conversationId,
       } = conversation;
       const sfnInput = {
-        conversation,
+        conversation: {
+          ...conversation,
+          pk: `${TENANT_INDEX}#${tenant}#${CONVERSATION_INDEX}#${chatPlatform.toUpperCase()}#${pageId}`,
+          sk: `${CONVERSATION_INDEX}#${conversationId}`,
+        },
         env: {
           ...sfnEnvironment,
           tenant: `${TENANT_INDEX}#${tenant}`,

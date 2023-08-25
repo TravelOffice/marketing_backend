@@ -8,6 +8,6 @@ export interface RestrictedZaloConversation extends RestrictedDDBModel<DDBConver
   conversationId?: TypeOfSk,
 }
 
-export interface ZaloConversationWithAssignee extends DDBConversation {
+export interface ZaloConversationWithAssignee extends RestrictedZaloConversation {
   assignee?: string
 }
