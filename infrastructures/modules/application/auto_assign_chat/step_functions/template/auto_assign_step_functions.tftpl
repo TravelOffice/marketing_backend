@@ -274,11 +274,24 @@
           "sales.$": "$.sales.Items"
         }
       },
-      "Next": "Auto assign notification service - Waiting sale reply",
+      "Next": "Generate sale assigned successfully code",
       "ResultPath": "$.assignment",
       "TimeoutSeconds": 3,
       "ResultSelector": {
         "assignedSale.$": "$.Payload.assignedSale"
+      }
+    },
+    "Generate sale assigned successfully code": {
+      "Type": "Pass",
+      "Next": "Auto assign notification service - Waiting sale reply",
+      "Parameters": {
+        "env.$": "$.env",
+        "admins.$": "$.admins",
+        "conversation.$": "$.conversation",
+        "assignment": {
+          "code": "AUTO_ASSIGN_NEW_CHAT_SUCCESSFULLY",
+          "assignedSale.$": "$.assignment.assignedSale"
+        }
       }
     },
     "Auto assign notification service - Waiting sale reply": {
