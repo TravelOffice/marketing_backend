@@ -40,6 +40,9 @@ export default class LinkFacebookPageUseCaseImpl implements LinkFacebookPageUseC
     // Get page information, included id, name and page access token, etc..
     const page = await facebookPageRepository.getPageAccessToken(pageId, longLiveToken);
 
+    // Subscribe page to enable webhook
+    await facebookPageRepository.subscribePage(pageId, page.accessToken);
+
     // Save the page information to correct tenant.
     await facebookPageRepository.saveToDynamo(tenantId, page);
     // 4. TODO: Sync conversations, messages

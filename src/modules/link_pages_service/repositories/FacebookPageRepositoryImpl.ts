@@ -35,4 +35,11 @@ export default class FacebookPageRepositoryImpl implements FacebookPageRepositor
     const facebookIndex = `${PAGE_INDEX}#${ChatPlatform.facebook.toUpperCase()}`;
     await dynamoProvider.putItem(travelTable, `${TENANT_INDEX}#${tenantId}`, `${facebookIndex}#${page.id}`, page);
   };
+
+  subscribePage = async (pageId: string, pageAccessToken: string) => {
+    const params = {
+      subscribed_fields: 'messages, messaging_postbacks, message_echoes',
+    };
+    await facebookApiProvider.post(`${pageId}/subscribed_apps`, pageAccessToken, params);
+  };
 }
