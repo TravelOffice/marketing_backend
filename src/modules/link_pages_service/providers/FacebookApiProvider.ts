@@ -7,7 +7,7 @@ export default class FacebookApiProvider {
 
   get = async (url: string, token?: string, params?: Object) => {
     try {
-      let query : any = { ...params };
+      let query: any = { ...params };
       if (token) {
         query = {
           ...params,
@@ -15,6 +15,26 @@ export default class FacebookApiProvider {
         };
       }
       const response = await this.axiosInstance.get(url, { params: query });
+      return response.data;
+    } catch (e: any) {
+      if (axios.isAxiosError(e)) {
+        throw new Error(e.message);
+      } else {
+        throw e;
+      }
+    }
+  };
+
+  post = async (url: string, token?: string, params?: Object) => {
+    try {
+      let query: any = { ...params };
+      if (token) {
+        query = {
+          ...params,
+          access_token: token,
+        };
+      }
+      const response = await this.axiosInstance.post(url, query);
       return response.data;
     } catch (e: any) {
       if (axios.isAxiosError(e)) {
