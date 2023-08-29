@@ -59,6 +59,20 @@ export function validateNewBookingParams() {
     body('services.*.tax', VALIDATE_POSITIVE_NUMBER)
       .notEmpty()
       .isInt({ min: 0 }),
+    body('passengers').optional().isArray().withMessage(VALIDATE_ARRAY_MSG),
+    body('passengers.*.honorific').optional().isString().withMessage(VALIDATE_STRING_MSG),
+    body('passengers.*.name').notEmpty().isString().withMessage(VALIDATE_STRING_MSG),
+    body('passengers.*.email').optional().isString().withMessage(VALIDATE_STRING_MSG),
+    body('passengers.*.phoneNumber').optional().isMobilePhone('any'),
+    body('passengers.*.address').optional().isString().withMessage(VALIDATE_STRING_MSG),
+    body('passengers.*.sex').optional().isIn(Object.values(SexType)).withMessage(`property allow only in ${Object.values(SexType)}`),
+    body('passengers.*.attachedDoc').optional().isArray().withMessage(VALIDATE_ARRAY_MSG),
+    body('passengers.*.birthday', VALIDATE_DATE_MSG).optional()
+      .if(body('passengers.*.birthday'))
+      .custom((value: string) => {
+        const date = Date.parse(value);
+        return !Number.isNaN(date);
+      }),
   ];
 }
 
@@ -166,6 +180,20 @@ export function validateUpdateBookingParams() {
       .withMessage(VALIDATE_NON_EMPTY_STRING_MSG)
       .isString()
       .withMessage(VALIDATE_STRING_MSG),
+    body('passengers').optional().isArray().withMessage(VALIDATE_ARRAY_MSG),
+    body('passengers.*.honorific').optional().isString().withMessage(VALIDATE_STRING_MSG),
+    body('passengers.*.name').notEmpty().isString().withMessage(VALIDATE_STRING_MSG),
+    body('passengers.*.email').optional().isString().withMessage(VALIDATE_STRING_MSG),
+    body('passengers.*.phoneNumber').optional().isMobilePhone('any'),
+    body('passengers.*.address').optional().isString().withMessage(VALIDATE_STRING_MSG),
+    body('passengers.*.attachedDoc').optional().isArray().withMessage(VALIDATE_ARRAY_MSG),
+    body('passengers.*.sex').optional().isIn(Object.values(SexType)).withMessage(`property allow only in ${Object.values(SexType)}`),
+    body('passengers.*.birthday', VALIDATE_DATE_MSG).optional()
+      .if(body('passengers.*.birthday'))
+      .custom((value: string) => {
+        const date = Date.parse(value);
+        return !Number.isNaN(date);
+      }),
   ];
 }
 

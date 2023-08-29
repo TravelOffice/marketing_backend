@@ -21,7 +21,7 @@ export default class CreateBookingUseCaseImpl implements CreateBookingUseCase {
     const now = Date.now();
     const { tenant, username: creatorUserName, name: creatorName } = currentUserInfo;
     const {
-      tourType, tourTemplateId, departureDate, sourceId, services, customer,
+      tourType, tourTemplateId, departureDate, sourceId, services, customer, passengers,
     } = newBookingInput;
 
     // Verify source
@@ -47,6 +47,7 @@ export default class CreateBookingUseCaseImpl implements CreateBookingUseCase {
       bookingStatus: status,
       paymentStatus: 'UNPAID',
       services,
+      passengers,
       tourTemplateId,
       departureDate,
       sourceId,

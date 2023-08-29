@@ -1,6 +1,7 @@
 import { BookingTourType } from '../booking/Booking';
 import { HonorificType } from '../Customer';
 import { Service } from '../booking/Service';
+import { Passenger } from '../Passenger';
 
 export interface CreateBookingInput {
   // Customer information, new customer will be created in database if not existed
@@ -23,4 +24,7 @@ export interface CreateBookingInput {
   sourceId: string,
 
   services: Service[]
+
+  // List of passengers
+  passengers: Passenger[]
 }

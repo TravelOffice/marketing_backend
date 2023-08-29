@@ -1,7 +1,5 @@
 import { Request } from 'express';
-import {
-  query, ValidationError, validationResult,
-} from 'express-validator';
+import { query, ValidationError, validationResult } from 'express-validator';
 
 export default function validate(req: Request) {
   const errors = validationResult(req);
@@ -36,6 +34,13 @@ export function getAvatarPresignedUrlValidator() {
 }
 
 export function getPaymentVoucherPresignedUrlValidator() {
+  return [
+    query('fileName', 'is required').not().isEmpty(),
+    query('fileType', 'is required').not().isEmpty(),
+  ];
+}
+
+export function getPassengerAttachedDocPresignedUrlValidator() {
   return [
     query('fileName', 'is required').not().isEmpty(),
     query('fileType', 'is required').not().isEmpty(),
