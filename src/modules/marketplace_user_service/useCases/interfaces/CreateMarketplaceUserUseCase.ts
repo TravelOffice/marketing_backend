@@ -1,5 +1,11 @@
-import { MarketplaceUser } from '../../models';
+import { MarketplaceUser, UserWithRoles } from '../../models';
 
 export interface CreateMarketplaceUserUseCase {
-  invoke: (tenant: string, username: string, roles: string[]) => Promise<MarketplaceUser>;
+  invoke: (
+    tenant: string,
+    users: UserWithRoles | UserWithRoles[]
+  ) => Promise<
+    | MarketplaceUser
+    | { processedUsers: MarketplaceUser[]; unprocessedUsers: MarketplaceUser[] }
+  >;
 }

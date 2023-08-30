@@ -53,3 +53,7 @@ export interface TravelUser extends BaseDdbModel {
 export interface UserWithPermission extends TravelUser {
   permissions: Array<string>
 }
+
+export interface UserWithRoles extends TravelUser {
+  roles: string[],
+}

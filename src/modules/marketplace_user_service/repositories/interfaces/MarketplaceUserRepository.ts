@@ -1,8 +1,10 @@
-import { MarketplaceUser, TravelUser } from '../../models';
+import { MarketplaceUser, UserWithRoles } from '../../models';
 
 export interface MarketplaceUserRepository {
   getById: (id: string) => Promise<MarketplaceUser | undefined>;
-  add: (user: TravelUser, roles: string[]) => Promise<MarketplaceUser>;
+  add: (user: MarketplaceUser) => Promise<MarketplaceUser>;
   list: (organization: string) => Promise<MarketplaceUser[]>;
   update: (id: string, user: Partial<MarketplaceUser>) => Promise<MarketplaceUser>;
+  buildBatchWriteUser: (tenant: string, users: UserWithRoles) => MarketplaceUser;
+  executeBatchWrite: (users: MarketplaceUser[]) => any;
 }
