@@ -3,11 +3,9 @@ import { body, ValidationError, validationResult } from 'express-validator';
 import { LANGUAGES_TYPE, THEMES_TYPE } from '../models';
 import {
   ROOT_ROLE,
-  VALIDATE_ARRAY_MSG,
   VALIDATE_BOOLEAN_MSG,
   VALIDATE_NON_EMPTY_STRING_MSG,
   VALIDATE_NON_EMPTY_USER_MSG,
-  VALIDATE_ROLE_MSG,
   VALIDATE_URL_MSG,
 } from './constants';
 
@@ -32,13 +30,13 @@ export function createUserValidator() {
     body('users')
       .notEmpty()
       .withMessage(VALIDATE_NON_EMPTY_USER_MSG)
-      .custom(data => {
+      .custom((data) => {
         if (typeof data === 'object') {
           if (Array.isArray(data)) {
             data.forEach((user, i) => {
               if (!user.username) throw new Error(`username must be valid string from index ${i}`);
               if (!Array.isArray(user.roles) || user.roles?.includes(ROOT_ROLE)) throw new Error(`roles must be valid array from index ${i}`);
-            })
+            });
           } else {
             if (!data.username || !(typeof data.username === 'string')) throw new Error('username must be valid string');
             if (!Array.isArray(data.roles) || data.roles?.includes(ROOT_ROLE)) throw new Error('roles must be valid array');
