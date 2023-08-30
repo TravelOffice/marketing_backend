@@ -49,7 +49,7 @@ export function createTourPostValidator() {
       .isNumeric()
       .withMessage('must be a number'),
 
-    body('commissionRate')
+    body('commission')
       .notEmpty().withMessage('is required')
       .isNumeric()
       .withMessage('must be a number'),
@@ -187,5 +187,13 @@ export function bookmarkPostValidator() {
 export function followPostValidator() {
   return [
     param('postId').notEmpty().withMessage('is required'),
+  ];
+}
+
+export function getTopTrendingTourValidator() {
+  return [
+    query('topCount').optional()
+      .isInt({ min: 1 })
+      .withMessage('must be a number and larger than 0'),
   ];
 }

@@ -7,5 +7,5 @@ export type UpdateOfferDto = Pick<Offer,
   'description' |
   'totalPax' |
   'pricePerPax' |
-  'commissionRate'
+  'commission'
 >;

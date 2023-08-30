@@ -4,6 +4,7 @@ import FollowTourPostUseCaseImpl from './FollowTourPostUseCaseImpl';
 import GetBookmarkedTourPostsUseCaseImpl from './GetBookmarkedTourPostsUseCaseImpl';
 import GetFollowedTourPostsUseCaseImpl from './GetFollowedTourPostsUseCaseImpl';
 import GetSelfTourPostListByUserUseCaseImpl from './GetSelfTourPostListByUserUseCaseImpl';
+import GetTopCommissionPostsUseCaseImpl from './GetTopCommissionPostsUseCaseImpl';
 import GetTourPostListByOrgUseCaseImpl from './GetTourPostListByOrgUseCaseImpl';
 import GetTourPostListByUserUseCaseImpl from './GetTourPostListByUserUseCaseImpl';
 import GetTourPostListUseCaseImpl from './GetTourPostListUseCaseImpl';
@@ -17,6 +18,7 @@ import { FollowTourPostUseCase } from './interfaces/FollowTourPostUseCase';
 import { GetBookmarkedTourPostsUseCase } from './interfaces/GetBookmarkedTourPostsUseCase';
 import { GetFollowedTourPostsUseCase } from './interfaces/GetFollowedTourPostsUseCase';
 import { GetSelfTourPostListByUserUseCase } from './interfaces/GetSelfTourPostListByUserUseCase';
+import { GetTopCommissionPostsUseCase } from './interfaces/GetTopCommissionPostsUseCase';
 import { GetTourPostListByOrgUseCase } from './interfaces/GetTourPostListByOrgUseCase';
 import { GetTourPostListByUserUseCase } from './interfaces/GetTourPostListByUserUseCase';
 import { GetTourPostListUseCase } from './interfaces/GetTourPostListUseCase';
@@ -39,6 +41,7 @@ interface UseCases {
   unbookmarkTourPostUseCase: UnbookmarkTourPostUseCase,
   followTourPostUseCase: FollowTourPostUseCase,
   unfollowTourPostUseCase: UnfollowTourPostUseCase,
+  getTopCommissionPostsUseCase: GetTopCommissionPostsUseCase,
 }
 
 const useCases : UseCases = {
@@ -55,6 +58,7 @@ const useCases : UseCases = {
   unbookmarkTourPostUseCase: new UnbookmarkTourPostUseCaseImpl(),
   followTourPostUseCase: new FollowTourPostUseCaseImpl(),
   unfollowTourPostUseCase: new UnfollowTourPostUseCaseImpl(),
+  getTopCommissionPostsUseCase: new GetTopCommissionPostsUseCaseImpl(),
 };
 
 export const {
@@ -71,4 +75,5 @@ export const {
   unbookmarkTourPostUseCase,
   followTourPostUseCase,
   unfollowTourPostUseCase,
+  getTopCommissionPostsUseCase,
 } = useCases;

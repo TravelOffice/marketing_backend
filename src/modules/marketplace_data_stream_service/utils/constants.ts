@@ -16,4 +16,10 @@ export const ORG_STATISTIC_INDEX = 'ORG_STATS';
 
 export const TOUR_POST_STATISTIC_INDEX = 'P_STATS';
 
+export const TOP_TOUR_POST_STATISTIC_INDEX = 'TOP_P_STATS';
+
 export const RATING_INDEX = 'R';
+
+export const PADDING_ZERO_PREFIX = '0';
+
+export const PADDING_ZERO_PREFIX_LENGTH = 10;

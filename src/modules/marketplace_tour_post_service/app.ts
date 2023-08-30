@@ -2,6 +2,7 @@ import compression from 'compression';
 import cors from 'cors';
 import { getMarketplaceUserInfo } from 'decode-token';
 import express, { NextFunction, Request, Response } from 'express';
+import { TourPost } from './models/TourPost';
 import {
   bookmarkTourPostUseCase,
   createTourPostUseCase,
@@ -9,6 +10,7 @@ import {
   getBookmarkedTourPostsUseCase,
   getFollowedTourPostsUseCase,
   getSelfTourPostListByUserUseCase,
+  getTopCommissionPostsUseCase,
   getTourPostListByOrgUseCase,
   getTourPostListByUserUseCase,
   getTourPostListUseCase,
@@ -26,6 +28,7 @@ import validate, {
   getBookmarkedOrFollowedPostsValidator,
   getPostsValidator,
   getSelfPostsValidator,
+  getTopTrendingTourValidator,
   getTourPostValidator,
   updateTourPostValidator,
 } from './utils/validator';
@@ -226,6 +229,25 @@ app.delete('/marketplace/posts/:id/follow', followPostValidator(), async (req: R
     await unfollowTourPostUseCase.invoke(currentUser, postId);
     logger.log(`[app.get] Unfollow post ${postId} for user ${currentUser} successfully`);
     res.json(wrapResponse(SUCCESS, undefined));
+  } catch (error: any) {
+    logger.log(`[app.get] Error ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.get('/marketplace/posts/trending', getTopTrendingTourValidator(), async (req: Request, res: Response) => {
+  try {
+    validate(req);
+    const { topCount } = req.query;
+    let topCommissionTourPosts: TourPost[];
+    if (topCount) {
+      topCommissionTourPosts = await getTopCommissionPostsUseCase
+        .invoke(parseInt(topCount as string, 10));
+    } else {
+      topCommissionTourPosts = await getTopCommissionPostsUseCase.invoke();
+    }
+    logger.log(`[app.get] Get top commission tour posts successfully ${JSON.stringify(topCommissionTourPosts)}`);
+    res.json(wrapResponse(SUCCESS, topCommissionTourPosts));
   } catch (error: any) {
     logger.log(`[app.get] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));

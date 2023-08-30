@@ -28,12 +28,21 @@ import { MarketplaceStatistic, MarketplaceStats } from './models/statistic/Marke
 import { OrganizationsStatistic } from './models/statistic/OrganizationsStatistic';
 import { TourPostsStatistic } from './models/statistic/TourPostsStatistic';
 import { marketplaceStatisticRepository, organizationStatisticRepository, tourPostStatisticRepository } from './repositories';
-import { MARKETPLACE_STATISTIC_INDEX, STATISTIC_INDEX } from './utils/constants';
+import {
+  MARKETPLACE_STATISTIC_INDEX,
+  PADDING_ZERO_PREFIX_LENGTH,
+  STATISTIC_INDEX,
+  TOP_TOUR_POST_STATISTIC_INDEX,
+} from './utils/constants';
 import {
   isOrganization, isTourPost, isTourPostOffer, isTourPostRating,
 } from './utils/dynamodb';
 import logger from './utils/logger';
 import { PostRating } from './models/PostRating';
+import { TourPost } from './models/TourPost';
+import { TopCommissionTourPost } from './models/statistic/TopCommissionTourPosts';
+import { TourPostStatus } from './models/TourPostStatus';
+import { padZeroToLeft } from './utils/number';
 
 /**
  * Get model change type from DynamoDB record
@@ -234,6 +243,90 @@ async function handleTourPostsStatisticChange(records: DynamoDBRecord[]): Promis
   await tourPostStatisticRepository.batchUpdateTourPostsStatistic(tourPostsChangedStats);
 }
 
+async function handleTopCommissionPosts(records: DynamoDBRecord[]): Promise<void> {
+  const tourPostRecords = records.filter((record) => getModelChangeType(record) === 'POST');
+  const uniqueTourPostRecords: DynamoDBRecord[] = [];
+  // Remove duplicate tour post records with compraing pk, sk
+  // and keep record item have sequence number is maximum
+  type PkSkType = { pk: string, sk: string };
+  tourPostRecords.forEach((record) => {
+    // If record is not DynamoDB record, return
+    if (!record.dynamodb || !record.dynamodb.Keys) { return; }
+    const sequenceNumber = record.dynamodb.SequenceNumber as string;
+    const { pk, sk } = dynamoProvider.unmarshall(record.dynamodb.Keys) as PkSkType;
+
+    // Find the same DynamoDB item with maximum sequence number
+    // Maximum sequence number means the latest item
+    // Because maybe there are some duplicated records in DynamoDB Stream event
+    const index = uniqueTourPostRecords.findIndex((item) => {
+      if (!item.dynamodb || !item.dynamodb.Keys) { return false; }
+      const itemSequenceNumber = item.dynamodb.SequenceNumber as string;
+      const { pk: itemPk, sk: itemSk } = dynamoProvider.unmarshall(item.dynamodb.Keys) as PkSkType;
+      return sequenceNumber > itemSequenceNumber && pk === itemPk && sk === itemSk;
+    });
+
+    if (index < 0) {
+      uniqueTourPostRecords.push(record);
+    } else {
+      uniqueTourPostRecords[index] = record;
+    }
+  });
+
+  logger.log(`Unique tour post records ${JSON.stringify(uniqueTourPostRecords, null, 5)}`);
+
+  // Data comes from DynamoDB Stream event
+  const streamedTourPostIds = uniqueTourPostRecords.map((record) => {
+    const pksk = dynamoProvider.unmarshall(record.dynamodb?.Keys!) as { pk: string, sk: string };
+    let tourPost;
+    let shouldbeDeleted;
+    if (record.eventName === 'REMOVE') {
+      shouldbeDeleted = true;
+    } else if (record.dynamodb?.NewImage) {
+      tourPost = dynamoProvider.unmarshall(record.dynamodb?.NewImage!) as TourPost;
+      // Only store IN_PROCESS tour post
+      if (tourPost.status !== TourPostStatus.IN_PROCESS) { shouldbeDeleted = true; }
+    }
+
+    return {
+      keys: pksk,
+      commission: tourPost?.commission,
+      shouldbeDeleted,
+    };
+  });
+
+  logger.log(`Streamed tour post ids ${JSON.stringify(streamedTourPostIds, null, 5)}`);
+
+  // Items to update
+  const updatingItems = streamedTourPostIds
+    .filter((item) => !item.shouldbeDeleted && item.commission !== undefined)
+    .map((item) => {
+      const { keys, commission } = item;
+      return {
+        pk: TOP_TOUR_POST_STATISTIC_INDEX,
+        sk: `${keys.pk}#${keys.sk}`,
+        keys,
+        commission,
+        // In order to sort by commission, we need to pad zero to left of commission
+        // Also it should be string type
+        lsi1: padZeroToLeft(commission!, PADDING_ZERO_PREFIX_LENGTH),
+      } as TopCommissionTourPost;
+    });
+
+  // Items to delete
+  const deletingItems = streamedTourPostIds
+    .filter((item) => item.shouldbeDeleted)
+    .map((item) => {
+      const { keys } = item;
+      return {
+        pk: TOP_TOUR_POST_STATISTIC_INDEX,
+        sk: `${keys.pk}#${keys.sk}`,
+      };
+    });
+
+  await tourPostStatisticRepository.batchUpdateTopCommissionTourPosts(updatingItems);
+  await tourPostStatisticRepository.batchDeleteTopCommissionTourPosts(deletingItems);
+}
+
 // eslint-disable-next-line import/prefer-default-export
 export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
   logger.log('Start handling DynamoDB Stream event');
@@ -258,4 +351,7 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
 
   // 3. Handle statistic data of each tour post
   await handleTourPostsStatisticChange(records);
+
+  // 4. Handle top Commission posts
+  await handleTopCommissionPosts(records);
 };

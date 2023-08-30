@@ -209,6 +209,24 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
     };
   };
 
+  listByIds = async (ids: string[]) => {
+    const marketplaceTable = await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE');
+    const queryParams = {
+      RequestItems: {
+        [marketplaceTable]: {
+          Keys: ids.map((id) => ({
+            pk: POST_INDEX,
+            sk: id,
+          })),
+        },
+      },
+    };
+    const responses = await dynamoProvider.batchGetItems(queryParams);
+    // Remove unnecessary data from the response
+    return responses[marketplaceTable]
+      .map((tourPost) => helper.excludeDataFromObject(tourPost) as TourPost);
+  };
+
   /**
    * Retrieves a tour post by its ID
    *
