@@ -144,7 +144,7 @@ implements MarketplaceUserRepository {
     const userEnabled = true;
 
     // Split huge array to smaller chucks
-    const chunkSize = 2;
+    const chunkSize = 10;
     const chunks = [];
     for (let i = 0; i < users.length; i += chunkSize) {
       chunks.push(users.slice(i, i + chunkSize));
