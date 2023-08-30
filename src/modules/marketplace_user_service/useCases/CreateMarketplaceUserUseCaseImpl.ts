@@ -1,5 +1,5 @@
 import { CreateMarketplaceUserUseCase } from './interfaces/CreateMarketplaceUserUseCase';
-import { marketplaceUserRepository } from '../repositories';
+import { marketplaceUserRepository, travelUserRepository } from '../repositories';
 import { UserWithRoles } from '../models';
 
 export default class CreateMarketplaceUserUseCaseImpl implements CreateMarketplaceUserUseCase {
@@ -7,30 +7,15 @@ export default class CreateMarketplaceUserUseCaseImpl implements CreateMarketpla
    * Method to get all users belong to Tenant excepts Root account
    * @returns Promise<MarketplaceUser> The created marketplace user
    * @param tenant The ID of tenant
-   * @param users The users that contain roles
+   * @param user The user that contain roles
    */
-  invoke = async (tenant: string, users: UserWithRoles | UserWithRoles[]) => {
-    if (!users) throw new Error('User is invalid');
-    if (Array.isArray(users)) {
-      const marketplaceUsers = users.map(
-        (user) => marketplaceUserRepository.buildBatchWriteUser(tenant, user),
-      );
-      const validUsers = marketplaceUsers.filter(async (user) => {
-        // Check marketplace user exists or not
-        const marketplaceUser = await marketplaceUserRepository.getById(`${tenant}#${user.username}`);
-        if (marketplaceUser) return false;
-        return true;
-      });
-      const unprocessedUsers = await marketplaceUserRepository.executeBatchWrite(validUsers);
-      return {
-        processedUsers: validUsers,
-        unprocessedUsers,
-      };
-    }
+  invoke = async (tenant: string, user: UserWithRoles) => {
+    // Retrieve user information from travel table
+    const travelUser = await travelUserRepository.get(tenant, user.username);
+    if (!travelUser) throw new Error('User does not exist');
     // Check marketplace user exists or not
-    const existedUser = await marketplaceUserRepository.getById(`${tenant}#${users.username}`);
+    const existedUser = await marketplaceUserRepository.getById(`${tenant}#${user.username}`);
     if (existedUser) return existedUser;
-    const marketplaceUser = marketplaceUserRepository.buildBatchWriteUser(tenant, users);
-    return marketplaceUserRepository.add(marketplaceUser);
+    return marketplaceUserRepository.add(tenant, user);
   };
 }

@@ -4,6 +4,7 @@ import { getMarketplaceUserInfo } from 'decode-token';
 import express, { NextFunction, Request, Response } from 'express';
 import {
   createMarketplaceUserUseCase,
+  createMultiMarketplaceUserUseCase,
   enableMarketplaceUserUseCase,
   getMarketplaceUserUseCase,
   getTenantUserListUseCase,
@@ -49,8 +50,13 @@ app.post('/marketplace/users', createUserValidator(), async (req: Request, res: 
     validate(req);
     const { tenant } = getMarketplaceUserInfo(req.headers.authorization!);
     const { users: usersBody } = req.body;
-    const users = await createMarketplaceUserUseCase.invoke(tenant, usersBody);
-    res.json(wrapResponse(SUCCESS, users));
+    if (Array.isArray(usersBody)) {
+      const users = await createMultiMarketplaceUserUseCase.invoke(tenant, usersBody);
+      res.json(wrapResponse(SUCCESS, users));
+    } else {
+      const users = await createMarketplaceUserUseCase.invoke(tenant, usersBody);
+      res.json(wrapResponse(SUCCESS, users));
+    }
   } catch (error: any) {
     logger.log(`[app.get] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));

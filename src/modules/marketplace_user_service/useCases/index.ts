@@ -8,10 +8,13 @@ import { EnableMarketplaceUserUseCase } from './interfaces/EnableMarketplaceUser
 import EnableMarketplaceuserUseCaseImpl from './EnableMarketplaceuserUseCaseImpl';
 import { GetMarketplaceUserUseCase } from './interfaces/GetMarketplaceUserUseCase';
 import GetMarketplaceUserUseCaseImpl from './GetMarketplaceUserUseCaseImpl';
+import { CreateMultiMarketplaceUserUseCase } from './interfaces/CreateMultiMarketplaceUserUseCase';
+import CreateMultiMarketplaceUserUseCaseImpl from './CreateMultiMarketplaceUserUseCaseImpl';
 
 interface UseCases {
   getTenantUserListUseCase: GetTenantUserListUseCase,
   createMarketplaceUserUseCase: CreateMarketplaceUserUseCase,
+  createMultiMarketplaceUserUseCase: CreateMultiMarketplaceUserUseCase,
   updateMarketplaceUserUseCase: UpdateMarketplaceUserUseCase,
   enableMarketplaceUserUseCase: EnableMarketplaceUserUseCase,
   getMarketplaceUserUseCase: GetMarketplaceUserUseCase,
@@ -20,6 +23,7 @@ interface UseCases {
 const useCases: UseCases = {
   getTenantUserListUseCase: new GetUserListUseCaseImpl(),
   createMarketplaceUserUseCase: new CreateMarketplaceUserUseCaseImpl(),
+  createMultiMarketplaceUserUseCase: new CreateMultiMarketplaceUserUseCaseImpl(),
   updateMarketplaceUserUseCase: new UpdateMarketplaceUserUseCaseImpl(),
   enableMarketplaceUserUseCase: new EnableMarketplaceuserUseCaseImpl(),
   getMarketplaceUserUseCase: new GetMarketplaceUserUseCaseImpl(),
@@ -32,4 +36,5 @@ export const {
   updateMarketplaceUserUseCase,
   enableMarketplaceUserUseCase,
   getMarketplaceUserUseCase,
+  createMultiMarketplaceUserUseCase,
 } = useCases;
