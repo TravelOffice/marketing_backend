@@ -47,8 +47,9 @@ app.get('/marketplace/users', async (req: Request, res: Response) => {
 app.post('/marketplace/users', createUserValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
-    const { roles, tenant, username } = req.body;
-    const users = await createMarketplaceUserUseCase.invoke(tenant, username, roles);
+    const { tenant } = getMarketplaceUserInfo(req.headers.authorization!);
+    const { users: usersBody } = req.body;
+    const users = await createMarketplaceUserUseCase.invoke(tenant, usersBody);
     res.json(wrapResponse(SUCCESS, users));
   } catch (error: any) {
     logger.log(`[app.get] Error ${error}`);

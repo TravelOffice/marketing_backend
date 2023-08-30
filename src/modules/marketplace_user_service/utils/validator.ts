@@ -6,6 +6,7 @@ import {
   VALIDATE_ARRAY_MSG,
   VALIDATE_BOOLEAN_MSG,
   VALIDATE_NON_EMPTY_STRING_MSG,
+  VALIDATE_NON_EMPTY_USER_MSG,
   VALIDATE_ROLE_MSG,
   VALIDATE_URL_MSG,
 } from './constants';
@@ -28,17 +29,24 @@ export default function validate(req: Request) {
 
 export function createUserValidator() {
   return [
-    body('tenant', VALIDATE_NON_EMPTY_STRING_MSG)
-      .isString()
-      .notEmpty(),
-    body('username', VALIDATE_NON_EMPTY_STRING_MSG)
-      .isString()
-      .notEmpty(),
-
-    body('roles')
-      .isArray({ min: 1 }).withMessage(VALIDATE_ARRAY_MSG)
-      .custom((value: Array<string>) => !value.includes(ROOT_ROLE))
-      .withMessage(VALIDATE_ROLE_MSG),
+    body('users')
+      .notEmpty()
+      .withMessage(VALIDATE_NON_EMPTY_USER_MSG)
+      .custom(data => {
+        if (typeof data === 'object') {
+          if (Array.isArray(data)) {
+            data.forEach((user, i) => {
+              if (!user.username) throw new Error(`username must be valid string from index ${i}`);
+              if (!Array.isArray(user.roles) || user.roles?.includes(ROOT_ROLE)) throw new Error(`roles must be valid array from index ${i}`);
+            })
+          } else {
+            if (!data.username || !(typeof data.username === 'string')) throw new Error('username must be valid string');
+            if (!Array.isArray(data.roles) || data.roles?.includes(ROOT_ROLE)) throw new Error('roles must be valid array');
+          }
+          return true; // Validation passes
+        }
+        throw new Error('Data must be an object or array');
+      }),
   ];
 }
 

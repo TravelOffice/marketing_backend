@@ -8,6 +8,8 @@ export const DISABLED = 'DISABLED';
 
 export const VALIDATE_NON_EMPTY_STRING_MSG = 'property must be a non-empty string';
 
+export const VALIDATE_NON_EMPTY_USER_MSG = 'property must be a user or user list';
+
 export const VALIDATE_STRING_MSG = 'property must be a string';
 
 export const VALIDATE_URL_MSG = 'property must be a URL';
