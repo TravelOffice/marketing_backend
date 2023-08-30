@@ -48,21 +48,40 @@ implements MarketplaceUserRepository {
 
   /**
    * Adds a new Marketplace user with specified roles.
-   *
-   * @param {TravelUser} user - The TravelUser object containing user information.
+   * @param tenant The ID of tenant
+   * @param {UserWithRoles} user - The TravelUser object containing user information.
    * @returns {Promise<MarketplaceUser>} - A promise resolving to the added MarketplaceUser.
    */
   add = async (
-    user: MarketplaceUser,
+    tenant: string,
+    user: UserWithRoles,
   ): Promise<MarketplaceUser> => {
     const table = await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE');
     const pk = USER_INDEX;
+    const sk = `${tenant}#${user.username}`;
+    const now = Date.now();
+    const marketplaceUser = {
+      organization: user.tenant,
+      username: user.username,
+      name: `${user.lastName} ${user.firstName}`,
+      id: sk,
+      phoneNumber: user.phoneNumber,
+      avatar: user.avatar,
+      settings: user.settings,
+      roles: user.roles,
+      roleStr: `${ROLE_STRING_DELIMITER}${user.roles.join(
+        ROLE_STRING_DELIMITER,
+      )}${ROLE_STRING_DELIMITER}`,
+      enabled: true,
+      createdAt: now,
+      updatedAt: now,
+    } as MarketplaceUser;
 
     // Add the Marketplace user to the DynamoDB table
-    await dynamoProvider.putItem(table, pk, user.sk, user);
+    await dynamoProvider.putItem(table, pk, sk, marketplaceUser);
 
     // Return the added MarketplaceUser
-    return helper.excludeDataFromObject(user) as MarketplaceUser;
+    return helper.excludeDataFromObject(marketplaceUser) as MarketplaceUser;
   };
 
   executeBatchWrite = async (users: MarketplaceUser[]) => {
@@ -112,48 +131,62 @@ implements MarketplaceUserRepository {
   };
 
   /**
-   * Convert `TravelUser` to `MarketplaceUser`
+   * Write batch `TravelUser` to `MarketplaceUser`
    * @param tenant The ID of tenant
-   * @param user Converted travel user
-   * @returns new `MarketplaceUser`
+   * @param users Travel users
+   * @returns
    */
-  buildBatchWriteUser = (
-    tenant: string,
-    user: UserWithRoles,
-  ): MarketplaceUser => {
+  buildBatchWriteUser = (tenant: string, users: UserWithRoles[]) => {
     // Construct the partition key for customers
     const pk = 'USR';
 
     // Default user enable = true
     const userEnabled = true;
 
-    // Construct the sort key for the customer
-    const sk = `${tenant}#${user.username}`;
+    // Split huge array to smaller chucks
+    const chunkSize = 2;
+    const chunks = [];
+    for (let i = 0; i < users.length; i += chunkSize) {
+      chunks.push(users.slice(i, i + chunkSize));
+    }
 
-    // Get the current timestamp
-    const now = Date.now();
-
-    // Construct the Item object for the PutRequest
-    return {
-      ...user,
-      pk,
-      sk,
-      // id: `${tenant}#${user.username}`,
-      id: sk,
-      username: user.username,
-      name: `${user.firstName} ${user.lastName}`,
-      organization: tenant,
-      enabled: userEnabled,
-      lsi1: `${userEnabled}#${now}`,
-      createdAt: now,
-      updatedAt: now,
-      phoneNumber: user.phoneNumber,
-      avatar: user.avatar,
-      settings: user.settings,
-      roles: user.roles,
-      roleStr: `${ROLE_STRING_DELIMITER}${user.roles.join(
-        ROLE_STRING_DELIMITER,
-      )}${ROLE_STRING_DELIMITER}`,
-    };
+    // Execute batch write users
+    const marketplaceUserChunks = Promise.all(chunks.map(async (chuck) => {
+      // Build TravelUsers with Roles to MarketUsers
+      const marketplaceUsers: MarketplaceUser[] = chuck.map((user) => {
+        // Construct the sort key for the customer
+        const sk = `${tenant}#${user.username}`;
+        // Get the current timestamp
+        const now = Date.now();
+        // Construct the Item object for the PutRequest
+        return {
+          ...user,
+          pk,
+          sk,
+          id: sk,
+          username: user.username,
+          name: `${user.firstName} ${user.lastName}`,
+          organization: tenant,
+          enabled: userEnabled,
+          lsi1: `${userEnabled}#${now}`,
+          createdAt: now,
+          updatedAt: now,
+          phoneNumber: user.phoneNumber,
+          avatar: user.avatar,
+          settings: user.settings,
+          roles: user.roles,
+          roleStr: `${ROLE_STRING_DELIMITER}${user.roles.join(
+            ROLE_STRING_DELIMITER,
+          )}${ROLE_STRING_DELIMITER}`,
+        };
+      });
+      // Execute batch write
+      await this.executeBatchWrite(marketplaceUsers);
+      // Return the added MarketplaceUser
+      return marketplaceUsers.map(
+        (marketplaceUser) => helper.excludeDataFromObject(marketplaceUser) as MarketplaceUser,
+      );
+    }));
+    return marketplaceUserChunks.then((chunkRs) => chunkRs.flat());
   };
 }
