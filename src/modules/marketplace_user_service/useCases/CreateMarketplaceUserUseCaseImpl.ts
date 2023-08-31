@@ -16,6 +16,6 @@ export default class CreateMarketplaceUserUseCaseImpl implements CreateMarketpla
     // Check marketplace user exists or not
     const existedUser = await marketplaceUserRepository.getById(`${tenant}#${user.username}`);
     if (existedUser) return existedUser;
-    return marketplaceUserRepository.add(tenant, user);
+    return marketplaceUserRepository.addUser(tenant, user);
   };
 }
