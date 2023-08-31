@@ -1,6 +1,6 @@
 import { CreateMultiMarketplaceUserUseCase } from './interfaces/CreateMultiMarketplaceUserUseCase';
 import { marketplaceUserRepository } from '../repositories';
-import { UserWithRoles } from '../models';
+import { MarketplaceUser, UserWithRoles } from '../models';
 
 export default class CreateMarketplaceUserUseCaseImpl
 implements CreateMultiMarketplaceUserUseCase {
@@ -24,13 +24,17 @@ implements CreateMultiMarketplaceUserUseCase {
       }),
     );
     // Check marketplace user exists or not
+    const existedUsers: MarketplaceUser[] = [];
     const validUsers = fetchedUsers
       .filter((data) => {
-        if (data.existedUser) return false;
+        if (data.existedUser) {
+          existedUsers.push(data.existedUser);
+          return false;
+        }
         return true;
       })
       .map((data) => data.user);
 
-    return marketplaceUserRepository.buildBatchWriteUser(tenant, validUsers);
+    return (await marketplaceUserRepository.addUsers(tenant, validUsers)).concat(existedUsers);
   };
 }

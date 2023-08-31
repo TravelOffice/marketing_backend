@@ -51,6 +51,7 @@ app.post('/marketplace/users', createUserValidator(), async (req: Request, res: 
     const { tenant } = getMarketplaceUserInfo(req.headers.authorization!);
     const { users: usersBody } = req.body;
     if (Array.isArray(usersBody)) {
+      if (usersBody.every((item) => tenant !== item.tenant)) res.status(400).json(wrapResponse(FAILED, undefined, 'Cannot add user of another tenant'));
       const users = await createMultiMarketplaceUserUseCase.invoke(tenant, usersBody);
       res.json(wrapResponse(SUCCESS, users));
     } else {
