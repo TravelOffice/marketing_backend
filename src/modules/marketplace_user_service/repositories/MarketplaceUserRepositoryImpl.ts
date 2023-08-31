@@ -1,5 +1,6 @@
 import { getAwsSecretValue } from 'get-env';
 import { dynamoProvider, helper, QueryInput } from 'core';
+import { BatchWriteItemInput } from 'core/providers/dynamodb/DynamoProvider';
 import { MarketplaceUser, UserWithRoles } from '../models';
 import {
   ROLE_STRING_DELIMITER,
@@ -111,12 +112,13 @@ implements MarketplaceUserRepository {
     const table = await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE');
     const requests = param.map((item) => ({
       PutRequest: { Item: item },
-    })) as any;
-    return dynamoProvider.batchWriteItem({
+    }));
+    const RequestItems = {
       RequestItems: {
         [table]: requests,
       },
-    });
+    } as BatchWriteItemInput;
+    return dynamoProvider.batchWriteItem(RequestItems);
   };
 
   /**
