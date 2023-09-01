@@ -180,13 +180,13 @@ export function getBookmarkedOrFollowedPostsValidator() {
 
 export function bookmarkPostValidator() {
   return [
-    param('postId').notEmpty().withMessage('is required'),
+    param('id').notEmpty().withMessage('is required'),
   ];
 }
 
 export function followPostValidator() {
   return [
-    param('postId').notEmpty().withMessage('is required'),
+    param('id').notEmpty().withMessage('is required'),
   ];
 }
 
