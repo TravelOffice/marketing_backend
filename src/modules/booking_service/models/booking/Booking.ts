@@ -7,6 +7,7 @@ import { Service } from './Service';
 import { Lead } from '../Lead';
 import { TourTemplate } from '../tour/TourTemplate';
 import { Customer } from '../Customer';
+import { Passenger } from '../Passenger';
 
 export enum BookingStatusEnum {
   INITIALIZED = 'INITIALIZED',
@@ -41,6 +42,7 @@ interface DdbBookingModel extends BaseDdbModel {
   deletedBy?: string,
   notes?: Note[],
   tasks?: Task[],
+  passengers?: Passenger[], // List of passengers
   bookingStatus: BookingStatus,
   paymentStatus: BookingPaymentStatus,
   assigneeId?: string,

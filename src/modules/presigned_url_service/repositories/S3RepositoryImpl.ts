@@ -4,6 +4,7 @@ import { GenerateMailPresignedUrlOption } from '../models/GenerateMailPresignedU
 import { s3Provider } from '../providers';
 import { S3Repository } from './interfaces/S3Repository';
 import { GeneratePaymentVoucherPresignedUrlOption } from '../models/GeneratePaymentVoucherPresignedUrlOption';
+import { GeneratePassengerAttachedDocPresignedUrlOption } from '../models/GeneratePassengerAttachedDocPresignedUrlOption';
 
 export default class S3RepositoryImpl implements S3Repository {
   /**
@@ -31,4 +32,18 @@ export default class S3RepositoryImpl implements S3Repository {
    * @returns PresignedUrl object
    */
   generatePaymentVoucherPresignedUrl = async (option: GeneratePaymentVoucherPresignedUrlOption) => s3Provider.generatePresignedUrl(option.bucket, `${option.tenant}/payment-voucher/${option.fileName}`, option.expires, option.fileType);
+
+  /**
+   * Generate presigned url to upload passenger's attached document to s3
+   * @param option GeneratePaymentVoucherPresignedUrlOption
+   * @returns PresignedUrl object
+   */
+  generatePassengerAttachedDocPresignedUrl = async (
+    option: GeneratePassengerAttachedDocPresignedUrlOption,
+  ) => {
+    const randomByteLength = 16;
+    const folderName = crypto.randomBytes(randomByteLength).toString('hex');
+    const now = new Date();
+    return s3Provider.generatePresignedUrl(option.bucket, `${option.tenant}/passenger-attached-doc/${now.getFullYear()}/${now.getMonth() + 1}/${now.getDate()}/${folderName}/${option.fileName}`, option.expires, option.fileType);
+  };
 }

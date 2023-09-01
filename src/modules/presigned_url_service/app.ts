@@ -6,7 +6,12 @@ import { getEnv } from 'get-env';
 import { s3Repository } from './repositories';
 import { FAILED, SUCCESS } from './utils/constants';
 import logger from './utils/logger';
-import validate, { getPresignedUrlValidator, getAvatarPresignedUrlValidator, getPaymentVoucherPresignedUrlValidator } from './utils/validator';
+import validate, {
+  getAvatarPresignedUrlValidator,
+  getPassengerAttachedDocPresignedUrlValidator,
+  getPaymentVoucherPresignedUrlValidator,
+  getPresignedUrlValidator,
+} from './utils/validator';
 import wrapResponse from './utils/wrapResponse';
 
 const app = express();
@@ -92,6 +97,30 @@ app.get('/payment-vouchers/presigned-url', getPaymentVoucherPresignedUrlValidato
     res.json(wrapResponse(SUCCESS, rs));
   } catch (error: any) {
     logger.log(`[GET /payment-vouchers/presigned-url] Generated an error ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.get('/passengers/attached-docs/presigned-url', getPassengerAttachedDocPresignedUrlValidator(), async (req: Request, res: Response) => {
+  try {
+    validate(req);
+    const { tenant } = getCurrentUserInfo(req.headers.authorization!);
+    const bucket = getEnv('ATTACHMENT_MESSAGE_BUCKET');
+    const expires = Number(getEnv('PRESIGNED_URL_EXPIRES'));
+    const {
+      fileType, fileName,
+    } = req.query;
+    const option = {
+      bucket,
+      tenant,
+      fileType: String(fileType),
+      fileName: String(fileName),
+      expires,
+    };
+    const rs = await s3Repository.generatePassengerAttachedDocPresignedUrl(option);
+    res.json(wrapResponse(SUCCESS, rs));
+  } catch (error: any) {
+    logger.log(`[GET /passengers/attached-docs/presigned-url] Generated an error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });

@@ -32,5 +32,6 @@ export type UpdateBookingDto = Pick<Booking,
   'waitingExpiredAt' |
   'doneAt' |
   'totalPax' |
-  'customer'
+  'customer' |
+  'passengers'
 >
