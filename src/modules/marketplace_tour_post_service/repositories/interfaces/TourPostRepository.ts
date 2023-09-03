@@ -36,7 +36,7 @@ export interface TourPostRepository {
 
   create(tourPost: TourPost): Promise<TourPost>,
 
-  getById(id: string): Promise<TourPost | undefined>,
+  getById(id: string, userId?: string): Promise<TourPost | undefined>,
 
   update(id: string, tourPost: Partial<TourPost>): Promise<TourPost>,
 
