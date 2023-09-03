@@ -175,9 +175,27 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
     const { data } = queryResult;
     const tourPosts = await this.batchQueryTourPosts(data);
 
+    // Get all the bookmarked items and followed items of the user
+    const followedItems = await this.getAllFollowedItems(userId);
+
+    // Convert to array of tour post ids that are bookmarked or followed by the user
+    const followedTourPostIds = followedItems.map((item) => item.tourPostId);
+
+    // Get number of offers and rating average for each tour post
+    const transformedTourPosts = await Promise.all(
+      tourPosts.map(async (item: TourPost) => {
+        const tourPostWithStatistic = await this.transformTourPostWithStatistic(item);
+        return {
+          ...tourPostWithStatistic,
+          isFollowed: followedTourPostIds.includes(item.code),
+          isBookmarked: true,
+        };
+      }),
+    );
+
     return {
       ...queryResult,
-      data: tourPosts,
+      data: transformedTourPosts,
     };
   };
 
@@ -203,9 +221,27 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
     const { data } = queryResult;
     const tourPosts = await this.batchQueryTourPosts(data);
 
+    // Get all the bookmarked items and followed items of the user
+    const bookmarkedItems = await this.getAllBookmarkedItems(userId);
+
+    // Convert to array of tour post ids that are bookmarked or followed by the user
+    const bookmarkedTourPostIds = bookmarkedItems.map((item) => item.tourPostId);
+
+    // Get number of offers and rating average for each tour post
+    const transformedTourPosts = await Promise.all(
+      tourPosts.map(async (item: TourPost) => {
+        const tourPostWithStatistic = await this.transformTourPostWithStatistic(item);
+        return {
+          ...tourPostWithStatistic,
+          isBookmarked: bookmarkedTourPostIds.includes(item.code),
+          isFollowed: true,
+        };
+      }),
+    );
+
     return {
       ...queryResult,
-      data: tourPosts,
+      data: transformedTourPosts,
     };
   };
 
@@ -228,28 +264,30 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
   };
 
   /**
-   * Retrieves a tour post by its ID
-   *
-   * @param id - The ID of the tour post.
-   * @returns A Promise that resolves to the retrieved tour post, or undefined if not found.
-   */
-  getById = async (id: string) => {
+ * Get a TourPost by its ID and optionally transform it based on a user.
+ *
+ * @param {string} id - The ID of the TourPost to retrieve.
+ * @param {string} [userId] - The ID of the user (optional) for transformation.
+ * @returns {Promise<TourPost | undefined>}
+ * - A promise that resolves with the TourPost (or undefined if not found).
+ */
+  getById = async (id: string, userId?: string): Promise<TourPost | undefined> => {
+  // Retrieve the TourPost from the DynamoDB table
     const marketplaceTable = await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE');
     const tourPost = await dynamoProvider.getItem<TourPost>(marketplaceTable, POST_INDEX, id);
+
+    // If the TourPost doesn't exist, return undefined
     if (!tourPost) {
       return undefined;
     }
-    const statistic = await this.getTourStatistic(tourPost.code);
-    const { totalOffers, totalRatings, numberOfRatings } = statistic;
-    let ratingAverage = 0;
-    if (numberOfRatings > 0) {
-      ratingAverage = roundNumber(totalRatings / numberOfRatings);
+
+    // If a user ID is provided, transform the TourPost with additional information
+    if (userId) {
+      return this.transformTourPost(tourPost, userId);
     }
-    return {
-      ...tourPost,
-      totalOffers,
-      ratingAverage,
-    };
+
+    // Otherwise, return the original TourPost without transformation
+    return tourPost;
   };
 
   /**
@@ -476,18 +514,9 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
     // Get number of offers and rating average for each tour post
     const transformedTourPosts = await Promise.all(
       tourPosts.map(async (item) => {
-        const statistic = await this.getTourStatistic(item.code);
-        const { totalOffers, totalRatings, numberOfRatings } = statistic;
-        let ratingAverage = 0;
-        if (numberOfRatings > 0) {
-          ratingAverage = roundNumber(totalRatings / numberOfRatings);
-        }
-        // Add isBookmarked and isFollowed flags to each tour post
-        // as well as totalOffers and ratingAverage
+        const tourPostWithStatistic = await this.transformTourPostWithStatistic(item);
         return {
-          ...item,
-          totalOffers,
-          ratingAverage,
+          ...tourPostWithStatistic,
           isBookmarked: bookmarkedTourPostIds.includes(item.code),
           isFollowed: followedTourPostIds.includes(item.code),
         };
@@ -496,6 +525,54 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
 
     return transformedTourPosts;
   };
+
+  /**
+   * Transform a TourPost by adding additional information.
+   *
+   * @param {TourPost} tourPost - The TourPost to transform.
+   * @param {string} userId - The ID of the user performing the transformation.
+   * @returns {Promise<TourPost>} - A promise that resolves with the transformed TourPost.
+   */
+  private async transformTourPost(tourPost: TourPost, userId: string): Promise<TourPost> {
+    // Get all the bookmarked items and followed items of the user
+    const bookmarkedItem = await this.getBookmarkedItem(userId, tourPost.code);
+    const followedItem = await this.getFollowedItem(userId, tourPost.code);
+
+    const tourPostWithStatistic = await this.transformTourPostWithStatistic(tourPost);
+
+    // Add isBookmarked and isFollowed flags to each tour post
+    // as well as totalOffers and ratingAverage
+    return {
+      ...tourPostWithStatistic,
+      isBookmarked: !!bookmarkedItem,
+      isFollowed: !!followedItem,
+    };
+  }
+
+  /**
+   * Transform a TourPost by adding rating statistics.
+   *
+   * @param {TourPost} tourPost - The TourPost to transform.
+   * @returns {Promise<TourPost>} - A promise that resolves with the transformed TourPost.
+   */
+  private async transformTourPostWithStatistic(tourPost: TourPost): Promise<TourPost> {
+    // Get the number of offers and rating statistics for each tour post
+    const statistic = await this.getTourStatistic(tourPost.code);
+    const { totalOffers, totalRatings, numberOfRatings } = statistic;
+
+    // Calculate the rating average, rounded to a reasonable precision
+    let ratingAverage = 0;
+    if (numberOfRatings > 0) {
+      ratingAverage = roundNumber(totalRatings / numberOfRatings);
+    }
+
+    // Add totalOffers and ratingAverage to the TourPost
+    return {
+      ...tourPost,
+      totalOffers,
+      ratingAverage,
+    };
+  }
 
   /**
    * Method to get tour post statistic

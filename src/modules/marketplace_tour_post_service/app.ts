@@ -109,7 +109,8 @@ app.get('/marketplace/posts/:id', getTourPostValidator(), async (req: Request, r
   try {
     validate(req);
     const { id } = req.params;
-    const tourPost = await getTourPostUseCase.invoke(id);
+    const currentUser = getMarketplaceUserInfo(req.headers.authorization!);
+    const tourPost = await getTourPostUseCase.invoke(id, currentUser);
     logger.log(`[app.get] Get post ${id} successfully ${JSON.stringify(tourPost)}`);
     res.json(wrapResponse(SUCCESS, tourPost));
   } catch (error: any) {
