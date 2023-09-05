@@ -43,6 +43,7 @@ export default class UpdateBookingUseCaseImpl implements UpdateBookingUseCase {
     'totalPax',
     'customer',
     'passengers',
+    'paidAmount',
   ];
 
   invoke = async (
