@@ -194,6 +194,7 @@ export function validateUpdateBookingParams() {
         const date = Date.parse(value);
         return !Number.isNaN(date);
       }),
+    body('paidAmount').optional().isInt({ min: 0 }).withMessage(VALIDATE_POSITIVE_NUMBER),
   ];
 }
 
@@ -221,7 +222,8 @@ export function validateSendEmailToTourGuideParams() {
 
 export function confirmBookingValidator() {
   return [
-    body('departureTourId').notEmpty().isString(),
+    body('departureTourId').notEmpty().isString().withMessage(VALIDATE_NON_EMPTY_STRING_MSG),
+    body('paidAmount').notEmpty().isInt({ min: 0 }).withMessage(VALIDATE_POSITIVE_NUMBER),
   ];
 }
 

@@ -28,7 +28,7 @@ export default class ConfirmBookingUseCaseImpl implements ConfirmBookingUseCase 
       throw new Error(`Cannot change status from '${booking.bookingStatus}' to '${BookingStatusEnum.CONFIRMED}'`);
     }
 
-    const { departureTourId } = dto;
+    const { departureTourId, paidAmount } = dto;
     const departureTour = await departureTourRepository.getDepartureTour(tenant, departureTourId);
     if (!departureTour) throw new Error(`Departure tour [${departureTourId}] not found`);
 
@@ -39,6 +39,7 @@ export default class ConfirmBookingUseCaseImpl implements ConfirmBookingUseCase 
       bookingStatus: BookingStatusEnum.CONFIRMED,
       updatedAt: Date.now(),
       doneAt: Date.now().toString(), // The time that completing payment
+      paidAmount,
       paymentStatus: BookingPaymentStatusEnum.PAID,
       lsi3: `${BOOKING_STATUS_INDEX}#${BookingStatusEnum.CONFIRMED}`,
       lsi4: `${DEPARTURE_TOUR_INDEX}#${departureTourId}`,
