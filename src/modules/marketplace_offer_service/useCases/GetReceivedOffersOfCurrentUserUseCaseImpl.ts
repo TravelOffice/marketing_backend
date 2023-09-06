@@ -1,12 +1,13 @@
 import { PaginationParams, PaginationResponsePayload } from 'core/providers/dynamodb/DynamoProvider';
 import { marketplaceUserRepository, offerRepository } from '../repositories';
 import { Offer } from '../models/Offer';
-import { GetOfferListOfAuthorUseCase } from './interfaces/GetOfferListOfAuthorUseCase';
 import { CognitoUser } from '../models/CognitoUser';
+import { GetReceivedOffersOfCurrentUserUseCase } from './interfaces/GetReceivedOffersOfCurrentUserUseCase';
 
-export default class GetOfferListOfAuthorUseCaseImpl implements GetOfferListOfAuthorUseCase {
+export default class GetReceivedOffersOfCurrentUserUseCaseImpl
+implements GetReceivedOffersOfCurrentUserUseCase {
   /**
-   * Retrieves a specific offer by its ID and the associated tour post ID.
+   * Retrieves the received offers of the current user.
    *
    * @param {string} currentUser - Current user
    * @param {PaginationParams} paginationParams - The parameters for pagination.
@@ -27,6 +28,6 @@ export default class GetOfferListOfAuthorUseCaseImpl implements GetOfferListOfAu
       throw new Error('Marketplace user not found');
     }
 
-    return offerRepository.listByAuthor(marketplaceUserId, paginationParams);
+    return offerRepository.listReceivedOffersOfUser(marketplaceUserId, paginationParams);
   };
 }

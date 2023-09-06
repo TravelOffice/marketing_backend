@@ -13,6 +13,7 @@ import {
   getSelfTourPostListByUserUseCase,
   getTopCommissionPostsUseCase,
   getTourPostListByOrgUseCase,
+  getTourPostListByPostTypeUseCase,
   getTourPostListByUserUseCase,
   getTourPostListUseCase,
   getTourPostUseCase,
@@ -74,9 +75,11 @@ app.get('/marketplace/me/posts', getSelfPostsValidator(), async (req: Request, r
 app.get('/marketplace/posts', getPostsValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
-    // The posts can be get by organization
+    // The posts can be get by organization or author or post type
     // If organization is not specified, get all posts
-    const { organization, author, ...paginationParams } = req.query;
+    const {
+      organization, author, postType, ...paginationParams
+    } = req.query;
     const currentUser = getMarketplaceUserInfo(req.headers.authorization!);
     let tourPosts;
     if (organization) {
@@ -95,6 +98,14 @@ app.get('/marketplace/posts', getPostsValidator(), async (req: Request, res: Res
         paginationParams,
       );
       logger.log(`[app.get] Get posts by author ${author} successfully ${JSON.stringify(tourPosts)}`);
+    } else if (postType) {
+      // Fetch posts by type
+      tourPosts = await getTourPostListByPostTypeUseCase.invoke(
+        currentUser,
+          postType as string,
+          paginationParams,
+      );
+      logger.log(`[app.get] Get posts by tour post type ${postType} successfully ${JSON.stringify(tourPosts)}`);
     } else {
       // Fetch all posts
       tourPosts = await getTourPostListUseCase.invoke(currentUser, paginationParams);

@@ -1,5 +1,5 @@
 import { dynamoProvider, helper } from 'core';
-import { PaginationParams } from 'core/providers/dynamodb/DynamoProvider';
+import { PaginationParams, PaginationResponsePayload } from 'core/providers/dynamodb/DynamoProvider';
 import { getAwsSecretValue } from 'get-env';
 import { BookmarkedTourPost } from '../models/BookmarkedTourPost';
 import { FollowedTourPost } from '../models/FollowedTourPost';
@@ -18,6 +18,7 @@ import logger from '../utils/logger';
 import { TourPostRepository } from './interfaces/TourPostRepository';
 import { TourPostStatistic } from '../models/statistic/TourPostStatistic';
 import { roundNumber } from '../utils/numeric';
+import { TourPostType } from '../models/TourPostType';
 
 type BookmarkOrFollowedTourPost = BookmarkedTourPost | FollowedTourPost;
 
@@ -72,7 +73,7 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
     currentUserId: string,
     author: string,
     paginationParams: PaginationParams,
-  ) => {
+  ): Promise<PaginationResponsePayload<TourPost> | undefined> => {
     // Prepare query params
     const marketplaceTable = await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE');
     const queryParams = {
@@ -86,6 +87,53 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
     };
 
     // Get list of tour posts by user
+    // The data is paginated
+    const queryResult = await dynamoProvider.queryPagination<TourPost>(
+      queryParams,
+      paginationParams,
+    );
+
+    // Transform the data such as:
+    // - Add bookmarked flag to each post if the user has bookmarked it
+    // - Add fav flag if the user has liked it
+    if (queryResult) {
+      const transformedPosts = await this.transformTourPostList(queryResult.data, currentUserId);
+      return {
+        ...queryResult,
+        data: transformedPosts,
+      };
+    }
+
+    return queryResult;
+  };
+
+  /**
+   * Lists all tour posts for the specified post type.
+   *
+   * @param currentUserId
+   * @param postType
+   * @param {PaginationParams} paginationParams - The pagination settings.
+   * @returns {Promise<PaginationResponsePayload<TourPost> | undefined>}
+   * A promise resolving to a paginated response.
+   */
+  listByPostType = async (
+    currentUserId: string,
+    postType: TourPostType,
+    paginationParams: PaginationParams,
+  ): Promise<PaginationResponsePayload<TourPost> | undefined> => {
+    // Prepare query params
+    const marketplaceTable = await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE');
+    const queryParams = {
+      TableName: marketplaceTable,
+      IndexName: 'Index3',
+      KeyConditionExpression: 'pk = :pk and begins_with(lsi3, :lsi3_filter)',
+      ExpressionAttributeValues: {
+        ':pk': POST_INDEX,
+        ':lsi3_filter': `${postType}#`,
+      },
+    };
+
+    // Get list of tour posts by tour post type
     // The data is paginated
     const queryResult = await dynamoProvider.queryPagination<TourPost>(
       queryParams,

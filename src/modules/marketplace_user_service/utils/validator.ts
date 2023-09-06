@@ -36,10 +36,14 @@ export function createUserValidator() {
             data.forEach((user, i) => {
               if (!user.username) throw new Error(`username must be valid string from index ${i}`);
               if (!Array.isArray(user.roles) || user.roles?.includes(ROOT_ROLE)) throw new Error(`roles must be valid array from index ${i}`);
+              if (!user.firstName) throw new Error(`firstName must be valid string from index ${i}`);
+              if (!user.lastName) throw new Error(`lastName must be valid string from index ${i}`);
             });
           } else {
             if (!data.username || !(typeof data.username === 'string')) throw new Error('username must be valid string');
             if (!Array.isArray(data.roles) || data.roles?.includes(ROOT_ROLE)) throw new Error('roles must be valid array');
+            if (!data.firstName || !(typeof data.firstName === 'string')) throw new Error('firstName must be valid string');
+            if (!data.lastName || !(typeof data.lastName === 'string')) throw new Error('lastName must be valid string');
           }
           return true; // Validation passes
         }

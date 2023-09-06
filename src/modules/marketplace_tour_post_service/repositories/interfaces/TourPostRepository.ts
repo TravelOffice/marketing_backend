@@ -16,6 +16,12 @@ export interface TourPostRepository {
     params: PaginationParams
   ): Promise<PaginationResponsePayload<TourPost> | undefined>,
 
+  listByPostType(
+      currentUserId: string,
+      postType: string,
+      params: PaginationParams
+  ): Promise<PaginationResponsePayload<TourPost> | undefined>,
+
   listByOrganization(
     currentUserId: string,
     organization: string,

@@ -16,16 +16,19 @@ import GetOfferUseCaseImpl from './GetOfferUseCaseImpl';
 import CancelOfferUseCaseImpl from './CancelOfferUseCaseImpl';
 import AcceptOfferUseCaseImpl from './AcceptOfferUseCaseImpl';
 import RejectOfferUseCaseImpl from './RejectOfferUseCaseImpl';
-import GetOfferListOfAuthorUseCaseImpl from './GetOfferListOfAuthorUseCaseImpl';
-import { GetOfferListOfAuthorUseCase } from './interfaces/GetOfferListOfAuthorUseCase';
+import GetSentOffersOfCurrentUserUseCaseImpl from './GetSentOffersOfCurrentUserUseCaseImpl';
+import { GetSentOffersOfCurrentUserUseCase } from './interfaces/GetSentOffersOfCurrentUserUseCase';
 import { GetReceivedOffersOfOrgUseCase } from './interfaces/GetReceivedOffersOfOrgUseCase';
 import GetReceivedOffersOrgUseCaseImpl from './GetReceivedOffersOrgUseCaseImpl';
+import { GetReceivedOffersOfCurrentUserUseCase } from './interfaces/GetReceivedOffersOfCurrentUserUseCase';
+import GetReceivedOffersOfCurrentUserUseCaseImpl from './GetReceivedOffersOfCurrentUserUseCaseImpl';
 
 interface UseCases {
   getOfferListOfPostUseCase: GetOfferListOfPostUseCase,
   getSentOffersOfOrgUseCase: GetSentOffersOfOrgUseCase,
   getReceivedOffersOfOrgUseCase: GetReceivedOffersOfOrgUseCase,
-  getOfferListOfAuthorUseCase: GetOfferListOfAuthorUseCase,
+  getSentOffersOfCurrentUserUseCase: GetSentOffersOfCurrentUserUseCase,
+  getReceivedOffersOfCurrentUserUseCase: GetReceivedOffersOfCurrentUserUseCase,
   createOfferUseCase: CreateOfferUseCase,
   getOfferUseCase: GetOfferUseCase,
   updateOfferUseCase: UpdateOfferUseCase,
@@ -38,7 +41,8 @@ const useCases: UseCases = {
   getOfferListOfPostUseCase: new GetOfferListOfPostUseCaseImpl(),
   getSentOffersOfOrgUseCase: new GetSentOffersOfOrgUseCaseImpl(),
   getReceivedOffersOfOrgUseCase: new GetReceivedOffersOrgUseCaseImpl(),
-  getOfferListOfAuthorUseCase: new GetOfferListOfAuthorUseCaseImpl(),
+  getSentOffersOfCurrentUserUseCase: new GetSentOffersOfCurrentUserUseCaseImpl(),
+  getReceivedOffersOfCurrentUserUseCase: new GetReceivedOffersOfCurrentUserUseCaseImpl(),
   createOfferUseCase: new CreateOfferUseCaseImpl(),
   getOfferUseCase: new GetOfferUseCaseImpl(),
   updateOfferUseCase: new UpdateOfferUseCaseImpl(),
@@ -51,7 +55,8 @@ export const {
   getOfferListOfPostUseCase,
   getSentOffersOfOrgUseCase,
   getReceivedOffersOfOrgUseCase,
-  getOfferListOfAuthorUseCase,
+  getSentOffersOfCurrentUserUseCase,
+  getReceivedOffersOfCurrentUserUseCase,
   createOfferUseCase,
   getOfferUseCase,
   updateOfferUseCase,
