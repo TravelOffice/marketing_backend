@@ -178,16 +178,18 @@ export function getBookmarkedOrFollowedPostsValidator() {
   ];
 }
 
-export function bookmarkPostValidator() {
+export function idParamValidator() {
   return [
     param('id').notEmpty().withMessage('is required'),
   ];
 }
 
+export function bookmarkPostValidator() {
+  return idParamValidator();
+}
+
 export function followPostValidator() {
-  return [
-    param('id').notEmpty().withMessage('is required'),
-  ];
+  return idParamValidator();
 }
 
 export function getTopTrendingTourValidator() {

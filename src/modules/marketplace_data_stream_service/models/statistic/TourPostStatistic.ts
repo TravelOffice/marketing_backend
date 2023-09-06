@@ -7,6 +7,12 @@ export interface TourPostStatistic extends BaseDdbModel {
   totalRatings: number,
   // Number of users that have rated the tour post
   numberOfRatings: number,
+  // The ID of organization
+  organization: string,
 }
 
-export type TourPostStats = Pick<TourPostStatistic, 'totalOffers' | 'totalRatings' | 'numberOfRatings'>;
+// Lsi1 ís id of lead or tour template that the tour post is linked to
+export type TourPostStats = Pick<
+  TourPostStatistic,
+  'totalOffers' | 'totalRatings' | 'numberOfRatings' | 'organization' | 'lsi1'
+>;

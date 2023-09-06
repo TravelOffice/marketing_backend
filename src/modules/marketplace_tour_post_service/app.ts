@@ -9,6 +9,7 @@ import {
   followTourPostUseCase,
   getBookmarkedTourPostsUseCase,
   getFollowedTourPostsUseCase,
+  getLinkedLeadOrTourInfoOnMarketplaceUseCase,
   getSelfTourPostListByUserUseCase,
   getTopCommissionPostsUseCase,
   getTourPostListByOrgUseCase,
@@ -30,6 +31,7 @@ import validate, {
   getSelfPostsValidator,
   getTopTrendingTourValidator,
   getTourPostValidator,
+  idParamValidator,
   updateTourPostValidator,
 } from './utils/validator';
 import wrapResponse from './utils/wrapResponse';
@@ -254,5 +256,23 @@ app.get('/marketplace/posts/trending', getTopTrendingTourValidator(), async (req
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });
+
+app.get(
+  '/marketplace/posts/linked-target-info/:id',
+  idParamValidator(),
+  async (req: Request, res: Response) => {
+    try {
+      validate(req);
+      const { id } = req.params;
+      const currentUser = getMarketplaceUserInfo(req.headers.authorization!);
+      const tourPostInfoLinkedToTarget = await getLinkedLeadOrTourInfoOnMarketplaceUseCase
+        .invoke(currentUser, id);
+      res.json(wrapResponse(SUCCESS, tourPostInfoLinkedToTarget));
+    } catch (error: any) {
+      logger.log(`[app.get] Error ${error}`);
+      res.json(wrapResponse(FAILED, undefined, error.message));
+    }
+  },
+);
 
 export default app;
