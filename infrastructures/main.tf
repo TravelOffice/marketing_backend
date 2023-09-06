@@ -12,7 +12,11 @@ variable "APPSYNC_LAMBDA_AUTHORIZER" {}
 variable "APPSYNC_LAMBDA_RESOLVER" {}
 
 data "aws_caller_identity" "current" {}
+data "http" "infra" {
+  url = "https://raw.githubusercontent.com/TravelOffice/infrastructure-constant/master/${var.ENV}-infrastructure.json"
+}
 locals {
+  constants           = jsondecode(data.http.infra.response_body)
   remote_feature_name = "base_infrastructure"
   domain_name         = module.REMOTE_STATE.STATE.COMMON_CONFIG.route53.hosted_zone.domain.name
   tags = {
@@ -110,6 +114,7 @@ locals {
       ATTACHMENT_BUCKET = module.REMOTE_STATE.STATE.MARKETING.frontend.sale_web.attachment_s3_bucket
     },
   }
+  MEILI_SEARCH_MASTER_KEY = local.constants["MEILI_SEARCH_MASTER_KEY"]
 }
 
 module "REMOTE_STATE" {
@@ -202,4 +207,40 @@ module "MARKETPLACE_DDB_STREAM_CONFIGURATION" {
   MARKETPLACE_DDB_STREAM_BATCH_SIZE      = 100
   MARKETPLACE_LAMBDA_STREAM_HANDLER_ARN  = module.LAMBDA_FUNCTION.lambda_arns["marketplace_data_stream_service"]
   MARKETPLACE_DDB_STREAM_BATCHING_WINDOW = 90
+}
+
+module "SEARCH_QUEUE" {
+  source       = "../../modules/sqs"
+  FEATURE_NAME = var.FEATURE_NAME
+  ENV          = var.ENV
+  TAGS         = local.tags
+}
+
+module "SEARCH_LOAD_BALANCER" {
+  source             = "../../modules/application/alb"
+  VPC_ID             = module.REMOTE_STATE.STATE.MARKETING.backend.vpc.id
+  LB_ARN             = module.REMOTE_STATE.STATE.MARKETING.search.lb_arn
+  LB_FRONT_END_HTTPS = module.REMOTE_STATE.STATE.MARKETING.search.lb_front_end_https_arn
+  LB_FRONT_END_HTTP  = module.REMOTE_STATE.STATE.MARKETING.search.lb_front_end_http_arn
+  DOMAIN_ARN         = module.REMOTE_STATE.STATE.COMMON_CONFIG.route53.hosted_zone.domain.certificate.api_gateway
+  TAGS               = local.tags
+}
+
+module "SEARCH_INSTANCE" {
+  source                   = "../../modules/application/search"
+  ENV                      = var.ENV
+  FEATURE_NAME             = var.FEATURE_NAME
+  SERVICE_NAME             = "${var.ENV}-${var.FEATURE_NAME}-service"
+  DESIRED_COUNT            = 1
+  MIN_CAPACITY             = 1
+  MAX_CAPACITY             = 1
+  SEARCH_TARGET_GROUP_ARN  = module.SEARCH_LOAD_BALANCER.search_lb_target_group_arn
+  SUBNETS                  = module.REMOTE_STATE.STATE.MARKETING.backend.vpc.private_subnets
+  VPC_ID                   = module.REMOTE_STATE.STATE.MARKETING.backend.vpc.id
+  AWS_REGION               = var.AWS_REGION
+  MEILI_SEARCH_MASTER_KEY  = local.MEILI_SEARCH_MASTER_KEY
+  SEARCH_MESSAGE_QUEUE_URL = module.SEARCH_QUEUE.search_queue_url
+  SEARCH_MESSAGE_QUEUE_ARN = module.SEARCH_QUEUE.search_queue_arn
+  SCRIPT_BUCKET            = module.REMOTE_STATE.STATE.MARKETING.s3.script_bucket
+  TAGS                     = local.tags
 }
