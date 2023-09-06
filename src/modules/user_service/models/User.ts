@@ -47,7 +47,6 @@ export interface User extends BaseDdbModel {
   sex: SexEnum
   birthday: string,
   status?: UserStatusEnum,
-  searchApiKey?: string,
 }
 
 export interface UserWithPermission extends User {

@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# Function to fetch the bootstrap script from S3 with retries
+fetch_bootstrap_script() {
+    while :; do
+        aws s3 cp s3://${bootstrap_script} bootstrap_script.sh && return 0
+        echo "Failed to fetch bootstrap script. Retrying in 10 seconds..."
+        sleep 10
+    done
+}
+
+# Update and install necessary packages
+apt update -y
+apt install unzip curl wget cron python3-pip -y
+
+# Install AWS CLI v2
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip -o awscliv2.zip
+./aws/install
+
+# Fetch bootstrap script from S3 with retries
+fetch_bootstrap_script
+
+chmod +x bootstrap_script.sh
+./bootstrap_script.sh
