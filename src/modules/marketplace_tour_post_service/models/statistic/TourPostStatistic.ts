@@ -7,4 +7,6 @@ export interface TourPostStatistic extends BaseDdbModel {
   totalRatings: number,
   // Number of users that have rated the tour post
   numberOfRatings: number,
+  // The ID of organization
+  organization: string,
 }

@@ -3,6 +3,7 @@ import CreateTourPostUseCaseImpl from './CreateTourPostUseCaseImpl';
 import FollowTourPostUseCaseImpl from './FollowTourPostUseCaseImpl';
 import GetBookmarkedTourPostsUseCaseImpl from './GetBookmarkedTourPostsUseCaseImpl';
 import GetFollowedTourPostsUseCaseImpl from './GetFollowedTourPostsUseCaseImpl';
+import GetLinkedLeadOrTourInfoOnMarketplaceUseCaseImpl from './GetLinkedLeadOrTourInfoOnMarketplaceUseCaseImpl';
 import GetSelfTourPostListByUserUseCaseImpl from './GetSelfTourPostListByUserUseCaseImpl';
 import GetTopCommissionPostsUseCaseImpl from './GetTopCommissionPostsUseCaseImpl';
 import GetTourPostListByOrgUseCaseImpl from './GetTourPostListByOrgUseCaseImpl';
@@ -17,6 +18,9 @@ import { CreateTourPostUseCase } from './interfaces/CreateTourPostUseCase';
 import { FollowTourPostUseCase } from './interfaces/FollowTourPostUseCase';
 import { GetBookmarkedTourPostsUseCase } from './interfaces/GetBookmarkedTourPostsUseCase';
 import { GetFollowedTourPostsUseCase } from './interfaces/GetFollowedTourPostsUseCase';
+import {
+  GetLinkedLeadOrTourInfoOnMarketplaceUseCase,
+} from './interfaces/GetLinkedLeadOrTourInfoOnMarketplace';
 import { GetSelfTourPostListByUserUseCase } from './interfaces/GetSelfTourPostListByUserUseCase';
 import { GetTopCommissionPostsUseCase } from './interfaces/GetTopCommissionPostsUseCase';
 import { GetTourPostListByOrgUseCase } from './interfaces/GetTourPostListByOrgUseCase';
@@ -42,9 +46,10 @@ interface UseCases {
   followTourPostUseCase: FollowTourPostUseCase,
   unfollowTourPostUseCase: UnfollowTourPostUseCase,
   getTopCommissionPostsUseCase: GetTopCommissionPostsUseCase,
+  getLinkedLeadOrTourInfoOnMarketplaceUseCase: GetLinkedLeadOrTourInfoOnMarketplaceUseCase,
 }
 
-const useCases : UseCases = {
+const useCases: UseCases = {
   getTourPostListUseCase: new GetTourPostListUseCaseImpl(),
   getSelfTourPostListByUserUseCase: new GetSelfTourPostListByUserUseCaseImpl(),
   getTourPostListByUserUseCase: new GetTourPostListByUserUseCaseImpl(),
@@ -59,6 +64,8 @@ const useCases : UseCases = {
   followTourPostUseCase: new FollowTourPostUseCaseImpl(),
   unfollowTourPostUseCase: new UnfollowTourPostUseCaseImpl(),
   getTopCommissionPostsUseCase: new GetTopCommissionPostsUseCaseImpl(),
+  getLinkedLeadOrTourInfoOnMarketplaceUseCase:
+    new GetLinkedLeadOrTourInfoOnMarketplaceUseCaseImpl(),
 };
 
 export const {
@@ -76,4 +83,5 @@ export const {
   followTourPostUseCase,
   unfollowTourPostUseCase,
   getTopCommissionPostsUseCase,
+  getLinkedLeadOrTourInfoOnMarketplaceUseCase,
 } = useCases;
