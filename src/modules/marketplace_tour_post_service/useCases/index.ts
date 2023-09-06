@@ -26,11 +26,14 @@ import { GetTourPostUseCase } from './interfaces/GetTourPostUseCase';
 import { UnbookmarkTourPostUseCase } from './interfaces/UnbookmarkTourPostUseCase';
 import { UnfollowTourPostUseCase } from './interfaces/UnfollowTourPostUseCase';
 import { UpdateTourPostUseCase } from './interfaces/UpdateTourPostUseCase';
+import { GetTourPostListByPostTypeUseCase } from './interfaces/GetTourPostListByPostTypeUseCase';
+import GetTourPostListByPostTypeUseCaseImpl from './GetTourPostListByPostTypeUseCaseImpl';
 
 interface UseCases {
   getTourPostListUseCase: GetTourPostListUseCase,
   getSelfTourPostListByUserUseCase: GetSelfTourPostListByUserUseCase,
   getTourPostListByUserUseCase: GetTourPostListByUserUseCase,
+  getTourPostListByPostTypeUseCase: GetTourPostListByPostTypeUseCase,
   getTourPostListByOrgUseCase: GetTourPostListByOrgUseCase,
   getBookmarkedTourPostsUseCase: GetBookmarkedTourPostsUseCase,
   getFollowedTourPostsUseCase: GetFollowedTourPostsUseCase,
@@ -48,6 +51,7 @@ const useCases : UseCases = {
   getTourPostListUseCase: new GetTourPostListUseCaseImpl(),
   getSelfTourPostListByUserUseCase: new GetSelfTourPostListByUserUseCaseImpl(),
   getTourPostListByUserUseCase: new GetTourPostListByUserUseCaseImpl(),
+  getTourPostListByPostTypeUseCase: new GetTourPostListByPostTypeUseCaseImpl(),
   getTourPostListByOrgUseCase: new GetTourPostListByOrgUseCaseImpl(),
   getBookmarkedTourPostsUseCase: new GetBookmarkedTourPostsUseCaseImpl(),
   getFollowedTourPostsUseCase: new GetFollowedTourPostsUseCaseImpl(),
@@ -65,6 +69,7 @@ export const {
   getTourPostListUseCase,
   getSelfTourPostListByUserUseCase,
   getTourPostListByUserUseCase,
+  getTourPostListByPostTypeUseCase,
   getTourPostListByOrgUseCase,
   getBookmarkedTourPostsUseCase,
   getFollowedTourPostsUseCase,

@@ -5,8 +5,9 @@ import { TourPostType } from './TourPostType';
 export interface TourPost extends BaseDdbModel {
   code: string, // Auto-generated code from DynamoDB
   name: string, // Name of the tour post
+  thumbnail?: string, // Thumbnail of the tour post
   description?: string, // Description of the tour post
-  type: TourPostType, // Type of the tour post, can be 'BUY' or 'SELL'
+  type: TourPostType, // Type of the tour post, can be 'BUY_PASSENGER' or 'SELL_PASSENGER'
   pricePerPax: number, // Price per pax of the offer
   commission: number, // Commission per pax of the offer
   // Lead code / tour template code (pk, sk) of the tenant that this tour post is linked to

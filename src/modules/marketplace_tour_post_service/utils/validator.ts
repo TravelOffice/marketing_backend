@@ -39,6 +39,13 @@ export function createTourPostValidator() {
       ).isString()
       .withMessage('must be a string'),
 
+    body('thumbnail')
+      .notEmpty()
+      .if(
+        body('thumbnail').exists(),
+      ).isURL()
+      .withMessage('must be an url'),
+
     body('type')
       .notEmpty().withMessage('is required')
       .isIn(tourPostTypes)
@@ -89,7 +96,6 @@ export function createTourPostValidator() {
       .withMessage(`allow only in ${allowedInitialPostStatuses}`),
 
     body('endingLocation')
-      .optional()
       .notEmpty()
       .isString()
       .withMessage('must be a non-empty string'),
@@ -139,6 +145,9 @@ export function getPostsValidator() {
     query('author')
       .optional().isString().notEmpty()
       .withMessage('must be a string'),
+    query('postType')
+      .optional().isIn(tourPostTypes)
+      .withMessage(`allow only in ${tourPostTypes}`),
 
     query('nextToken')
       .optional()

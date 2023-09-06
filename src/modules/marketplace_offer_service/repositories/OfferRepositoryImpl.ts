@@ -181,13 +181,13 @@ export default class OfferRepositoryImpl implements OfferRepository {
   /**
    * Retrieves a paginated list of sent offer for a specific user
    *
-   * @param {string} authorId - The ID of the author.
+   * @param {string} userId - The ID of the user.
    * @param {PaginationParams} paginationParams - The parameters for pagination.
    * @returns {Promise<PaginationResponsePayload<Offer> | undefined>}
    * - A promise resolving to the paginated list of offers or undefined if not found.
    */
-  listByAuthor = async (
-    authorId: string,
+  listSentOffersOfUser = async (
+    userId: string,
     paginationParams: PaginationParams,
   ): Promise<PaginationResponsePayload<Offer> | undefined> => {
     // Prepare the query parameters
@@ -197,7 +197,7 @@ export default class OfferRepositoryImpl implements OfferRepository {
       KeyConditionExpression: 'pk = :pk AND begins_with(lsi2, :lsi_filter_value)',
       ExpressionAttributeValues: {
         ':pk': OFFER_INDEX,
-        ':lsi_filter_value': authorId,
+        ':lsi_filter_value': userId,
       },
     };
 
@@ -206,7 +206,7 @@ export default class OfferRepositoryImpl implements OfferRepository {
   };
 
   /**
-   * Retrieves a paginated list of received offer for a specific author.
+   * Retrieves a paginated list of received offer for a specific user
    *
    * @param {string} userId - The ID of the user.
    * @param {PaginationParams} paginationParams - The parameters for pagination.
@@ -220,8 +220,8 @@ export default class OfferRepositoryImpl implements OfferRepository {
     // Prepare the query parameters
     const queryParams = {
       TableName: await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE'),
-      IndexName: 'Index2',
-      KeyConditionExpression: 'pk = :pk AND begins_with(lsi2, :lsi_filter_value)',
+      IndexName: 'Index5',
+      KeyConditionExpression: 'pk = :pk AND begins_with(lsi5, :lsi_filter_value)',
       ExpressionAttributeValues: {
         ':pk': OFFER_INDEX,
         ':lsi_filter_value': userId,

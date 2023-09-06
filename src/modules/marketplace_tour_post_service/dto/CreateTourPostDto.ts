@@ -6,5 +6,5 @@ export type CreateTourPostDto = Pick<
   'maximumPaxToTrade' | 'type' |
   'name' | 'linkedToTargetKeys' | 'status' |
   'description' | 'expiry' | 'autoClose' |
-  'endingLocation' | 'departureDate'
+  'endingLocation' | 'departureDate' | 'thumbnail'
 >;

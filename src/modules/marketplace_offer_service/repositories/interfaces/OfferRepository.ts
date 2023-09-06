@@ -20,8 +20,13 @@ export interface OfferRepository {
     paginationParams?: PaginationParams,
   ): Promise<PaginationResponsePayload<Offer> | undefined>,
 
-  listByAuthor(
-    authorId: string,
+  listSentOffersOfUser(
+    senderId: string,
+    paginationParams?: PaginationParams,
+  ): Promise<PaginationResponsePayload<Offer> | undefined>,
+
+  listReceivedOffersOfUser(
+    receiverId: string,
     paginationParams?: PaginationParams,
   ): Promise<PaginationResponsePayload<Offer> | undefined>,
 

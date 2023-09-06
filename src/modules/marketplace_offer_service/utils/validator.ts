@@ -96,7 +96,7 @@ export function getOfferListOfOrgValidator() {
   ];
 }
 
-export function getOfferListOfAuthorValidator() {
+export function getOffersOfCurrentUserValidator() {
   return [
     query('nextToken')
       .optional()

@@ -17,7 +17,9 @@ export default class CreateTourPostUseCaseImpl implements CreateTourPostUseCase 
     const createdAt = now;
     const updatedAt = now;
     const tourPostIndex = await tourPostRepository.generateCode();
-    const { status, endingLocation, departureDate } = createTourPostDto;
+    const {
+      status, endingLocation, departureDate, type,
+    } = createTourPostDto;
     const tourPost = {
       ...createTourPostDto,
       code: `${TOUR_POST_ID_PREFIX}${tourPostIndex}`,
@@ -29,8 +31,8 @@ export default class CreateTourPostUseCaseImpl implements CreateTourPostUseCase 
       // - All latest posts that belong to tenant
       // - All latest posts that created by specific user
       lsi1: `${marketplaceUserId}#${createdAt}`,
-      lsi2: `${status}${createdAt}`, // Local index for getting all posts by specific status
-      lsi3: createdAt.toString(), // Local index for sort post by createdAt
+      lsi2: `${status}#${createdAt}`, // Local index for getting all posts by specific status
+      lsi3: `${type}#${createdAt.toString()}`, // Local index for sort post by tour post's type and createdAt
       lsi4: `${endingLocation}#${createdAt}`, // Local index for filter latest post by ending location
       lsi5: departureDate, // Local index for filter post by departure date
     } as TourPost;

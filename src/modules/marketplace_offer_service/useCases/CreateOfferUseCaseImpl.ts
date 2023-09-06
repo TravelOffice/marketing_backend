@@ -35,6 +35,11 @@ export default class CreateOfferUseCaseImpl implements CreateOfferUseCase {
       throw new Error('Tour post not found');
     }
 
+    // Org of the user who sent offer must be different from the org of the post
+    if (sentOrg === tourPost.organization) {
+      throw new Error('Cannot send an offer to a post from your own organization');
+    }
+
     // User who sent offer must be different from the author of the post
     if (authorId === tourPost.authorId) {
       throw new Error('Cannot send offer to yourself');
