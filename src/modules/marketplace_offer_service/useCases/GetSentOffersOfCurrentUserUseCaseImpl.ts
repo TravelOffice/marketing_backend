@@ -1,6 +1,6 @@
 import { PaginationParams, PaginationResponsePayload } from 'core/providers/dynamodb/DynamoProvider';
 import { marketplaceUserRepository, offerRepository } from '../repositories';
-import { Offer } from '../models/Offer';
+import { Offer, OfferStatus } from '../models/Offer';
 import { GetSentOffersOfCurrentUserUseCase } from './interfaces/GetSentOffersOfCurrentUserUseCase';
 import { CognitoUser } from '../models/CognitoUser';
 
@@ -11,12 +11,14 @@ implements GetSentOffersOfCurrentUserUseCase {
    *
    * @param {string} currentUser - Current user
    * @param {PaginationParams} paginationParams - The parameters for pagination.
+   * @param {OfferStatus} status - The status of the offer.
    * @returns {Promise<Offer | undefined>} - A promise resolving to the retrieved offer
    * or undefined if not found.
    */
   invoke = async (
     currentUser: CognitoUser,
     paginationParams: PaginationParams,
+    status?: OfferStatus,
   ): Promise<PaginationResponsePayload<Offer> | undefined> => {
     // Extract necessary information from the current user
     const { tenant: organization, username } = currentUser;
@@ -28,6 +30,6 @@ implements GetSentOffersOfCurrentUserUseCase {
       throw new Error('Marketplace user not found');
     }
 
-    return offerRepository.listSentOffersOfUser(marketplaceUserId, paginationParams);
+    return offerRepository.listSentOffersOfUser(marketplaceUserId, paginationParams, status);
   };
 }

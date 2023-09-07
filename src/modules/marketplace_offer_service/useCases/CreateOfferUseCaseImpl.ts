@@ -57,6 +57,7 @@ export default class CreateOfferUseCaseImpl implements CreateOfferUseCase {
     const offerIndex = await offerRepository.generateCode();
 
     // Create the offer object
+    const offerStatus = OfferStatus.IN_PROCESS;
     const offer = {
       ...createOfferDto,
       code: offerIndex,
@@ -66,12 +67,7 @@ export default class CreateOfferUseCaseImpl implements CreateOfferUseCase {
       createdAt,
       updatedAt,
       summitedAt: now,
-      offerStatus: OfferStatus.IN_PROCESS,
-      lsi1: `${sentOrg}#${createdAt}`, // Get all sent offers of the organization
-      lsi2: `${authorId}#${createdAt}`, // Get all sent offers of the user
-      lsi3: `${tourPostId}#${createdAt}`, // Get all offers of the post
-      lsi4: `${receivedOrg}#${createdAt}`, // Get all received offers by organization
-      lsi5: `${receivedUser}#${createdAt}`, // Get all received offers by user
+      offerStatus,
       receivedOrg,
       receivedUser,
     } as Offer;

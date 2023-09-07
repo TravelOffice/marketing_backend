@@ -1,9 +1,7 @@
 import { dynamoProvider, helper, logger } from 'core';
 import { PaginationParams, PaginationResponsePayload } from 'core/providers/dynamodb/DynamoProvider';
 import { getAwsSecretValue } from 'get-env';
-import {
-  MARKETPLACE_COUNTER_INDEX, OFFER_COUNTER_INDEX, OFFER_INDEX, ORGANIZATION_INDEX,
-} from '../utils/constants';
+import { MARKETPLACE_COUNTER_INDEX, OFFER_COUNTER_INDEX, OFFER_INDEX } from '../utils/constants';
 import { OfferRepository } from './interfaces/OfferRepository';
 import { Offer, OfferStatus } from '../models/Offer';
 
@@ -51,7 +49,10 @@ export default class OfferRepositoryImpl implements OfferRepository {
       await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE'),
       OFFER_INDEX,
       offer.code,
-      offer,
+      {
+        offer,
+        ...this.generateLSI(offer),
+      },
     );
     return offer;
   }
@@ -61,17 +62,26 @@ export default class OfferRepositoryImpl implements OfferRepository {
    *
    * @param id - The ID of the offer to update.
    * @param offer - The partial offer object with the updated fields.
+   * @param status - The new status of offer (optional)
    * @returns A Promise that resolves to the updated rating.
    */
   async update(
     id: string,
     offer: Partial<Offer>,
+    status?: OfferStatus,
   ): Promise<Offer> {
+    let updatingOffer = offer;
+    if (status) {
+      updatingOffer = {
+        ...offer,
+        ...this.generateLSI(offer),
+      };
+    }
     const result = await dynamoProvider.updateItemWithSetExpression(
       await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE'),
       OFFER_INDEX,
       id,
-      offer,
+      updatingOffer,
     );
     return result.Attributes as Offer;
   }
@@ -99,12 +109,14 @@ export default class OfferRepositoryImpl implements OfferRepository {
    *
    * @param {string} organization - The ID of the organization for which to retrieve offers.
    * @param {PaginationParams} paginationParams - The parameters for pagination.
+   * @param  - The status of the organization for which to retrieve offers (optional)
    * @returns {Promise<PaginationResponsePayload<Offer> | undefined>}
    * - A promise resolving to the paginated list of sent offers or undefined if not found.
    */
   listSentOffersOfOrganization = async (
     organization: string,
     paginationParams: PaginationParams,
+    status?: OfferStatus,
   ): Promise<PaginationResponsePayload<Offer> | undefined> => {
     // Prepare the query parameters
     const queryParams = {
@@ -113,37 +125,7 @@ export default class OfferRepositoryImpl implements OfferRepository {
       KeyConditionExpression: 'pk = :pk AND begins_with(lsi1, :lsi_filter_value)',
       ExpressionAttributeValues: {
         ':pk': OFFER_INDEX,
-        ':lsi_filter_value': organization,
-      },
-    };
-
-    // Perform the query using queryPagination and return the result
-    return dynamoProvider.queryPagination(queryParams, paginationParams);
-  };
-
-  /**
-   * Retrieves a paginated list of sent offers of a specific organization
-   * and a specific status.
-   *
-   * @param {string} organization - The ID of the organization for which to retrieve offers.
-   * @param {string} offerStatus - The status of the offer.
-   * @param {PaginationParams} paginationParams - The parameters for pagination.
-   * @returns {Promise<PaginationResponsePayload<Offer> | undefined>}
-   * - A promise resolving to the paginated list of sent offers or undefined if not found.
-   */
-  listSentOffersOfOrganizationByOfferStatus = async (
-    organization: string,
-    offerStatus: OfferStatus,
-    paginationParams: PaginationParams,
-  ): Promise<PaginationResponsePayload<Offer> | undefined> => {
-    // Prepare the query parameters
-    const queryParams = {
-      TableName: await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE'),
-      IndexName: 'Index2',
-      KeyConditionExpression: 'pk = :pk AND lsi2 = :lsi2_filter_value',
-      ExpressionAttributeValues: {
-        ':pk': `${ORGANIZATION_INDEX}#${organization}#${OFFER_INDEX}`,
-        ':lsi2_filter_value': `${OFFER_INDEX}#${offerStatus}`,
+        ':lsi_filter_value': `${organization}#${status ?? ''}`,
       },
     };
 
@@ -156,12 +138,14 @@ export default class OfferRepositoryImpl implements OfferRepository {
    *
    * @param {string} organization - The ID of the organization for which to retrieve offers.
    * @param {PaginationParams} paginationParams - The parameters for pagination.
+   * @param status - The status of the organization for which to retrieve offers.
    * @returns {Promise<PaginationResponsePayload<Offer> | undefined>}
    * - A promise resolving to the paginated list of received offers or undefined if not found.
    */
   listReceivedOffersOfOrganization = async (
     organization: string,
     paginationParams: PaginationParams,
+    status?: OfferStatus,
   ): Promise<PaginationResponsePayload<Offer> | undefined> => {
     // Prepare the query parameters
     const queryParams = {
@@ -170,7 +154,7 @@ export default class OfferRepositoryImpl implements OfferRepository {
       KeyConditionExpression: 'pk = :pk AND begins_with(lsi4, :lsi_filter_value)',
       ExpressionAttributeValues: {
         ':pk': OFFER_INDEX,
-        ':lsi_filter_value': `${organization}#`,
+        ':lsi_filter_value': `${organization}#${status ?? ''}`,
       },
     };
 
@@ -183,12 +167,14 @@ export default class OfferRepositoryImpl implements OfferRepository {
    *
    * @param {string} userId - The ID of the user.
    * @param {PaginationParams} paginationParams - The parameters for pagination.
+   * @param status - The status of the organization for which to retrieve offers.
    * @returns {Promise<PaginationResponsePayload<Offer> | undefined>}
    * - A promise resolving to the paginated list of offers or undefined if not found.
    */
   listSentOffersOfUser = async (
     userId: string,
     paginationParams: PaginationParams,
+    status?: OfferStatus,
   ): Promise<PaginationResponsePayload<Offer> | undefined> => {
     // Prepare the query parameters
     const queryParams = {
@@ -197,7 +183,7 @@ export default class OfferRepositoryImpl implements OfferRepository {
       KeyConditionExpression: 'pk = :pk AND begins_with(lsi2, :lsi_filter_value)',
       ExpressionAttributeValues: {
         ':pk': OFFER_INDEX,
-        ':lsi_filter_value': userId,
+        ':lsi_filter_value': `${userId}#${status ?? ''}`,
       },
     };
 
@@ -210,12 +196,14 @@ export default class OfferRepositoryImpl implements OfferRepository {
    *
    * @param {string} userId - The ID of the user.
    * @param {PaginationParams} paginationParams - The parameters for pagination.
+   * @param status - The status of the organization for which to retrieve offers.
    * @returns {Promise<PaginationResponsePayload<Offer> | undefined>}
    * - A promise resolving to the paginated list of offers or undefined if not found.
    */
   listReceivedOffersOfUser = async (
     userId: string,
     paginationParams: PaginationParams,
+    status?: OfferStatus,
   ): Promise<PaginationResponsePayload<Offer> | undefined> => {
     // Prepare the query parameters
     const queryParams = {
@@ -224,11 +212,24 @@ export default class OfferRepositoryImpl implements OfferRepository {
       KeyConditionExpression: 'pk = :pk AND begins_with(lsi5, :lsi_filter_value)',
       ExpressionAttributeValues: {
         ':pk': OFFER_INDEX,
-        ':lsi_filter_value': userId,
+        ':lsi_filter_value': `${userId}#${status ?? ''}`,
       },
     };
 
     // Perform the query using queryPagination and return the result
     return dynamoProvider.queryPagination(queryParams, paginationParams);
   };
+
+  private generateLSI(offer: Partial<Offer>) {
+    const {
+      sentOrg, authorId, tourPostId, receivedOrg, receivedUser, offerStatus, createdAt,
+    } = offer;
+    return {
+      lsi1: `${sentOrg}#${offerStatus}#${createdAt}`, // Get all sent offers of the organization
+      lsi2: `${authorId}#${offerStatus}#${createdAt}`, // Get all sent offers of the user
+      lsi3: `${tourPostId}#${offerStatus}#${createdAt}`, // Get all offers of the post
+      lsi4: `${receivedOrg}#${offerStatus}#${createdAt}`, // Get all received offers by organization
+      lsi5: `${receivedUser}#${offerStatus}#${createdAt}`, // Get all received offers by user
+    };
+  }
 }

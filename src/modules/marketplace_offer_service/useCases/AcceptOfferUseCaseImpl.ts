@@ -42,6 +42,7 @@ export default class AcceptOfferUseCaseImpl implements AcceptOfferUseCase {
     const acceptedOffer = await offerRepository.update(offerId, {
       offerStatus: OfferStatus.ACCEPTED,
       acceptedAt: Date.now(),
+      updatedAt: Date.now(),
     });
 
     // Exclude unnecessary data from the offer object and return as Offer

@@ -46,6 +46,7 @@ export default class RejectOfferUseCaseImpl implements RejectOfferUseCase {
       offerStatus: OfferStatus.REJECTED,
       rejectReason,
       rejectedAt: Date.now(),
+      updatedAt: Date.now(),
     });
 
     // Exclude unnecessary data from the offer object and return as Offer

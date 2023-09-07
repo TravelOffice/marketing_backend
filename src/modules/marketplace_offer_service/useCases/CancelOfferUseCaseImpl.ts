@@ -45,6 +45,7 @@ export default class CancelOfferUseCaseImpl implements CancelOfferUseCase {
       offerStatus: OfferStatus.CANCELLED,
       cancelReason,
       canceledAt: Date.now(),
+      updatedAt: Date.now(),
     });
 
     // Exclude unnecessary data from the offer object and return as Offer
