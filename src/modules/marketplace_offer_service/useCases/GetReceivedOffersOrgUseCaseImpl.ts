@@ -1,6 +1,6 @@
 import { PaginationParams, PaginationResponsePayload } from 'core/providers/dynamodb/DynamoProvider';
 import { offerRepository } from '../repositories';
-import { Offer } from '../models/Offer';
+import { Offer, OfferStatus } from '../models/Offer';
 import { CognitoUser } from '../models/CognitoUser';
 import { GetReceivedOffersOfOrgUseCase } from './interfaces/GetReceivedOffersOfOrgUseCase';
 
@@ -12,12 +12,14 @@ implements GetReceivedOffersOfOrgUseCase {
    *
    * @param {CognitoUser} currentUser - The current authenticated user.
    * @param {PaginationParams} paginationParams - The parameters for pagination.
+   * @param {OfferStatus} status - The status of the offer.
    * @returns {Promise<PaginationResponsePayload<Offer> | undefined>}
    * - A promise resolving to the paginated list of received offers or undefined if not found.
    */
   invoke = async (
     currentUser: CognitoUser,
     paginationParams: PaginationParams,
+    status?: OfferStatus,
   ): Promise<PaginationResponsePayload<Offer> | undefined> => {
     // Extract necessary information from the current user
     const { tenant: organization } = currentUser;
@@ -25,6 +27,7 @@ implements GetReceivedOffersOfOrgUseCase {
     return offerRepository.listReceivedOffersOfOrganization(
       organization,
       paginationParams,
+      status,
     );
   };
 }

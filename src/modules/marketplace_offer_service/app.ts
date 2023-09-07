@@ -84,8 +84,8 @@ app.get('/marketplace/me/organizations/sent-offers', getOfferListOfOrgValidator(
     } = req.query;
     const offers = await getSentOffersOfOrgUseCase.invoke(
       currentUser,
-      offerStatus as OfferStatus,
       paginationParams,
+      offerStatus as OfferStatus,
     );
     res.json(wrapResponse(SUCCESS, offers));
   } catch (error: any) {
@@ -99,11 +99,12 @@ app.get('/marketplace/me/organizations/received-offers', getOfferListOfOrgValida
     validate(req);
     const currentUser = getMarketplaceUserInfo(req.headers.authorization!);
     const {
-      ...paginationParams
+      offerStatus, ...paginationParams
     } = req.query;
     const offers = await getReceivedOffersOfOrgUseCase.invoke(
       currentUser,
       paginationParams,
+      offerStatus as OfferStatus,
     );
     res.json(wrapResponse(SUCCESS, offers));
   } catch (error: any) {
@@ -203,10 +204,11 @@ app.get('/marketplace/me/sent-offers', getOffersOfCurrentUserValidator(), async 
   try {
     validate(req);
     const currentUser = getMarketplaceUserInfo(req.headers.authorization!);
-    const { ...paginationParams } = req.query;
+    const { offerStatus, ...paginationParams } = req.query;
     const offers = await getSentOffersOfCurrentUserUseCase.invoke(
       currentUser,
       paginationParams,
+      offerStatus as OfferStatus,
     );
     res.json(wrapResponse(SUCCESS, offers));
   } catch (error: any) {
@@ -219,10 +221,11 @@ app.get('/marketplace/me/received-offers', getOffersOfCurrentUserValidator(), as
   try {
     validate(req);
     const currentUser = getMarketplaceUserInfo(req.headers.authorization!);
-    const { ...paginationParams } = req.query;
+    const { offerStatus, ...paginationParams } = req.query;
     const offers = await getReceivedOffersOfCurrentUserUseCase.invoke(
       currentUser,
       paginationParams,
+      offerStatus as OfferStatus,
     );
     res.json(wrapResponse(SUCCESS, offers));
   } catch (error: any) {

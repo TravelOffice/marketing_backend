@@ -7,32 +7,25 @@ export interface OfferRepository {
   listSentOffersOfOrganization(
     organization: string,
     paginationParams?: PaginationParams,
-  ): Promise<PaginationResponsePayload<Offer> | undefined>,
-
-  listSentOffersOfOrganizationByOfferStatus(
-    organization: string,
-    offerStatus: OfferStatus,
-    paginationParams?: PaginationParams,
+    status?: OfferStatus,
   ): Promise<PaginationResponsePayload<Offer> | undefined>,
 
   listReceivedOffersOfOrganization(
     organization: string,
     paginationParams?: PaginationParams,
+    status?: OfferStatus,
   ): Promise<PaginationResponsePayload<Offer> | undefined>,
 
   listSentOffersOfUser(
     senderId: string,
     paginationParams?: PaginationParams,
+    status?: OfferStatus,
   ): Promise<PaginationResponsePayload<Offer> | undefined>,
 
   listReceivedOffersOfUser(
     receiverId: string,
     paginationParams?: PaginationParams,
-  ): Promise<PaginationResponsePayload<Offer> | undefined>,
-
-  listReceivedOffersOfUser(
-    userId: string,
-    paginationParams?: PaginationParams,
+    status?: OfferStatus,
   ): Promise<PaginationResponsePayload<Offer> | undefined>,
 
   create(offer: Offer): Promise<Offer>,
@@ -41,7 +34,8 @@ export interface OfferRepository {
 
   update(
     id: string,
-    offer: Partial<Offer>
+    offer: Partial<Offer>,
+    status?: OfferStatus
   ): Promise<Offer>,
 
   generateCode(): Promise<string>,

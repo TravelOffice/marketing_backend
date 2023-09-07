@@ -98,6 +98,7 @@ export function getOfferListOfOrgValidator() {
 
 export function getOffersOfCurrentUserValidator() {
   return [
+    query('offerStatus').optional().isIn(OfferStatusTypes).withMessage(`must be one of ${OfferStatusTypes}`),
     query('nextToken')
       .optional()
       .custom((value: string) => {
