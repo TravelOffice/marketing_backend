@@ -84,6 +84,6 @@ module "SEARCH_LB" {
 }
 
 output "search_lb_target_group_arn" {
-  value = module.SEARCH_LB.search_lb_target_group_arn
+  value = module.SEARCH_LB.search_lb_target_group_arn[0]
 }
 
