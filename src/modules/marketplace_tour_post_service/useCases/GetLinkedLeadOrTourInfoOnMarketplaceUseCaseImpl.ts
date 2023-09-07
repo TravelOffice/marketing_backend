@@ -1,13 +1,16 @@
 import { CognitoUser } from '../models/CognitoUser';
 import { tourPostStatisticRepository } from '../repositories';
-import { KEY_DELIMITER } from '../utils/constants';
+import { KEY_DELIMITER, TENANT_INDEX } from '../utils/constants';
 import { GetLinkedLeadOrTourInfoOnMarketplaceUseCase } from './interfaces/GetLinkedLeadOrTourInfoOnMarketplace';
 
 export default class GetLinkedLeadOrTourInfoOnMarketplaceUseCaseImpl
 implements GetLinkedLeadOrTourInfoOnMarketplaceUseCase {
   invoke = async (currentUser: CognitoUser, targetId: string) => {
     const { tenant } = currentUser;
-    const tourPostStatistic = await tourPostStatisticRepository.getByLeadOrTourTemplateId(targetId);
+    // Id format LEAD#id or TOUR_TEMPLATE#id
+    // Need to add tenant prefix in order to query
+    const key = `${TENANT_INDEX}#${tenant}#${targetId}`;
+    const tourPostStatistic = await tourPostStatisticRepository.getByLeadOrTourTemplateId(key);
 
     // If the tour post is not found,
     // mark tour post as unavailable with linked lead or tour template info
