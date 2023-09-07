@@ -1,5 +1,6 @@
 import { CognitoUser } from '../models/CognitoUser';
 import { tourPostStatisticRepository } from '../repositories';
+import { KEY_DELIMITER } from '../utils/constants';
 import { GetLinkedLeadOrTourInfoOnMarketplaceUseCase } from './interfaces/GetLinkedLeadOrTourInfoOnMarketplace';
 
 export default class GetLinkedLeadOrTourInfoOnMarketplaceUseCaseImpl
@@ -14,14 +15,17 @@ implements GetLinkedLeadOrTourInfoOnMarketplaceUseCase {
       return { isAvailable: false };
     }
 
-    const { totalOffers, organization } = tourPostStatistic;
+    const { totalOffers, organization, sk } = tourPostStatistic;
     if (organization !== tenant) {
       throw new Error('Organization of the tour post is not the same as the current user');
     }
 
+    const [, postId] = sk.split(KEY_DELIMITER);
+
     return {
       isAvailable: true,
       totalOffers,
+      postId,
     };
   };
 }
