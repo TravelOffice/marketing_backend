@@ -156,8 +156,8 @@ export function validateUpdateBookingParams() {
     body('promoCode').optional().isString(),
     body('discountMoney').optional().isNumeric(),
     body('discountPercent').optional().isNumeric(),
-    body('totalPayment').optional().isNumeric(),
-    body('totalPaid').optional().isNumeric(),
+    body('totalPayment').optional().isInt({ min: 0 }).withMessage(VALIDATE_POSITIVE_NUMBER),
+    body('totalPaid').optional().isInt({ min: 0 }).withMessage(VALIDATE_POSITIVE_NUMBER),
     body('description').optional().isString(),
     body('checkin').optional().isNumeric(),
     body('checkout').optional().isNumeric(),
@@ -194,7 +194,6 @@ export function validateUpdateBookingParams() {
         const date = Date.parse(value);
         return !Number.isNaN(date);
       }),
-    body('paidAmount').optional().isInt({ min: 0 }).withMessage(VALIDATE_POSITIVE_NUMBER),
   ];
 }
 
@@ -223,7 +222,7 @@ export function validateSendEmailToTourGuideParams() {
 export function confirmBookingValidator() {
   return [
     body('departureTourId').notEmpty().isString().withMessage(VALIDATE_NON_EMPTY_STRING_MSG),
-    body('paidAmount').notEmpty().isInt({ min: 0 }).withMessage(VALIDATE_POSITIVE_NUMBER),
+    body('totalPaid').notEmpty().isInt({ min: 0 }).withMessage(VALIDATE_POSITIVE_NUMBER),
   ];
 }
 

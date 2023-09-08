@@ -36,6 +36,7 @@ import validate, {
   updateTourPostValidator,
 } from './utils/validator';
 import wrapResponse from './utils/wrapResponse';
+import { TourPostType } from './models/TourPostType';
 
 const app = express();
 
@@ -102,7 +103,7 @@ app.get('/marketplace/posts', getPostsValidator(), async (req: Request, res: Res
       // Fetch posts by type
       tourPosts = await getTourPostListByPostTypeUseCase.invoke(
         currentUser,
-          postType as string,
+          postType as TourPostType,
           paginationParams,
       );
       logger.log(`[app.get] Get posts by tour post type ${postType} successfully ${JSON.stringify(tourPosts)}`);

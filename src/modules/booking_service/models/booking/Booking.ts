@@ -56,7 +56,6 @@ interface DdbBookingModel extends BaseDdbModel {
   departureDate?: string,
   departureTourId?: string,
   departureTourName?: string,
-  paidAmount?: number, // Total paid amount when booking is confirmed
 
   /**
    * Booking related items
@@ -84,8 +83,8 @@ interface DdbBookingModel extends BaseDdbModel {
   discountMoney?: number,
   discountPercent?: number,
   totalPayment?: number,
+  totalPaid?: number, // Number of amount user has been paid
   // role
-  totalPaid?: number,
   description?: string,
   checkin?: number, // DateTime
   checkout?: number, // DateTime
