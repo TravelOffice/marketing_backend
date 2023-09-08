@@ -50,7 +50,7 @@ export default class OfferRepositoryImpl implements OfferRepository {
       OFFER_INDEX,
       offer.code,
       {
-        offer,
+        ...offer,
         ...this.generateLSI(offer),
       },
     );
