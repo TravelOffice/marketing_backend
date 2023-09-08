@@ -244,3 +244,32 @@ module "SEARCH_INSTANCE" {
   SCRIPT_BUCKET            = module.REMOTE_STATE.STATE.MARKETING.s3.script_bucket
   TAGS                     = local.tags
 }
+
+module "ECS" {
+  source       = "../../modules/ecs"
+  FEATURE_NAME = var.FEATURE_NAME
+  ENV          = var.ENV
+  CUSTOM_POLICIES = [
+    "EcsTaskStandardRole",
+    "DynamoTableReadWrite",
+    "SQSLambdaTriggerRole",
+    "SecretManagerRead",
+    "SQSSendMessage"
+  ]
+  AWS_POLICIES = [
+    "service-role/AmazonECSTaskExecutionRolePolicy"
+  ]
+  SUPPLIER_CRAWLER_TASK_ENV = merge(
+    local.env_vars.standard_vars,
+    {
+      "SEARCH_MESSAGE_QUEUE_URL" = module.SEARCH_QUEUE.search_queue_url
+      "SEARCH_MESSAGE_QUEUE_ARN" = module.SEARCH_QUEUE.search_queue_arn
+    }
+  )
+  TAGS                = local.tags
+  AWS_REGION          = var.AWS_REGION
+  PUBLIC_SUBNETS      = module.REMOTE_STATE.STATE.MARKETING.backend.vpc.public_subnets
+  PRIVATE_SUBNETS     = module.REMOTE_STATE.STATE.MARKETING.backend.vpc.private_subnets
+  VPC_ID              = module.REMOTE_STATE.STATE.MARKETING.backend.vpc.id
+  SCHEDULE_EXPRESSION = "cron(0 17 * * ? *)"
+}

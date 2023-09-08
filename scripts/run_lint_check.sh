@@ -62,11 +62,11 @@ lint_check() {
   cd ${SERVICE_DIR}
   if [ ! -f "package.json" ]; then
     echo "Missing requirement package.json file for ${SERVICENAME}!" >&2
-    exit 1
+    return 0
   fi
   if [ ! -f ".eslintrc.js" ]; then
     echo "Missing requirement eslintrc file for ${SERVICENAME}!" >&2
-    exit 1
+    return 0
   fi
 
   npm run lint

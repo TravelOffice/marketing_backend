@@ -1,0 +1,86 @@
+{
+    "fields": [],
+    "data": {
+        "checkInDate": {
+            "year": "2023",
+            "month": "8",
+            "day": "25"
+        },
+        "checkOutDate": {
+            "year": "2023",
+            "month": "8",
+            "day": "26"
+        },
+        "numOfNights": 1,
+        "currency": "VND",
+        "numAdults": 2,
+        "numChildren": 0,
+        "childAges": [],
+        "numInfants": 0,
+        "numRooms": 1,
+        "ccGuaranteeOptions": {
+            "ccInfoPreferences": [
+                "CC_TOKEN",
+                "CC_FULL_INFO"
+            ],
+            "ccGuaranteeRequirementOptions": [
+                "CC_GUARANTEE"
+            ]
+        },
+        "rateTypes": [
+            "PAY_NOW",
+            "PAY_AT_PROPERTY"
+        ],
+        "isJustLogin": false,
+        "backdate": false,
+        "geoId": "10009843",
+        "monitoringSpec": {
+            "lastKeyword": "Việt Nam",
+            "referrer": "https://www.traveloka.com/vi-vn?id=7280980621070556008&adloc=vi-vn&kw=7280980621070556008_traveloka&gmt=e&gn=g&gd=c&gdm=&gcid=98263771218&gdp=&gdt=&gap=&pc=2&cp=7280980621070556008_TB-COM-D-s_7280980621070556008_EM&aid=24326433378&wid=kwd-51659214310&fid=&gid=9040331&utm_id=ihZJb6Ly&ad_id=98263771218&target_id=kwd-51659214310&click_id=Cj0KCQjw_5unBhCMARIsACZyzS3ibBCIkNg7bSOf2FIp_arU3NG9Pd6P6jPbxAUR7NQBvZ3Da44aMNUaAjoYEALw_wcB&group_id=24326433378&gclid=Cj0KCQjw_5unBhCMARIsACZyzS3ibBCIkNg7bSOf2FIp_arU3NG9Pd6P6jPbxAUR7NQBvZ3Da44aMNUaAjoYEALw_wcB",
+            "searchId": null,
+            "searchFunnelType": null,
+            "isPriceFinderActive": null,
+            "dateIndicator": null,
+            "bannerMessage": "",
+            "displayPrice": null
+        },
+        "showHidden": false,
+        "locationName": "Việt Nam",
+        "sourceType": "HOTEL_GEO",
+        "isExtraBedIncluded": true,
+        "supportedDisplayTypes": [
+            "INVENTORY",
+            "INVENTORY_LIST",
+            "HEADER",
+            "INVENTORY_WITH_HEADER"
+        ],
+        "userSearchPreferences": [],
+        "uniqueSearchId": null,
+        "basicFilterSortSpec": {
+            "accommodationTypeFilter": [],
+            "starRatingFilter": [
+                true,
+                true,
+                true,
+                true,
+                true
+            ],
+            "facilityFilter": [],
+            "hasFreeCancellationRooms": false,
+            "minPriceFilter": null,
+            "maxPriceFilter": null,
+            "quickFilterId": null,
+            "ascending": false,
+            "basicSortType": "POPULARITY",
+            "chainIds": null,
+            "skip": 0,
+            "top": 100
+        },
+        "criteriaFilterSortSpec": null,
+        "boundaries": null,
+        "contexts": {
+            "isFamilyCheckbox": false
+        }
+    },
+    "clientInterface": "desktop"
+}
