@@ -249,7 +249,7 @@ app.delete('/marketplace/posts/:id/follow', followPostValidator(), async (req: R
   }
 });
 
-app.get('/marketplace/posts/trending', getTopTrendingTourValidator(), async (req: Request, res: Response) => {
+app.get('/marketplace/trending-posts', getTopTrendingTourValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
     const { topCount } = req.query;
