@@ -46,20 +46,41 @@ export default class PostRatingRepositoryImpl implements PostRatingRepository {
     );
   }
 
-  async getByUserId(organization: string, userId: string): Promise<PostRating | undefined> {
+  /**
+   * Get a PostRating by organization, tourPostId, and userId.
+   *
+   * @param {string} organization - The organization identifier.
+   * @param {string} tourPostId - The tour post identifier.
+   * @param {string} userId - The user identifier.
+   * @returns {Promise<PostRating | undefined>}
+   * - A promise that resolves with the retrieved PostRating or undefined if not found.
+   */
+  async getByUserId(
+    organization: string,
+    tourPostId: string,
+    userId: string,
+  ): Promise<PostRating | undefined> {
     const marketplaceTable = await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE');
+
+    // Define the query parameters
     const queryParams = {
       TableName: marketplaceTable,
-      IndexName: 'Index1',
-      KeyConditionExpression: 'pk = :pk and begins_with(lsi1, :lsi1_filter)',
+      KeyConditionExpression: 'pk = :pk and begins_with(sk, :sk_filter)',
       ExpressionAttributeValues: {
         ':pk': `${ORGANIZATION_INDEX}#${organization}#${RATING_INDEX}`,
-        ':lsi1_filter': `${userId}#`,
+        ':sk_filter': `${tourPostId}#`,
+        ':user_filter': userId,
       },
+      FilterExpression: 'authorId = :user_filter',
     };
+
+    // Execute the query
     const result = await dynamoProvider.query(queryParams);
+
+    // Extract the first matching PostRating (if any)
     const [postRating] = result as PostRating[];
-    return postRating;
+
+    return postRating; // Return the retrieved PostRating or undefined if not found
   }
 
   /**
