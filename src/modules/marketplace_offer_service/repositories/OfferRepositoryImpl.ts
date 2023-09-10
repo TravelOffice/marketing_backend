@@ -12,7 +12,7 @@ export default class OfferRepositoryImpl implements OfferRepository {
    * @param tourPostId - The ID of the post.
    * @returns A promise resolving to a array of Offer object.
    */
-  async listByPost(tourPostId: string): Promise<Offer[]> {
+  async listOffersOfPost(tourPostId: string): Promise<Offer[]> {
     return dynamoProvider.query({
       TableName: await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE'),
       IndexName: 'Index3',
@@ -21,6 +21,28 @@ export default class OfferRepositoryImpl implements OfferRepository {
         ':pk': OFFER_INDEX,
         ':lsi_filter_value': `${tourPostId}#`,
       },
+    });
+  }
+
+  /**
+   * List offers of a tour post made by a specific user.
+   *
+   * @param {string} tourPostId - The identifier of the tour post.
+   * @param {string} userId - The identifier of the user.
+   * @returns {Promise<Offer[]>}
+   * - A promise that resolves with an array of offers made by the user for the specified tour post.
+   */
+  async listOffersOfPostByUser(tourPostId: string, userId: string): Promise<Offer[]> {
+    return dynamoProvider.query({
+      TableName: await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE'),
+      IndexName: 'Index3',
+      KeyConditionExpression: 'pk = :pk AND begins_with(lsi3, :lsi_filter_value)',
+      ExpressionAttributeValues: {
+        ':pk': OFFER_INDEX,
+        ':lsi_filter_value': `${tourPostId}#`,
+        ':user_filter_value': userId,
+      },
+      FilterExpression: 'authorId = :user_filter_value',
     });
   }
 
