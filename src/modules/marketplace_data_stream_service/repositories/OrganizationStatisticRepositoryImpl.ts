@@ -60,7 +60,13 @@ implements OrganizationStatisticRepository {
     // Build update expression
     const dynamicSetExp = Object
       .keys(orgStatistic)
-      .map((key) => `#${key} = if_not_exists(#${key}, :defaultValue) + :${key}`)
+      .map((key) => {
+        const valueType = typeof orgStatistic[key as keyof OrganizationStats];
+        if (valueType === 'number' || valueType === 'bigint') {
+          return `#${key} = if_not_exists(#${key}, :defaultValue) + :${key}`;
+        }
+        return `#${key} = :${key}`;
+      })
       .join(', ');
     const updateExpression = `SET ${dynamicSetExp}, createdAt = if_not_exists(createdAt, :createdAt), updatedAt = :updatedAt`;
 
