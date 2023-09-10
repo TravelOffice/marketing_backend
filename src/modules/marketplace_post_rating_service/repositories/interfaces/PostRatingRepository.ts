@@ -14,7 +14,11 @@ export interface PostRatingRepository {
 
   get(organization: string, tourPostId: string, id: string): Promise<PostRating | undefined>,
 
-  getByUserId(organization: string, userId: string): Promise<PostRating | undefined>,
+  getByUserId(
+    organization: string,
+    tourPostId: string,
+    userId: string,
+  ): Promise<PostRating | undefined>,
 
   update(
     organization: string,

@@ -33,7 +33,11 @@ export default class CreatePostRatingUseCaseImpl implements CreatePostRatingUseC
     }
 
     // Check if the user has already rated this post
-    const existedPostRating = await postRatingRepository.getByUserId(tenant, marketplaceUserId);
+    const existedPostRating = await postRatingRepository.getByUserId(
+      tenant,
+      tourPostId,
+      marketplaceUserId,
+    );
     if (existedPostRating) {
       throw new Error('You have already rated this post');
     }
