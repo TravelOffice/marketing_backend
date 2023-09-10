@@ -150,8 +150,8 @@ async function handleOrganizationsStatisticChange(records: DynamoDBRecord[]): Pr
       return;
     }
 
-    const newModelData = dynamoProvider.unmarshall(record.dynamodb?.NewImage);
-    const organization = (newModelData.sentOrg || newModelData.organization) as string;
+    const newModelData = dynamoProvider.unmarshall(record.dynamodb?.NewImage) as TourPost & Offer;
+    const organization = (newModelData.receivedOrg || newModelData.organization) as string;
 
     // Check whether organization is valid
     if (!organization) {
@@ -184,7 +184,7 @@ async function handleOrganizationsStatisticChange(records: DynamoDBRecord[]): Pr
         if (record.dynamodb?.OldImage) {
           previousOffer = dynamoProvider.unmarshall(record.dynamodb?.OldImage) as Offer;
         }
-        const offer = dynamoProvider.unmarshall(record.dynamodb?.NewImage) as Offer;
+        const offer = newModelData as Offer;
         if (previousOffer?.offerStatus !== offer.offerStatus && offer.offerStatus === 'ACCEPTED') {
           orgsChangedStats[organization].totalSuccessOffers += 1;
         }
@@ -334,29 +334,33 @@ async function handleTopCommissionPosts(records: DynamoDBRecord[]): Promise<void
 
 // eslint-disable-next-line import/prefer-default-export
 export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
-  logger.log('Start handling DynamoDB Stream event');
-  const { Records: records } = event;
-  if (!records || records.length === 0) {
-    logger.log('No DynamoDB records to handle');
-    return;
+  try {
+    logger.log('Start handling DynamoDB Stream event');
+    const { Records: records } = event;
+    if (!records || records.length === 0) {
+      logger.log('No DynamoDB records to handle');
+      return;
+    }
+
+    // Start handling DynamoDB records to update statistic data
+    // There are two kinds of statistic data:
+    // - Statistic data of the whole marketplace - All of orgs, posts, offers.
+    // - Statistic data of each organization - All of posts, offers made, success offers made
+    // * Lambda handles maximum 100 (Batch size setup by Lambda trigger) records at a time
+    // Number of records is large enough to reduce infrastructure cost and improve performance
+
+    // 1. Handle statistic data of the whole marketplace
+    await handleMarketplaceStatisticChange(records);
+
+    // 2. Handle statistic data of each organization
+    await handleOrganizationsStatisticChange(records);
+
+    // 3. Handle statistic data of each tour post
+    await handleTourPostsStatisticChange(records);
+
+    // 4. Handle top Commission posts
+    await handleTopCommissionPosts(records);
+  } catch (error) {
+    logger.log(`Error occurred when handling DynamoDB Stream event ${error}`);
   }
-
-  // Start handling DynamoDB records to update statistic data
-  // There are two kinds of statistic data:
-  // - Statistic data of the whole marketplace - All of orgs, posts, offers.
-  // - Statistic data of each organization - All of posts, offers made, success offers made
-  // * Lambda handles maximum 100 (Batch size setup by Lambda trigger) records at a time
-  // Number of records is large enough to reduce infrastructure cost and improve performance
-
-  // 1. Handle statistic data of the whole marketplace
-  await handleMarketplaceStatisticChange(records);
-
-  // 2. Handle statistic data of each organization
-  await handleOrganizationsStatisticChange(records);
-
-  // 3. Handle statistic data of each tour post
-  await handleTourPostsStatisticChange(records);
-
-  // 4. Handle top Commission posts
-  await handleTopCommissionPosts(records);
 };

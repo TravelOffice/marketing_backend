@@ -131,7 +131,13 @@ implements TourPostStatisticRepository {
     // Build update expression
     const dynamicSetExp = Object
       .keys(postStatistic)
-      .map((key) => `#${key} = if_not_exists(#${key}, :defaultValue) + :${key}`)
+      .map((key) => {
+        const valueType = typeof postStatistic[key as keyof TourPostStats];
+        if (valueType === 'number' || valueType === 'bigint') {
+          return `#${key} = if_not_exists(#${key}, :defaultValue) + :${key}`;
+        }
+        return `#${key} = :${key}`;
+      })
       .join(', ');
     const updateExpression = `SET ${dynamicSetExp}, createdAt = if_not_exists(createdAt, :createdAt), updatedAt = :updatedAt`;
 
