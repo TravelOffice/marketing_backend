@@ -5,14 +5,12 @@ import { TourPost } from '../models/TourPost';
 import { statusTransitionRules } from '../models/TourPostStatus';
 import { marketplaceUserRepository, tourPostRepository } from '../repositories';
 import { UpdateTourPostUseCase } from './interfaces/UpdateTourPostUseCase';
-import { CreateTourPostDto } from '../dto/CreateTourPostDto';
 
 export default class UpdateTourPostUseCaseImpl implements UpdateTourPostUseCase {
   allowedUpdatingKeys: (keyof UpdateTourPostDto)[] = [
     'name',
     'description',
     'type',
-    'linkedToTargetKeys',
     'status',
     'expiry',
     'autoClose',
@@ -57,11 +55,11 @@ export default class UpdateTourPostUseCaseImpl implements UpdateTourPostUseCase 
   };
 
   /**
-   * Transform dto to expected data which should be used to update.
-   * Also, some kinds of data should be validated before updating.
-   * @param tourPost Current tour post
-   * @param updatingTourPostData Data to update
-   */
+     * Transform dto to expected data which should be used to update.
+     * Also, some kinds of data should be validated before updating.
+     * @param tourPost Current tour post
+     * @param updatingTourPostData Data to update
+     */
   private async getDataToUpdate(
     tourPost: TourPost,
     updatingTourPostData: Partial<UpdateTourPostDto>,
@@ -79,15 +77,22 @@ export default class UpdateTourPostUseCaseImpl implements UpdateTourPostUseCase 
 
     const updatedAt = Date.now();
     const {
-      endingLocation: newEndingLocation, departureDate: newDepartureDate,
+      endingLocation: newEndingLocation, departureDate: newDepartureDate, type: newType,
     } = updatingTourPostData;
+    const dataToUpdate: Partial<TourPost> = { ...updatingTourPostData, updatedAt };
+    if (newStatus) {
+      dataToUpdate.lsi2 = `${newStatus}#${tourPost.createdAt}`; // Local index for getting all posts by specific status
+    }
+    if (newType) {
+      dataToUpdate.lsi3 = `${newType}#${tourPost.createdAt}`; // Local index for sort post by tour post's type and createdAt
+    }
+    if (newEndingLocation) {
+      dataToUpdate.lsi4 = `${newEndingLocation}#${tourPost.createdAt}`; // Local index for filter latest post by ending location
+    }
+    if (newDepartureDate) {
+      dataToUpdate.lsi5 = newDepartureDate; // Local index for filter post by departure date
+    }
     // New data to update
-    return {
-      ...updatingTourPostData,
-      updatedAt,
-      lsi2: newStatus, // Local index for getting all posts by specific status
-      lsi4: `${newEndingLocation ?? tourPost.endingLocation}#${tourPost.createdAt}`,
-      lsi5: `${newDepartureDate ?? tourPost.departureDate}`,
-    } as CreateTourPostDto;
+    return dataToUpdate as UpdateTourPostDto;
   }
 }

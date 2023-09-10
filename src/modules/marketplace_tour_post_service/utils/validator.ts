@@ -2,8 +2,18 @@ import { Request } from 'express';
 import {
   body, param, query, ValidationError, validationResult,
 } from 'express-validator';
-import { allowedInitialPostStatuses } from './constants';
+import {
+  allowedInitialPostStatuses,
+  VALIDATE_BOOLEAN_MSG,
+  VALIDATE_DATE_MSG,
+  VALIDATE_NUMBER_MSG,
+  VALIDATE_POSITIVE_NUMBER_MSG,
+  VALIDATE_REQUIRED_MSG,
+  VALIDATE_STRING_MSG,
+  VALIDATE_URL_MSG,
+} from './constants';
 import { tourPostTypes } from '../models/TourPostType';
+import { linkedLeadOrTourTemplateTypes } from '../models/LinkedLeadOrTourInfo';
 
 export default function validate(req: Request) {
   const errors = validationResult(req);
@@ -30,81 +40,79 @@ export function getTourPostValidator() {
 
 export function createTourPostValidator() {
   return [
-    body('name').notEmpty().withMessage('is required'),
+    body('name')
+      .notEmpty()
+      .withMessage(VALIDATE_REQUIRED_MSG)
+      .isString()
+      .withMessage(VALIDATE_STRING_MSG),
+
+    body('linkedToTargetCode') // Lead or TourTemplate code
+      .notEmpty()
+      .withMessage(VALIDATE_REQUIRED_MSG)
+      .isString()
+      .withMessage(VALIDATE_STRING_MSG),
+
+    body('linkedToTargetType') // LEAD or TOUR_TEMPLATE
+      .notEmpty()
+      .withMessage(VALIDATE_REQUIRED_MSG)
+      .isIn(linkedLeadOrTourTemplateTypes)
+      .withMessage(`allow only in ${linkedLeadOrTourTemplateTypes}`),
 
     body('description')
       .optional()
-      .if(
-        body('description').exists(),
-      ).isString()
-      .withMessage('must be a string'),
+      .isString()
+      .withMessage(VALIDATE_STRING_MSG),
 
     body('thumbnail')
       .notEmpty()
-      .if(
-        body('thumbnail').exists(),
-      ).isURL()
-      .withMessage('must be an url'),
+      .withMessage(VALIDATE_REQUIRED_MSG)
+      .isURL()
+      .withMessage(VALIDATE_URL_MSG),
 
     body('type')
-      .notEmpty().withMessage('is required')
+      .notEmpty()
+      .withMessage(VALIDATE_REQUIRED_MSG)
       .isIn(tourPostTypes)
       .withMessage(`allow only in ${tourPostTypes}`),
 
     body('pricePerPax')
-      .notEmpty().withMessage('is required')
+      .notEmpty()
+      .withMessage(VALIDATE_REQUIRED_MSG)
       .isNumeric()
-      .withMessage('must be a number'),
+      .withMessage(VALIDATE_NUMBER_MSG),
 
     body('commission')
-      .notEmpty().withMessage('is required')
-      .isNumeric()
-      .withMessage('must be a number'),
-
-    body('linkedToTargetKeys')
-      .isObject()
-      .withMessage('is required and must be an object'),
-
-    body('linkedToTargetKeys.pk')
       .notEmpty()
-      .isString()
-      .withMessage('must be a non-empty string'),
-
-    body('linkedToTargetKeys.sk')
-      .notEmpty()
-      .isString()
-      .withMessage('must be a non-empty string'),
+      .withMessage(VALIDATE_REQUIRED_MSG)
+      .isInt({ min: 0 })
+      .withMessage(VALIDATE_POSITIVE_NUMBER_MSG),
 
     body('expiry')
       .optional()
       .isNumeric()
-      .withMessage('must be a number'),
+      .withMessage(VALIDATE_NUMBER_MSG),
 
     body('autoClose')
       .optional()
       .isBoolean()
-      .withMessage('must be a boolean'),
+      .withMessage(VALIDATE_BOOLEAN_MSG),
 
     body('maximumPaxToTrade')
       .optional()
-      .isInt({ min: -1 })
-      .withMessage('must be a number'),
-
-    body('status')
-      .notEmpty().withMessage('is required')
-      .isIn(allowedInitialPostStatuses)
-      .withMessage(`allow only in ${allowedInitialPostStatuses}`),
+      .isInt({ min: 0 })
+      .withMessage(VALIDATE_POSITIVE_NUMBER_MSG),
 
     body('endingLocation')
       .notEmpty()
+      .withMessage(VALIDATE_REQUIRED_MSG)
       .isString()
-      .withMessage('must be a non-empty string'),
+      .withMessage(VALIDATE_STRING_MSG),
 
     body('departureDate')
-      .optional()
       .notEmpty()
+      .withMessage(VALIDATE_REQUIRED_MSG)
       .custom((value) => !Number.isNaN(new Date(value)))
-      .withMessage('must be a date'),
+      .withMessage(VALIDATE_DATE_MSG),
   ];
 }
 
@@ -112,7 +120,67 @@ export function updateTourPostValidator() {
   const validateBody = createTourPostValidator();
   return validateBody.concat(
     [
-      param('id').notEmpty().withMessage('is required'),
+      param('id').notEmpty().withMessage(VALIDATE_REQUIRED_MSG),
+
+      body('name')
+        .optional()
+        .isString()
+        .withMessage(VALIDATE_STRING_MSG),
+
+      body('description')
+        .optional()
+        .isString()
+        .withMessage(VALIDATE_STRING_MSG),
+
+      body('thumbnail')
+        .optional()
+        .isURL()
+        .withMessage(VALIDATE_URL_MSG),
+
+      body('type')
+        .optional()
+        .isIn(tourPostTypes)
+        .withMessage(`allow only in ${tourPostTypes}`),
+
+      body('pricePerPax')
+        .optional()
+        .isInt({ min: 0 })
+        .withMessage(VALIDATE_POSITIVE_NUMBER_MSG),
+
+      body('commission')
+        .optional()
+        .isInt({ min: 0 })
+        .withMessage(VALIDATE_POSITIVE_NUMBER_MSG),
+
+      body('expiry')
+        .optional()
+        .isNumeric()
+        .withMessage(VALIDATE_NUMBER_MSG),
+
+      body('autoClose')
+        .optional()
+        .isBoolean()
+        .withMessage(VALIDATE_BOOLEAN_MSG),
+
+      body('maximumPaxToTrade')
+        .optional()
+        .isInt({ min: 0 })
+        .withMessage(VALIDATE_POSITIVE_NUMBER_MSG),
+
+      body('status')
+        .optional()
+        .isIn(allowedInitialPostStatuses)
+        .withMessage(`allow only in ${allowedInitialPostStatuses}`),
+
+      body('endingLocation')
+        .optional()
+        .isString()
+        .withMessage(VALIDATE_STRING_MSG),
+
+      body('departureDate')
+        .optional()
+        .custom((value) => !Number.isNaN(new Date(value)))
+        .withMessage(VALIDATE_DATE_MSG),
     ],
   );
 }
