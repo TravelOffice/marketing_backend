@@ -25,13 +25,15 @@ export default class GetOfferListOfPostUseCaseImpl implements GetOfferListOfPost
     const { tenant, username } = currentUser;
     const marketplaceUserId = `${tenant}#${username}`;
 
+    let offers = [];
     // Check if current user is author of tour post
-    // only author of tour post can get list offer of tour post
-    if (marketplaceUserId !== tourPost.authorId) {
-      throw new Error('You are not authorized to access this resource');
+    // only author of tour post can get all offers of tour post
+    if (marketplaceUserId === tourPost.authorId) {
+      offers = await offerRepository.listOffersOfPost(tourPostId);
+    } else {
+      // Get all offers of current user for this post
+      offers = await offerRepository.listOffersOfPostByUser(tourPostId, marketplaceUserId);
     }
-
-    const offers = await offerRepository.listByPost(tourPostId);
     return offers.map(
       (offer) => helper.excludeDataFromObject(offer) as Offer,
     );

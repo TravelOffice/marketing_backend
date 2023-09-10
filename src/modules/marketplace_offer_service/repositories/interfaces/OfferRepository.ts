@@ -2,7 +2,9 @@ import { PaginationParams, PaginationResponsePayload } from 'core/providers/dyna
 import { Offer, OfferStatus } from '../../models/Offer';
 
 export interface OfferRepository {
-  listByPost(tourPostId: string): Promise<Offer[]>,
+  listOffersOfPost(tourPostId: string): Promise<Offer[]>,
+
+  listOffersOfPostByUser(tourPostId: string, userId: string): Promise<Offer[]>,
 
   listSentOffersOfOrganization(
     organization: string,
