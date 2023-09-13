@@ -17,9 +17,9 @@ export interface TourPostRepository {
   ): Promise<PaginationResponsePayload<TourPost> | undefined>,
 
   listByPostType(
-      currentUserId: string,
-      postType: string,
-      params: PaginationParams
+    currentUserId: string,
+    postType: string,
+    params: PaginationParams
   ): Promise<PaginationResponsePayload<TourPost> | undefined>,
 
   listByOrganization(
@@ -65,4 +65,6 @@ export interface TourPostRepository {
   unfollow(userId: string, tourPostId: string): Promise<void>,
 
   generateCode(): Promise<string>,
+
+  deleteThumbnail(cdnUrl?: string): Promise<void>,
 }

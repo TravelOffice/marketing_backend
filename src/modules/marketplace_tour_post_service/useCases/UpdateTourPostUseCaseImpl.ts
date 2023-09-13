@@ -17,7 +17,6 @@ export default class UpdateTourPostUseCaseImpl implements UpdateTourPostUseCase 
     'maximumPaxToTrade',
     'endingLocation',
     'departureDate',
-    'thumbnail',
   ];
 
   invoke = async (
@@ -55,11 +54,11 @@ export default class UpdateTourPostUseCaseImpl implements UpdateTourPostUseCase 
   };
 
   /**
-     * Transform dto to expected data which should be used to update.
-     * Also, some kinds of data should be validated before updating.
-     * @param tourPost Current tour post
-     * @param updatingTourPostData Data to update
-     */
+   * Transform dto to expected data which should be used to update.
+   * Also, some kinds of data should be validated before updating.
+   * @param tourPost Current tour post
+   * @param updatingTourPostData Data to update
+   */
   private async getDataToUpdate(
     tourPost: TourPost,
     updatingTourPostData: Partial<UpdateTourPostDto>,

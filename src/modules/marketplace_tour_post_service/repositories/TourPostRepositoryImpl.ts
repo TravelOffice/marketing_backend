@@ -1,4 +1,4 @@
-import { dynamoProvider, helper } from 'core';
+import { dynamoProvider, helper, s3Provider } from 'core';
 import { PaginationParams, PaginationResponsePayload } from 'core/providers/dynamodb/DynamoProvider';
 import { getAwsSecretValue } from 'get-env';
 import { BookmarkedTourPost } from '../models/BookmarkedTourPost';
@@ -312,15 +312,15 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
   };
 
   /**
- * Get a TourPost by its ID and optionally transform it based on a user.
- *
- * @param {string} id - The ID of the TourPost to retrieve.
- * @param {string} [userId] - The ID of the user (optional) for transformation.
- * @returns {Promise<TourPost | undefined>}
- * - A promise that resolves with the TourPost (or undefined if not found).
- */
+   * Get a TourPost by its ID and optionally transform it based on a user.
+   *
+   * @param {string} id - The ID of the TourPost to retrieve.
+   * @param {string} [userId] - The ID of the user (optional) for transformation.
+   * @returns {Promise<TourPost | undefined>}
+   * - A promise that resolves with the TourPost (or undefined if not found).
+   */
   getById = async (id: string, userId?: string): Promise<TourPost | undefined> => {
-  // Retrieve the TourPost from the DynamoDB table
+    // Retrieve the TourPost from the DynamoDB table
     const marketplaceTable = await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE');
     const tourPost = await dynamoProvider.getItem<TourPost>(marketplaceTable, POST_INDEX, id);
 
@@ -538,6 +538,35 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
       return count.toString();
     } catch (error) {
       logger.log('Error during increment operation for tour post');
+      throw error;
+    }
+  };
+
+  /**
+   * Deletes a thumbnail image from an S3 bucket based on its CDN URL.
+   *
+   * @param {string} cdnUrl - The CDN URL of the thumbnail image to delete.
+   * @returns {Promise<void>} A promise that resolves when the deletion is successful.
+   * @throws {Error} If an error occurs during the deletion process.
+   */
+  deleteThumbnail = async (cdnUrl?: string): Promise<void> => {
+    if (!cdnUrl) {
+      // If CDN URL is not provided, nothing to delete
+      return;
+    }
+
+    try {
+      // Extract the key from the CDN URL
+      const bucket = await getAwsSecretValue('MARKETPLACE_FILE_BUCKET');
+      const cdnHostName = await getAwsSecretValue('MARKETPLACE_FILE_CDN');
+      const key = cdnUrl.replace(`${cdnHostName}/`, '');
+
+      // Delete the object from the S3 bucket
+      await s3Provider.deleteObject(bucket, key);
+
+      logger.log(`Deleted thumbnail: ${cdnUrl}`);
+    } catch (error) {
+      logger.log(`Error deleting thumbnail: ${error}`);
       throw error;
     }
   };

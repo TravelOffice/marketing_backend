@@ -25,7 +25,6 @@ export default class EventBridgeProvider {
       ScheduleExpression: cron, // The cron expression defining the schedule
       State: 'ENABLED', // The state of the rule (ENABLED or DISABLED)
     };
-
     // Create the EventBridge rule with the specified schedule
     await eventBridge.putRule(ruleParams).promise();
 
