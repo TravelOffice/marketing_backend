@@ -89,8 +89,8 @@ export function createTourPostValidator() {
 
     body('expiry')
       .optional()
-      .isNumeric()
-      .withMessage(VALIDATE_NUMBER_MSG),
+      .isString()
+      .withMessage(VALIDATE_STRING_MSG),
 
     body('autoClose')
       .optional()
@@ -117,72 +117,69 @@ export function createTourPostValidator() {
 }
 
 export function updateTourPostValidator() {
-  const validateBody = createTourPostValidator();
-  return validateBody.concat(
-    [
-      param('id').notEmpty().withMessage(VALIDATE_REQUIRED_MSG),
+  return [
+    param('id').notEmpty().withMessage(VALIDATE_REQUIRED_MSG),
 
-      body('name')
-        .optional()
-        .isString()
-        .withMessage(VALIDATE_STRING_MSG),
+    body('name')
+      .optional()
+      .isString()
+      .withMessage(VALIDATE_STRING_MSG),
 
-      body('description')
-        .optional()
-        .isString()
-        .withMessage(VALIDATE_STRING_MSG),
+    body('description')
+      .optional()
+      .isString()
+      .withMessage(VALIDATE_STRING_MSG),
 
-      body('thumbnail')
-        .optional()
-        .isURL()
-        .withMessage(VALIDATE_URL_MSG),
+    body('thumbnail')
+      .optional()
+      .isURL()
+      .withMessage(VALIDATE_URL_MSG),
 
-      body('type')
-        .optional()
-        .isIn(tourPostTypes)
-        .withMessage(`allow only in ${tourPostTypes}`),
+    body('type')
+      .optional()
+      .isIn(tourPostTypes)
+      .withMessage(`allow only in ${tourPostTypes}`),
 
-      body('pricePerPax')
-        .optional()
-        .isInt({ min: 0 })
-        .withMessage(VALIDATE_POSITIVE_NUMBER_MSG),
+    body('pricePerPax')
+      .optional()
+      .isInt({ min: 0 })
+      .withMessage(VALIDATE_POSITIVE_NUMBER_MSG),
 
-      body('commission')
-        .optional()
-        .isInt({ min: 0 })
-        .withMessage(VALIDATE_POSITIVE_NUMBER_MSG),
+    body('commission')
+      .optional()
+      .isInt({ min: 0 })
+      .withMessage(VALIDATE_POSITIVE_NUMBER_MSG),
 
-      body('expiry')
-        .optional()
-        .isNumeric()
-        .withMessage(VALIDATE_NUMBER_MSG),
+    body('expiry')
+      .optional()
+      .isString()
+      .withMessage(VALIDATE_STRING_MSG),
 
-      body('autoClose')
-        .optional()
-        .isBoolean()
-        .withMessage(VALIDATE_BOOLEAN_MSG),
+    body('autoClose')
+      .optional()
+      .isBoolean()
+      .withMessage(VALIDATE_BOOLEAN_MSG),
 
-      body('maximumPaxToTrade')
-        .optional()
-        .isInt({ min: 0 })
-        .withMessage(VALIDATE_POSITIVE_NUMBER_MSG),
+    body('maximumPaxToTrade')
+      .optional()
+      .isInt({ min: 0 })
+      .withMessage(VALIDATE_POSITIVE_NUMBER_MSG),
 
-      body('status')
-        .optional()
-        .isIn(allowedInitialPostStatuses)
-        .withMessage(`allow only in ${allowedInitialPostStatuses}`),
+    body('status')
+      .optional()
+      .isIn(allowedInitialPostStatuses)
+      .withMessage(`allow only in ${allowedInitialPostStatuses}`),
 
-      body('endingLocation')
-        .optional()
-        .isString()
-        .withMessage(VALIDATE_STRING_MSG),
+    body('endingLocation')
+      .optional()
+      .isString()
+      .withMessage(VALIDATE_STRING_MSG),
 
-      body('departureDate')
-        .optional()
-        .custom((value) => !Number.isNaN(new Date(value)))
-        .withMessage(VALIDATE_DATE_MSG),
-    ],
-  );
+    body('departureDate')
+      .optional()
+      .custom((value) => !Number.isNaN(new Date(value)))
+      .withMessage(VALIDATE_DATE_MSG),
+  ];
 }
 
 export function getSelfPostsValidator() {
