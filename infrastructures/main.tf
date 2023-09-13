@@ -19,7 +19,7 @@ locals {
   constants           = jsondecode(data.http.infra.response_body)
   remote_feature_name = "base_infrastructure"
   domain_name         = module.REMOTE_STATE.STATE.COMMON_CONFIG.route53.hosted_zone.domain.name
-  tags = {
+  tags                = {
     Env       = var.ENV
     Terraform = true
     Feature   = var.FEATURE_NAME
@@ -36,6 +36,13 @@ locals {
       NODE_ENV                  = var.ENV
       SECRET_MANAGER_ID         = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
       ATTACHMENT_MESSAGE_BUCKET = module.REMOTE_STATE.STATE.MARKETING.frontend.sale_web.attachment_s3_bucket
+      PRESIGNED_URL_EXPIRES     = 60
+    },
+    marketplace_s3_presigned_url_vars = {
+      REGION                    = var.AWS_REGION
+      NODE_ENV                  = var.ENV
+      SECRET_MANAGER_ID         = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
+      ATTACHMENT_MESSAGE_BUCKET = module.REMOTE_STATE.STATE.MARKETING.frontend.marketplace_web.attachment_s3_bucket
       PRESIGNED_URL_EXPIRES     = 60
     },
     link_pages_vars = {
@@ -246,9 +253,9 @@ module "SEARCH_INSTANCE" {
 }
 
 module "ECS" {
-  source       = "../../modules/ecs"
-  FEATURE_NAME = var.FEATURE_NAME
-  ENV          = var.ENV
+  source          = "../../modules/ecs"
+  FEATURE_NAME    = var.FEATURE_NAME
+  ENV             = var.ENV
   CUSTOM_POLICIES = [
     "EcsTaskStandardRole",
     "DynamoTableReadWrite",
