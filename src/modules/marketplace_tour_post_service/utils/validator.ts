@@ -273,3 +273,12 @@ export function getTopTrendingTourValidator() {
       .withMessage('must be a number and larger than 0'),
   ];
 }
+
+export function updateThumbnailValidator() {
+  return [
+    body('cdnUrl')
+      .isString()
+      .notEmpty()
+      .withMessage('must be a non-empty string'),
+  ];
+}

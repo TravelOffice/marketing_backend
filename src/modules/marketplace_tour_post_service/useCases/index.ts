@@ -18,9 +18,7 @@ import { CreateTourPostUseCase } from './interfaces/CreateTourPostUseCase';
 import { FollowTourPostUseCase } from './interfaces/FollowTourPostUseCase';
 import { GetBookmarkedTourPostsUseCase } from './interfaces/GetBookmarkedTourPostsUseCase';
 import { GetFollowedTourPostsUseCase } from './interfaces/GetFollowedTourPostsUseCase';
-import {
-  GetLinkedLeadOrTourInfoOnMarketplaceUseCase,
-} from './interfaces/GetLinkedLeadOrTourInfoOnMarketplace';
+import { GetLinkedLeadOrTourInfoOnMarketplaceUseCase } from './interfaces/GetLinkedLeadOrTourInfoOnMarketplace';
 import { GetSelfTourPostListByUserUseCase } from './interfaces/GetSelfTourPostListByUserUseCase';
 import { GetTopCommissionPostsUseCase } from './interfaces/GetTopCommissionPostsUseCase';
 import { GetTourPostListByOrgUseCase } from './interfaces/GetTourPostListByOrgUseCase';
@@ -32,6 +30,8 @@ import { UnfollowTourPostUseCase } from './interfaces/UnfollowTourPostUseCase';
 import { UpdateTourPostUseCase } from './interfaces/UpdateTourPostUseCase';
 import { GetTourPostListByPostTypeUseCase } from './interfaces/GetTourPostListByPostTypeUseCase';
 import GetTourPostListByPostTypeUseCaseImpl from './GetTourPostListByPostTypeUseCaseImpl';
+import { UpdateThumbnailUseCase } from './interfaces/UpdateThumbnailUseCase';
+import UpdateThumbnailUseCaseImpl from './UpdateThumbnailUseCaseImpl';
 
 interface UseCases {
   getTourPostListUseCase: GetTourPostListUseCase,
@@ -50,6 +50,7 @@ interface UseCases {
   unfollowTourPostUseCase: UnfollowTourPostUseCase,
   getTopCommissionPostsUseCase: GetTopCommissionPostsUseCase,
   getLinkedLeadOrTourInfoOnMarketplaceUseCase: GetLinkedLeadOrTourInfoOnMarketplaceUseCase,
+  updateThumbnailUseCase: UpdateThumbnailUseCase,
 }
 
 const useCases: UseCases = {
@@ -70,6 +71,7 @@ const useCases: UseCases = {
   getTopCommissionPostsUseCase: new GetTopCommissionPostsUseCaseImpl(),
   getLinkedLeadOrTourInfoOnMarketplaceUseCase:
     new GetLinkedLeadOrTourInfoOnMarketplaceUseCaseImpl(),
+  updateThumbnailUseCase: new UpdateThumbnailUseCaseImpl(),
 };
 
 export const {
@@ -89,4 +91,5 @@ export const {
   unfollowTourPostUseCase,
   getTopCommissionPostsUseCase,
   getLinkedLeadOrTourInfoOnMarketplaceUseCase,
+  updateThumbnailUseCase,
 } = useCases;
