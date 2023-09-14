@@ -1,14 +1,12 @@
 import compression from 'compression';
 import cors from 'cors';
 import express, { NextFunction, Request, Response } from 'express';
-import { getEnv } from 'get-env';
 import { getMarketplaceUserInfo } from 'decode-token';
-import { s3Repository } from './repositories';
 import { FAILED, SUCCESS } from './utils/constants';
 import logger from './utils/logger';
 import validate, { getPresignedUrlValidator } from './utils/validator';
 import wrapResponse from './utils/wrapResponse';
-import { GeneratePresignedUrlOption } from './models/GeneratePresignedUrlOption';
+import { createOrgThumbnailUrlUseCase, createPostThumbnailUrlUseCase, createUserAvatarUrlUseCase } from './useCases';
 
 const app = express();
 
@@ -27,20 +25,36 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 app.get('/marketplace/presigned-url', getPresignedUrlValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
-    const bucket = getEnv('ATTACHMENT_BUCKET');
-    const expires = Number(getEnv('PRESIGNED_URL_EXPIRES'));
     const currentUser = getMarketplaceUserInfo(req.headers.authorization!);
     const {
-      fileType, fileName,
+      presignedUrlType, fileType, fileName,
     } = req.query;
-    const option = {
-      bucket,
-      organization: currentUser.tenant,
-      expires,
-      fileType: String(fileType),
-      fileName: String(fileName),
-    } as GeneratePresignedUrlOption;
-    const rs = await s3Repository.generatePresignedUrl(option);
+    let rs;
+    switch (presignedUrlType) {
+      case 'ORGANIZATION_THUMBNAIL':
+        rs = await createOrgThumbnailUrlUseCase.invoke(
+          currentUser,
+          fileName as string,
+          fileType as string,
+        );
+        break;
+      case 'USER_AVATAR':
+        rs = await createUserAvatarUrlUseCase.invoke(
+          currentUser,
+          fileName as string,
+          fileType as string,
+        );
+        break;
+      case 'POST_THUMBNAIL':
+        rs = await createPostThumbnailUrlUseCase.invoke(
+          currentUser,
+          fileName as string,
+          fileType as string,
+        );
+        break;
+      default:
+        break;
+    }
     res.json(wrapResponse(SUCCESS, rs));
   } catch (error: any) {
     logger.log(`[GET /marketplace/presigned-url] Generated an error ${error}`);

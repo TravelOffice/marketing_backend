@@ -19,7 +19,6 @@ import {
   getTourPostUseCase,
   unbookmarkTourPostUseCase,
   unfollowTourPostUseCase,
-  updateThumbnailUseCase,
   updateTourPostUseCase,
 } from './useCases';
 import { FAILED, SUCCESS } from './utils/constants';
@@ -34,7 +33,6 @@ import validate, {
   getTopTrendingTourValidator,
   getTourPostValidator,
   idParamValidator,
-  updateThumbnailValidator,
   updateTourPostValidator,
 } from './utils/validator';
 import wrapResponse from './utils/wrapResponse';
@@ -288,20 +286,5 @@ app.get(
     }
   },
 );
-
-app.put('/marketplace/posts/:id/thumbnail', updateThumbnailValidator(), async (req: Request, res: Response) => {
-  try {
-    validate(req);
-    const { id } = req.params;
-    const { cdnUrl } = req.body;
-    const currentUser = getMarketplaceUserInfo(req.headers.authorization!);
-    await updateThumbnailUseCase.invoke(currentUser, id, cdnUrl);
-    logger.log(`[app.put] Update thumbnail of post ${id} successfully`);
-    res.json(wrapResponse(SUCCESS));
-  } catch (error: any) {
-    logger.log(`[app.get] Error ${error}`);
-    res.json(wrapResponse(FAILED, undefined, error.message));
-  }
-});
 
 export default app;
