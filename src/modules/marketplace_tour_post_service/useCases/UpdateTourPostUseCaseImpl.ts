@@ -17,6 +17,7 @@ export default class UpdateTourPostUseCaseImpl implements UpdateTourPostUseCase 
     'maximumPaxToTrade',
     'endingLocation',
     'departureDate',
+    'thumbnail',
   ];
 
   invoke = async (
@@ -50,6 +51,10 @@ export default class UpdateTourPostUseCaseImpl implements UpdateTourPostUseCase 
     );
     const updatingTourPostData = await this.getDataToUpdate(tourPost, allowedUpdatingData);
     const updatedTourPost = await tourPostRepository.update(tourPostId, updatingTourPostData);
+    if (updateTourPostDto.thumbnail) {
+      // Delete Old thumbnail
+      await tourPostRepository.deleteThumbnail(tourPost.thumbnail);
+    }
     return helper.excludeDataFromObject(updatedTourPost as TourPost) as TourPost;
   };
 

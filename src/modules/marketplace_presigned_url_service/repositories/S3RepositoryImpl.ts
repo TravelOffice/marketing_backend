@@ -1,17 +1,20 @@
-import * as crypto from 'crypto';
+import { getAwsSecretValue, getEnv } from 'get-env';
 import { s3Provider } from '../providers';
 import { S3Repository } from './interfaces/S3Repository';
-import { GeneratePresignedUrlOption } from '../models/GeneratePresignedUrlOption';
 
 export default class S3RepositoryImpl implements S3Repository {
   /**
    * Generate pre-signed url to upload file to s3
-   * @param option GeneratePresignedUrlOption
    * @returns PresignedUrl object
+   * @param key
+   * @param fileType
    */
-  generatePresignedUrl = async (option: GeneratePresignedUrlOption) => {
-    const randomByteLength = 16;
-    const folderName = crypto.randomBytes(randomByteLength).toString('hex');
-    return s3Provider.generatePresignedUrl(option.bucket, `images/${option.organization}/${folderName}/${option.fileName}`, option.expires, option.fileType);
+  generatePresignedUrl = async (
+    key: string,
+    fileType: string,
+  ) => {
+    const bucket = await getAwsSecretValue('MARKETPLACE_FILE_BUCKET');
+    const expires = Number(getEnv('PRESIGNED_URL_EXPIRES'));
+    return s3Provider.generatePresignedUrl(bucket, key, expires, fileType);
   };
 }

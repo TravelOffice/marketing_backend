@@ -1,5 +1,6 @@
 import { Request } from 'express';
 import { query, ValidationError, validationResult } from 'express-validator';
+import { PresignedUrlTypes } from '../models';
 
 export default function validate(req: Request) {
   const errors = validationResult(req);
@@ -19,8 +20,10 @@ export default function validate(req: Request) {
 }
 
 export function getPresignedUrlValidator() {
+  const presignedUrlTypes = Object.values(PresignedUrlTypes);
   return [
-    query('fileName', 'is required').not().isEmpty(),
-    query('fileType', 'is required').not().isEmpty(),
+    query('presignedUrlType').isIn(presignedUrlTypes).withMessage(`allow only in ${presignedUrlTypes}`),
+    query('fileName', 'is required').notEmpty(),
+    query('fileType', 'is required').notEmpty(),
   ];
 }
