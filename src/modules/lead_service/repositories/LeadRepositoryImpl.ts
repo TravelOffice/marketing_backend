@@ -2,12 +2,14 @@
 import AWS from 'aws';
 import { getAwsSecretValue } from 'get-env';
 import { helper, dynamoProvider } from 'core';
+import { PaginationParams } from 'core/providers/dynamodb/DynamoProvider';
 import { Lead, LeadStatus } from '../models/Lead';
 
 import {
   ASSIGNEE_INDEX,
   LEAD_COUNTER_INDEX,
   LEAD_INDEX,
+  LEAD_STATUS_INDEX,
   STATUS_INDEX,
   TENANT_INDEX,
 } from '../utils/constants';
@@ -53,6 +55,23 @@ export default class LeadRepositoryImpl implements LeadRepository {
       ':pk': `${TENANT_INDEX}#${tenantId}#${LEAD_INDEX}`,
     },
   });
+
+  availableListForMarketplace = async (tenant: string, paginationParams: PaginationParams) => {
+    const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const queryParams = {
+      TableName: travelTable,
+      IndexName: 'Index3',
+      KeyConditionExpression: 'pk = :pk and lsi3 = :lsi3',
+      ExpressionAttributeValues: {
+        ':pk': `${TENANT_INDEX}#${tenant}#${LEAD_INDEX}`,
+        ':lsi3': `${LEAD_STATUS_INDEX}#${LeadStatus.PROCESSING}`,
+      },
+    };
+    return dynamoProvider.queryPagination<Lead>(
+      queryParams,
+      paginationParams,
+    );
+  };
 
   /**
    * Query to get all leads which is assigned to given employee

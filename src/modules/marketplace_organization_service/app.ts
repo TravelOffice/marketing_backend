@@ -1,6 +1,6 @@
 import cors from 'cors';
 import { getMarketplaceUserInfo } from 'decode-token';
-import express, { Request, Response, NextFunction } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import compression from 'compression';
 import { logger } from 'core';
 import {
@@ -12,7 +12,7 @@ import {
 } from './useCases';
 import wrapResponse from './utils/wrapResponse';
 import { FAILED, SUCCESS } from './utils/constants';
-import validate, { createOrUpdateOrganizationValidator } from './utils/validator';
+import validate, { createOrganizationValidator, updateOrganizationValidator } from './utils/validator';
 
 const app = express();
 
@@ -43,7 +43,7 @@ app.get('/marketplace/organizations', async (req: Request, res: Response) => {
   }
 });
 
-app.post('/marketplace/organizations', createOrUpdateOrganizationValidator(), async (req: Request, res: Response) => {
+app.post('/marketplace/organizations', createOrganizationValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
     const currentUser = getMarketplaceUserInfo(req.headers.authorization!);
@@ -66,7 +66,7 @@ app.get('/marketplace/organizations/:id', async (req: Request, res: Response) =>
   }
 });
 
-app.put('/marketplace/organizations/:id', createOrUpdateOrganizationValidator(), async (req: Request, res: Response) => {
+app.put('/marketplace/organizations/:id', updateOrganizationValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
     const { id } = req.params;

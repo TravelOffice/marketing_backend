@@ -14,6 +14,8 @@ import { UpdateLeadUseCase } from './interfaces/UpdateLeadUseCase';
 import UpdateLeadUseCaseImpl from './UpdateLeadUseCaseImpl';
 import { GetLeadUseCase } from './interfaces/GetLeadUseCase';
 import GetLeadUseCaseImpl from './GetLeadUseCaseImpl';
+import { GetPaginatedListFromMarketplaceUseCase } from './interfaces/GetPaginatedListFromMarketplaceUseCase';
+import GetPaginatedListFromMarketplaceUseCaseImpl from './GetPaginatedLeadsFromMarketplaceUseCaseImpl';
 
 interface UseCases {
   changeLeadStatusUseCase: ChangeLeadStatusUseCase,
@@ -24,6 +26,7 @@ interface UseCases {
   changeLeadAssigneeUseCase: ChangeLeadAssigneeUseCase,
   getMyLeadListUseCase: GetMyLeadListUseCase,
   updateLeadUseCase: UpdateLeadUseCase,
+  getPaginatedListFromMarketplaceUseCase: GetPaginatedListFromMarketplaceUseCase,
 }
 
 const useCases: UseCases = {
@@ -35,6 +38,7 @@ const useCases: UseCases = {
   changeLeadAssigneeUseCase: new ChangeLeadAssigneeUseCaseImpl(),
   getMyLeadListUseCase: new GetMyLeadListUseCaseImpl(),
   updateLeadUseCase: new UpdateLeadUseCaseImpl(),
+  getPaginatedListFromMarketplaceUseCase: new GetPaginatedListFromMarketplaceUseCaseImpl(),
 };
 
 // eslint-disable-next-line import/prefer-default-export
@@ -47,4 +51,5 @@ export const {
   changeLeadAssigneeUseCase,
   getMyLeadListUseCase,
   updateLeadUseCase,
+  getPaginatedListFromMarketplaceUseCase,
 } = useCases;
