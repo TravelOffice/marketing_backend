@@ -2,25 +2,25 @@
 
 import CreateUserAvatarUrlUseCaseImpl from './CreateUserAvatarUrlUseCaseImpl';
 import { CreateUserAvatarUrlUseCase } from './interfaces/CreateUserAvatarUrlUseCase';
-import { CreateOrgThumbnailUrlUseCase } from './interfaces/CreateOrgThumbnailUrlUseCase';
 import { CreatePostThumbnailUrlUseCase } from './interfaces/CreatePostThumbnaillUrlUseCase';
-import CreateOrgThumbnailUrlUseCaseImpl from './CreateOrgThumbnailUrlUseCaseImpl';
 import CreatePostThumbnailUrlUseCaseImpl from './CreatePostThumbnailUrlUseCaseImpl';
+import CreateOrgProfilePictureUrlUseCaseImpl from './CreateOrgProfilePictureUrlUseCaseImpl';
+import { CreateOrgProfilePictureUrlUseCase } from './interfaces/CreateOrgProfilePictureUrlUseCase';
 
 interface UseCases {
-  createOrgThumbnailUrlUseCase: CreateOrgThumbnailUrlUseCase,
+  createOrgProfilePictureUrlUseCase: CreateOrgProfilePictureUrlUseCase,
   createUserAvatarUrlUseCase: CreateUserAvatarUrlUseCase,
   createPostThumbnailUrlUseCase: CreatePostThumbnailUrlUseCase,
 }
 
 const useCases: UseCases = {
-  createOrgThumbnailUrlUseCase: new CreateOrgThumbnailUrlUseCaseImpl(),
+  createOrgProfilePictureUrlUseCase: new CreateOrgProfilePictureUrlUseCaseImpl(),
   createUserAvatarUrlUseCase: new CreateUserAvatarUrlUseCaseImpl(),
   createPostThumbnailUrlUseCase: new CreatePostThumbnailUrlUseCaseImpl(),
 };
 
 export const {
-  createOrgThumbnailUrlUseCase,
+  createOrgProfilePictureUrlUseCase,
   createUserAvatarUrlUseCase,
   createPostThumbnailUrlUseCase,
 } = useCases;
