@@ -40,15 +40,8 @@ export default class CreateOrganizationUseCaseImpl implements CreateOrganization
     const { tenant, username, name: creatorName } = currentUser;
     const creatorId = `${tenant}#${username}`;
     return {
-      name: createOrganizationDto.name,
-      email: createOrganizationDto.email,
-      phoneNumber: createOrganizationDto.phoneNumber,
-      address: createOrganizationDto.address,
-      profilePicture: createOrganizationDto.profilePicture,
-      employeesCount: createOrganizationDto.employeesCount,
-      foundedYear: createOrganizationDto.foundedYear,
-      website: createOrganizationDto.website,
-      socialMedia: createOrganizationDto.socialMedia,
+      ...createOrganizationDto,
+      code: tenant,
       createdAt: now,
       updatedAt: now,
       creatorId,
@@ -56,6 +49,6 @@ export default class CreateOrganizationUseCaseImpl implements CreateOrganization
       lsi1: `${now}`, // createdAt lsi
       lsi2: `${now}`, // updatedAt lsi
       lsi4: `${creatorId}`, // creatorId lsi
-    };
+    } as Organization;
   }
 }
