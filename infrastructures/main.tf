@@ -123,7 +123,7 @@ locals {
       REGION                     = var.AWS_REGION
       NODE_ENV                   = var.ENV
       LEAD_SERVICE_NAME          = "${var.ENV}-${var.FEATURE_NAME}-get_leads_from_marketplace_service"
-      TOUR_TEMPLATE_SERVICE_NAME = "${var.ENV}-${var.FEATURE_NAME}-get_tour_templates_from_marketplace_service"
+      TOUR_TEMPLATE_SERVICE_NAME = "${var.ENV}-${var.FEATURE_NAME}-get_tour_tpls_from_marketplace_service"
     },
   }
   MEILI_SEARCH_MASTER_KEY = local.constants["MEILI_SEARCH_MASTER_KEY"]
