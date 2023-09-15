@@ -22,4 +22,10 @@ export const SUPPLIER_INDEX = 'SUPPLIER';
 
 export const SUPPLIER_COUNTER_INDEX = 'SUPPLIER_COUNTER';
 
+export const VALIDATE_URL_MSG = 'property must be a valid URL';
+
 export const URL_REGEX_PATTERN = /^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)$/;
+
+export const VALIDATE_REQUIRED_MSG = 'property is required';
+
+export const VALIDATE_OBJECT_MSG = 'property must be an object';

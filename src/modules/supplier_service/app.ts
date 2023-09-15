@@ -12,7 +12,11 @@ import {
 } from './useCases';
 import wrapResponse from './utils/wrapResponse';
 import { FAILED, SUCCESS } from './utils/constants';
-import validate, { createOrUpdateSupplierValidator, updateSupplierQuoteValidator } from './utils/validator';
+import validate, {
+  createSupplierValidator,
+  updateSupplierQuoteValidator,
+  updateSupplierValidator,
+} from './utils/validator';
 import logger from './utils/logger';
 
 const app = express();
@@ -53,7 +57,7 @@ app.get('/suppliers', async (req: Request, res: Response) => {
 
 app.post(
   '/suppliers',
-  createOrUpdateSupplierValidator(),
+  createSupplierValidator(),
   async (req: Request, res: Response) => {
     try {
       validate(req);
@@ -102,7 +106,7 @@ app.get('/suppliers/:id', async (req: Request, res: Response) => {
   }
 });
 
-app.put('/suppliers/:id', createOrUpdateSupplierValidator(), async (req: Request, res: Response) => {
+app.put('/suppliers/:id', updateSupplierValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
     const { id } = req.params;
