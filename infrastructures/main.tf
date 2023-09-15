@@ -19,7 +19,7 @@ locals {
   constants           = jsondecode(data.http.infra.response_body)
   remote_feature_name = "base_infrastructure"
   domain_name         = module.REMOTE_STATE.STATE.COMMON_CONFIG.route53.hosted_zone.domain.name
-  tags                = {
+  tags = {
     Env       = var.ENV
     Terraform = true
     Feature   = var.FEATURE_NAME
@@ -118,6 +118,12 @@ locals {
       NODE_ENV          = var.ENV
       SECRET_MANAGER_ID = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
       ATTACHMENT_BUCKET = module.REMOTE_STATE.STATE.MARKETING.frontend.sale_web.attachment_s3_bucket
+    },
+    marketplace_get_available_tours_lambda_vars = {
+      REGION                     = var.AWS_REGION
+      NODE_ENV                   = var.ENV
+      LEAD_SERVICE_NAME          = "${var.ENV}-${var.FEATURE_NAME}-get_leads_from_marketplace_service"
+      TOUR_TEMPLATE_SERVICE_NAME = "${var.ENV}-${var.FEATURE_NAME}-get_tour_templates_from_marketplace_service"
     },
   }
   MEILI_SEARCH_MASTER_KEY = local.constants["MEILI_SEARCH_MASTER_KEY"]
@@ -252,9 +258,9 @@ module "SEARCH_INSTANCE" {
 }
 
 module "ECS" {
-  source          = "../../modules/ecs"
-  FEATURE_NAME    = var.FEATURE_NAME
-  ENV             = var.ENV
+  source       = "../../modules/ecs"
+  FEATURE_NAME = var.FEATURE_NAME
+  ENV          = var.ENV
   CUSTOM_POLICIES = [
     "EcsTaskStandardRole",
     "DynamoTableReadWrite",

@@ -1,3 +1,4 @@
+import { PaginationParams, PaginationResponsePayload } from 'core/providers/dynamodb/DynamoProvider';
 import { Lead, LeadStatus } from '../../models/Lead';
 import { User } from '../../models/User';
 
@@ -6,6 +7,10 @@ export interface LeadRepository {
   create: (tenantId: string, lead: Lead) => Promise<Lead>,
   list: (tenantId: string) => Promise<Lead[]>,
   listByAssignee: (tenantId: string, assigneeId: string) => Promise<Lead[]>,
+  availableListForMarketplace: (
+    tenant: string,
+    paginationParams: PaginationParams,
+  ) => Promise<PaginationResponsePayload<Lead> | undefined>,
   get: (tenantId: string, leadId: string) => Promise<Lead>,
   update: (tenantId: string, leadId: string, lead: Partial<Lead>) => Promise<Lead>,
   delete: (tenantId: string, leadId: string) => Promise<void>,

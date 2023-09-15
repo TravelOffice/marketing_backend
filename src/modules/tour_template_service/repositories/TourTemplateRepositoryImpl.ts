@@ -1,5 +1,6 @@
 import { getAwsSecretValue } from 'get-env';
 import { dynamoProvider, helper, QueryInput } from 'core';
+import { PaginationParams } from 'core/providers/dynamodb/DynamoProvider';
 import { TourTemplate } from '../models/TourTemplate';
 import { TENANT_INDEX, TOUR_TEMPLATE_COUNTER_INDEX, TOUR_TEMPLATE_INDEX } from '../utils/constants';
 import logger from '../utils/logger';
@@ -60,6 +61,22 @@ implements TourTemplateRepository {
     logger.log('Formatted items:', tourTemplates);
 
     return tourTemplates;
+  };
+
+  availableListForMarketplace = async (tenant: string, paginationParams: PaginationParams) => {
+    const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const queryParams = {
+      TableName: travelTable,
+      IndexName: 'Index1',
+      KeyConditionExpression: 'pk = :pk',
+      ExpressionAttributeValues: {
+        ':pk': `${TENANT_INDEX}#${tenant}#${TOUR_TEMPLATE_INDEX}`,
+      },
+    };
+    return dynamoProvider.queryPagination<TourTemplate>(
+      queryParams,
+      paginationParams,
+    );
   };
 
   /**
