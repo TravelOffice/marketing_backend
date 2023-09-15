@@ -1,12 +1,10 @@
 import { getAwsSecretValue } from 'get-env';
-import { dynamoProvider, helper, QueryInput } from 'core';
+import {
+  dynamoProvider, helper, logger, QueryInput, s3Provider,
+} from 'core';
 import { BatchWriteItemInput } from 'core/providers/dynamodb/DynamoProvider';
 import { MarketplaceUser, UserWithRoles } from '../models';
-import {
-  ROLE_STRING_DELIMITER,
-  ROOT_ROLE,
-  USER_INDEX,
-} from '../utils/constants';
+import { ROLE_STRING_DELIMITER, ROOT_ROLE, USER_INDEX } from '../utils/constants';
 import { MarketplaceUserRepository } from './interfaces/MarketplaceUserRepository';
 
 export default class MarketplaceUserRepositoryImpl
@@ -108,6 +106,69 @@ implements MarketplaceUserRepository {
     return marketplaceUserChunks.then((chunkRs) => chunkRs.flat());
   };
 
+  /**
+   * Updates a Marketplace user with new information.
+   *
+   * @param {string} id - The ID of the user to be updated.
+   * @param {Partial<MarketplaceUser>} user - The partial MarketplaceUser object
+   * with updated information.
+   * @returns {Promise<MarketplaceUser>} - A promise resolving to the updated MarketplaceUser.
+   */
+  update = async (
+    id: string,
+    user: Partial<MarketplaceUser>,
+  ): Promise<MarketplaceUser> => {
+    // Generate update expression names and values
+    const expressionNamesAndValues = helper.generateUpdateExpressionNamesAndValues(user);
+
+    // Perform raw update using DynamoDB provider
+    const result = await dynamoProvider.rawUpdateItem({
+      TableName: await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE'),
+      Key: {
+        pk: USER_INDEX,
+        sk: id,
+      },
+      UpdateExpression: helper.generateUpdateExpression(user),
+      ReturnValues: 'ALL_NEW',
+      ExpressionAttributeValues: expressionNamesAndValues.values,
+      ExpressionAttributeNames: expressionNamesAndValues.names,
+    });
+
+    // Return the updated MarketplaceUser
+    return helper.excludeDataFromObject(
+      result.Attributes as MarketplaceUser,
+    ) as MarketplaceUser;
+  };
+
+  /**
+   * Deletes a thumbnail image from an S3 bucket based on its CDN URL.
+   *
+   * @param {string} cdnUrl - The CDN URL of the thumbnail image to delete.
+   * @returns {Promise<void>} A promise that resolves when the deletion is successful.
+   * @throws {Error} If an error occurs during the deletion process.
+   */
+  deleteAvatar = async (cdnUrl?: string): Promise<void> => {
+    if (!cdnUrl) {
+      // If CDN URL is not provided, nothing to delete
+      return;
+    }
+
+    try {
+      // Extract the key from the CDN URL
+      const bucket = await getAwsSecretValue('MARKETPLACE_FILE_BUCKET');
+      const cdnHostName = await getAwsSecretValue('MARKETPLACE_FILE_CDN');
+      const key = cdnUrl.replace(`${cdnHostName}/`, '');
+
+      // Delete the object from the S3 bucket
+      await s3Provider.deleteObject(bucket, key);
+
+      logger.log(`Deleted thumbnail: ${cdnUrl}`);
+    } catch (error) {
+      logger.log(`Error deleting thumbnail: ${error}`);
+      throw error;
+    }
+  };
+
   private executeBatchWrite = async <T>(param: T[]) => {
     const table = await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE');
     const requests = param.map((item) => ({
@@ -162,39 +223,5 @@ implements MarketplaceUserRepository {
         )}${ROLE_STRING_DELIMITER}`,
       };
     });
-  };
-
-  /**
-   * Updates a Marketplace user with new information.
-   *
-   * @param {string} id - The ID of the user to be updated.
-   * @param {Partial<MarketplaceUser>} user - The partial MarketplaceUser object
-   * with updated information.
-   * @returns {Promise<MarketplaceUser>} - A promise resolving to the updated MarketplaceUser.
-   */
-  update = async (
-    id: string,
-    user: Partial<MarketplaceUser>,
-  ): Promise<MarketplaceUser> => {
-    // Generate update expression names and values
-    const expressionNamesAndValues = helper.generateUpdateExpressionNamesAndValues(user);
-
-    // Perform raw update using DynamoDB provider
-    const result = await dynamoProvider.rawUpdateItem({
-      TableName: await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE'),
-      Key: {
-        pk: USER_INDEX,
-        sk: id,
-      },
-      UpdateExpression: helper.generateUpdateExpression(user),
-      ReturnValues: 'ALL_NEW',
-      ExpressionAttributeValues: expressionNamesAndValues.values,
-      ExpressionAttributeNames: expressionNamesAndValues.names,
-    });
-
-    // Return the updated MarketplaceUser
-    return helper.excludeDataFromObject(
-      result.Attributes as MarketplaceUser,
-    ) as MarketplaceUser;
   };
 }

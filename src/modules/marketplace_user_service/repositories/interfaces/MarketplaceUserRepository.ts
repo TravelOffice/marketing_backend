@@ -9,4 +9,5 @@ export interface MarketplaceUserRepository {
     id: string,
     user: Partial<MarketplaceUser>
   ) => Promise<MarketplaceUser>;
+  deleteAvatar: (cdnUrl?: string) => Promise<void>
 }

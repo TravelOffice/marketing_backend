@@ -34,12 +34,14 @@ app.get('/marketplace/presigned-url', getPresignedUrlValidator(), async (req: Re
       case 'ORG_PROFILE_PICTURE':
         rs = await createOrgProfilePictureUrlUseCase.invoke(
           currentUser,
+          fileName as string,
           fileType as string,
         );
         break;
       case 'USER_AVATAR':
         rs = await createUserAvatarUrlUseCase.invoke(
           currentUser,
+          fileName as string,
           fileType as string,
         );
         break;
