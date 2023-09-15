@@ -10,4 +10,6 @@ export interface OrganizationRepository {
   update(id: string, organization: Partial<Organization>): Promise<Organization>,
 
   delete(id: string): Promise<void>,
+
+  deleteProfilePicture(cdn?: string): Promise<void>;
 }

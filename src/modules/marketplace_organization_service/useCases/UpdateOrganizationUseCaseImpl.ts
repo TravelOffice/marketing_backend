@@ -43,6 +43,10 @@ export default class UpdateOrganizationUseCaseImpl implements UpdateOrganization
       id,
       dataToUpdate,
     );
+    // Delete old profile picture if need
+    if (updateOrganizationDto.profilePicture) {
+      await organizationRepository.deleteProfilePicture(currentOrganization?.profilePicture);
+    }
     return helper.excludeDataFromObject(organization) as Organization;
   }
 

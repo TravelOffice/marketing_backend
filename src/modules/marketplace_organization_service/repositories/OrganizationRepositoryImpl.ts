@@ -1,5 +1,7 @@
 import { getAwsSecretValue } from 'get-env';
-import { dynamoProvider, helper } from 'core';
+import {
+  dynamoProvider, helper, logger, s3Provider,
+} from 'core';
 import { Organization } from '../models/Organization';
 import { OrganizationRepository } from './interfaces/OrganizationRepository';
 import { ORGANIZATION_INDEX } from '../utils/constants';
@@ -89,5 +91,34 @@ export default class OrganizationRepositoryImpl implements OrganizationRepositor
       ORGANIZATION_INDEX,
       id,
     );
+  }
+
+  /**
+   * Deletes a thumbnail image from an S3 bucket based on its CDN URL.
+   *
+   * @param {string} cdnUrl - The CDN URL of the thumbnail image to delete.
+   * @returns {Promise<void>} A promise that resolves when the deletion is successful.
+   * @throws {Error} If an error occurs during the deletion process.
+   */
+  async deleteProfilePicture(cdnUrl?: string): Promise<void> {
+    if (!cdnUrl) {
+      // If CDN URL is not provided, nothing to delete
+      return;
+    }
+
+    try {
+      // Extract the key from the CDN URL
+      const bucket = await getAwsSecretValue('MARKETPLACE_FILE_BUCKET');
+      const cdnHostName = await getAwsSecretValue('MARKETPLACE_FILE_CDN');
+      const key = cdnUrl.replace(`${cdnHostName}/`, '');
+
+      // Delete the object from the S3 bucket
+      await s3Provider.deleteObject(bucket, key);
+
+      logger.log(`Deleted thumbnail: ${cdnUrl}`);
+    } catch (error) {
+      logger.log(`Error deleting thumbnail: ${error}`);
+      throw error;
+    }
   }
 }

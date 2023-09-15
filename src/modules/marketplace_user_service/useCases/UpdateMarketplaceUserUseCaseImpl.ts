@@ -30,6 +30,10 @@ export default class UpdateMarketplaceUserUseCaseImpl implements UpdateMarketpla
       this.allowedUpdatingKeys,
     );
     const updatingUserData = await this.getDataToUpdate(marketplaceUser, allowedUpdatingData);
+    // Delete old user avatar
+    if (updateUserDto.avatar) {
+      await marketplaceUserRepository.deleteAvatar(marketplaceUser.avatar);
+    }
     return marketplaceUserRepository.update(id, updatingUserData);
   };
 
