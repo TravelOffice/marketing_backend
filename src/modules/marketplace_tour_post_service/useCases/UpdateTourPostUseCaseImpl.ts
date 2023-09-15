@@ -72,7 +72,7 @@ export default class UpdateTourPostUseCaseImpl implements UpdateTourPostUseCase 
     // Status transition must follow the defined rules
     const currentStatus = tourPost.status;
     const newStatus = updatingTourPostData?.status;
-    if (currentStatus !== newStatus) {
+    if (newStatus && currentStatus !== newStatus) {
       const statusTransition = `${currentStatus}-${newStatus}`;
       if (!statusTransitionRules.includes(statusTransition)) {
         throw new Error(`Can not change status from ${currentStatus} to ${newStatus}`);
