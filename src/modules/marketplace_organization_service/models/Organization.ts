@@ -1,7 +1,8 @@
 import { BaseDdbModel } from 'common-models';
 
-interface DdbOrganization extends BaseDdbModel {
+export interface Organization extends BaseDdbModel {
   name: string,
+  code: string,
   email: string,
   phoneNumber: string,
   profilePicture?: string,
@@ -20,5 +21,3 @@ interface DdbOrganization extends BaseDdbModel {
   createdAt: number,
   updatedAt: number,
 }
-
-export type Organization = Omit<DdbOrganization, 'pk' | 'sk'>;

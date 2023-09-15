@@ -31,7 +31,7 @@ app.get('/marketplace/presigned-url', getPresignedUrlValidator(), async (req: Re
     } = req.query;
     let rs;
     switch (presignedUrlType) {
-      case 'ORGANIZATION_THUMBNAIL':
+      case 'ORG_PROFILE_PICTURE':
         rs = await createOrgThumbnailUrlUseCase.invoke(
           currentUser,
           fileName as string,

@@ -73,6 +73,7 @@ export default class UpdateOrganizationUseCaseImpl implements UpdateOrganization
       }
     });
     dataToUpdate.updatedAt = now;
+    dataToUpdate.lsi2 = `${now}`;
 
     return dataToUpdate;
   }

@@ -1,8 +1,5 @@
 import { Request } from 'express';
-import {
-  body,
-  ValidationError, validationResult,
-} from 'express-validator';
+import { body, ValidationError, validationResult } from 'express-validator';
 import {
   VALIDATE_EMAIL_MSG, VALIDATE_NON_EMPTY_STRING_MSG, VALIDATE_NUMBER_MSG, VALIDATE_PHONE_MSG,
 } from './constants';
@@ -57,7 +54,7 @@ export function createOrUpdateOrganizationValidator() {
       .isURL()
       .withMessage('Invalid Facebook URL'),
     body('socialMedia.twitter')
-      .if(body('phoneNumber').notEmpty())
+      .if(body('socialMedia.twitter').notEmpty())
       .isURL()
       .withMessage('Invalid Twitter URL'),
     body('socialMedia.zalo')
