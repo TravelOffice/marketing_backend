@@ -6,7 +6,7 @@ import { FAILED, SUCCESS } from './utils/constants';
 import logger from './utils/logger';
 import validate, { getPresignedUrlValidator } from './utils/validator';
 import wrapResponse from './utils/wrapResponse';
-import { createOrgThumbnailUrlUseCase, createPostThumbnailUrlUseCase, createUserAvatarUrlUseCase } from './useCases';
+import { createOrgProfilePictureUrlUseCase, createPostThumbnailUrlUseCase, createUserAvatarUrlUseCase } from './useCases';
 
 const app = express();
 
@@ -32,16 +32,14 @@ app.get('/marketplace/presigned-url', getPresignedUrlValidator(), async (req: Re
     let rs;
     switch (presignedUrlType) {
       case 'ORG_PROFILE_PICTURE':
-        rs = await createOrgThumbnailUrlUseCase.invoke(
+        rs = await createOrgProfilePictureUrlUseCase.invoke(
           currentUser,
-          fileName as string,
           fileType as string,
         );
         break;
       case 'USER_AVATAR':
         rs = await createUserAvatarUrlUseCase.invoke(
           currentUser,
-          fileName as string,
           fileType as string,
         );
         break;
