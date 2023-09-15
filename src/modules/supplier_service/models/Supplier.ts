@@ -13,7 +13,9 @@ export enum ServiceType {
 }
 
 export interface Quote {
+  name: string;
   price: number;
+  unit: string;
   link: string;
   year: number;
   description: string;
