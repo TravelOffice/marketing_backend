@@ -9,6 +9,8 @@ import {
 export interface S3Repository {
   generatePresignedUrl: (option: GenerateMailPresignedUrlOption) => Promise<PresignedUrl>;
 
+  generatePresignedUrls: (key: string, fileType: string) => Promise<PresignedUrl>;
+
   generateAvatarPresignedUrl: (option: GenerateAvatarPresignedUrlOption) => Promise<PresignedUrl>
 
   generatePaymentVoucherPresignedUrl: (
@@ -16,6 +18,6 @@ export interface S3Repository {
   ) => Promise<PresignedUrl>
 
   generatePassengerAttachedDocPresignedUrl: (
-      option: GeneratePassengerAttachedDocPresignedUrlOption
+    option: GeneratePassengerAttachedDocPresignedUrlOption
   ) => Promise<PresignedUrl>
 }
