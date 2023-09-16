@@ -18,6 +18,8 @@ export default class UpdateTourPostUseCaseImpl implements UpdateTourPostUseCase 
     'endingLocation',
     'departureDate',
     'thumbnail',
+    'commission',
+    'pricePerPax',
   ];
 
   invoke = async (

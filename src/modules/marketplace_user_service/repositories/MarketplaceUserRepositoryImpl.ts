@@ -62,6 +62,7 @@ implements MarketplaceUserRepository {
     const marketplaceUser = {
       organization: user.tenant,
       username: user.username,
+      alias: `${tenant}_${user.username}`,
       name: `${user.lastName} ${user.firstName}`,
       id: sk,
       phoneNumber: user.phoneNumber,
@@ -74,6 +75,7 @@ implements MarketplaceUserRepository {
       enabled: true,
       createdAt: now,
       updatedAt: now,
+      lsi1: `true#${now}`,
     } as MarketplaceUser;
 
     // Add the Marketplace user to the DynamoDB table
@@ -208,7 +210,8 @@ implements MarketplaceUserRepository {
         sk,
         id: sk,
         username: user.username,
-        name: `${user.firstName} ${user.lastName}`,
+        name: `${user.lastName} ${user.firstName}`,
+        aslias: `${user.tenant}_${user.username}`,
         organization: tenant,
         enabled: userEnabled,
         lsi1: `${userEnabled}#${now}`,
