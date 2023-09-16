@@ -10,9 +10,12 @@ import validate, {
   getAvatarPresignedUrlValidator,
   getPassengerAttachedDocPresignedUrlValidator,
   getPaymentVoucherPresignedUrlValidator,
+  getPresignedUrlsValidator,
   getPresignedUrlValidator,
 } from './utils/validator';
 import wrapResponse from './utils/wrapResponse';
+import { PresignedUrlType } from './models';
+import { createSupplierQuoteAttachmentUrlUseCase } from './useCases';
 
 const app = express();
 
@@ -48,6 +51,35 @@ app.get('/presigned-url', getPresignedUrlValidator(), async (req: Request, res: 
     res.json(wrapResponse(SUCCESS, rs));
   } catch (error: any) {
     logger.log(`[GET /presigned-url] Generated an error ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+// API to get presigned url for multi type of file,
+// such as: for quote, for payment voucher, for passenger attached doc
+// TODO: refactor this API to use only one API for all type of file
+app.get('/presigned-urls', getPresignedUrlsValidator(), async (req: Request, res: Response) => {
+  try {
+    validate(req);
+    const {
+      presignedUrlType, fileType, fileName,
+    } = req.query;
+    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    let rs;
+    switch (presignedUrlType) {
+      case PresignedUrlType.SUPPLIER_QUOTE_ATTACHMENT:
+        rs = await createSupplierQuoteAttachmentUrlUseCase.invoke(
+          currentUser,
+          fileName as string,
+          fileType as string,
+        );
+        break;
+      default:
+        break;
+    }
+    res.json(wrapResponse(SUCCESS, rs));
+  } catch (error: any) {
+    logger.log(`[GET /presigned-urls] Generated an error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });
