@@ -47,7 +47,7 @@ export default class Helper {
   ) {
     const data: Partial<T> = {};
     keys.forEach((key) => {
-      if (!removeUndefined || obj[key]) {
+      if (!removeUndefined || obj[key] != null) {
         data[key] = obj[key];
       }
     });
