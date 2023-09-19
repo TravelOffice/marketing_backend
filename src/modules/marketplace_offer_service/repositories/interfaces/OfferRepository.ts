@@ -36,8 +36,8 @@ export interface OfferRepository {
 
   update(
     id: string,
-    offer: Partial<Offer>,
-    status?: OfferStatus
+    newOffer: Partial<Offer>,
+    offer: Offer,
   ): Promise<Offer>,
 
   generateCode(): Promise<string>,

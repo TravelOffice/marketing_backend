@@ -67,6 +67,7 @@ export default class UpdateOfferUseCaseImpl implements UpdateOfferUseCase {
     const updatedOffer = await offerRepository.update(
       offerId,
       updatingOfferData,
+      offer,
     );
     return helper.excludeDataFromObject(updatedOffer) as Offer;
   };

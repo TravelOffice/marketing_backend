@@ -43,7 +43,7 @@ export default class AcceptOfferUseCaseImpl implements AcceptOfferUseCase {
       offerStatus: OfferStatus.ACCEPTED,
       acceptedAt: Date.now(),
       updatedAt: Date.now(),
-    });
+    }, offer);
 
     // Exclude unnecessary data from the offer object and return as Offer
     return helper.excludeDataFromObject(acceptedOffer) as Offer;
