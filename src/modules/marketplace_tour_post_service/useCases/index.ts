@@ -30,6 +30,10 @@ import { UnfollowTourPostUseCase } from './interfaces/UnfollowTourPostUseCase';
 import { UpdateTourPostUseCase } from './interfaces/UpdateTourPostUseCase';
 import { GetTourPostListByPostTypeUseCase } from './interfaces/GetTourPostListByPostTypeUseCase';
 import GetTourPostListByPostTypeUseCaseImpl from './GetTourPostListByPostTypeUseCaseImpl';
+import { GetPostsByDepartureDateUseCase } from './interfaces/GetPostsByDepartureDateUseCase';
+import { GetPostsByEndingLocationUseCase } from './interfaces/GetPostsByEndingLocationUseCase';
+import GetPostsByDepartureDateUseCaseImpl from './GetPostsByDepartureDateUseCaseImpl';
+import GetPostsByEndingLocationUseCaseImpl from './GetPostsByEndingLocationUseCaseImpl';
 
 interface UseCases {
   getTourPostListUseCase: GetTourPostListUseCase,
@@ -48,6 +52,8 @@ interface UseCases {
   unfollowTourPostUseCase: UnfollowTourPostUseCase,
   getTopCommissionPostsUseCase: GetTopCommissionPostsUseCase,
   getLinkedLeadOrTourInfoOnMarketplaceUseCase: GetLinkedLeadOrTourInfoOnMarketplaceUseCase,
+  getPostsByDepartureDateUseCase: GetPostsByDepartureDateUseCase,
+  getPostsByEndingLocationUseCase: GetPostsByEndingLocationUseCase,
 }
 
 const useCases: UseCases = {
@@ -68,6 +74,8 @@ const useCases: UseCases = {
   getTopCommissionPostsUseCase: new GetTopCommissionPostsUseCaseImpl(),
   getLinkedLeadOrTourInfoOnMarketplaceUseCase:
     new GetLinkedLeadOrTourInfoOnMarketplaceUseCaseImpl(),
+  getPostsByDepartureDateUseCase: new GetPostsByDepartureDateUseCaseImpl(),
+  getPostsByEndingLocationUseCase: new GetPostsByEndingLocationUseCaseImpl(),
 };
 
 export const {
@@ -87,4 +95,6 @@ export const {
   unfollowTourPostUseCase,
   getTopCommissionPostsUseCase,
   getLinkedLeadOrTourInfoOnMarketplaceUseCase,
+  getPostsByDepartureDateUseCase,
+  getPostsByEndingLocationUseCase,
 } = useCases;

@@ -10,6 +10,8 @@ import {
   getBookmarkedTourPostsUseCase,
   getFollowedTourPostsUseCase,
   getLinkedLeadOrTourInfoOnMarketplaceUseCase,
+  getPostsByDepartureDateUseCase,
+  getPostsByEndingLocationUseCase,
   getSelfTourPostListByUserUseCase,
   getTopCommissionPostsUseCase,
   getTourPostListByOrgUseCase,
@@ -37,6 +39,7 @@ import validate, {
 } from './utils/validator';
 import wrapResponse from './utils/wrapResponse';
 import { TourPostType } from './models/TourPostType';
+import { TourPostStatus } from './models/TourPostStatus';
 
 const app = express();
 
@@ -60,10 +63,15 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
 app.get('/marketplace/me/posts', getSelfPostsValidator(), async (req: Request, res: Response) => {
   validate(req);
   try {
+    const {
+      status,
+      ...paginationParams
+    } = req.query;
     const currentUser = getMarketplaceUserInfo(req.headers.authorization!);
     const tourPosts = await getSelfTourPostListByUserUseCase.invoke(
       currentUser,
-      req.query,
+      paginationParams,
+      status as TourPostStatus,
     );
     logger.log(`[app.get] Get posts of current user successfully ${JSON.stringify(tourPosts)}`);
     res.json(wrapResponse(SUCCESS, tourPosts));
@@ -79,7 +87,13 @@ app.get('/marketplace/posts', getPostsValidator(), async (req: Request, res: Res
     // The posts can be get by organization or author or post type
     // If organization is not specified, get all posts
     const {
-      organization, author, postType, ...paginationParams
+      organization,
+      author,
+      postType,
+      endingLocation,
+      departureDate,
+      status,
+      ...paginationParams
     } = req.query;
     const currentUser = getMarketplaceUserInfo(req.headers.authorization!);
     let tourPosts;
@@ -89,24 +103,45 @@ app.get('/marketplace/posts', getPostsValidator(), async (req: Request, res: Res
         currentUser,
         organization as string,
         paginationParams,
+        status as TourPostStatus,
       );
-      logger.log(`[app.get] Get posts by organization ${organization} successfully ${JSON.stringify(tourPosts)}`);
+      logger.log(`[app.get] Get posts by organization ${organization} successfully`);
     } else if (author) {
       // Fetch posts by author
       tourPosts = await getTourPostListByUserUseCase.invoke(
         currentUser,
         author as string,
         paginationParams,
+        status as TourPostStatus,
       );
-      logger.log(`[app.get] Get posts by author ${author} successfully ${JSON.stringify(tourPosts)}`);
+      logger.log(`[app.get] Get posts by author ${author} successfully`);
     } else if (postType) {
       // Fetch posts by type
       tourPosts = await getTourPostListByPostTypeUseCase.invoke(
         currentUser,
         postType as TourPostType,
         paginationParams,
+        status as TourPostStatus,
       );
       logger.log(`[app.get] Get posts by tour post type ${postType} successfully ${JSON.stringify(tourPosts)}`);
+    } else if (departureDate) {
+      // Fetch posts by type
+      tourPosts = await getPostsByDepartureDateUseCase.invoke(
+        currentUser,
+        departureDate as string,
+        paginationParams,
+        status as TourPostStatus,
+      );
+      logger.log(`[app.get] Get posts by departure date ${departureDate} successfully ${JSON.stringify(tourPosts)}`);
+    } else if (endingLocation) {
+      // Fetch posts by type
+      tourPosts = await getPostsByEndingLocationUseCase.invoke(
+        currentUser,
+        endingLocation as string,
+        paginationParams,
+        status as TourPostStatus,
+      );
+      logger.log(`[app.get] Get posts by ending location ${endingLocation} successfully ${JSON.stringify(tourPosts)}`);
     } else {
       // Fetch all posts
       tourPosts = await getTourPostListUseCase.invoke(currentUser, paginationParams);
