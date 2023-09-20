@@ -73,7 +73,7 @@ export default class OfferRepositoryImpl implements OfferRepository {
       offer.code,
       {
         ...offer,
-        ...this.generateLSI(offer),
+        ...this.generateLSI(offer.offerStatus, offer),
       },
     );
     return offer;
@@ -83,20 +83,20 @@ export default class OfferRepositoryImpl implements OfferRepository {
    * Updates an offer for the specified post.
    *
    * @param id - The ID of the offer to update.
-   * @param offer - The partial offer object with the updated fields.
-   * @param status - The new status of offer (optional)
+   * @param newOffer - The partial offer object with the updating fields.
+   * @param offer - The current offer object
    * @returns A Promise that resolves to the updated rating.
    */
   async update(
     id: string,
-    offer: Partial<Offer>,
-    status?: OfferStatus,
+    newOffer: Partial<Offer>,
+    offer: Offer,
   ): Promise<Offer> {
-    let updatingOffer = offer;
-    if (status) {
+    let updatingOffer = newOffer;
+    if (newOffer.offerStatus) {
       updatingOffer = {
-        ...offer,
-        ...this.generateLSI(offer),
+        ...newOffer,
+        ...this.generateLSI(newOffer.offerStatus, offer),
       };
     }
     const result = await dynamoProvider.updateItemWithSetExpression(
@@ -131,7 +131,8 @@ export default class OfferRepositoryImpl implements OfferRepository {
    *
    * @param {string} organization - The ID of the organization for which to retrieve offers.
    * @param {PaginationParams} paginationParams - The parameters for pagination.
-   * @param  - The status of the organization for which to retrieve offers (optional)
+   * @param {OfferStatus} status
+   * - The status of the organization for which to retrieve offers (optional)
    * @returns {Promise<PaginationResponsePayload<Offer> | undefined>}
    * - A promise resolving to the paginated list of sent offers or undefined if not found.
    */
@@ -242,9 +243,9 @@ export default class OfferRepositoryImpl implements OfferRepository {
     return dynamoProvider.queryPagination(queryParams, paginationParams);
   };
 
-  private generateLSI(offer: Partial<Offer>) {
+  private generateLSI(offerStatus: OfferStatus, offer: Offer) {
     const {
-      sentOrg, authorId, tourPostId, receivedOrg, receivedUser, offerStatus, createdAt,
+      sentOrg, authorId, tourPostId, receivedOrg, receivedUser, createdAt,
     } = offer;
     return {
       lsi1: `${sentOrg}#${offerStatus}#${createdAt}`, // Get all sent offers of the organization

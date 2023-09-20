@@ -9,7 +9,6 @@ export default class RejectOfferUseCaseImpl implements RejectOfferUseCase {
    * Reject an offer by its ID and the associated tour post ID.
    *
    * @param {string} currentUser - The current authenticated user.
-   * @param {string} tourPostId - The ID of the tour post associated with the offer.
    * @param {string} offerId - The ID of the offer to be rejected.
    * @param {string} rejectReason - The reason for rejecting the offer.
    * @returns {Promise<Offer | undefined>} - A promise resolving to the rejected offer
@@ -47,7 +46,7 @@ export default class RejectOfferUseCaseImpl implements RejectOfferUseCase {
       rejectReason,
       rejectedAt: Date.now(),
       updatedAt: Date.now(),
-    });
+    }, offer);
 
     // Exclude unnecessary data from the offer object and return as Offer
     return helper.excludeDataFromObject(rejectedOffer) as Offer;
