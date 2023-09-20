@@ -2,6 +2,7 @@ import { PaginationParams, PaginationResponsePayload } from 'core/providers/dyna
 import { BookmarkedTourPost } from '../../models/BookmarkedTourPost';
 import { FollowedTourPost } from '../../models/FollowedTourPost';
 import { TourPost } from '../../models/TourPost';
+import { TourPostStatus } from '../../models/TourPostStatus';
 
 export interface TourPostRepository {
   // CRUD functions
@@ -13,19 +14,22 @@ export interface TourPostRepository {
   listByUser(
     currentUserId: string,
     author: string,
-    params: PaginationParams
+    params: PaginationParams,
+    status?: TourPostStatus,
   ): Promise<PaginationResponsePayload<TourPost> | undefined>,
 
   listByPostType(
     currentUserId: string,
     postType: string,
-    params: PaginationParams
+    params: PaginationParams,
+    status?: TourPostStatus,
   ): Promise<PaginationResponsePayload<TourPost> | undefined>,
 
   listByOrganization(
     currentUserId: string,
     organization: string,
-    params: PaginationParams
+    params: PaginationParams,
+    status?: TourPostStatus,
   ): Promise<PaginationResponsePayload<TourPost> | undefined>,
 
   listBookmarkedByUser(
@@ -36,6 +40,20 @@ export interface TourPostRepository {
   listFollowedByUser(
     userId: string,
     params: PaginationParams,
+  ): Promise<PaginationResponsePayload<TourPost> | undefined>,
+
+  listByEndingLocation(
+    currentUserid: string,
+    endingLocation: string,
+    paginationParams: PaginationParams,
+    status?: TourPostStatus,
+  ): Promise<PaginationResponsePayload<TourPost> | undefined>,
+
+  listByDepartureDate(
+    currentUserId: string,
+    departureDate: string,
+    paginationParams: PaginationParams,
+    status?: TourPostStatus,
   ): Promise<PaginationResponsePayload<TourPost> | undefined>,
 
   listByIds(ids: string[]): Promise<Array<TourPost>>,

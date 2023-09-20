@@ -43,6 +43,8 @@ export default class CreateTourPostUseCaseImpl implements CreateTourPostUseCase 
       this.allowedCreatingKeys,
     );
 
+    const status = TourPostStatus.IN_PROCESS;
+
     const tourPost = {
       ...allowedCreatingData,
       status: TourPostStatus.IN_PROCESS,
@@ -55,11 +57,11 @@ export default class CreateTourPostUseCaseImpl implements CreateTourPostUseCase 
       // Local index with format <tenant>#<username> for getting:
       // - All latest posts that belong to tenant
       // - All latest posts that created by specific user
-      lsi1: `${marketplaceUserId}#${createdAt}`,
-      lsi2: `${TourPostStatus.IN_PROCESS}#${createdAt}`, // Local index for getting all posts by specific status
-      lsi3: `${type}#${createdAt.toString()}`, // Local index for sort post by tour post's type and createdAt
-      lsi4: `${endingLocation}#${createdAt}`, // Local index for filter latest post by ending location
-      lsi5: departureDate, // Local index for filter post by departure date
+      lsi1: `${marketplaceUserId}#${status}#${createdAt}`, // Local index for getting all posts by specific user
+      lsi2: `${tenant}#${status}#${createdAt}`, // Local index for getting all posts by specific organization
+      lsi3: `${type}#${status}#${createdAt}`, // Local index for filter tour post by type and status
+      lsi4: `${endingLocation}#${status}#${createdAt}`, // Local index for filter latest post by ending location
+      lsi5: `${departureDate}#${status}#${createdAt}`, // Local index for filter post by departure date
     } as TourPost;
     // Add post to DynamoDB
     const result = await tourPostRepository.create(tourPost);

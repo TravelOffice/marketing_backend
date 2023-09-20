@@ -67,16 +67,19 @@ export default class DynamoProvider {
   };
 
   /**
-   * Executes a paginated query on the DynamoDB table based on the provided query parameters
-   * and pagination settings.
+   * Perform a paginated query on DynamoDB.
    *
-   * @param {QueryInput} queryParams - The query parameters for the DynamoDB query.
-   * @param {PaginationParams} paginationParams - The pagination settings.
-   * @returns {Promise<PaginationResponsePayload>} - A promise resolving to a paginated response.
+   * @template T - The type of items in the query result.
+   * @param {QueryInput} queryParams - The query parameters for DynamoDB.
+   * @param {PaginationParams} paginationParams - The pagination parameters.
+   * @param {Array<keyof T>} [excludeKeys] - Optional keys to exclude from the response data.
+   * @returns {Promise<PaginationResponsePayload<T> | undefined>}
+   * - A promise that resolves to the paginated query result or undefined if no data is found.
    */
   queryPagination = async <T extends object = any>(
     queryParams: QueryInput,
     paginationParams: PaginationParams,
+    excludeKeys?: (keyof T)[],
   ): Promise<PaginationResponsePayload<T> | undefined> => {
     // Set a default pagination limit
     const defaultPaginationLimit = 10;
@@ -99,7 +102,7 @@ export default class DynamoProvider {
     if (Items) {
       // If there are items, create the paginated response payload
       return {
-        data: Items.map((item: any) => helper.excludeDataFromObject(item)),
+        data: Items.map((item: any) => helper.excludeDataFromObject(item, excludeKeys)),
         paging: {
           cursors: {
             before: LastEvaluatedKey ? JSON.stringify(LastEvaluatedKey) : '', // Set the 'before' cursor
@@ -177,7 +180,9 @@ export default class DynamoProvider {
     return dynamoDB.update(params).promise();
   };
 
-  updateItemWithPrebuiltExpression = async (itemInput: UpdateItemInput) => dynamoDB.update(itemInput).promise();
+  updateItemWithPrebuiltExpression = async (
+    itemInput: UpdateItemInput,
+  ) => dynamoDB.update(itemInput).promise();
 
   /**
    * Delete an item from the DynamoDB table.

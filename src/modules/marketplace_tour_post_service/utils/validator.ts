@@ -14,6 +14,7 @@ import {
 } from './constants';
 import { tourPostTypes } from '../models/TourPostType';
 import { linkedLeadOrTourTemplateTypes } from '../models/LinkedLeadOrTourInfo';
+import { TourPostStatus } from '../models/TourPostStatus';
 
 export default function validate(req: Request) {
   const errors = validationResult(req);
@@ -199,6 +200,10 @@ export function getSelfPostsValidator() {
     query('sortDesc').optional()
       .isBoolean()
       .withMessage('must be a boolean'),
+    query('status')
+      .optional()
+      .isIn(Object.values(TourPostStatus))
+      .withMessage(`allow only in ${Object.values(TourPostStatus)}`),
   ];
 }
 
@@ -213,7 +218,13 @@ export function getPostsValidator() {
     query('postType')
       .optional().isIn(tourPostTypes)
       .withMessage(`allow only in ${tourPostTypes}`),
-
+    query('endingLocation')
+      .optional().isString().notEmpty()
+      .withMessage('must be a string'),
+    query('departureDate').optional().custom((value: string) => {
+      const date = Date.parse(value);
+      return !Number.isNaN(date);
+    }).withMessage('must be a date string'),
     query('nextToken')
       .optional()
       .custom((value: string) => {
@@ -229,6 +240,10 @@ export function getPostsValidator() {
     query('sortDesc').optional()
       .isBoolean()
       .withMessage('must be a boolean'),
+    query('status')
+      .optional()
+      .isIn(Object.values(TourPostStatus))
+      .withMessage(`allow only in ${Object.values(TourPostStatus)}`),
   ];
 }
 

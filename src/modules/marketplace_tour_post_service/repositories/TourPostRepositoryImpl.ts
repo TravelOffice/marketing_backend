@@ -19,8 +19,20 @@ import { TourPostRepository } from './interfaces/TourPostRepository';
 import { TourPostStatistic } from '../models/statistic/TourPostStatistic';
 import { roundNumber } from '../utils/numeric';
 import { TourPostType } from '../models/TourPostType';
+import { TourPostStatus } from '../models/TourPostStatus';
 
 type BookmarkOrFollowedTourPost = BookmarkedTourPost | FollowedTourPost;
+
+const excludeKeys = [
+  'pk',
+  'sk',
+  'lsi1',
+  'lsi2',
+  'lsi3',
+  'lsi4',
+  'lsi5',
+  'linkedToTargetKeys',
+] as (keyof TourPost)[];
 
 export default class TourPostRepositoryImpl implements TourPostRepository {
   /**
@@ -31,7 +43,10 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
    * A promise resolving to a paginated response.
    * Each tour post will have additional data such as isBookmarked, isFav, etc.
    */
-  list = async (currentUserId: string, paginationParams: PaginationParams) => {
+  list = async (
+    currentUserId: string,
+    paginationParams: PaginationParams,
+  ): Promise<PaginationResponsePayload<TourPost> | undefined> => {
     const marketplaceTable = await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE');
     const queryParams = {
       TableName: marketplaceTable,
@@ -44,6 +59,7 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
     const queryResult = await dynamoProvider.queryPagination<TourPost>(
       queryParams,
       paginationParams,
+      excludeKeys,
     );
 
     // Transform the data such as:
@@ -61,18 +77,20 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
   };
 
   /**
-   * Lists all tour posts for the specified user.
+   * List tour posts by a specific user.
    *
-   * @param currentUserId
-   * @param author
-   * @param {PaginationParams} paginationParams - The pagination settings.
+   * @param {string} currentUserId - The ID of the current user.
+   * @param {string} author - The author's ID for whom tour posts are being listed.
+   * @param {PaginationParams} paginationParams - The pagination parameters.
+   * @param {TourPostStatus} [status] - Optional status to filter tour posts.
    * @returns {Promise<PaginationResponsePayload<TourPost> | undefined>}
-   * A promise resolving to a paginated response.
+   * - A promise that resolves to the paginated list of tour posts or undefined if no data is found.
    */
   listByUser = async (
     currentUserId: string,
     author: string,
     paginationParams: PaginationParams,
+    status?: TourPostStatus,
   ): Promise<PaginationResponsePayload<TourPost> | undefined> => {
     // Prepare query params
     const marketplaceTable = await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE');
@@ -82,7 +100,7 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
       KeyConditionExpression: 'pk = :pk and begins_with(lsi1, :lsi1_filter)',
       ExpressionAttributeValues: {
         ':pk': POST_INDEX,
-        ':lsi1_filter': `${author}#`,
+        ':lsi1_filter': status ? `${author}#${status}` : `${author}#`,
       },
     };
 
@@ -91,6 +109,7 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
     const queryResult = await dynamoProvider.queryPagination<TourPost>(
       queryParams,
       paginationParams,
+      excludeKeys,
     );
 
     // Transform the data such as:
@@ -108,28 +127,32 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
   };
 
   /**
-   * Lists all tour posts for the specified post type.
+   * List Tour Posts by Post Type and optional Status.
    *
-   * @param currentUserId
-   * @param postType
-   * @param {PaginationParams} paginationParams - The pagination settings.
+   * @param {string} currentUserId - The ID of the current user.
+   * @param {TourPostType} postType - The type of Tour Post to filter by.
+   * @param {PaginationParams} paginationParams - Pagination parameters.
+   * @param {TourPostStatus} [status] - Optional status filter.
    * @returns {Promise<PaginationResponsePayload<TourPost> | undefined>}
-   * A promise resolving to a paginated response.
+   * - A promise that resolves to the list of Tour Posts or undefined.
    */
   listByPostType = async (
     currentUserId: string,
     postType: TourPostType,
     paginationParams: PaginationParams,
+    status?: TourPostStatus,
   ): Promise<PaginationResponsePayload<TourPost> | undefined> => {
     // Prepare query params
     const marketplaceTable = await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE');
+
+    // Define query parameters for DynamoDB query
     const queryParams = {
       TableName: marketplaceTable,
       IndexName: 'Index3',
       KeyConditionExpression: 'pk = :pk and begins_with(lsi3, :lsi3_filter)',
       ExpressionAttributeValues: {
-        ':pk': POST_INDEX,
-        ':lsi3_filter': `${postType}#`,
+        ':pk': POST_INDEX, // Assuming POST_INDEX is a constant for the table index
+        ':lsi3_filter': status ? `${postType}#${status}#` : `${postType}#`, // Construct filter based on status
       },
     };
 
@@ -138,6 +161,7 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
     const queryResult = await dynamoProvider.queryPagination<TourPost>(
       queryParams,
       paginationParams,
+      excludeKeys,
     );
 
     // Transform the data such as:
@@ -157,9 +181,10 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
   /**
    * Lists all tour posts for the specified organization.
    * This method is used for organization admin to get all posts of the organization.
-   * @param currentUserId - The ID of the current user
-   * @param organization - The ID of the organization.
+   * @param {string} currentUserId - The ID of the current user
+   * @param {string} organization - The ID of the organization.
    * @param {PaginationParams} paginationParams - The pagination settings.
+   * @param {TourPostStatus} [status] - Optional status filter.
    * @returns {Promise<PaginationResponsePayload<TourPost> | undefined>}
    * A promise resolving to a paginated response.
    */
@@ -167,16 +192,17 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
     currentUserId: string,
     organization: string,
     paginationParams: PaginationParams,
-  ) => {
+    status?: TourPostStatus,
+  ): Promise<PaginationResponsePayload<TourPost> | undefined> => {
     // Prepare query params
     const marketplaceTable = await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE');
     const queryParams = {
       TableName: marketplaceTable,
-      IndexName: 'Index1',
-      KeyConditionExpression: 'pk = :pk and begins_with(lsi1, :lsi1_filter)',
+      IndexName: 'Index2',
+      KeyConditionExpression: 'pk = :pk and begins_with(lsi2, :lsi2_filter)',
       ExpressionAttributeValues: {
         ':pk': POST_INDEX,
-        ':lsi1_filter': `${organization}#`,
+        ':lsi2_filter': status ? `${organization}#${status}#` : `${organization}#`,
       },
     };
 
@@ -185,6 +211,111 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
     const queryResult = await dynamoProvider.queryPagination<TourPost>(
       queryParams,
       paginationParams,
+      excludeKeys,
+    );
+
+    // Transform the data such as:
+    // - Add bookmarked flag to each post if the user has bookmarked it
+    // - Add fav flag if the user has liked it
+    if (queryResult) {
+      const transformedPosts = await this.transformTourPostList(queryResult.data, currentUserId);
+      return {
+        ...queryResult,
+        data: transformedPosts,
+      };
+    }
+
+    return queryResult;
+  };
+
+  /**
+   * List Tour Posts by Departure Date and optional Status.
+   *
+   * @param {string} currentUserId - The ID of the current user.
+   * @param {string} departureDate - The departure date to filter by.
+   * @param {PaginationParams} paginationParams - Pagination parameters.
+   * @param {TourPostStatus} [status] - Optional status filter.
+   * @returns {Promise<PaginationResponsePayload<TourPost> | undefined>}
+   * - A promise that resolves to the list of Tour Posts or undefined.
+   */
+  listByDepartureDate = async (
+    currentUserId: string,
+    departureDate: string,
+    paginationParams: PaginationParams,
+    status?: TourPostStatus,
+  ): Promise<PaginationResponsePayload<TourPost> | undefined> => {
+    // Prepare query params
+    const marketplaceTable = await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE');
+
+    // Define query parameters for DynamoDB query
+    const queryParams = {
+      TableName: marketplaceTable,
+      IndexName: 'Index5',
+      KeyConditionExpression: 'pk = :pk and begins_with(lsi5, :lsi5_filter)',
+      ExpressionAttributeValues: {
+        ':pk': POST_INDEX, // Assuming POST_INDEX is a constant for the table index
+        ':lsi5_filter': status ? `${departureDate}#${status}#` : `${departureDate}#`, // Construct filter based on status
+      },
+    };
+
+    // Get list of tour posts by user
+    // The data is paginated
+    const queryResult = await dynamoProvider.queryPagination<TourPost>(
+      queryParams,
+      paginationParams,
+      excludeKeys,
+    );
+
+    // Transform the data such as:
+    // - Add bookmarked flag to each post if the user has bookmarked it
+    // - Add fav flag if the user has liked it
+    if (queryResult) {
+      const transformedPosts = await this.transformTourPostList(queryResult.data, currentUserId);
+      return {
+        ...queryResult,
+        data: transformedPosts,
+      };
+    }
+
+    return queryResult;
+  };
+
+  /**
+   * List Tour Posts by Ending Location and optional Status.
+   *
+   * @param {string} currentUserId - The ID of the current user.
+   * @param {string} endingLocation - The ending location to filter by.
+   * @param {PaginationParams} paginationParams - Pagination parameters.
+   * @param {TourPostStatus} [status] - Optional status filter.
+   * @returns {Promise<PaginationResponsePayload<TourPost> | undefined>}
+   * - A promise that resolves to the list of Tour Posts or undefined.
+   */
+  listByEndingLocation = async (
+    currentUserId: string,
+    endingLocation: string,
+    paginationParams: PaginationParams,
+    status?: TourPostStatus,
+  ): Promise<PaginationResponsePayload<TourPost> | undefined> => {
+    // Prepare query params
+    const marketplaceTable = await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE');
+
+    // Define query parameters for DynamoDB query
+    const queryParams = {
+      TableName: marketplaceTable,
+      IndexName: 'Index4',
+      KeyConditionExpression: 'pk = :pk and begins_with(lsi4, :lsi4_filter)',
+      ExpressionAttributeValues: {
+        ':pk': POST_INDEX, // Assuming POST_INDEX is a constant for the table index
+        ':lsi4_filter': status ? `${endingLocation}#${status}#` : `${endingLocation}#`, // Construct filter based on status
+      },
+    };
+
+    // Get list of tour posts by user
+    // The data is paginated
+    const queryResult = await dynamoProvider.queryPagination<TourPost>(
+      queryParams,
+      paginationParams,
+      excludeKeys,
     );
 
     // Transform the data such as:
@@ -205,13 +336,13 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
    * List bookmarked tour posts of the specified user.
    * @param userId - The ID of the user.
    * @param params - The pagination params
-   * @returns {Promise<PaginationResponsePayload<BookmarkedTourPost> | undefined>}
+   * @returns {Promise<PaginationResponsePayload<TourPost> | undefined>}
    * A promise resolving to a paginated response.
    */
   listBookmarkedByUser = async (
     userId: string,
     params: PaginationParams,
-  ) => {
+  ): Promise<PaginationResponsePayload<TourPost> | undefined> => {
     // Query bookmarked items
     const queryResult = await this.getBookmarkedItemsWithPagination(userId, params);
     if (!queryResult) {
@@ -251,13 +382,13 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
    * List followed tour posts of the specified user.
    * @param userId - The ID of the user.
    * @param params - The pagination params
-   * @returns {Promise<PaginationResponsePayload<FollowedTourPost> | undefined>}
+   * @returns {Promise<PaginationResponsePayload<TourPost> | undefined>}
    * A promise resolving to a paginated response.
    */
   listFollowedByUser = async (
     userId: string,
     params: PaginationParams,
-  ) => {
+  ): Promise<PaginationResponsePayload<TourPost> | undefined> => {
     // Query followed items
     const queryResult = await this.getFollowedItemsWithPagination(userId, params);
     if (!queryResult) {
@@ -322,12 +453,14 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
   getById = async (id: string, userId?: string): Promise<TourPost | undefined> => {
     // Retrieve the TourPost from the DynamoDB table
     const marketplaceTable = await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE');
-    const tourPost = await dynamoProvider.getItem<TourPost>(marketplaceTable, POST_INDEX, id);
+    let tourPost = await dynamoProvider.getItem<TourPost>(marketplaceTable, POST_INDEX, id);
 
     // If the TourPost doesn't exist, return undefined
     if (!tourPost) {
       return undefined;
     }
+
+    tourPost = helper.excludeDataFromObject(tourPost, excludeKeys) as TourPost;
 
     // If a user ID is provided, transform the TourPost with additional information
     if (userId) {
