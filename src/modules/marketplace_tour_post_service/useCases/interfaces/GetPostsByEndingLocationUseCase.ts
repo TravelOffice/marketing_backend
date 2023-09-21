@@ -1,13 +1,9 @@
-import { PaginationParams, PaginationResponsePayload } from 'core/providers/dynamodb/DynamoProvider';
-import { CognitoUser } from '../../models/CognitoUser';
+import { PaginationResponsePayload } from 'core/providers/dynamodb/DynamoProvider';
 import { TourPost } from '../../models/TourPost';
-import { TourPostStatus } from '../../models/TourPostStatus';
+import { GetPostsByEndingLocationParams } from '../../repositories/interfaces/TourPostRepository';
 
 export interface GetPostsByEndingLocationUseCase {
   invoke(
-    currentUser: CognitoUser,
-    endingLocation: string,
-    params: PaginationParams,
-    status?: TourPostStatus,
+    params: GetPostsByEndingLocationParams
   ): Promise<PaginationResponsePayload<TourPost> | undefined>,
 }

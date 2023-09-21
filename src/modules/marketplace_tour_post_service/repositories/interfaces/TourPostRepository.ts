@@ -3,6 +3,23 @@ import { BookmarkedTourPost } from '../../models/BookmarkedTourPost';
 import { FollowedTourPost } from '../../models/FollowedTourPost';
 import { TourPost } from '../../models/TourPost';
 import { TourPostStatus } from '../../models/TourPostStatus';
+import { TourPostType } from '../../models/TourPostType';
+
+export interface GetPostsByEndingLocationParams {
+  currentUserId: string,
+  endingLocation: string,
+  postType: TourPostType,
+  paginationParams: PaginationParams,
+  status?: TourPostStatus,
+}
+
+export interface GetPostsByDepartureDateParams {
+  currentUserId: string,
+  departureDate: string,
+  postType: TourPostType,
+  paginationParams: PaginationParams,
+  status?: TourPostStatus,
+}
 
 export interface TourPostRepository {
   // CRUD functions
@@ -43,17 +60,11 @@ export interface TourPostRepository {
   ): Promise<PaginationResponsePayload<TourPost> | undefined>,
 
   listByEndingLocation(
-    currentUserid: string,
-    endingLocation: string,
-    paginationParams: PaginationParams,
-    status?: TourPostStatus,
+    params: GetPostsByEndingLocationParams
   ): Promise<PaginationResponsePayload<TourPost> | undefined>,
 
   listByDepartureDate(
-    currentUserId: string,
-    departureDate: string,
-    paginationParams: PaginationParams,
-    status?: TourPostStatus,
+    params: GetPostsByDepartureDateParams
   ): Promise<PaginationResponsePayload<TourPost> | undefined>,
 
   listByIds(ids: string[]): Promise<Array<TourPost>>,

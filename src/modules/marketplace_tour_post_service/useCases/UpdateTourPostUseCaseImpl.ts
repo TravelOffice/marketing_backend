@@ -93,10 +93,10 @@ export default class UpdateTourPostUseCaseImpl implements UpdateTourPostUseCase 
     }
 
     if (newEndingLocation) {
-      dataToUpdate.lsi4 = newStatus ? `${newEndingLocation}#${newStatus}#${tourPost.createdAt}` : `${newEndingLocation}#${tourPost.status}#${tourPost.createdAt}`;
+      dataToUpdate.lsi4 = `${tourPost.type}#${newEndingLocation}#${newStatus || tourPost.status}#${tourPost.createdAt}`;
     }
     if (newDepartureDate) {
-      dataToUpdate.lsi5 = newStatus ? `${newDepartureDate}#${newStatus}#${tourPost.createdAt}` : `${newDepartureDate}#${tourPost.status}#${tourPost.createdAt}`;
+      dataToUpdate.lsi5 = `${tourPost.type}#${newDepartureDate}#${newStatus || tourPost.status}#${tourPost.createdAt}`;
     }
     // New data to update
     return dataToUpdate as UpdateTourPostDto;

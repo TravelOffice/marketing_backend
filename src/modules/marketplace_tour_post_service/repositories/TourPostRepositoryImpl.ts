@@ -15,7 +15,11 @@ import {
   TOUR_POST_STATISTIC_INDEX,
 } from '../utils/constants';
 import logger from '../utils/logger';
-import { TourPostRepository } from './interfaces/TourPostRepository';
+import {
+  GetPostsByDepartureDateParams,
+  GetPostsByEndingLocationParams,
+  TourPostRepository,
+} from './interfaces/TourPostRepository';
 import { TourPostStatistic } from '../models/statistic/TourPostStatistic';
 import { roundNumber } from '../utils/numeric';
 import { TourPostType } from '../models/TourPostType';
@@ -229,21 +233,21 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
   };
 
   /**
-   * List Tour Posts by Departure Date and optional Status.
-   *
-   * @param {string} currentUserId - The ID of the current user.
-   * @param {string} departureDate - The departure date to filter by.
-   * @param {PaginationParams} paginationParams - Pagination parameters.
-   * @param {TourPostStatus} [status] - Optional status filter.
+   * List Tour Posts by post type, Departure Date and optional Status.
+   * @param {GetPostsByDepartureDateParams} params
    * @returns {Promise<PaginationResponsePayload<TourPost> | undefined>}
    * - A promise that resolves to the list of Tour Posts or undefined.
    */
   listByDepartureDate = async (
-    currentUserId: string,
-    departureDate: string,
-    paginationParams: PaginationParams,
-    status?: TourPostStatus,
+    params: GetPostsByDepartureDateParams,
   ): Promise<PaginationResponsePayload<TourPost> | undefined> => {
+    const {
+      currentUserId,
+      departureDate,
+      postType,
+      paginationParams,
+      status,
+    } = params;
     // Prepare query params
     const marketplaceTable = await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE');
 
@@ -254,7 +258,7 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
       KeyConditionExpression: 'pk = :pk and begins_with(lsi5, :lsi5_filter)',
       ExpressionAttributeValues: {
         ':pk': POST_INDEX, // Assuming POST_INDEX is a constant for the table index
-        ':lsi5_filter': status ? `${departureDate}#${status}#` : `${departureDate}#`, // Construct filter based on status
+        ':lsi5_filter': status ? `${postType}#${departureDate}#${status}#` : `${postType}#${departureDate}#`, // Construct filter based on status
       },
     };
 
@@ -281,21 +285,22 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
   };
 
   /**
-   * List Tour Posts by Ending Location and optional Status.
-   *
-   * @param {string} currentUserId - The ID of the current user.
-   * @param {string} endingLocation - The ending location to filter by.
-   * @param {PaginationParams} paginationParams - Pagination parameters.
-   * @param {TourPostStatus} [status] - Optional status filter.
+   * List Tour Posts by post type, Departure Date and optional Status.
+   * @param {GetPostsByEndingLocationParams} params
    * @returns {Promise<PaginationResponsePayload<TourPost> | undefined>}
    * - A promise that resolves to the list of Tour Posts or undefined.
    */
   listByEndingLocation = async (
-    currentUserId: string,
-    endingLocation: string,
-    paginationParams: PaginationParams,
-    status?: TourPostStatus,
+    params: GetPostsByEndingLocationParams,
   ): Promise<PaginationResponsePayload<TourPost> | undefined> => {
+    console.log('Ending location');
+    const {
+      currentUserId,
+      endingLocation,
+      postType,
+      paginationParams,
+      status,
+    } = params;
     // Prepare query params
     const marketplaceTable = await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE');
 
@@ -306,7 +311,7 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
       KeyConditionExpression: 'pk = :pk and begins_with(lsi4, :lsi4_filter)',
       ExpressionAttributeValues: {
         ':pk': POST_INDEX, // Assuming POST_INDEX is a constant for the table index
-        ':lsi4_filter': status ? `${endingLocation}#${status}#` : `${endingLocation}#`, // Construct filter based on status
+        ':lsi4_filter': status ? `${postType}#${endingLocation}#${status}#` : `${postType}#${endingLocation}#`, // Construct filter based on status
       },
     };
 

@@ -40,6 +40,10 @@ import validate, {
 import wrapResponse from './utils/wrapResponse';
 import { TourPostType } from './models/TourPostType';
 import { TourPostStatus } from './models/TourPostStatus';
+import {
+  GetPostsByDepartureDateParams,
+  GetPostsByEndingLocationParams,
+} from './repositories/interfaces/TourPostRepository';
 
 const app = express();
 
@@ -73,7 +77,7 @@ app.get('/marketplace/me/posts', getSelfPostsValidator(), async (req: Request, r
       paginationParams,
       status as TourPostStatus,
     );
-    logger.log(`[app.get] Get posts of current user successfully ${JSON.stringify(tourPosts)}`);
+    logger.log('[app.get] Get posts of current user successfully');
     res.json(wrapResponse(SUCCESS, tourPosts));
   } catch (error: any) {
     logger.log(`[app.get] Error ${error}`);
@@ -116,36 +120,43 @@ app.get('/marketplace/posts', getPostsValidator(), async (req: Request, res: Res
       );
       logger.log(`[app.get] Get posts by author ${author} successfully`);
     } else if (postType) {
-      // Fetch posts by type
-      tourPosts = await getTourPostListByPostTypeUseCase.invoke(
-        currentUser,
-        postType as TourPostType,
-        paginationParams,
-        status as TourPostStatus,
-      );
-      logger.log(`[app.get] Get posts by tour post type ${postType} successfully ${JSON.stringify(tourPosts)}`);
-    } else if (departureDate) {
-      // Fetch posts by type
-      tourPosts = await getPostsByDepartureDateUseCase.invoke(
-        currentUser,
-        departureDate as string,
-        paginationParams,
-        status as TourPostStatus,
-      );
-      logger.log(`[app.get] Get posts by departure date ${departureDate} successfully ${JSON.stringify(tourPosts)}`);
-    } else if (endingLocation) {
-      // Fetch posts by type
-      tourPosts = await getPostsByEndingLocationUseCase.invoke(
-        currentUser,
-        endingLocation as string,
-        paginationParams,
-        status as TourPostStatus,
-      );
-      logger.log(`[app.get] Get posts by ending location ${endingLocation} successfully ${JSON.stringify(tourPosts)}`);
+      const { tenant, username } = currentUser;
+      const currentUserId = `${tenant}#${username}`;
+      // (Optional) Filter posts with departure date or ending location
+      if (departureDate) {
+        // Fetch posts by type
+        tourPosts = await getPostsByDepartureDateUseCase.invoke({
+          currentUserId,
+          departureDate,
+          postType,
+          paginationParams,
+          status,
+        } as GetPostsByDepartureDateParams);
+        logger.log(`[app.get] Get posts by departure date ${departureDate} successfully`);
+      } else if (endingLocation) {
+        // Fetch posts by type
+        tourPosts = await getPostsByEndingLocationUseCase.invoke({
+          currentUserId,
+          endingLocation,
+          postType,
+          paginationParams,
+          status,
+        } as GetPostsByEndingLocationParams);
+        logger.log(`[app.get] Get posts by ending location ${endingLocation} successfully`);
+      } else {
+        // Fetch posts by type
+        tourPosts = await getTourPostListByPostTypeUseCase.invoke(
+          currentUser,
+          postType as TourPostType,
+          paginationParams,
+          status as TourPostStatus,
+        );
+      }
+      logger.log(`[app.get] Get posts by tour post type ${postType} successfully`);
     } else {
       // Fetch all posts
       tourPosts = await getTourPostListUseCase.invoke(currentUser, paginationParams);
-      logger.log(`[app.get] Get all posts successfully ${JSON.stringify(tourPosts)}`);
+      logger.log('[app.get] Get all posts successfully');
     }
     res.json(wrapResponse(SUCCESS, tourPosts));
   } catch (error: any) {
@@ -160,7 +171,7 @@ app.get('/marketplace/posts/:id', getTourPostValidator(), async (req: Request, r
     const { id } = req.params;
     const currentUser = getMarketplaceUserInfo(req.headers.authorization!);
     const tourPost = await getTourPostUseCase.invoke(id, currentUser);
-    logger.log(`[app.get] Get post ${id} successfully ${JSON.stringify(tourPost)}`);
+    logger.log(`[app.get] Get post ${id} successfully`);
     res.json(wrapResponse(SUCCESS, tourPost));
   } catch (error: any) {
     logger.log(`[app.get] Error ${error}`);
@@ -204,7 +215,7 @@ app.get('/marketplace/me/bookmarked-posts', getBookmarkedOrFollowedPostsValidato
       currentUser,
       req.query,
     );
-    logger.log(`[app.get] Get bookmarked posts of current user ${currentUser} successfully ${JSON.stringify(tourPosts)}`);
+    logger.log(`[app.get] Get bookmarked posts of current user ${currentUser} successfully`);
     res.json(wrapResponse(SUCCESS, tourPosts));
   } catch (error: any) {
     logger.log(`[app.get] Error ${error}`);
@@ -296,7 +307,7 @@ app.get('/marketplace/trending-posts', getTopTrendingTourValidator(), async (req
     } else {
       topCommissionTourPosts = await getTopCommissionPostsUseCase.invoke();
     }
-    logger.log(`[app.get] Get top commission tour posts successfully ${JSON.stringify(topCommissionTourPosts)}`);
+    logger.log('[app.get] Get top commission tour posts successfully');
     res.json(wrapResponse(SUCCESS, topCommissionTourPosts));
   } catch (error: any) {
     logger.log(`[app.get] Error ${error}`);
