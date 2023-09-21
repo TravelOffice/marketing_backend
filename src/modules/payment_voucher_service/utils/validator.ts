@@ -1,9 +1,9 @@
 import { Request } from 'express';
-import { body, ValidationError, validationResult } from 'express-validator';
 import {
-  VALIDATE_BOOLEAN_MSG, VALIDATE_DATE_MSG, VALIDATE_NON_EMPTY_STRING_MSG, VALIDATE_NUMBER_MSG,
-} from './constants';
-import { paymentVoucherMethods, PaymentVoucherStatus } from '../models/PaymentVoucher';
+  body, param, ValidationError, validationResult,
+} from 'express-validator';
+import { VALIDATE_DATE_MSG, VALIDATE_NON_EMPTY_STRING_MSG, VALIDATE_NUMBER_MSG } from './constants';
+import { paymentVoucherMethods } from '../models/PaymentVoucher';
 
 export default function validate(req: Request) {
   const errors = validationResult(req);
@@ -51,10 +51,6 @@ export function createPaymentVoucherValidator() {
       .optional()
       .isString()
       .notEmpty(),
-    body('includeTax', VALIDATE_BOOLEAN_MSG)
-      .isBoolean(),
-    body('quickApproval', VALIDATE_BOOLEAN_MSG)
-      .isBoolean(),
     body('attachment', VALIDATE_NON_EMPTY_STRING_MSG)
       .if(body('attachment').exists())
       .isString()
@@ -64,37 +60,47 @@ export function createPaymentVoucherValidator() {
 
 export function updatePaymentVoucherValidator() {
   return [
-    body('amount', VALIDATE_NUMBER_MSG)
-      .isNumeric(),
-    body('receiverId', VALIDATE_NON_EMPTY_STRING_MSG)
-      .isNumeric(),
-    body('description', VALIDATE_NON_EMPTY_STRING_MSG)
+    body('amount')
+      .optional()
+      .isNumeric()
+      .withMessage(VALIDATE_NUMBER_MSG),
+    body('receiverId')
+      .optional()
+      .isNumeric()
+      .withMessage(VALIDATE_NUMBER_MSG),
+    body('description')
+      .optional()
       .isString()
-      .notEmpty(),
-    body('note', VALIDATE_NON_EMPTY_STRING_MSG)
-      .if(body('note').exists())
-      .isString()
-      .notEmpty(),
-    body('deadline', VALIDATE_DATE_MSG)
-      .if(body('deadline').exists())
       .notEmpty()
-      .custom((value) => !Number.isNaN(Date.parse(value))),
-    body('method', VALIDATE_NON_EMPTY_STRING_MSG)
+      .withMessage(VALIDATE_NON_EMPTY_STRING_MSG),
+    body('note')
+      .optional()
       .isString()
-      .notEmpty(),
-    body('signGroup', VALIDATE_NON_EMPTY_STRING_MSG)
+      .notEmpty()
+      .withMessage(VALIDATE_NON_EMPTY_STRING_MSG),
+    body('deadline')
+      .optional()
+      .custom((value) => !Number.isNaN(Date.parse(value)))
+      .withMessage(VALIDATE_DATE_MSG),
+    body('method')
+      .optional()
+      .isString()
+      .notEmpty()
+      .withMessage(VALIDATE_NON_EMPTY_STRING_MSG),
+    body('signGroup')
+      .optional()
+      .isString()
+      .notEmpty()
+      .withMessage(VALIDATE_NON_EMPTY_STRING_MSG),
+    body('attachment')
       .optional()
       .isString()
       .notEmpty(),
-    body('includeTax', VALIDATE_BOOLEAN_MSG)
-      .isBoolean(),
-    body('quickApproval', VALIDATE_BOOLEAN_MSG)
-      .isBoolean(),
-    body('attachment', VALIDATE_NON_EMPTY_STRING_MSG)
-      .if(body('attachment').exists())
-      .isString()
-      .notEmpty(),
-    body('status')
-      .isIn(Object.values(PaymentVoucherStatus)).withMessage(`property allow only in ${Object.values(PaymentVoucherStatus)}`),
+  ];
+}
+
+export function approvePaymentVoucherValidator() {
+  return [
+    param('id').notEmpty().isString().withMessage(VALIDATE_NON_EMPTY_STRING_MSG),
   ];
 }

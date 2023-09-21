@@ -6,7 +6,8 @@ export enum PaymentVoucherStatus {
   WAIT_FOR_SIGN = 'WAIT_FOR_SIGN',
   SIGNED = 'SIGNED',
   WAIT_FOR_TRANSFER = 'WAIT_FOR_TRANSFER',
-  TRANSFERRED = 'TRANSFERRED'
+  TRANSFERRED = 'TRANSFERRED',
+  REJECTED = 'REJECTED',
 }
 
 export const paymentVoucherMethods = [
@@ -15,6 +16,16 @@ export const paymentVoucherMethods = [
 ];
 
 export type PaymentVoucherMethod = typeof paymentVoucherMethods[number]
+
+export const paymentVoucherStatusTransitionRules = [
+  `${PaymentVoucherStatus.WAIT_FOR_APPROVAL}-${PaymentVoucherStatus.APPROVED}`,
+];
+
+export const statusAllowUpdatePaymentVoucher = [
+  PaymentVoucherStatus.WAIT_FOR_APPROVAL,
+  PaymentVoucherStatus.WAIT_FOR_TRANSFER,
+  PaymentVoucherStatus.WAIT_FOR_SIGN,
+];
 
 export interface PaymentVoucher extends BaseDdbModel {
   code: string,
@@ -27,8 +38,8 @@ export interface PaymentVoucher extends BaseDdbModel {
   deadline?: string,
   method: PaymentVoucherMethod,
   signGroup: string,
-  includeTax: boolean,
-  quickApproval: boolean,
+  includeTax?: boolean,
+  quickApproval?: boolean,
   attachment?: string,
   status: PaymentVoucherStatus,
   creatorId: string,

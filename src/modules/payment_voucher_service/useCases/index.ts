@@ -12,6 +12,8 @@ import { GetPaymentVoucherUseCase } from './interfaces/GetPaymentVoucherUseCase'
 import { UpdatePaymentVoucherUseCase } from './interfaces/UpdatePaymentVoucherUseCase';
 import { GetPaymentVouchersOfTourUseCase } from './interfaces/GetPaymentVouchersOfTourUseCase';
 import GetPaymentVouchersOfTourUseCaseImpl from './GetPaymentVouchersOfTourUseCaseImpl';
+import { ApprovePaymentVoucherUseCase } from './interfaces/ApprovePaymentVoucherUseCase';
+import ApprovePaymentVoucherUseCaseImpl from './ApprovePaymentVoucherUseCaseImpl';
 
 interface UseCases {
   createPaymentVoucherUseCase: CreatePaymentVoucherUseCase,
@@ -20,6 +22,7 @@ interface UseCases {
   getPaymentVouchersFromOpTourUseCase: GetPaymentVouchersOfTourUseCase,
   getPaymentVoucherUseCase: GetPaymentVoucherUseCase,
   updatePaymentVoucherUseCase: UpdatePaymentVoucherUseCase,
+  approvePaymentVoucherUseCase: ApprovePaymentVoucherUseCase,
 }
 
 const useCases: UseCases = {
@@ -29,6 +32,7 @@ const useCases: UseCases = {
   getPaymentVouchersFromOpTourUseCase: new GetPaymentVouchersOfTourUseCaseImpl(),
   getPaymentVoucherUseCase: new GetPaymentVoucherUseCaseImpl(),
   updatePaymentVoucherUseCase: new UpdatePaymentVoucherUseCaseImpl(),
+  approvePaymentVoucherUseCase: new ApprovePaymentVoucherUseCaseImpl(),
 };
 
 export const {
@@ -38,4 +42,5 @@ export const {
   getPaymentVouchersFromOpTourUseCase,
   getPaymentVoucherUseCase,
   updatePaymentVoucherUseCase,
+  approvePaymentVoucherUseCase,
 } = useCases;
