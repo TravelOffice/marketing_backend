@@ -57,9 +57,9 @@ export function getPostCommentListValidator() {
       .optional()
       .isInt()
       .withMessage('must be a number'),
-    query('sortDesc')
+    query('sortType')
       .optional()
-      .isBoolean()
-      .withMessage('must be a boolean'),
+      .isIn(['ASC', 'DESC'])
+      .withMessage('property must be one of ASC, DESC'),
   ];
 }

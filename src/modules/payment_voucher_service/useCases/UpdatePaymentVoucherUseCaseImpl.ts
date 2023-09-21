@@ -2,7 +2,7 @@ import { helper } from 'core';
 import { PaymentVoucher } from '../models/PaymentVoucher';
 import { paymentVoucherRepository } from '../repositories';
 import { UpdatePaymentVoucherUseCase } from './interfaces/UpdatePaymentVoucherUseCase';
-import { STATUS_INDEX, TOUR_OPERATION_INDEX, UPDATED_AT_INDEX } from '../utils/constants';
+import { TOUR_OPERATION_INDEX, UPDATED_AT_INDEX } from '../utils/constants';
 
 export default class UpdatePaymentVoucherUseCaseImpl implements UpdatePaymentVoucherUseCase {
   private allowedUpdatingKeys: (keyof PaymentVoucher)[] = [
@@ -12,10 +12,7 @@ export default class UpdatePaymentVoucherUseCaseImpl implements UpdatePaymentVou
     'deadline',
     'method',
     'signGroup',
-    'includeTax',
-    'quickApproval',
     'attachment',
-    'status',
     'tourId',
   ];
 
@@ -42,7 +39,6 @@ export default class UpdatePaymentVoucherUseCaseImpl implements UpdatePaymentVou
       ...helper.extractDataFromObject(paymentVoucher, this.allowedUpdatingKeys),
       updatedAt: now,
       lsi2: `${UPDATED_AT_INDEX}#${now}`,
-      lsi3: `${STATUS_INDEX}#${paymentVoucher.status}`,
       lsi5: tourId ? `${TOUR_OPERATION_INDEX}#${tourId}` : existingPaymentVoucher.lsi5,
     };
 

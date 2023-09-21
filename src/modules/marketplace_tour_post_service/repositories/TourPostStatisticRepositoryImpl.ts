@@ -14,7 +14,7 @@ export default class TourPostStatisticRepositoryImpl implements TourPostStatisti
         ':pk': TOP_TOUR_POST_STATISTIC_INDEX,
       },
     };
-    const result = await dynamoProvider.queryPagination(params, { limit, sortDesc: true });
+    const result = await dynamoProvider.queryPagination(params, { limit, sortType: 'DESC' });
     return result?.data || [];
   };
 

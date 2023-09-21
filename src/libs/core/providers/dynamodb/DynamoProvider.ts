@@ -28,7 +28,7 @@ export type PaginationResponsePayload<T extends Object = any> = {
 export type PaginationParams = {
   nextToken?: string,
   limit?: number,
-  sortDesc?: boolean,
+  sortType?: 'ASC' | 'DESC'
 }
 
 export default class DynamoProvider {
@@ -85,7 +85,7 @@ export default class DynamoProvider {
     const defaultPaginationLimit = 10;
 
     // Extract pagination parameters from the input
-    const { nextToken, limit, sortDesc } = paginationParams;
+    const { nextToken, limit, sortType } = paginationParams;
 
     // Determine the pagination limit
     const paginationLimit = limit || defaultPaginationLimit;
@@ -93,7 +93,8 @@ export default class DynamoProvider {
     // Perform the DynamoDB query
     const { Items, LastEvaluatedKey } = await dynamoDB.query({
       ...queryParams,
-      ScanIndexForward: !!sortDesc, // Default, sort record DESC
+      ScanIndexForward: sortType === 'ASC', // Default, sort record DESC
+      // ScanIndexForward: sortDesc !== null && sortDesc !== true;
       Limit: paginationLimit,
       ExclusiveStartKey: nextToken ? JSON.parse(nextToken) : undefined,
     }).promise();
