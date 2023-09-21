@@ -3,16 +3,22 @@ import express, { NextFunction, Request, Response } from 'express';
 import compression from 'compression';
 import { getCurrentUserInfo } from 'decode-token';
 import {
+  approvePaymentVoucherUseCase,
   createPaymentVoucherUseCase,
   deletePaymentVoucherUseCase,
-  getPaymentVoucherListUseCase, getPaymentVouchersFromOpTourUseCase,
+  getPaymentVoucherListUseCase,
+  getPaymentVouchersFromOpTourUseCase,
   getPaymentVoucherUseCase,
   updatePaymentVoucherUseCase,
 } from './useCases';
 import wrapResponse from './utils/wrapResponse';
 import { FAILED, SUCCESS } from './utils/constants';
 import { CognitoUser } from './models/CognitoUser';
-import validate, { createPaymentVoucherValidator } from './utils/validator';
+import validate, {
+  approvePaymentVoucherValidator,
+  createPaymentVoucherValidator,
+  updatePaymentVoucherValidator,
+} from './utils/validator';
 import logger from './utils/logger';
 
 // Create an instance of the Express application
@@ -85,7 +91,7 @@ app.post('/payment-vouchers', createPaymentVoucherValidator(), async (req: Reque
 });
 
 // Route for handling GET requests to a specific tour location endpoint
-app.get('payment-vouchers/:id', async (req: Request, res: Response) => {
+app.get('/payment-vouchers/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { tenant } = getCurrentUserInfo(req.headers.authorization!);
@@ -98,7 +104,7 @@ app.get('payment-vouchers/:id', async (req: Request, res: Response) => {
 });
 
 // Route for handling PUT requests to a specific tour location endpoint
-app.put('/payment-vouchers/:id', async (req: Request, res: Response) => {
+app.put('/payment-vouchers/:id', updatePaymentVoucherValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
     const { id } = req.params;
@@ -107,6 +113,19 @@ app.put('/payment-vouchers/:id', async (req: Request, res: Response) => {
     res.json(wrapResponse(SUCCESS, receipt));
   } catch (error: any) {
     logger.log('Error updating payment voucher:', error.message);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.put('/payment-vouchers/:id/approve', approvePaymentVoucherValidator(), async (req: Request, res: Response) => {
+  try {
+    validate(req);
+    const { id } = req.params;
+    const { tenant } = getCurrentUserInfo(req.headers.authorization!);
+    const paymentVoucher = await approvePaymentVoucherUseCase.invoke(tenant, id);
+    res.json(wrapResponse(SUCCESS, paymentVoucher));
+  } catch (error: any) {
+    logger.log('Error approving payment voucher:', error.message);
     res.json(wrapResponse(FAILED, undefined, error.message));
   }
 });

@@ -197,9 +197,10 @@ export function getSelfPostsValidator() {
       })
       .withMessage('must be a JSON string'),
     query('limit').optional().isInt().withMessage('must be a number'),
-    query('sortDesc').optional()
-      .isBoolean()
-      .withMessage('must be a boolean'),
+    query('sortType')
+      .optional()
+      .isIn(['ASC', 'DESC'])
+      .withMessage('property must be one of ASC, DESC'),
     query('status')
       .optional()
       .isIn(Object.values(TourPostStatus))
@@ -237,9 +238,10 @@ export function getPostsValidator() {
       })
       .withMessage('must be a JSON string'),
     query('limit').optional().isInt().withMessage('must be a number'),
-    query('sortDesc').optional()
-      .isBoolean()
-      .withMessage('must be a boolean'),
+    query('sortType')
+      .optional()
+      .isIn(['ASC', 'DESC'])
+      .withMessage('property must be one of ASC, DESC'),
     query('status')
       .optional()
       .isIn(Object.values(TourPostStatus))
@@ -261,9 +263,10 @@ export function getBookmarkedOrFollowedPostsValidator() {
       })
       .withMessage('must be a JSON string'),
     query('limit').optional().isInt().withMessage('must be a number'),
-    query('sortDesc').optional()
-      .isBoolean()
-      .withMessage('must be a boolean'),
+    query('sortType')
+      .optional()
+      .isIn(['ASC', 'DESC'])
+      .withMessage('property must be one of ASC, DESC'),
   ];
 }
 
