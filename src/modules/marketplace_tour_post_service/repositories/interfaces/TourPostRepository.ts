@@ -19,6 +19,7 @@ export interface GetPostsByDepartureDateParams {
   postType: TourPostType,
   paginationParams: PaginationParams,
   status?: TourPostStatus,
+  endingLocation?: string,
 }
 
 export interface TourPostRepository {

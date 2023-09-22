@@ -123,26 +123,27 @@ app.get('/marketplace/posts', getPostsValidator(), async (req: Request, res: Res
       const { tenant, username } = currentUser;
       const currentUserId = `${tenant}#${username}`;
       // (Optional) Filter posts with departure date or ending location
-      if (departureDate) {
-        // Fetch posts by type
-        tourPosts = await getPostsByDepartureDateUseCase.invoke({
-          currentUserId,
-          departureDate,
-          postType,
-          paginationParams,
-          status,
-        } as GetPostsByDepartureDateParams);
-        logger.log(`[app.get] Get posts by departure date ${departureDate} successfully`);
-      } else if (endingLocation) {
-        // Fetch posts by type
+      if (endingLocation && !departureDate) {
+        // Fetch posts by type, ending location and optional status
         tourPosts = await getPostsByEndingLocationUseCase.invoke({
           currentUserId,
           endingLocation,
           postType,
-          paginationParams,
           status,
+          paginationParams,
         } as GetPostsByEndingLocationParams);
         logger.log(`[app.get] Get posts by ending location ${endingLocation} successfully`);
+      } else if (departureDate) {
+        // Fetch posts by type, departure date, optional status and optional ending location
+        tourPosts = await getPostsByDepartureDateUseCase.invoke({
+          currentUserId,
+          departureDate,
+          postType,
+          status,
+          endingLocation,
+          paginationParams,
+        } as GetPostsByDepartureDateParams);
+        logger.log(`[app.get] Get posts by departure date ${departureDate} successfully`);
       } else {
         // Fetch posts by type
         tourPosts = await getTourPostListByPostTypeUseCase.invoke(
