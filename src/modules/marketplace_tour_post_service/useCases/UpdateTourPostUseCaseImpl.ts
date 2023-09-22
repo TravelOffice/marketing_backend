@@ -93,7 +93,8 @@ export default class UpdateTourPostUseCaseImpl implements UpdateTourPostUseCase 
     }
 
     if (newEndingLocation) {
-      dataToUpdate.lsi4 = `${tourPost.type}#${newEndingLocation}#${newStatus || tourPost.status}#${tourPost.createdAt}`;
+      const newEndingLocationNonAccent = helper.toLowerCaseNonAccentVietnamese(newEndingLocation);
+      dataToUpdate.lsi4 = `${tourPost.type}#${newEndingLocationNonAccent}#${newStatus || tourPost.status}#${tourPost.createdAt}`;
     }
     if (newDepartureDate) {
       dataToUpdate.lsi5 = `${tourPost.type}#${newDepartureDate}#${newStatus || tourPost.status}#${tourPost.createdAt}`;

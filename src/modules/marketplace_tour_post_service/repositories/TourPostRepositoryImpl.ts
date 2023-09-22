@@ -245,12 +245,21 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
       currentUserId,
       departureDate,
       postType,
-      paginationParams,
       status,
+      endingLocation,
+      paginationParams,
     } = params;
     // Prepare query params
     const marketplaceTable = await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE');
 
+    let filterLsi5 = `${postType}#${departureDate}#`;
+    if (status) {
+      if (endingLocation) {
+        filterLsi5 = `${postType}#${departureDate}#${status}#${helper.toLowerCaseNonAccentVietnamese(endingLocation)}`;
+      } else {
+        filterLsi5 = `${postType}#${departureDate}#${status}#`;
+      }
+    }
     // Define query parameters for DynamoDB query
     const queryParams = {
       TableName: marketplaceTable,
@@ -258,7 +267,7 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
       KeyConditionExpression: 'pk = :pk and begins_with(lsi5, :lsi5_filter)',
       ExpressionAttributeValues: {
         ':pk': POST_INDEX, // Assuming POST_INDEX is a constant for the table index
-        ':lsi5_filter': status ? `${postType}#${departureDate}#${status}#` : `${postType}#${departureDate}#`, // Construct filter based on status
+        ':lsi5_filter': filterLsi5,
       },
     };
 
