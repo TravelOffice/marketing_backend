@@ -220,12 +220,16 @@ export function getPostsValidator() {
       .optional().isIn(tourPostTypes)
       .withMessage(`allow only in ${tourPostTypes}`),
     query('endingLocation')
-      .optional().isString().notEmpty()
+      .if(query('endingLocation').notEmpty())
+      .isString()
       .withMessage('must be a string'),
-    query('departureDate').optional().custom((value: string) => {
-      const date = Date.parse(value);
-      return !Number.isNaN(date);
-    }).withMessage('must be a date string'),
+    query('departureDate')
+      .if(query('departureDate').notEmpty())
+      .custom((value: string) => {
+        const date = Date.parse(value);
+        return !Number.isNaN(date);
+      })
+      .withMessage('must be a date string'),
     query('nextToken')
       .optional()
       .custom((value: string) => {
