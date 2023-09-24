@@ -152,8 +152,8 @@ app.get('/marketplace/posts', getPostsValidator(), async (req: Request, res: Res
           paginationParams,
           status as TourPostStatus,
         );
+        logger.log(`[app.get] Get posts by tour post type ${postType} successfully`);
       }
-      logger.log(`[app.get] Get posts by tour post type ${postType} successfully`);
     } else {
       // Fetch all posts
       tourPosts = await getTourPostListUseCase.invoke(currentUser, paginationParams);

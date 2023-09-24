@@ -302,7 +302,6 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
   listByEndingLocation = async (
     params: GetPostsByEndingLocationParams,
   ): Promise<PaginationResponsePayload<TourPost> | undefined> => {
-    console.log('Ending location');
     const {
       currentUserId,
       endingLocation,
@@ -313,6 +312,8 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
     // Prepare query params
     const marketplaceTable = await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE');
 
+    const endingLocationNonAccent = helper.toLowerCaseNonAccentVietnamese(endingLocation);
+
     // Define query parameters for DynamoDB query
     const queryParams = {
       TableName: marketplaceTable,
@@ -320,7 +321,7 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
       KeyConditionExpression: 'pk = :pk and begins_with(lsi4, :lsi4_filter)',
       ExpressionAttributeValues: {
         ':pk': POST_INDEX, // Assuming POST_INDEX is a constant for the table index
-        ':lsi4_filter': status ? `${postType}#${endingLocation}#${status}#` : `${postType}#${endingLocation}#`, // Construct filter based on status
+        ':lsi4_filter': status ? `${postType}#${endingLocationNonAccent}#${status}#` : `${postType}#${endingLocationNonAccent}#`, // Construct filter based on status
       },
     };
 
