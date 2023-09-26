@@ -24,6 +24,8 @@ export const VALIDATE_USERNAME_SYNTAX_STRING_MSG = 'username must not contain # 
 
 export const VALIDATE_USERNAME_RESERVED_STRING_MSG = 'Invalid username';
 
+export const VALIDATE_USERNAME_POLICY_MSG = 'Username must contain only alphanumeric characters (a-z, A-Z, 0-9)';
+
 export const VALIDATE_ARRAY_MSG = 'property must be an array';
 
 export const VALIDATE_ROLE_MSG = 'property cant not contains ROOT role';
