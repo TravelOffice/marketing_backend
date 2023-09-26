@@ -15,6 +15,7 @@ import {
   VALIDATE_EMAIL_MSG,
   VALIDATE_NON_EMPTY_STRING_MSG,
   VALIDATE_ROLE_MSG,
+  VALIDATE_USERNAME_POLICY_MSG,
   VALIDATE_USERNAME_RESERVED_STRING_MSG,
   VALIDATE_USERNAME_SYNTAX_STRING_MSG,
 } from './constants';
@@ -67,7 +68,9 @@ export function createTenantUserValidator() {
       .withMessage(VALIDATE_USERNAME_SYNTAX_STRING_MSG)
       .not()
       .isIn(reservedUsernames)
-      .withMessage(VALIDATE_USERNAME_RESERVED_STRING_MSG),
+      .withMessage(VALIDATE_USERNAME_RESERVED_STRING_MSG)
+      .matches(/^[0-9a-zA-Z]+$/)
+      .withMessage(VALIDATE_USERNAME_POLICY_MSG),
 
     body('firstName', VALIDATE_NON_EMPTY_STRING_MSG)
       .optional()
