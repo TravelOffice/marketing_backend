@@ -3,5 +3,5 @@ import { TourPostStatistic } from '../../models/statistic/TourPostStatistic';
 
 export interface TourPostStatisticRepository {
   listTopCommissionTourPosts(limit?: number): Promise<TopCommissionTourPosts>;
-  getByLeadOrTourTemplateId(id: string): Promise<TourPostStatistic | undefined>;
+  getByLeadOrTourTemplateId(id: string): Promise<TourPostStatistic[] | undefined>;
 }

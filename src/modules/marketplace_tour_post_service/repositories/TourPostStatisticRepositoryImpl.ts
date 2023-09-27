@@ -2,6 +2,7 @@ import { dynamoProvider } from 'core';
 import { getAwsSecretValue } from 'get-env';
 import { STATISTIC_INDEX, TOP_TOUR_POST_STATISTIC_INDEX } from '../utils/constants';
 import { TourPostStatisticRepository } from './interfaces/TourPostStatisticRepository';
+import { TourPostStatistic } from '../models/statistic/TourPostStatistic';
 
 export default class TourPostStatisticRepositoryImpl implements TourPostStatisticRepository {
   listTopCommissionTourPosts = async (limit?: number) => {
@@ -29,7 +30,6 @@ export default class TourPostStatisticRepositoryImpl implements TourPostStatisti
         ':lsi1': id,
       },
     };
-    const [tourPostStatisticItem] = await dynamoProvider.query(params);
-    return tourPostStatisticItem;
+    return dynamoProvider.query<TourPostStatistic>(params);
   };
 }
