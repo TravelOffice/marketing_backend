@@ -62,7 +62,7 @@ export default class CreateTourPostUseCaseImpl implements CreateTourPostUseCase 
       lsi1: `${marketplaceUserId}#${status}#${createdAt}`, // Local index for getting all posts by specific user
       lsi2: `${tenant}#${status}#${createdAt}`, // Local index for getting all posts by specific organization
       lsi3: `${type}#${status}#${createdAt}`, // Local index for filter tour post by type and status
-      lsi4: `${type}#${endingLocationNonAccent}#$${status}#${createdAt}`, // Local index for filter latest post by post type and ending location
+      lsi4: `${type}#${endingLocationNonAccent}#${status}#${createdAt}`, // Local index for filter latest post by post type and ending location
       lsi5: `${type}#${departureDate}#${status}#${endingLocationNonAccent}#${createdAt}`, // Local index for filter by post type + departure date or post type + departure date + ending location
     } as TourPost;
     // Add post to DynamoDB

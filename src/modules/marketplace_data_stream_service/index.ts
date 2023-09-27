@@ -136,17 +136,14 @@ async function handleOrganizationsStatisticChange(records: DynamoDBRecord[]): Pr
   // Attribute to count number of posts, offers or success offer added for each organization
   const orgsChangedStats: OrganizationsStatistic = {};
   records.forEach(async (record) => {
-    logger.log(`DynamoDB Record for handling organization statistic ${JSON.stringify(record, null, 5)}`);
     // New data expected to be added to database
     if (!record.dynamodb?.NewImage) {
-      logger.log('No new data to handle');
       return;
     }
 
     const modelChangeType = getModelChangeType(record);
     // Expected data model should be TourPost or Offer
     if (modelChangeType !== 'POST' && modelChangeType !== 'OFFER') {
-      logger.log(`Target model is not needed to handle ${modelChangeType}`);
       return;
     }
 
@@ -155,7 +152,6 @@ async function handleOrganizationsStatisticChange(records: DynamoDBRecord[]): Pr
 
     // Check whether organization is valid
     if (!organization) {
-      logger.log('No organization to handle');
       return;
     }
 
@@ -191,6 +187,13 @@ async function handleOrganizationsStatisticChange(records: DynamoDBRecord[]): Pr
       }
     }
   });
+
+  if (Object.keys(orgsChangedStats).length === 0) {
+    logger.log('No organization statistic changes needed to handle');
+    return;
+  }
+
+  logger.log(`Organizations statistics changes needed to handle ${JSON.stringify(orgsChangedStats, null, 5)}`);
   await organizationStatisticRepository.batchUpdateOrganizationsStatistic(orgsChangedStats);
 }
 
@@ -199,24 +202,25 @@ async function handleTourPostsStatisticChange(records: DynamoDBRecord[]): Promis
   // as well as total rating of each post and number of users rated for each post
   const tourPostsChangedStats: TourPostsStatistic = {};
   records.forEach(async (record) => {
-    logger.log(`DynamoDB Record for handling organization statistic ${JSON.stringify(record, null, 5)}`);
-
     // New data expected to be added to database
     if (!record.dynamodb?.NewImage) {
-      logger.log('No new data to handle');
       return;
     }
 
     const modelChangeType = getModelChangeType(record);
     // Expected data model should be Rating or Offer
-    if (modelChangeType !== 'RATING' && modelChangeType !== 'OFFER') {
-      logger.log(`Target model is not needed to handle ${modelChangeType}`);
+    if (
+      modelChangeType !== 'RATING'
+      && modelChangeType !== 'OFFER'
+      && modelChangeType !== 'POST'
+    ) {
       return;
     }
 
     const newModelData = dynamoProvider.unmarshall(record.dynamodb?.NewImage);
-    const { tourPostId, linkedToTargetKeys, organization } = newModelData;
+    const { tourPostId, linkedToTargetKeys } = newModelData;
     const linkedTargetId = `${linkedToTargetKeys?.pk}#${linkedToTargetKeys?.sk}`;
+    const organization = (newModelData.receivedOrg || newModelData.organization) as string;
 
     // Initialize statistic data for tour post if it doesn't exist
     if (tourPostsChangedStats[tourPostId] === undefined) {
@@ -234,7 +238,9 @@ async function handleTourPostsStatisticChange(records: DynamoDBRecord[]): Promis
     // Handle new data added to database
     // * Rating data is not allowed to be changed, so there is no need to handle `MODIFY` event
     if (record.eventName === 'INSERT') {
-      if (modelChangeType === 'OFFER') {
+      if (modelChangeType === 'POST') {
+        tourPostsChangedStats[tourPostId].isNewPost = true;
+      } else if (modelChangeType === 'OFFER') {
         // Handle inserted offer for post
         tourPostsChangedStats[tourPostId].totalOffers += 1;
       } else if (modelChangeType === 'RATING') {
@@ -245,6 +251,13 @@ async function handleTourPostsStatisticChange(records: DynamoDBRecord[]): Promis
       }
     }
   });
+
+  if (Object.keys(tourPostsChangedStats).length === 0) {
+    logger.log('No tour post statistic changes needed to handle');
+    return;
+  }
+
+  logger.log(`Tour posts statistics changes needed to handle ${JSON.stringify(tourPostsChangedStats, null, 5)}`);
   await tourPostStatisticRepository.batchUpdateTourPostsStatistic(tourPostsChangedStats);
 }
 
@@ -335,8 +348,9 @@ async function handleTopCommissionPosts(records: DynamoDBRecord[]): Promise<void
 // eslint-disable-next-line import/prefer-default-export
 export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
   try {
-    logger.log('Start handling DynamoDB Stream event');
     const { Records: records } = event;
+    logger.log(`Start handling DynamoDB Stream event records ${JSON.stringify(records, null, 5)}`);
+
     if (!records || records.length === 0) {
       logger.log('No DynamoDB records to handle');
       return;

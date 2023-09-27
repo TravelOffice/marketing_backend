@@ -9,7 +9,7 @@ import { TourPostStatisticRepository } from './interfaces/TourPostStatisticRepos
 import { DeletingIndexes, TopCommissionTourPost, TopCommissionTourPosts } from '../models/statistic/TopCommissionTourPosts';
 
 export default class TourPostStatisticRepositoryImpl
-implements TourPostStatisticRepository {
+  implements TourPostStatisticRepository {
   /**
    * Batch update TourPosts' statistic
    * Since DynamoDB doesn't support batch update, we have to update each item one by one in parallel
@@ -26,11 +26,12 @@ implements TourPostStatisticRepository {
         return;
       }
       // Build update item params and write to database
+      const { isNewPost, ...cleanedTourPostStatistic } = tourPostStatistic;
       const {
         updateExpression,
         expressionNames,
         expressionValues,
-      } = this.buildUpdatePostsStatisticParams(tourPostStatistic);
+      } = this.buildUpdatePostsStatisticParams(cleanedTourPostStatistic);
       const params: UpdateItemInput = {
         TableName: statisticTable,
         Key: {

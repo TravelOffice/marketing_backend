@@ -11,6 +11,8 @@ export function isOrgStatisticChanged(
 export function isTourPostStatisticChanged(
   tourPostStatistic: TourPostStats,
 ): boolean {
-  const { totalOffers, totalRatings, numberOfRatings } = tourPostStatistic;
-  return totalOffers > 0 || totalRatings > 0 || numberOfRatings > 0;
+  const {
+    totalOffers, totalRatings, numberOfRatings, isNewPost,
+  } = tourPostStatistic;
+  return totalOffers > 0 || totalRatings > 0 || numberOfRatings > 0 || isNewPost === true;
 }
