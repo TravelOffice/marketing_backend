@@ -15,4 +15,4 @@ export interface TourPostStatistic extends BaseDdbModel {
 export type TourPostStats = Pick<
   TourPostStatistic,
   'totalOffers' | 'totalRatings' | 'numberOfRatings' | 'organization' | 'lsi1'
->;
+> & { isNewPost?: boolean };
