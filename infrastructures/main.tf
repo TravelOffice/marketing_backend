@@ -19,7 +19,7 @@ locals {
   constants           = jsondecode(data.http.infra.response_body)
   remote_feature_name = "base_infrastructure"
   domain_name         = module.REMOTE_STATE.STATE.COMMON_CONFIG.route53.hosted_zone.domain.name
-  tags = {
+  tags                = {
     Env       = var.ENV
     Terraform = true
     Feature   = var.FEATURE_NAME
@@ -258,9 +258,9 @@ module "SEARCH_INSTANCE" {
 }
 
 module "ECS" {
-  source       = "../../modules/ecs"
-  FEATURE_NAME = var.FEATURE_NAME
-  ENV          = var.ENV
+  source          = "../../modules/ecs"
+  FEATURE_NAME    = var.FEATURE_NAME
+  ENV             = var.ENV
   CUSTOM_POLICIES = [
     "EcsTaskStandardRole",
     "DynamoTableReadWrite",
@@ -284,4 +284,10 @@ module "ECS" {
   PRIVATE_SUBNETS     = module.REMOTE_STATE.STATE.MARKETING.backend.vpc.private_subnets
   VPC_ID              = module.REMOTE_STATE.STATE.MARKETING.backend.vpc.id
   SCHEDULE_EXPRESSION = "cron(0 17 * * ? *)"
+}
+
+module "NOTIFICATION_LAMBDA_SQS_MAPPING" {
+  source     = "../../modules/application/notification/queue"
+  LAMBDA_ARN = module.LAMBDA_FUNCTION.lambda_arns["marketplace_notification_service"]
+  SOURCE_ARN = module.REMOTE_STATE.STATE.MARKETING.queue.marketplace_notification_queue
 }
