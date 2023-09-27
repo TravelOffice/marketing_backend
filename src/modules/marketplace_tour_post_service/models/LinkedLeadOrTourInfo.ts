@@ -1,7 +1,12 @@
+export interface PostShortedInfo {
+    postId: string,
+    totalOffers: number,
+}
+
 export interface LinkedLeadOrTourInfo {
     isAvailable: boolean,
-    postId?: string,
     totalOffers?: number,
+    posts?: PostShortedInfo[],
 }
 
 export enum linkedLeadOrTourTemplateType {
