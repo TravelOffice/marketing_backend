@@ -1,8 +1,5 @@
 import AutoAssignChatUseCaseImpl from './AutoAssignChatUseCaseImpl';
-import {
-  AutoAssignChatUseCase,
-  ManualAssignChatUseCase,
-} from './interfaces';
+import { AutoAssignChatUseCase, ManualAssignChatUseCase } from './interfaces';
 import ManualAssignChatUseCaseImpl from './ManualAssignChatUseCaseImpl';
 
 interface UseCases {
