@@ -1,0 +1,39 @@
+import { Request } from 'express';
+import {
+  ValidationError, body, validationResult,
+} from 'express-validator';
+import { VALIDATE_REQUIRED_MSG, VALIDATE_STRING_MSG } from './constants';
+import { deviceTypes } from '../models/UserDeviceSession';
+
+export default function validate(req: Request) {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    const errorGroups: { [key: string]: ValidationError[] } = {};
+    errors.array().forEach((err) => {
+      const location = err.location || 'unknown';
+      const errs: ValidationError[] = errorGroups[location] || [];
+      errs.push(err);
+      errorGroups[location] = errs;
+    });
+    const msgs = Object.entries(errorGroups)
+      .map((entry) => `Validate failed at ${entry[0]}: ${entry[1].map((err) => `${err.param} ${err.msg}, value=${err.value}`).join('; ')}`);
+    throw new Error(msgs.join('\n'));
+  }
+}
+
+export function createUserDeviceSession() {
+  const stringAttrs = ['token', 'name', 'userAgent', 'os'];
+  const stringValidators = stringAttrs.map((attr) => body(attr)
+    .notEmpty()
+    .withMessage(VALIDATE_REQUIRED_MSG)
+    .isString()
+    .withMessage(VALIDATE_STRING_MSG));
+  return [
+    ...stringValidators,
+    body('type')
+      .notEmpty()
+      .withMessage(VALIDATE_REQUIRED_MSG)
+      .isIn(deviceTypes)
+      .withMessage(`property allow only in ${deviceTypes}`),
+  ];
+}
