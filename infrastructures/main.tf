@@ -12,14 +12,19 @@ variable "APPSYNC_LAMBDA_AUTHORIZER" {}
 variable "APPSYNC_LAMBDA_RESOLVER" {}
 
 data "aws_caller_identity" "current" {}
-data "http" "infra" {
-  url = "https://raw.githubusercontent.com/TravelOffice/infrastructure-constant/master/${var.ENV}-infrastructure.json"
+data "aws_secretsmanager_secret" "secrets" {
+  arn = var.SCM_CONSTANT_ARN
 }
+
+data "aws_secretsmanager_secret_version" "current" {
+  secret_id = data.aws_secretsmanager_secret.secrets.id
+}
+
 locals {
-  constants           = jsondecode(data.http.infra.response_body)
+  constants           = jsondecode(data.aws_secretsmanager_secret_version.current.secret_string)
   remote_feature_name = "base_infrastructure"
   domain_name         = module.REMOTE_STATE.STATE.COMMON_CONFIG.route53.hosted_zone.domain.name
-  tags                = {
+  tags = {
     Env       = var.ENV
     Terraform = true
     Feature   = var.FEATURE_NAME
@@ -258,9 +263,9 @@ module "SEARCH_INSTANCE" {
 }
 
 module "ECS" {
-  source          = "../../modules/ecs"
-  FEATURE_NAME    = var.FEATURE_NAME
-  ENV             = var.ENV
+  source       = "../../modules/ecs"
+  FEATURE_NAME = var.FEATURE_NAME
+  ENV          = var.ENV
   CUSTOM_POLICIES = [
     "EcsTaskStandardRole",
     "DynamoTableReadWrite",
