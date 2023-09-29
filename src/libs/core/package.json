@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "aws": "link:../aws-sdk",
+    "firebase-admin": "^11.11.0",
     "get-env": "link:../get-env"
   },
   "devDependencies": {
@@ -26,7 +27,7 @@
     "eslint-plugin-jsx-a11y": "^6.5.1",
     "eslint-plugin-react": "^7.28.0",
     "eslint-plugin-react-hooks": "^4.3.0",
-    "utility-types": "^3.10.0",
-    "typescript": "^4.5.4"
+    "typescript": "^4.5.4",
+    "utility-types": "^3.10.0"
   }
 }
