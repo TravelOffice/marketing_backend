@@ -39,7 +39,7 @@ if [ ! -f "package.json" ]; then
 fi
 rm -rf ${SERVICE_DIR}/dist
 rm -rf ${SERVICE_DIR}/node_modules
-yarn install
+yarn install --ignore-optional
 echo "Install successfully"
 yarn build || exit 0
 echo "Build"
@@ -52,7 +52,7 @@ fi
 
 rm -rf ${SERVICE_DIR}/node_modules
 echo "Install production dependencies"
-yarn install --production
+yarn install --production --ignore-optional
 
 echo "Clean dependencies resource"
 cd ${CUR_DIR}

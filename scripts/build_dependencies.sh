@@ -34,9 +34,9 @@ build_lib() {
   rm -rf node_modules
   if [ "${PRODUCTION}" == "true" ]; then
     echo "Build for production ${dir}"
-    yarn install --production
+    yarn install --production --ignore-optional
   else
-    yarn install
+    yarn install --ignore-optional
     yarn build
   fi
 }
