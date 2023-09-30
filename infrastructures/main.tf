@@ -293,6 +293,6 @@ module "ECS" {
 
 module "NOTIFICATION_LAMBDA_SQS_MAPPING" {
   source     = "../../modules/application/notification/queue"
-  LAMBDA_ARN = module.LAMBDA_FUNCTION.lambda_arns["marketplace_notification_service"]
+  LAMBDA_ARN = module.LAMBDA_FUNCTION.lambda_arns["system_notification_service"]
   SOURCE_ARN = module.REMOTE_STATE.STATE.MARKETING.queue.marketplace_notification_queue
 }

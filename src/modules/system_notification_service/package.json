@@ -1,24 +1,28 @@
 {
-  "name": "marketplace_notification_service",
+  "name": "notificatin-service",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "lint": "npx eslint . --ext .js,.jsx,.ts,.tsx",
     "lint:fix": "npx eslint . --ext .js,.jsx,.ts,.tsx --fix",
+    "dev": "nodemon app.local.ts",
     "build": "tsc"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@vendia/serverless-express": "^4.5.2",
     "aws": "link:../../libs/aws-sdk",
     "common-models": "link:../../libs/common-models",
     "compression": "^1.7.4",
+    "core": "link:../../libs/core",
     "cors": "^2.8.5",
     "decode-token": "link:../../libs/decode-token",
+    "express": "^4.17.2",
+    "express-validator": "^6.14.0",
     "get-env": "link:../../libs/get-env",
-    "reflect-metadata": "^0.1.13",
-    "round-robin-js": "^3.0.3"
+    "reflect-metadata": "^0.1.13"
   },
   "devDependencies": {
     "@types/compression": "^1.7.2",
