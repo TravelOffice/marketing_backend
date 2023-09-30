@@ -43,5 +43,5 @@ else
 fi
 
 cd ${SERVICE_DIR}
-yarn install
+yarn install --ignore-optional
 nodemon app.local.ts

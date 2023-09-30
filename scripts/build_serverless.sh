@@ -33,7 +33,7 @@ build_service() {
     return 1
   fi
   rm -rf ${SERVICE_DIR}/{dist,node_modules}
-  yarn install
+  yarn install --ignore-optional
   echo "Install successfully"
   yarn build
   if [ $? -ne 0 ]; then
@@ -44,7 +44,7 @@ build_service() {
 
   rm -rf ${SERVICE_DIR}/node_modules
   echo "Install production dependencies"
-  yarn install --production
+  yarn install --production --ignore-optional
   echo "Finished installing production"
   LAYER_DIR=${CUR_DIR}/src/layers/${SERVICENAME}/nodejs
   mkdir -p ${LAYER_DIR}
