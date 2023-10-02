@@ -11,3 +11,10 @@ export interface UserNotification extends BaseDdbModel {
   action: string,
   read: boolean,
 }
+
+export type CreateUserNotificationDto = Pick<UserNotification,
+  'model' |
+  'notification' |
+  'code' |
+  'action'
+>
