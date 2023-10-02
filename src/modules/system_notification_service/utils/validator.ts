@@ -1,9 +1,9 @@
 import { Request } from 'express';
 import {
-  ValidationError, body, validationResult,
+  ValidationError, body, query, validationResult,
 } from 'express-validator';
-import { VALIDATE_REQUIRED_MSG, VALIDATE_STRING_MSG } from './constants';
 import { deviceTypes } from '../models/UserDeviceSession';
+import { VALIDATE_REQUIRED_MSG, VALIDATE_STRING_MSG } from './constants';
 
 export default function validate(req: Request) {
   const errors = validationResult(req);
@@ -35,5 +35,26 @@ export function createUserDeviceSession() {
       .withMessage(VALIDATE_REQUIRED_MSG)
       .isIn(deviceTypes)
       .withMessage(`property allow only in ${deviceTypes}`),
+  ];
+}
+
+export function getMyNotificationsValidator() {
+  return [
+    query('nextToken')
+      .optional()
+      .custom((value: string) => {
+        try {
+          JSON.parse(value);
+          return true;
+        } catch {
+          return false;
+        }
+      })
+      .withMessage('must be a JSON string'),
+    query('limit').optional().isInt().withMessage('must be a number'),
+    query('sortType')
+      .optional()
+      .isIn(['ASC', 'DESC'])
+      .withMessage('property must be one of ASC, DESC'),
   ];
 }

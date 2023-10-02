@@ -19,11 +19,12 @@ export default class StoreUserSessionUseCaseImpl implements StoreUserSessionUseC
     createSessionDto: CreateUserDeviceSessionDto,
   ) => {
     const { tenant, username } = currentUser;
+    const userId = `${tenant}#${username}`;
     const { token } = createSessionDto;
     // Check wether the device token exists in the database.
     // If it exists, return the existing user device session.
     const existingUserDeviceSession = await userDeviceSessionRepository
-      .getByDeviceToken(tenant, username, token);
+      .getByDeviceToken(userId, token);
     if (existingUserDeviceSession) {
       return existingUserDeviceSession;
     }
@@ -34,10 +35,10 @@ export default class StoreUserSessionUseCaseImpl implements StoreUserSessionUseC
       ...createSessionDto,
       createdAt: now,
       updatedAt: now,
+      lsi1: now.toString(),
     } as UserDeviceSession;
     const userDeviceSession = await userDeviceSessionRepository.create(
-      tenant,
-      username,
+      userId,
       session,
     );
 
