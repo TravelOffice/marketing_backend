@@ -1,15 +1,19 @@
+import GetUserNotificationsUseCaseImpl from './GetUserNotificationsUseCaseImpl';
 import StoreUserSessionUseCaseImpl from './StoreUserSessionUseCaseImpl';
+import { GetUserNotificationsUseCase } from './interfaces/GetUserNotificationsUseCase';
 import { StoreUserSessionUseCase } from './interfaces/StoreUserSessionUseCase';
 
 interface UseCases {
-    storeUserSessionUseCase: StoreUserSessionUseCase,
-  }
+  storeUserSessionUseCase: StoreUserSessionUseCase,
+  getUserNotificationsUseCase: GetUserNotificationsUseCase,
+}
 
 const useCases: UseCases = {
   storeUserSessionUseCase: new StoreUserSessionUseCaseImpl(),
+  getUserNotificationsUseCase: new GetUserNotificationsUseCaseImpl(),
 };
 
-// eslint-disable-next-line import/prefer-default-export
 export const {
   storeUserSessionUseCase,
+  getUserNotificationsUseCase,
 } = useCases;

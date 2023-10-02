@@ -10,6 +10,10 @@ export const USERNAME_INDEX = 'USER';
 
 export const USER_SESSION_INDEX = 'SS';
 
+export const FCM_NOTIFICATION_TOPIC_INDEX = 'TOPIC';
+
+export const USER_NOTIFICATION_INDEX = 'NOTI';
+
 export const VALIDATE_REQUIRED_MSG = 'property is required';
 
 export const VALIDATE_STRING_MSG = 'property must be a string';
