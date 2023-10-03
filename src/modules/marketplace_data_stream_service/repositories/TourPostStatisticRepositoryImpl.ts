@@ -6,10 +6,13 @@ import { TourPostsStatistic } from '../models/statistic/TourPostsStatistic';
 import { STATISTIC_INDEX, TOUR_POST_STATISTIC_INDEX } from '../utils/constants';
 import { isTourPostStatisticChanged } from '../utils/statistic';
 import { TourPostStatisticRepository } from './interfaces/TourPostStatisticRepository';
-import { DeletingIndexes, TopCommissionTourPost, TopCommissionTourPosts } from '../models/statistic/TopCommissionTourPosts';
+import {
+  DeletingIndexes,
+  TopCommissionTourPost,
+  TopCommissionTourPosts,
+} from '../models/statistic/TopCommissionTourPosts';
 
-export default class TourPostStatisticRepositoryImpl
-  implements TourPostStatisticRepository {
+export default class TourPostStatisticRepositoryImpl implements TourPostStatisticRepository {
   /**
    * Batch update TourPosts' statistic
    * Since DynamoDB doesn't support batch update, we have to update each item one by one in parallel
