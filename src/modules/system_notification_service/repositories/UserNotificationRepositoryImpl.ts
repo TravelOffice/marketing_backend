@@ -1,15 +1,14 @@
-import { PaginationParams } from 'core/providers/dynamodb/DynamoProvider';
+import { PaginationParams, PaginationResponsePayload } from 'core/providers/dynamodb/DynamoProvider';
 import { getAwsSecretValue } from 'get-env';
-import { dynamoProvider } from 'core';
+import { dynamoProvider, fcmProvider } from 'core';
 import { UserNotificationRepository } from './interfaces/UserNotificationRepository';
-import { UserNotification } from '../models/UserNotification';
-import { USERNAME_INDEX, USER_NOTIFICATION_INDEX } from '../utils/constants';
+import { CreateUserNotificationDto, UserNotification } from '../models/UserNotification';
+import { USER_NOTIFICATION_INDEX, USERNAME_INDEX } from '../utils/constants';
 
 export default class UserNotificationRepositoryImpl implements UserNotificationRepository {
   /**
    * Lists all notifications of user sorted by createdAt (lsi1)
    * @param currentUserId - The ID of the user that own access token in the request.
-   * @param tenant - Tenant id that user belongs to.
    * @param {PaginationParams} paginationParams - The pagination settings.
    * @returns {Promise<PaginationResponsePayload<UserNotification> | undefined>}
    * A promise resolving to a paginated response.
@@ -17,7 +16,7 @@ export default class UserNotificationRepositoryImpl implements UserNotificationR
   listByUser = async (
     currentUserId: string,
     paginationParams: PaginationParams,
-  ) => {
+  ): Promise<PaginationResponsePayload<UserNotification> | undefined> => {
     const marketplaceTable = await getAwsSecretValue('DYNAMO_NOTIFICATION_TABLE');
     const queryParams = {
       TableName: marketplaceTable,
@@ -31,5 +30,27 @@ export default class UserNotificationRepositoryImpl implements UserNotificationR
       queryParams,
       paginationParams,
     );
+  };
+
+  sendToTopic = async (
+    topic: string,
+    userId: string,
+    createUserNotificationDto: CreateUserNotificationDto,
+  ): Promise<void> => {
+    const {
+      model,
+      code,
+      action,
+      notification,
+    } = createUserNotificationDto;
+    const payload = {
+      data: { model, code, action },
+      notification: { ...notification },
+    };
+    const notificationId = await fcmProvider.sendMessageToTopic(topic, payload);
+    const table = await getAwsSecretValue('DYNAMO_NOTIFICATION_TABLE');
+    const pk = `${USERNAME_INDEX}#${userId}#${USER_NOTIFICATION_INDEX}`;
+    const sk = notificationId.toString();
+    await dynamoProvider.putItem(table, pk, sk, createUserNotificationDto);
   };
 }

@@ -21,11 +21,15 @@ export default class FcmProvider {
     await messaging().unsubscribeFromTopic(registrationTokens, topic);
   }
 
-  public async sendMessageToTopic(topic: string, payload: MessagingPayload): Promise<void> {
+  public async sendMessageToTopic(
+    topic: string,
+    payload: MessagingPayload,
+  ): Promise<number> {
     if (!this.app) {
       await this.init();
     }
-    await messaging().sendToTopic(`/topics/${topic}`, payload);
+    const { messageId } = await messaging().sendToTopic(`/topics/${topic}`, payload);
+    return messageId;
   }
 
   private async init() {
