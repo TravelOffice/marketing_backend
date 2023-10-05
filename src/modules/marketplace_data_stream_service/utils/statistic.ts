@@ -4,8 +4,7 @@ import { TourPostStats } from '../models/statistic/TourPostStatistic';
 export function isOrgStatisticChanged(
   orgStatistic: OrganizationStats,
 ): boolean {
-  const { totalOffers, totalPosts, totalSuccessOffers } = orgStatistic;
-  return totalOffers > 0 || totalPosts > 0 || totalSuccessOffers > 0;
+  return Object.values(orgStatistic).some((value) => value > 0);
 }
 
 export function isTourPostStatisticChanged(
