@@ -27,7 +27,11 @@ import { DdbModelChangeType } from './models/dataSubscription/DdbModelChangeType
 import { MarketplaceStatistic, MarketplaceStats } from './models/statistic/MarketplaceStatistic';
 import { OrganizationsStatistic } from './models/statistic/OrganizationsStatistic';
 import { TourPostsStatistic } from './models/statistic/TourPostsStatistic';
-import { marketplaceStatisticRepository, organizationStatisticRepository, tourPostStatisticRepository } from './repositories';
+import {
+  marketplaceStatisticRepository,
+  organizationStatisticRepository,
+  tourPostStatisticRepository,
+} from './repositories';
 import {
   MARKETPLACE_STATISTIC_INDEX,
   PADDING_ZERO_PREFIX_LENGTH,
@@ -62,11 +66,14 @@ function getModelChangeType(record: DynamoDBRecord): DdbModelChangeType | undefi
 
   if (isOrganization(pk)) {
     return 'ORG';
-  } if (isTourPost(pk)) {
+  }
+  if (isTourPost(pk)) {
     return 'POST';
-  } if (isTourPostOffer(pk)) {
+  }
+  if (isTourPostOffer(pk)) {
     return 'OFFER';
-  } if (isTourPostRating(pk)) {
+  }
+  if (isTourPostRating(pk)) {
     return 'RATING';
   }
 
@@ -135,6 +142,15 @@ async function handleMarketplaceStatisticChange(records: DynamoDBRecord[]): Prom
 async function handleOrganizationsStatisticChange(records: DynamoDBRecord[]): Promise<void> {
   // Attribute to count number of posts, offers or success offer added for each organization
   const orgsChangedStats: OrganizationsStatistic = {};
+  const initOrgChangedStats = {
+    totalPosts: 0,
+    totalReceivedOffers: 0,
+    totalSentOffers: 0,
+    totalSuccessReceivedOffers: 0,
+    totalSuccessSentOffers: 0,
+    totalReceivedOffersRevenue: 0,
+    totalSentOffersRevenue: 0,
+  };
   records.forEach(async (record) => {
     // New data expected to be added to database
     if (!record.dynamodb?.NewImage) {
@@ -148,41 +164,58 @@ async function handleOrganizationsStatisticChange(records: DynamoDBRecord[]): Pr
     }
 
     const newModelData = dynamoProvider.unmarshall(record.dynamodb?.NewImage) as TourPost & Offer;
-    const organization = (newModelData.receivedOrg || newModelData.organization) as string;
-
-    // Check whether organization is valid
-    if (!organization) {
-      return;
-    }
+    const { sentOrg, organization, receivedOrg } = newModelData;
 
     // Initialize statistic data for organization if it doesn't exist
-    if (orgsChangedStats[organization] === undefined) {
+    if (organization && orgsChangedStats[organization] === undefined) {
       orgsChangedStats[organization] = {
-        totalPosts: 0,
-        totalOffers: 0,
-        totalSuccessOffers: 0,
+        ...initOrgChangedStats,
+      };
+    }
+    if (sentOrg && orgsChangedStats[sentOrg] === undefined) {
+      orgsChangedStats[sentOrg] = {
+        ...initOrgChangedStats,
+      };
+    }
+    if (receivedOrg && orgsChangedStats[receivedOrg] === undefined) {
+      orgsChangedStats[receivedOrg] = {
+        ...initOrgChangedStats,
       };
     }
 
-    // Handle new data added to database
-    if (record.eventName === 'INSERT') {
-      if (modelChangeType === 'POST') {
-        // Handle inserted post for tenant
+    // Calculate tour post statistic data for organization if model change type is POST
+    if (modelChangeType === 'POST') {
+      if (record.eventName === 'INSERT') {
         orgsChangedStats[organization].totalPosts += 1;
-      } else if (modelChangeType === 'OFFER') {
-        // Handle insert offer for tenant
-        orgsChangedStats[organization].totalOffers += 1;
       }
-    } else if (record.eventName === 'MODIFY') { // Handle data changed on database
-      // Check whether offer is changed to `ACCEPTED`
-      if (modelChangeType === 'OFFER') {
+    }
+
+    // Calculate offer statistic data for organization if model change type is OFFER
+    if (modelChangeType === 'OFFER') {
+      if (record.eventName === 'INSERT') {
+        // Increase total received offers for received org
+        orgsChangedStats[receivedOrg].totalReceivedOffers += 1;
+        // Increase total sent offers for sent org
+        orgsChangedStats[sentOrg].totalSentOffers += 1;
+      } else if (record.eventName === 'MODIFY') {
         let previousOffer;
         if (record.dynamodb?.OldImage) {
           previousOffer = dynamoProvider.unmarshall(record.dynamodb?.OldImage) as Offer;
         }
         const offer = newModelData as Offer;
         if (previousOffer?.offerStatus !== offer.offerStatus && offer.offerStatus === 'ACCEPTED') {
-          orgsChangedStats[organization].totalSuccessOffers += 1;
+          // Increase total success received offers for received org
+          orgsChangedStats[receivedOrg].totalSuccessReceivedOffers += 1;
+
+          // Increase total success sent offers for sent org
+          orgsChangedStats[sentOrg].totalSuccessSentOffers += 1;
+
+          // Calculate total received offers revenue for received org
+          orgsChangedStats[receivedOrg].totalReceivedOffersRevenue += offer.totalPax
+            * (offer.pricePerPax - offer.commission);
+
+          // Calculate total sent offers revenue for sent org
+          orgsChangedStats[sentOrg].totalSentOffersRevenue += offer.totalPax * offer.commission;
         }
       }
     }
@@ -266,10 +299,15 @@ async function handleTopCommissionPosts(records: DynamoDBRecord[]): Promise<void
   const uniqueTourPostRecords: DynamoDBRecord[] = [];
   // Remove duplicate tour post records with compraing pk, sk
   // and keep record item have sequence number is maximum
-  type PkSkType = { pk: string, sk: string };
+  type PkSkType = {
+    pk: string,
+    sk: string
+  };
   tourPostRecords.forEach((record) => {
     // If record is not DynamoDB record, return
-    if (!record.dynamodb || !record.dynamodb.Keys) { return; }
+    if (!record.dynamodb || !record.dynamodb.Keys) {
+      return;
+    }
     const sequenceNumber = record.dynamodb.SequenceNumber as string;
     const { pk, sk } = dynamoProvider.unmarshall(record.dynamodb.Keys) as PkSkType;
 
@@ -277,7 +315,9 @@ async function handleTopCommissionPosts(records: DynamoDBRecord[]): Promise<void
     // Maximum sequence number means the latest item
     // Because maybe there are some duplicated records in DynamoDB Stream event
     const index = uniqueTourPostRecords.findIndex((item) => {
-      if (!item.dynamodb || !item.dynamodb.Keys) { return false; }
+      if (!item.dynamodb || !item.dynamodb.Keys) {
+        return false;
+      }
       const itemSequenceNumber = item.dynamodb.SequenceNumber as string;
       const { pk: itemPk, sk: itemSk } = dynamoProvider.unmarshall(item.dynamodb.Keys) as PkSkType;
       return sequenceNumber > itemSequenceNumber && pk === itemPk && sk === itemSk;
@@ -294,7 +334,10 @@ async function handleTopCommissionPosts(records: DynamoDBRecord[]): Promise<void
 
   // Data comes from DynamoDB Stream event
   const streamedTourPostIds = uniqueTourPostRecords.map((record) => {
-    const pksk = dynamoProvider.unmarshall(record.dynamodb?.Keys!) as { pk: string, sk: string };
+    const pksk = dynamoProvider.unmarshall(record.dynamodb?.Keys!) as {
+      pk: string,
+      sk: string
+    };
     let tourPost;
     let shouldbeDeleted;
     if (record.eventName === 'REMOVE') {
@@ -302,7 +345,9 @@ async function handleTopCommissionPosts(records: DynamoDBRecord[]): Promise<void
     } else if (record.dynamodb?.NewImage) {
       tourPost = dynamoProvider.unmarshall(record.dynamodb?.NewImage!) as TourPost;
       // Only store IN_PROCESS tour post
-      if (tourPost.status !== TourPostStatus.IN_PROCESS) { shouldbeDeleted = true; }
+      if (tourPost.status !== TourPostStatus.IN_PROCESS) {
+        shouldbeDeleted = true;
+      }
     }
 
     return {
