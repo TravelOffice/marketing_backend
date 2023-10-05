@@ -1,27 +1,33 @@
-import { DynamoDBRecord, DynamoDBStreamEvent } from 'aws-lambda';
-import { dynamoProvider } from 'core';
-import { DdbModelChangeType } from './models/dataSubscription/DdbModelChangeType';
+import { DynamoDBStreamEvent } from 'aws-lambda';
+import * as _ from 'lodash';
+import TenantSaleAnalyzer from './analyzer/TenantSaleAnalyzer';
+import { RequiredDynamoDBRecord } from './types/dynamodb';
 import logger from './utils/logger';
-
-/* eslint-disable */
+import {
+  getTenant,
+  isNeededHandleRecord,
+  toPkSk,
+  toUniquePkSkEventName,
+} from './utils/streamRecords';
 
 /**
- * Get model change type from DynamoDB record
- * @param record DynamoDB record
- * @returns Model change type
+ * Analyze lead records to update statistic data
+ * With each tenant, following metrics will be analyzed:
+ * 1. Number of leads
+ *
+ *
+ * @param records Lead records to handle
  */
-function getModelChangeType(record: DynamoDBRecord): DdbModelChangeType | undefined {
-  // Extract data from record
-  const { dynamodb, eventName } = record;
-  if (!dynamodb || !dynamodb.Keys) {
-    return undefined;
-  }
-  const marshalledKeys = dynamoProvider.unmarshall(dynamodb.Keys);
-  const { pk, sk } = marshalledKeys;
+async function analyzeTenantSaleData(
+  tenant: string,
+  groupedRecords: RequiredDynamoDBRecord[],
+): Promise<void> {
+  // Analyze sale data including leads and bookings
+  const tenantAnalyzer = new TenantSaleAnalyzer(tenant, groupedRecords);
+  await tenantAnalyzer.analyze();
 
-  logger.log(`Data change type ${eventName} with keys pk: ${pk}, sk: ${sk}`);
-
-  return 'OTHER';
+  // Store analyzed data to database
+  // const tenantSaleStatistic = tenantAnalyzer.analyzedData;
 }
 
 // eslint-disable-next-line import/prefer-default-export
@@ -34,12 +40,39 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
       logger.log('No DynamoDB records to handle');
     }
 
+    // Transform records to make sure that:
+    // 1. Records are sorted by SequenceNumber
+    // 2. Records are sorted by pk and sk
+    // 3. Records are unique by pk#sk
+    // Only need to handle newest records of the same model and event type type
+    // combined by pk, sk and event name
+    const compactedRecords = _.remove(records, isNeededHandleRecord) as RequiredDynamoDBRecord[];
+    const transformedRecords = _.chain(compactedRecords)
+      .orderBy([
+        (record) => {
+          const { dynamodb } = record;
+          return dynamodb!.SequenceNumber;
+        },
+        toPkSk,
+      ], ['desc', 'asc'])
+      .sortedUniqBy(toUniquePkSkEventName).value();
+
+    // Group records by tenant
+    const groupedbyTenantRecords = _.groupBy(transformedRecords, getTenant);
+    logger.log(`Records by group need to handle ${JSON.stringify(groupedbyTenantRecords, null, 5)}`);
+
     // Start handling DynamoDB records to update statistic data
+    // Data of all the tenants will be handled in parallel
     // There are two kinds of statistic data:
     // 1. Statistic data of the lead
     // 2. Statistic data of the booking
     // * Lambda handles maximum 100 (Batch size setup by Lambda trigger) records at a time
     // Number of records is large enough to reduce infrastructure cost and improve performance
+    const tenantHandlerPromises = Object.keys(groupedbyTenantRecords).map(async (tenant) => {
+      const tenantRecords = groupedbyTenantRecords[tenant];
+      await analyzeTenantSaleData(tenant, tenantRecords);
+    });
+    await Promise.all(tenantHandlerPromises);
   } catch (error) {
     logger.log(`Error occurred when handling DynamoDB Stream event ${error}`);
   }
