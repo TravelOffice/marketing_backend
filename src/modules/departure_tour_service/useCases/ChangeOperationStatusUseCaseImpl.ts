@@ -1,21 +1,23 @@
-import { getEnv } from 'get-env';
 import { helper } from 'core';
 import {
   bookingRepository,
   customerRepository,
   databaseRepository,
   departureTourRepository,
-  userRepository,
+  paymentVoucherRepository,
 } from '../repositories';
 import logger from '../utils/logger';
-import sendEmail from '../utils/email';
-import { BOOKING_STATUS_INDEX, OPERATOR_MANAGER_ROLE } from '../utils/constants';
-import { MailTemplate } from '../models/MailTemplate';
+import { BOOKING_STATUS_INDEX } from '../utils/constants';
 import { DepartureTour, operationStatusTransitionRules } from '../models/DepartureTour';
 import { ChangeOperationStatusUseCase } from './interfaces/ChangeOperationStatusUseCase';
 import TourOperationStatus from '../models/TourOperationstatus';
 import { LatestBooking } from '../models/customer/Customer';
 import { Booking } from '../models/booking/Booking';
+import {
+  calculateCostOfDepartureTour,
+  calculateRevenueOfDepartureTour,
+  sendEmailNotiTourStatusChanged,
+} from '../utils/departureTourUtils';
 
 export default class ChangeOperationStatusUseCaseImpl implements ChangeOperationStatusUseCase {
   /**
@@ -30,11 +32,9 @@ export default class ChangeOperationStatusUseCaseImpl implements ChangeOperation
     tenantId: string,
     departureTourId: string,
     toOperationStatus: TourOperationStatus,
-  ) => {
-    // Retrieve the departure tour based on the tenantId and ID
+  ): Promise<DepartureTour> => {
+    // Retrieve the departure tour based on the tenantId and departureTourId
     const departureTour = await departureTourRepository.get(tenantId, departureTourId);
-
-    // Validate departure tour information
     if (!departureTour) {
       throw new Error(`Departure tour ${departureTourId} does not exist!`);
     }
@@ -42,7 +42,6 @@ export default class ChangeOperationStatusUseCaseImpl implements ChangeOperation
     // Return the departure tour as it is
     // if the departure tour is already in the given operation status
     const currentOperationStatus = departureTour.operationStatus;
-
     if (currentOperationStatus === toOperationStatus) {
       return helper.excludeDataFromObject(departureTour) as DepartureTour;
     }
@@ -54,35 +53,22 @@ export default class ChangeOperationStatusUseCaseImpl implements ChangeOperation
     logger.log('Departure tour information validated successfully.');
 
     // Change the operation of the departure tour
-    const updatedDepartureTour = await departureTourRepository.changeOperationStatus(
+    let updatedDepartureTour = await departureTourRepository.changeOperationStatus(
       tenantId,
       departureTourId,
       toOperationStatus,
     );
+    logger.log(`Operation status of departure tour ${departureTourId} changed to ${toOperationStatus} successfully.`);
 
-    logger.log(`Operation status of d tour ${departureTourId} changed to ${toOperationStatus} successfully.`);
-
-    // Notify the change to the operator manager
-    const operatorManagers = await userRepository.listByRole(tenantId, OPERATOR_MANAGER_ROLE);
-
-    // Retrieve the user attributes based on the tenantId and assigneeId
+    // Send email to notify assignee and operator manager
     if (departureTour.assigneeId) {
-      const assignee = await userRepository.getUserAttributes(tenantId, departureTour.assigneeId);
-      const departureTourUrl = `${tenantId}.${getEnv('DEPARTURE_TOUR_URL')}/${departureTourId}`;
-      if (!assignee) {
-        throw new Error(`User ${departureTour.assigneeId} does not exist!`);
-      }
-
-      // Send mail to Operator manager
-      // TODO: In the future, tenants can configure the mail template
-      const mail: MailTemplate = {
-        toAddresses: [assignee.email],
-        ccAddresses: operatorManagers.map((item) => item.email),
-        subject: `Operate departure tour [${departureTourId}]`,
-        text: `The departure tour [${departureTourId}] has been transited to new state`, // For non-html client
-        html: `<p>The operational status of departure tour [${departureTourId}] has been changed from ${currentOperationStatus} to ${toOperationStatus}</p><a href="${departureTourUrl}">Details</a>`, // For html client
-      };
-      await sendEmail(getEnv('NO_REPLY_DEFAULT_EMAIL'), mail);
+      await sendEmailNotiTourStatusChanged(
+        tenantId,
+        departureTour,
+        departureTour.assigneeId,
+        currentOperationStatus,
+        toOperationStatus,
+      );
     }
 
     if (toOperationStatus === TourOperationStatus.COMPLETED) {
@@ -103,73 +89,115 @@ export default class ChangeOperationStatusUseCaseImpl implements ChangeOperation
         } as Booking;
       });
 
-      const bookingsWithCustomer = bookingsWithPayment.filter(
-        (booking) => booking.customerId,
-      );
-
-      // Filter and process bookings with new customers
-      let bookingsWithPotentialCustomer = bookingsWithPayment.filter(
-        (item) => !item.customerId,
-      );
-
-      // Determine the quantity of new customers
-      const quantityCustomer = bookingsWithPotentialCustomer.length;
-      // Generate codes for new customers
-      let currentCode = await customerRepository.generateCustomerCode(
+      updatedDepartureTour = await this.updateRevenueAndProfitOfDepartureTour(
         tenantId,
-        quantityCustomer,
+        departureTourId,
+        bookingsWithPayment,
       );
 
-      // Update bookings and customers with generated codes
-      bookingsWithPotentialCustomer = bookingsWithPotentialCustomer.map((booking: Booking) => {
-        const code = currentCode.toString();
-        currentCode -= 1;
-        const latestBooking: LatestBooking = {
-          id: booking.code,
-          creatorId: booking.creatorId!,
-          creatorName: booking.creatorName!,
-          createdAt: booking.createdAt!,
-        };
-        return {
-          ...booking,
-          customerId: code,
-          customer: {
-            ...booking.customer,
-            code,
-            latestBooking,
-            creatorId: booking.creatorId,
-            creatorName: booking.creatorName,
-          },
-        } as Booking;
-      });
-
-      // Extract new customers and updating bookings
-      const newCustomers = bookingsWithPotentialCustomer.map((booking) => booking.customer!);
-      const updatingBookings = bookingsWithPotentialCustomer.map((booking) => {
-        const { customer, ...rest } = booking;
-        return rest;
-      }).concat(bookingsWithCustomer);
-
-      // Build batch write requests for customer and booking updates
-      const customersPutRequest = customerRepository.buildBatchWriteCustomers(
-        tenantId,
-        newCustomers,
-      );
-      const bookingsPutRequest = bookingRepository.buildBatchWriteBookings(
-        tenantId,
-        updatingBookings,
-      );
-
-      // Logging: Notify the start of the customer and booking updates
-      logger.log('Updating new customers and associated bookings.');
-
-      // Execute the batch write requests to update customers and bookings
-      await databaseRepository.executeBatchWrite(customersPutRequest.concat(bookingsPutRequest));
-
-      // Logging: Notify the successful completion of customer and booking updates
-      logger.log('New customers and associated bookings updated successfully.');
+      // Update bookings and customers
+      await this.updateBookingsWithPotentialCustomers(tenantId, bookingsWithPayment);
     }
 
     return helper.excludeDataFromObject(updatedDepartureTour) as DepartureTour;
+  };
+
+  private updateRevenueAndProfitOfDepartureTour = async (
+    tenantId: string,
+    departureTourId: string,
+    bookingsWithPayment: Booking[],
+  ): Promise<DepartureTour> => {
+    // Calculate total revenue of departure tour
+    // Total revenue = sum of total payment of bookings
+    const totalRevenue = calculateRevenueOfDepartureTour(bookingsWithPayment);
+
+    // Calculate total cost of departure tour from payment vouchers
+    const paymentVouchersOfTour = await paymentVoucherRepository.listByTour(
+      tenantId,
+      departureTourId,
+    );
+    const totalCost = calculateCostOfDepartureTour(paymentVouchersOfTour);
+
+    // Calculate total profit of departure tour
+    // Total profit = total revenue - total cost
+    const totalProfit = totalRevenue - totalCost;
+
+    // Update total revenue and total profit of departure tour
+    return departureTourRepository.update(
+      tenantId,
+      departureTourId,
+      { totalRevenue, totalProfit, totalCost },
+    );
+  };
+
+  private updateBookingsWithPotentialCustomers = async (
+    tenantId: string,
+    bookingsWithPayment: Booking[],
+  ) => {
+    const bookingsWithCustomer = bookingsWithPayment.filter(
+      (booking) => booking.customerId,
+    );
+
+    // Filter and process bookings with new customers
+    let bookingsWithPotentialCustomer = bookingsWithPayment.filter(
+      (item) => !item.customerId,
+    );
+
+    // Determine the quantity of new customers
+    const quantityCustomer = bookingsWithPotentialCustomer.length;
+
+    // Generate codes for new customers
+    let currentCode = await customerRepository.generateCustomerCode(
+      tenantId,
+      quantityCustomer,
+    );
+
+    bookingsWithPotentialCustomer = bookingsWithPotentialCustomer.map((booking: Booking) => {
+      const code = currentCode.toString();
+      currentCode -= 1;
+      const latestBooking: LatestBooking = {
+        id: booking.code,
+        creatorId: booking.creatorId!,
+        creatorName: booking.creatorName!,
+        createdAt: booking.createdAt!,
+      };
+      return {
+        ...booking,
+        customerId: code,
+        customer: {
+          ...booking.customer,
+          code,
+          latestBooking,
+          creatorId: booking.creatorId,
+          creatorName: booking.creatorName,
+        },
+      } as Booking;
+    });
+
+    // Extract new customers and updating bookings
+    const newCustomers = bookingsWithPotentialCustomer.map((booking) => booking.customer!);
+    const updatingBookings = bookingsWithPotentialCustomer.map((booking) => {
+      const { customer, ...rest } = booking;
+      return rest;
+    }).concat(bookingsWithCustomer);
+
+    // Build batch write requests for customer and booking updates
+    const customersPutRequest = customerRepository.buildBatchWriteCustomers(
+      tenantId,
+      newCustomers,
+    );
+    const bookingsPutRequest = bookingRepository.buildBatchWriteBookings(
+      tenantId,
+      updatingBookings,
+    );
+
+    // Logging: Notify the start of the customer and booking updates
+    logger.log('Updating new customers and associated bookings.');
+
+    // Execute the batch write requests to update customers and bookings
+    await databaseRepository.executeBatchWrite(customersPutRequest.concat(bookingsPutRequest));
+
+    // Logging: Notify the successful completion of customer and booking updates
+    logger.log('New customers and associated bookings updated successfully.');
   };
 }

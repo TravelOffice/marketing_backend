@@ -3,9 +3,7 @@ import { leadRepository } from '../repositories';
 import { UpdateLeadUseCase } from './interfaces/UpdateLeadUseCase';
 import { UpdateLeadDto } from '../dto/UpdateLeadDto';
 import { Lead, LeadStatus } from '../models/Lead';
-import {
-  ASSIGNEE_INDEX, STATUS_INDEX, UPDATED_INDEX,
-} from '../utils/constants';
+import { ASSIGNEE_INDEX, STATUS_INDEX, UPDATED_INDEX } from '../utils/constants';
 import BaseRepositoryImpl from './BaseRepositoryImpl';
 
 export default class UpdateLeadUseCaseImpl extends BaseRepositoryImpl implements UpdateLeadUseCase {
@@ -26,6 +24,8 @@ export default class UpdateLeadUseCaseImpl extends BaseRepositoryImpl implements
     'startDate',
     'type',
     'tourType',
+    'endingLocationName',
+    'endingLocationCode',
   ];
 
   disallowedUpdateStatus = [

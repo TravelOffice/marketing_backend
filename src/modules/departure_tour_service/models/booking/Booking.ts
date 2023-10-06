@@ -76,7 +76,7 @@ interface DdbBookingModel extends BaseDdbModel {
   promoCode?: string,
   discountMoney?: number,
   discountPercent?: number,
-  totalPayment?: number,
+  totalPayment: number,
   // role
   totalPaid?: number,
   description?: string,

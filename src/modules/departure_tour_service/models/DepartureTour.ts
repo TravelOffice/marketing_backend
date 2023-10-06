@@ -14,6 +14,7 @@ export interface DepartureTour extends TourTemplate {
   tourPlan?: TourPlan,
   totalRevenue: number,
   totalProfit: number,
+  totalCost: number
 }
 
 export const operationStatusTransitionRules = [

@@ -10,6 +10,8 @@ import { DepartureTourRepository } from './interfaces/DepartureTourRepository';
 import { UserRepository } from './interfaces/UserRepository';
 import { DatabaseRepository } from './interfaces/DatabaseRepository';
 import DatabaseRepositoryImpl from './DatabaseRepositoryImpl';
+import { PaymentVoucherRepository } from './interfaces/PaymentVoucherRepository';
+import PaymentVoucherRepositoryImpl from './PaymentVoucherRepositoryImpl';
 
 interface Repositories {
   departureTourRepository: DepartureTourRepository,
@@ -17,6 +19,7 @@ interface Repositories {
   bookingRepository: BookingRepository,
   customerRepository: CustomerRepository,
   databaseRepository: DatabaseRepository,
+  paymentVoucherRepository: PaymentVoucherRepository
 }
 
 const repositories: Repositories = {
@@ -25,6 +28,7 @@ const repositories: Repositories = {
   bookingRepository: new BookingRepositoryImpl(),
   customerRepository: new CustomerRepositoryImpl(),
   databaseRepository: new DatabaseRepositoryImpl(),
+  paymentVoucherRepository: new PaymentVoucherRepositoryImpl(),
 };
 
 // TODO: Remove below line if there are two or more repository
@@ -35,4 +39,5 @@ export const {
   bookingRepository,
   customerRepository,
   databaseRepository,
+  paymentVoucherRepository,
 } = repositories;

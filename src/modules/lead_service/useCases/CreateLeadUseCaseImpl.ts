@@ -39,7 +39,7 @@ export default class CreateLeadUseCaseImpl extends BaseRepositoryImpl implements
 
     // TODO: Logging and notification
 
-    const lead = await leadRepository.create(currentUser.tenant, leadToAdd);
+    const lead = await leadRepository.create(currentUser.tenant, leadToAdd as Lead);
     return helper.excludeDataFromObject(lead) as Lead;
   };
 
@@ -64,9 +64,13 @@ export default class CreateLeadUseCaseImpl extends BaseRepositoryImpl implements
     const source = await this.getSource(tenant, sourceId);
     const assignee = await this.getAssignee(tenant, assigneeId);
     const tourTemplate = await this.getTourTemplate(tenant, tourTemplateId);
-    const location = await this.getTourLocation(tenant, departure);
+    if (!tourTemplate) {
+      throw new Error(`Tour template ${tourTemplateId} does not exist!`);
+    }
+    const startingLocation = await this.getTourLocation(tenant, departure);
+    const endingLocation = await this.getTourLocation(tenant, tourTemplate.endingLocation);
 
-    const leadToAdd: Lead = {
+    const leadToAdd: Partial<Lead> = {
       code: leadCode,
       lsi1: `${CREATED_AT_INDEX}#${now.toString()}`,
       lsi2: `${UPDATED_AT_INDEX}#${now.toString()}`,
@@ -82,8 +86,10 @@ export default class CreateLeadUseCaseImpl extends BaseRepositoryImpl implements
       assigneeName: assignee ? `${assignee.firstName} ${assignee.lastName}` : undefined,
       tourTemplateId: tourTemplate?.code,
       tourTemplateName: tourTemplate?.name,
+      endingLocationName: endingLocation.name,
+      endingLocationCode: endingLocation.code,
       type: tourTemplate ? tourTemplate.type : type,
-      departureName: location.name,
+      departureName: startingLocation.name,
       leadStatus: status,
       tags: [],
       createdAt: now,
