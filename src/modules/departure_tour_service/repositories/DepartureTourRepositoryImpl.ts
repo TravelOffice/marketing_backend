@@ -121,7 +121,11 @@ export default class DepartureTourRepositoryImpl implements DepartureTourReposit
    * @param departureTour The updated DepartureTour object.
    * @returns The updated DepartureTour.
    */
-  update = async (tenantId: string, departureTourId: string, departureTour: DepartureTour) => {
+  update = async (
+    tenantId: string,
+    departureTourId: string,
+    departureTour: Partial<DepartureTour>,
+  ) => {
     const pk = `${TENANT_INDEX}#${tenantId}#${DEPARTURE_TOUR_INDEX}`;
     const sk = `${departureTourId}`;
 

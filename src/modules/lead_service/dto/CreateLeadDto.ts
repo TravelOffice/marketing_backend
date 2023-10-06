@@ -16,5 +16,7 @@ export type CreateLeadDto = Pick<Lead,
   'departure' |
   'startDate' |
   'type' |
-  'tourType'
+  'tourType' |
+  'endingLocationName' |
+  'endingLocationCode'
 >

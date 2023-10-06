@@ -10,7 +10,7 @@ export interface DepartureTourRepository {
   update: (
     tenantId: string,
     departureTourId: string,
-    departureTour: DepartureTour
+    departureTour: Partial<DepartureTour>
   ) => Promise<DepartureTour>
   delete: (tenantId: string, departureTourId: string) => Promise<string>
   changeAssignee: (

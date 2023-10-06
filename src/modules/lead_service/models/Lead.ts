@@ -43,6 +43,8 @@ export interface Lead extends BaseDdbModel {
   description?: string,
   numberOfAdultPassengers: number,
   numberOfChildrenPassengers: number,
+  endingLocationName: string,
+  endingLocationCode: string,
 
   // Manage
   leadStatus: LeadStatus,
@@ -53,7 +55,7 @@ export interface Lead extends BaseDdbModel {
   assigneeName?: string,
   sourceId: string,
   sourceName: string,
-  cancelledReason?: string,
+  cancelledReason?: string
 }
 
 export const CHANGING_STATUS_RULES = [

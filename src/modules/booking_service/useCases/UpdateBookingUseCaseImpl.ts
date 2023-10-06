@@ -7,6 +7,7 @@ import {
 import { UpdateBookingUseCase } from './interfaces/UpdateBookingUseCase';
 import { UpdateBookingDto } from '../models/dto/UpdateBookingDto';
 import { DEPARTURE_TOUR_INDEX } from '../utils/constants';
+import { calculateRevenue } from '../utils/bookingUtils';
 
 export default class UpdateBookingUseCaseImpl implements UpdateBookingUseCase {
   allowedUpdatingKeys: (keyof UpdateBookingDto)[] = [
@@ -81,7 +82,7 @@ export default class UpdateBookingUseCaseImpl implements UpdateBookingUseCase {
 
     const props = Object.keys(updateBookingDto);
 
-    const { assigneeId, sourceId } = updateBookingDto;
+    const { assigneeId, sourceId, services } = updateBookingDto;
 
     const now = Date.now();
 
@@ -126,6 +127,9 @@ export default class UpdateBookingUseCaseImpl implements UpdateBookingUseCase {
       dataToUpdate.sourceName = source.name;
     }
     // TODO: Fill other fields
+    if (services) {
+      dataToUpdate.totalPayment = calculateRevenue(services);
+    }
 
     return dataToUpdate;
   }
