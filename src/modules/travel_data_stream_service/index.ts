@@ -1,6 +1,5 @@
 import { DynamoDBStreamEvent } from 'aws-lambda';
 import * as _ from 'lodash';
-import TenantSaleAnalyzer from './analyzer/TenantSaleAnalyzer';
 import { RequiredDynamoDBRecord } from './types/dynamodb';
 import logger from './utils/logger';
 import {
@@ -18,16 +17,11 @@ import {
  *
  * @param records Lead records to handle
  */
-async function analyzeTenantSaleData(
+async function handlerTenantHistoricalChanges(
   tenant: string,
   groupedRecords: RequiredDynamoDBRecord[],
 ): Promise<void> {
-  // Analyze sale data including leads and bookings
-  const tenantAnalyzer = new TenantSaleAnalyzer(tenant, groupedRecords);
-  await tenantAnalyzer.analyze();
-
-  // Store analyzed data to database
-  // const tenantSaleStatistic = tenantAnalyzer.analyzedData;
+  logger.log(`Handle historical changes for tenant ${tenant} ${groupedRecords}`);
 }
 
 // eslint-disable-next-line import/prefer-default-export
@@ -70,7 +64,7 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
     // Number of records is large enough to reduce infrastructure cost and improve performance
     const tenantHandlerPromises = Object.keys(groupedbyTenantRecords).map(async (tenant) => {
       const tenantRecords = groupedbyTenantRecords[tenant];
-      await analyzeTenantSaleData(tenant, tenantRecords);
+      await handlerTenantHistoricalChanges(tenant, tenantRecords);
     });
     await Promise.all(tenantHandlerPromises);
   } catch (error) {

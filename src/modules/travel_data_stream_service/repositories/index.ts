@@ -1,16 +1,16 @@
-import TenantSaleStatisticRepositoryImpl from './TenantSaleStatisticRepositoryImpl';
-import { TenantSaleStatisticRepository } from './interfaces/TenantSaleStatisticRepository';
+import HistoryRepositoryImpl from './HistoryRepositoryImpl';
+import { HistoryRepository } from './interfaces/HistoryRepository';
 
 interface Repositories {
-  tenantSaleStatisticRepository: TenantSaleStatisticRepository,
+  historyRepository: HistoryRepository,
 }
 
 const repositories: Repositories = {
-  tenantSaleStatisticRepository: new TenantSaleStatisticRepositoryImpl(),
+  historyRepository: new HistoryRepositoryImpl(),
 };
 
 // TODO: Remove below line if there are two or more repository
 // eslint-disable-next-line import/prefer-default-export
 export const {
-  tenantSaleStatisticRepository,
+  historyRepository,
 } = repositories;
