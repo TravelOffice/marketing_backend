@@ -1,6 +1,7 @@
 import { FilteringDuration } from '../../models/FilteringDuration';
 import {
   FavouriteLocationStatistic,
+  FavouriteTourStatistic,
   FillingRatioTourStatistic,
   ProficiencyTourStatistic,
 } from '../../models/TenantStatistic';
@@ -19,6 +20,11 @@ export interface TenantStatisticRepository {
     tenant: string,
     filteringDuration: FilteringDuration,
   ): Promise<ProficiencyTourStatistic[]>;
+
+  getFavouriteTours(
+    tenant: string,
+    filteringDuration: FilteringDuration
+  ): Promise<FavouriteTourStatistic[]>;
 
   geFavouriteLocations(
     tenant: string,
