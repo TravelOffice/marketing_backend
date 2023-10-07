@@ -8,4 +8,5 @@ export interface BaseDdbModel {
   lsi5?: string,
   createdAt?: number,
   updatedAt?: number,
+
 }

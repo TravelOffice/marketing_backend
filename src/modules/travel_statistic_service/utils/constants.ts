@@ -2,20 +2,28 @@ export const SUCCESS = 'Successfully!';
 
 export const FAILED = 'Failed!';
 
-export const TENANT_INDEX = 'TN';
+export const TENANT_INDEX = 'TENANT';
 
-export const REVENUE_INDEX = 'RV';
+export const TENANT_STATISTIC_INDEX = 'TN';
 
-export const PROFIT_INDEX = 'PF';
+export const SALE_STATISTIC_INDEX = 'S';
 
-export const LEAD_INDEX = 'L';
+export const REVENUE_STATISTIC_INDEX = 'RV';
 
-export const BOOKING_INDEX = 'BK';
+export const PROFIT_STATISTIC_INDEX = 'PF';
 
-export const TOUR_TEMPLATE_INDEX = 'TT';
+export const LEAD_INDEX = 'LEAD';
 
-export const LOCATION_INDEX = 'LC';
+export const BOOKING_INDEX = 'BOOKING';
 
-export const DEPARTURE_TOUR_INDEX = 'DT';
+export const TOUR_TEMPLATE_STATISTIC_INDEX = 'TT';
 
-export const PROFICIENCY_INDEX = 'PRF';
+export const LOCATION_STATISTIC_INDEX = 'LC';
+
+export const DEPARTURE_TOUR_INDEX = 'DEPARTURE_TOUR';
+
+export const DEPARTURE_TOUR_STATISTIC_INDEX = 'DT';
+
+export const PROFICIENCY_STATISTIC_INDEX = 'PRF';
+
+export const FILLING_RATIO_STATISTIC_INDEX = 'FR';
