@@ -1,7 +1,7 @@
 import { DynamoDBRecord } from 'aws-lambda';
 import { dynamoProvider, logger } from 'core';
 import { DdbModelChangeType } from '../models/dataSubscription/DdbModelChangeType';
-import { isBooking, isLead } from './dynamodb';
+import { isBooking, isDepartureTour, isLead } from './dynamodb';
 import { RequiredDynamoDBRecord } from '../types/dynamodb';
 
 /**
@@ -23,8 +23,14 @@ export function getModelChangeType(record: DynamoDBRecord): DdbModelChangeType |
 
   if (isLead(pk)) {
     return 'LEAD';
-  } if (isBooking(pk)) {
+  }
+
+  if (isBooking(pk)) {
     return 'BOOKING';
+  }
+
+  if (isDepartureTour(pk)) {
+    return 'DEPARTURE_TOUR';
   }
 
   return 'OTHER';

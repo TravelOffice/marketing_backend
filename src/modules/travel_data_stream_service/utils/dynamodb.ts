@@ -1,5 +1,6 @@
 import {
   BOOKING_INDEX,
+  DEPARTURE_TOUR_INDEX,
   LEAD_INDEX,
   TENANT_INDEX,
 } from './constants';
@@ -11,5 +12,10 @@ export function isBooking(pk: string): boolean {
 
 export function isLead(pk: string): boolean {
   const regex = new RegExp(`^${TENANT_INDEX}#.*#${LEAD_INDEX}$`);
+  return regex.test(pk);
+}
+
+export function isDepartureTour(pk: string): boolean {
+  const regex = new RegExp(`^${TENANT_INDEX}#.*#${DEPARTURE_TOUR_INDEX}$`);
   return regex.test(pk);
 }
