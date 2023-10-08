@@ -7,5 +7,12 @@ export default class GetTotalBookingOfSaleUseCaseImpl implements GetTotalBooking
     tenant: string,
     saleId: string,
     filteringDuration?: FilteringDuration,
-  ): Promise<number> => saleStatisticRepository.getTotalLead(tenant, saleId, filteringDuration);
+  ): Promise<number> => {
+    const records = await saleStatisticRepository.getBookingStatistic(
+      tenant,
+      saleId,
+      filteringDuration,
+    );
+    return records.length;
+  };
 }
