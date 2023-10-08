@@ -1,15 +1,16 @@
 import { FilteringDuration } from '../../models/FilteringDuration';
+import { BookingStatistic, LeadStatistic } from '../../models/TenantStatistic';
 
 export interface SaleStatisticRepository {
-  getTotalLead(
+  getLeadStatistic(
     tenant: string,
     saleId: string,
     filteringDuration?: FilteringDuration,
-  ): Promise<number>;
+  ): Promise<LeadStatistic[]>;
 
-  getTotalBooking(
+  getBookingStatistic(
     tenant: string,
     saleId: string,
     filteringDuration?: FilteringDuration,
-  ): Promise<number>;
+  ): Promise<BookingStatistic[]>;
 }

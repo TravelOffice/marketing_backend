@@ -1,7 +1,0 @@
-enum TourOperationStatus {
-  WAITING_FOR_OPERATION = 'WAITING_FOR_OPERATION',
-  PROCESSING = 'PROCESSING',
-  TRANSFERRED = 'TRANSFERRED',
-  COMPLETED = 'COMPLETED',
-}
-export default TourOperationStatus;

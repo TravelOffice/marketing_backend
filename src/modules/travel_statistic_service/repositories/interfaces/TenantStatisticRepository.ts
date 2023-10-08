@@ -1,35 +1,24 @@
 import { FilteringDuration } from '../../models/FilteringDuration';
 import {
-  FavouriteLocationStatistic,
-  FavouriteTourStatistic,
-  FillingRatioTourStatistic,
-  ProficiencyTourStatistic,
+  BookingStatistic,
+  DepartureTourStatistic,
+  FillingRatioStatistic,
+  LeadStatistic,
 } from '../../models/TenantStatistic';
 
 export interface TenantStatisticRepository {
 
-  getTotalRevenue(tenant: string, filteringDuration?: FilteringDuration): Promise<number>;
-
-  getTotalProfit(tenant: string, filteringDuration?: FilteringDuration): Promise<number>;
-
-  getTotalLead(tenant: string, filteringDuration?: FilteringDuration): Promise<number>;
-
-  getTotalBooking(tenant: string, filteringDuration?: FilteringDuration): Promise<number>;
-
-  getProficiencyTours(
+  getDepartureTourStatistic(
     tenant: string,
-    filteringDuration: FilteringDuration,
-  ): Promise<ProficiencyTourStatistic[]>;
+    filteringDuration?: FilteringDuration,
+  ): Promise<DepartureTourStatistic[]>;
 
-  getFavouriteTours(
+  getLeadStatistic(tenant: string, filteringDuration?: FilteringDuration): Promise<LeadStatistic[]>;
+
+  getBookingStatistic(
     tenant: string,
-    filteringDuration: FilteringDuration
-  ): Promise<FavouriteTourStatistic[]>;
+    filteringDuration?: FilteringDuration,
+  ): Promise<BookingStatistic[]>;
 
-  geFavouriteLocations(
-    tenant: string,
-    filteringDuration: FilteringDuration,
-  ): Promise<FavouriteLocationStatistic[]>;
-
-  getFillingRatioOfTours(tenant: string): Promise<FillingRatioTourStatistic[]>;
+  getFillingRatioStatistic(tenant: string): Promise<FillingRatioStatistic[]>;
 }

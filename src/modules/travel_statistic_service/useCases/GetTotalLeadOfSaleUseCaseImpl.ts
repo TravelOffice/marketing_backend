@@ -7,5 +7,12 @@ export default class GetTotalLeadOfSaleUseCaseImpl implements GetTotalLeadOfSale
     tenant: string,
     saleId: string,
     filteringDuration?: FilteringDuration,
-  ): Promise<number> => saleStatisticRepository.getTotalLead(tenant, saleId, filteringDuration);
+  ): Promise<number> => {
+    const records = await saleStatisticRepository.getLeadStatistic(
+      tenant,
+      saleId,
+      filteringDuration,
+    );
+    return records.length;
+  };
 }
