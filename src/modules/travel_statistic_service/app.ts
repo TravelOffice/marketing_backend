@@ -1,9 +1,19 @@
 import cors from 'cors';
 import express, { NextFunction, Request, Response } from 'express';
 import compression from 'compression';
+import { getCurrentUserInfo } from 'decode-token';
 import wrapResponse from './utils/wrapResponse';
 import { FAILED, SUCCESS } from './utils/constants';
 import logger from './utils/logger';
+import validate, { getStatisticValidator } from './utils/validator';
+import { MetricName } from './models/MetricName';
+import {
+  getConversionRatioUseCase,
+  getTotalBookingOfSaleUseCase,
+  getTotalLeadOfSaleUserCase,
+  getTotalProfitOfTenantUseCase,
+  getTotalRevenueOfTenantUseCase,
+} from './useCases';
 
 const app = express();
 
@@ -24,10 +34,66 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
   next();
 });
 
-app.get('/statistic', async (req: Request, res: Response) => {
+app.get('/statistic/tenant', getStatisticValidator(), async (req: Request, res: Response) => {
   try {
-    logger.log('[GET] Get statistic Successfully');
-    res.json(wrapResponse(SUCCESS));
+    validate(req);
+    const { tenant } = getCurrentUserInfo(req.headers.authorization!);
+    const { metricName, startTime, endTime } = req.query;
+    let result;
+    let filteringDuration;
+    if (startTime && endTime) {
+      filteringDuration = {
+        startTime: startTime as string,
+        endTime: endTime as string,
+      };
+    }
+    switch (metricName as MetricName) {
+      case 'totalRevenueOfTenant':
+        result = await getTotalRevenueOfTenantUseCase.invoke(tenant, filteringDuration);
+        break;
+      case 'totalProfitOfTenant':
+        result = await getTotalProfitOfTenantUseCase.invoke(tenant, filteringDuration);
+        break;
+      case 'conversionRatioOfTenant':
+        result = await getConversionRatioUseCase.invoke(tenant, filteringDuration);
+        break;
+      default:
+        break;
+    }
+    logger.log(`[GET] Get statistic ${metricName} Successfully`);
+    res.json(wrapResponse(SUCCESS, result));
+  } catch (error: any) {
+    logger.log(`[GET] Error ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.get('/statistic/sales/:id', getStatisticValidator(), async (req: Request, res: Response) => {
+  try {
+    validate(req);
+    const { tenant } = getCurrentUserInfo(req.headers.authorization!);
+    const { id: saleId } = req.params;
+    const { metricName, startTime, endTime } = req.query;
+    let result;
+    let filteringDuration;
+    if (startTime && endTime) {
+      filteringDuration = {
+        startTime: startTime as string,
+        endTime: endTime as string,
+      };
+    }
+    switch (metricName as MetricName) {
+      case 'totalLeadOfSale':
+        result = await getTotalLeadOfSaleUserCase.invoke(tenant, saleId, filteringDuration);
+        break;
+      case 'totalBookingOfSale':
+        result = await getTotalBookingOfSaleUseCase.invoke(tenant, saleId, filteringDuration);
+        break;
+      default:
+        break;
+    }
+    logger.log(`[GET] Get statistic ${metricName} Successfully`);
+    res.json(wrapResponse(SUCCESS, result));
   } catch (error: any) {
     logger.log(`[GET] Error ${error}`);
     res.json(wrapResponse(FAILED, undefined, error.message));
