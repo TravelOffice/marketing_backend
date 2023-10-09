@@ -12,7 +12,6 @@ export default class GetTotalRevenueOfTenantUseCaseImpl implements GetTotalReven
       tenant,
       filteringDuration,
     );
-    console.log(tenant);
     const totalRevenue = records.reduce((a, b) => a + b.rv, 0);
     return {
       totalRevenue,

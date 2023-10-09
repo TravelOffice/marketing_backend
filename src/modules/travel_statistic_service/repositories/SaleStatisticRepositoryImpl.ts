@@ -35,7 +35,7 @@ export default class SaleStatisticRepositoryImpl implements SaleStatisticReposit
       return dynamoProvider.query<T>({
         TableName: await getAwsSecretValue('DYNAMO_STATISTIC_TABLE'),
         IndexName: 'Index2',
-        KeyConditionExpression: 'pk = :pk AND lsi1 BETWEEN :start AND :end',
+        KeyConditionExpression: 'pk = :pk AND lsi2 BETWEEN :start AND :end',
         ExpressionAttributeValues: {
           ':pk': pk,
           ':start': `${saleId}#${startTime}`,
@@ -47,10 +47,10 @@ export default class SaleStatisticRepositoryImpl implements SaleStatisticReposit
     return dynamoProvider.query<T>({
       TableName: await getAwsSecretValue('DYNAMO_STATISTIC_TABLE'),
       IndexName: 'Index2',
-      KeyConditionExpression: 'pk = :pk ADN begins_with(lsi1, :lsi1)',
+      KeyConditionExpression: 'pk = :pk AND begins_with(lsi2, :lsi2)',
       ExpressionAttributeValues: {
         ':pk': pk,
-        ':lsi1': `${saleId}#`,
+        ':lsi2': `${saleId}#`,
       },
     });
   }

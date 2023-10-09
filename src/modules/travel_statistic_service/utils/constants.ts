@@ -11,3 +11,5 @@ export const BOOKING_INDEX = 'BK';
 export const DEPARTURE_TOUR_INDEX = 'DT';
 
 export const FILLING_RATIO_INDEX = 'FR';
+
+export const DEFAULT_TOP_COUNT = 5;

@@ -7,8 +7,15 @@ export interface BookingStatistic extends BaseDdbModel {
   // lsi2 = <saleId>#<createdAt>
   ttId: string, // tour template ID
   ttN: string, // tour template name
+  ttP: number, // total payment of booking
 }
 
 export interface TotalBookingMetricResponse {
   totalBooking: number,
+}
+
+export interface FavouriteTour {
+  tourTemplateId: string,
+  tourTemplateName: string,
+  numberOfBooking: number,
 }
