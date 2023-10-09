@@ -46,6 +46,15 @@ export default class ConfirmBookingUseCaseImpl implements ConfirmBookingUseCase 
     };
     const updatedBooking = await bookingRepository.confirm(tenant, bookingId, dataToUpdate);
 
+    // Update filling ratio of departure tour
+    const { visitorCount } = departureTour;
+    const totalConfirmedPax = (booking.passengers?.length || 0) + departureTour.totalConfirmedPax;
+    const departureTourToUpdate = {
+      fillingRatio: Math.round((totalConfirmedPax / visitorCount) * 100),
+      totalConfirmedPax,
+    };
+    await departureTourRepository.update(tenant, departureTourId, departureTourToUpdate);
+
     // Delete payment pending event bridge
     if (booking.bookingStatus === BookingStatusEnum.PAYMENT_PENDING) {
       const ruleName = `${tenant}-${bookingId}-${PAYMENT_PENDING_RULE}`;

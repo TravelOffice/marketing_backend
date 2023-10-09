@@ -10,7 +10,9 @@ export interface DepartureTour extends TourTemplate {
   assigneeId: string,
   assigneeName: string,
   operationStatus: TourOperationStatus,
-  operator?:string,
+  operator?: string,
+  fillingRatio: number, // The ratio of total confirmed pax to visitor count
+  totalConfirmedPax: number, // Number of passenger who has its booking status is CONFIRMED
 }
 
 export const operationStatusTransitionRules = [
