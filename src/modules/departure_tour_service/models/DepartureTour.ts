@@ -14,7 +14,9 @@ export interface DepartureTour extends TourTemplate {
   tourPlan?: TourPlan,
   totalRevenue: number,
   totalProfit: number,
-  totalCost: number
+  totalCost: number,
+  fillingRatio: number, // The ratio of total confirmed pax to visitor count
+  totalConfirmedPax: number, // Number of passenger who has its booking status is CONFIRMED
 }
 
 export const operationStatusTransitionRules = [
