@@ -5,12 +5,10 @@ import {
 } from '../utils/constants';
 import { FilteringDuration } from '../models/FilteringDuration';
 import { TenantStatisticRepository } from './interfaces/TenantStatisticRepository';
-import {
-  BookingStatistic,
-  DepartureTourStatistic,
-  FillingRatioStatistic,
-  LeadStatistic,
-} from '../models/TenantStatistic';
+import { DepartureTourStatistic } from '../models/DepartureTourStatistic';
+import { LeadStatistic } from '../models/LeadStatistic';
+import { BookingStatistic } from '../models/BookingStatistic';
+import { TourFillingRatioStatistic } from '../models/TourFillingRatioStatistic';
 
 export default class TenantStatisticRepositoryImpl implements TenantStatisticRepository {
   getDepartureTourStatistic = async (tenant: string, filteringDuration?: FilteringDuration) => {
@@ -30,7 +28,7 @@ export default class TenantStatisticRepositoryImpl implements TenantStatisticRep
 
   getFillingRatioStatistic = async (tenant: string, filteringDuration?: FilteringDuration) => {
     const pk = `${TENANT_INDEX}#${tenant}#${FILLING_RATIO_INDEX}`;
-    return this.queryStatistic<FillingRatioStatistic>(pk, filteringDuration);
+    return this.queryStatistic<TourFillingRatioStatistic>(pk, filteringDuration);
   };
 
   private async queryStatistic<T>(pk: string, filteringDuration?: FilteringDuration) {
@@ -38,7 +36,8 @@ export default class TenantStatisticRepositoryImpl implements TenantStatisticRep
       const { startTime, endTime } = filteringDuration;
       return dynamoProvider.query<T>({
         TableName: await getAwsSecretValue('DYNAMO_STATISTIC_TABLE'),
-        KeyConditionExpression: 'pk = :pk AND sk BETWEEN :start AND :end',
+        IndexName: 'Index1',
+        KeyConditionExpression: 'pk = :pk AND lsi1 BETWEEN :start AND :end',
         ExpressionAttributeValues: {
           ':pk': pk,
           ':start': startTime,
@@ -49,6 +48,7 @@ export default class TenantStatisticRepositoryImpl implements TenantStatisticRep
 
     return dynamoProvider.query<T>({
       TableName: await getAwsSecretValue('DYNAMO_STATISTIC_TABLE'),
+      IndexName: 'Index1',
       KeyConditionExpression: 'pk = :pk',
       ExpressionAttributeValues: {
         ':pk': pk,

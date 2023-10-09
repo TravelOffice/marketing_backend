@@ -1,7 +1,5 @@
 import { Request } from 'express';
-import {
-  param, ValidationError, validationResult,
-} from 'express-validator';
+import { query, ValidationError, validationResult } from 'express-validator';
 
 export default function validate(req: Request) {
   const errors = validationResult(req);
@@ -20,8 +18,10 @@ export default function validate(req: Request) {
   }
 }
 
-export function getOrganizationStatisticValidator() {
+export function getStatisticValidator() {
   return [
-    param('id').notEmpty().withMessage('Id is string value'),
+    query('metricName').notEmpty().withMessage('must be a non-string value'),
+    query('startTime').optional().custom((value) => !Number.isNaN(new Date(value))).withMessage('must be a valid date string'),
+    query('endTime').optional().custom((value) => !Number.isNaN(new Date(value))).withMessage('must be a valid date string'),
   ];
 }

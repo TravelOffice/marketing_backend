@@ -1,5 +1,6 @@
+import { BookingStatistic } from '../../models/BookingStatistic';
 import { FilteringDuration } from '../../models/FilteringDuration';
-import { BookingStatistic, LeadStatistic } from '../../models/TenantStatistic';
+import { LeadStatistic } from '../../models/LeadStatistic';
 
 export interface SaleStatisticRepository {
   getLeadStatistic(

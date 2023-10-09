@@ -3,7 +3,8 @@ import { dynamoProvider } from 'core';
 import { SaleStatisticRepository } from './interfaces/SaleStatisticRepository';
 import { FilteringDuration } from '../models/FilteringDuration';
 import { BOOKING_INDEX, LEAD_INDEX, TENANT_INDEX } from '../utils/constants';
-import { BookingStatistic, LeadStatistic } from '../models/TenantStatistic';
+import { LeadStatistic } from '../models/LeadStatistic';
+import { BookingStatistic } from '../models/BookingStatistic';
 
 export default class SaleStatisticRepositoryImpl implements SaleStatisticRepository {
   getLeadStatistic = async (
@@ -33,7 +34,7 @@ export default class SaleStatisticRepositoryImpl implements SaleStatisticReposit
       const { startTime, endTime } = filteringDuration;
       return dynamoProvider.query<T>({
         TableName: await getAwsSecretValue('DYNAMO_STATISTIC_TABLE'),
-        IndexName: 'Index1',
+        IndexName: 'Index2',
         KeyConditionExpression: 'pk = :pk AND lsi1 BETWEEN :start AND :end',
         ExpressionAttributeValues: {
           ':pk': pk,
@@ -45,7 +46,7 @@ export default class SaleStatisticRepositoryImpl implements SaleStatisticReposit
 
     return dynamoProvider.query<T>({
       TableName: await getAwsSecretValue('DYNAMO_STATISTIC_TABLE'),
-      IndexName: 'Index1',
+      IndexName: 'Index2',
       KeyConditionExpression: 'pk = :pk ADN begins_with(lsi1, :lsi1)',
       ExpressionAttributeValues: {
         ':pk': pk,

@@ -1,0 +1,9 @@
+import { FilteringDuration } from '../../models/FilteringDuration';
+import { ConversionRatioMetricResponse } from '../../models/LeadStatistic';
+
+export interface GetConversionRatioOfTenantUseCase {
+  invoke(
+    tenant: string,
+    filteringDuration?: FilteringDuration,
+  ): Promise<ConversionRatioMetricResponse>;
+}

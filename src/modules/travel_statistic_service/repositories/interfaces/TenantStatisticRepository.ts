@@ -1,10 +1,8 @@
+import { BookingStatistic } from '../../models/BookingStatistic';
+import { DepartureTourStatistic } from '../../models/DepartureTourStatistic';
 import { FilteringDuration } from '../../models/FilteringDuration';
-import {
-  BookingStatistic,
-  DepartureTourStatistic,
-  FillingRatioStatistic,
-  LeadStatistic,
-} from '../../models/TenantStatistic';
+import { LeadStatistic } from '../../models/LeadStatistic';
+import { TourFillingRatioStatistic } from '../../models/TourFillingRatioStatistic';
 
 export interface TenantStatisticRepository {
 
@@ -20,5 +18,5 @@ export interface TenantStatisticRepository {
     filteringDuration?: FilteringDuration,
   ): Promise<BookingStatistic[]>;
 
-  getFillingRatioStatistic(tenant: string): Promise<FillingRatioStatistic[]>;
+  getFillingRatioStatistic(tenant: string): Promise<TourFillingRatioStatistic[]>;
 }
