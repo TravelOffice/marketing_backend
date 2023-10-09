@@ -21,7 +21,8 @@ export default class CreateBookingUseCaseImpl implements CreateBookingUseCase {
     const now = Date.now();
     const { tenant, username: creatorUserName, name: creatorName } = currentUserInfo;
     const {
-      tourType, tourTemplateId, departureDate, sourceId, services, customer, passengers,
+      tourType, tourTemplateId, tourTemplateName,
+      departureDate, sourceId, services, customer, passengers,
     } = newBookingInput;
 
     // Verify source
@@ -49,6 +50,7 @@ export default class CreateBookingUseCaseImpl implements CreateBookingUseCase {
       services,
       passengers,
       tourTemplateId,
+      tourTemplateName,
       departureDate,
       sourceId,
       sourceName,

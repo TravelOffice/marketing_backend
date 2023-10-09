@@ -35,6 +35,7 @@ export default function validate(req: Request) {
 export function validateNewBookingParams() {
   return [
     body('tourTemplateId').notEmpty().isString(),
+    body('tourTemplateName').notEmpty().isString(),
     body('sourceId').notEmpty().isString(),
     body('tourType').notEmpty().isIn(tourTypes).withMessage(`allow only in ${tourTypes}`),
     body('departureDate').optional().custom((value: string) => {
@@ -80,6 +81,7 @@ export function validateNewBookingFromLeadParams() {
   return [
     body('leadId').notEmpty().isString(),
     body('tourTemplateId').notEmpty().isString(),
+    body('tourTemplateName').notEmpty().isString(),
     body('tourType').notEmpty().isIn(tourTypes).withMessage(`allow only in ${tourTypes}`),
     body('departureDate').optional().custom((value: string) => {
       const date = Date.parse(value);

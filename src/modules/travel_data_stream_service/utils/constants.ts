@@ -6,6 +6,16 @@ export const BOOKING_INDEX = 'BOOKING';
 
 export const DEPARTURE_TOUR_INDEX = 'DEPARTURE_TOUR';
 
+export const TENANT_STATISTIC_INDEX = 'TN';
+
+export const DEPARTURE_TOUR_STATISTIC_INDEX = 'DT';
+
+export const LEAD_STATISTIC_INDEX = 'L';
+
+export const BOOKING_STATISTIC_INDEX = 'BK';
+
+export const BOOKING_FR_STATISTIC_INDEX = 'FR';
+
 export const PADDING_ZERO_PREFIX = '0';
 
-export const PADDING_ZERO_PREFIX_LENGTH = 10;
+export const PADDING_ZERO_FOR_FILLING_RATIO_PREFIX_LENGTH = 3;

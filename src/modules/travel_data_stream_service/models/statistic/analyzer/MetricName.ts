@@ -1,0 +1,5 @@
+export type MetricName =
+  'BOOKING_METRIC'
+  | 'LEAD_METRIC'
+  | 'TOUR_METRIC'
+  | 'TOUR_FILLINGRATIO_METRIC';
