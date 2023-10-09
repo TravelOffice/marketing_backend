@@ -8,10 +8,15 @@ import logger from './utils/logger';
 import validate, { getStatisticValidator } from './utils/validator';
 import { MetricName } from './models/MetricName';
 import {
-  getConversionRatioUseCase,
+  getConversionRatioOfTenantUseCase,
+  getConversionRatiosOfSaleUseCase,
+  getTopFavouriteLocationUseCase,
+  getTopFavouriteTourUseCase,
+  getTopProficiencyTourUseCase,
   getTotalBookingOfSaleUseCase,
   getTotalLeadOfSaleUserCase,
   getTotalProfitOfTenantUseCase,
+  getTotalRevenueOfSaleUseCase,
   getTotalRevenueOfTenantUseCase,
 } from './useCases';
 
@@ -38,7 +43,9 @@ app.get('/statistic/tenant', getStatisticValidator(), async (req: Request, res: 
   try {
     validate(req);
     const { tenant } = getCurrentUserInfo(req.headers.authorization!);
-    const { metricName, startTime, endTime } = req.query;
+    const {
+      metricName, startTime, endTime, topCount,
+    } = req.query;
     let result;
     let filteringDuration;
     if (startTime && endTime) {
@@ -55,7 +62,28 @@ app.get('/statistic/tenant', getStatisticValidator(), async (req: Request, res: 
         result = await getTotalProfitOfTenantUseCase.invoke(tenant, filteringDuration);
         break;
       case 'conversionRatioOfTenant':
-        result = await getConversionRatioUseCase.invoke(tenant, filteringDuration);
+        result = await getConversionRatioOfTenantUseCase.invoke(tenant, filteringDuration);
+        break;
+      case 'topProficiencyTour':
+        result = await getTopProficiencyTourUseCase.invoke(
+          tenant,
+          filteringDuration,
+          Number(topCount),
+        );
+        break;
+      case 'topFavouriteTour':
+        result = await getTopFavouriteTourUseCase.invoke(
+          tenant,
+          filteringDuration,
+          Number(topCount),
+        );
+        break;
+      case 'topFavouriteLocation':
+        result = await getTopFavouriteLocationUseCase.invoke(
+          tenant,
+          filteringDuration,
+          Number(topCount),
+        );
         break;
       default:
         break;
@@ -88,6 +116,12 @@ app.get('/statistic/sales/:id', getStatisticValidator(), async (req: Request, re
         break;
       case 'totalBookingOfSale':
         result = await getTotalBookingOfSaleUseCase.invoke(tenant, saleId, filteringDuration);
+        break;
+      case 'totalRevenueOfSale':
+        result = await getTotalRevenueOfSaleUseCase.invoke(tenant, saleId, filteringDuration);
+        break;
+      case 'conversionRatioOfSale':
+        result = await getConversionRatiosOfSaleUseCase.invoke(tenant, saleId, filteringDuration);
         break;
       default:
         break;

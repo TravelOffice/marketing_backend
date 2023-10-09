@@ -16,3 +16,9 @@ export interface TotalLeadMetricResponse {
 export interface ConversionRatioMetricResponse {
   conversionRatio: number,
 }
+
+export interface FavouriteLocation {
+  locationId: string,
+  locationName: string,
+  numberOfLead: number,
+}

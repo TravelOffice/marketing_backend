@@ -10,27 +10,52 @@ import GetTotalProfitOfTenantUseCaseImpl from './GetTotalProfitOfTenantUseCaseIm
 import { GetTotalProfitOfTenantUseCase } from './interfaces/GetTotalProfitOfTenantUseCase';
 import { GetConversionRatioOfTenantUseCase } from './interfaces/GetConversionRatioOfTenantUseCase';
 import GetConversionRatioOfTenantUseCaseImpl from './GetConversionRatioOfTenantUseCaseImpl';
+import { GetTopProficiencyTourUseCase } from './interfaces/GetTopProficiencyTourUseCase';
+import GetTopProficiencyTourUseCaseImpl from './GetTopProficiencyTourUseCaseImpl';
+import { GetTopFavouriteLocationUseCase } from './interfaces/GetTopFavouriteLocationUseCase';
+import GetTopFavouriteLocationUseCaseImpl from './GetTopFavouriteLocationUseCaseImpl';
+import { GetTopFavouriteTourUseCase } from './interfaces/GetTopFavouriteTourUseCase';
+import GetTopFavouriteTourUseCaseImpl from './GetTopFavouriteTourUseCaseImpl';
+import { GetTotalRevenueOfSaleUseCase } from './interfaces/GetTotalRevenueOfSaleUseCase';
+import GetTotalRevenueOfSaleUseCaseImpl from './GetTotalRevenueOfSaleUseCaseImpl';
+import { GetConversionRatioOfSaleUseCase } from './interfaces/GetConversionRatioOfSaleUseCase';
+import GetConversionRatioOfSaleUseCaseImpl from './GetConversionRatioOfSaleUseCaseImpl';
 
 interface UseCases {
   getTotalLeadOfSaleUserCase: GetTotalLeadOfSaleUseCase,
   getTotalBookingOfSaleUseCase: GetTotalBookingOfSaleUseCase,
+  getTotalRevenueOfSaleUseCase: GetTotalRevenueOfSaleUseCase,
+  getConversionRatiosOfSaleUseCase: GetConversionRatioOfSaleUseCase,
   getTotalRevenueOfTenantUseCase: GetTotalRevenueOfTenantUseCase,
   getTotalProfitOfTenantUseCase: GetTotalProfitOfTenantUseCase,
-  getConversionRatioUseCase: GetConversionRatioOfTenantUseCase,
+  getConversionRatioOfTenantUseCase: GetConversionRatioOfTenantUseCase,
+  getTopProficiencyTourUseCase: GetTopProficiencyTourUseCase,
+  getTopFavouriteTourUseCase: GetTopFavouriteTourUseCase,
+  getTopFavouriteLocationUseCase: GetTopFavouriteLocationUseCase,
 }
 
 const useCases: UseCases = {
   getTotalLeadOfSaleUserCase: new GetTotalLeadOfSaleUseCaseImpl(),
   getTotalBookingOfSaleUseCase: new GetTotalBookingOfSaleUseCaseImpl(),
+  getTotalRevenueOfSaleUseCase: new GetTotalRevenueOfSaleUseCaseImpl(),
+  getConversionRatiosOfSaleUseCase: new GetConversionRatioOfSaleUseCaseImpl(),
   getTotalRevenueOfTenantUseCase: new GetTotalRevenueOfTenantUseCaseImpl(),
   getTotalProfitOfTenantUseCase: new GetTotalProfitOfTenantUseCaseImpl(),
-  getConversionRatioUseCase: new GetConversionRatioOfTenantUseCaseImpl(),
+  getConversionRatioOfTenantUseCase: new GetConversionRatioOfTenantUseCaseImpl(),
+  getTopProficiencyTourUseCase: new GetTopProficiencyTourUseCaseImpl(),
+  getTopFavouriteTourUseCase: new GetTopFavouriteTourUseCaseImpl(),
+  getTopFavouriteLocationUseCase: new GetTopFavouriteLocationUseCaseImpl(),
 };
 
 export const {
   getTotalLeadOfSaleUserCase,
   getTotalBookingOfSaleUseCase,
+  getTotalRevenueOfSaleUseCase,
+  getConversionRatiosOfSaleUseCase,
   getTotalRevenueOfTenantUseCase,
   getTotalProfitOfTenantUseCase,
-  getConversionRatioUseCase,
+  getConversionRatioOfTenantUseCase,
+  getTopProficiencyTourUseCase,
+  getTopFavouriteTourUseCase,
+  getTopFavouriteLocationUseCase,
 } = useCases;

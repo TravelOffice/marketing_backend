@@ -8,4 +8,6 @@ export type MetricName =
   'topFavouriteLocation' |
   'fillingRatioOfTour' |
   'totalLeadOfSale' |
-  'totalBookingOfSale';
+  'totalBookingOfSale' |
+  'totalRevenueOfSale' |
+  'conversionRatioOfSale';

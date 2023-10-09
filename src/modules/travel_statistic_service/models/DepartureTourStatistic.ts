@@ -7,6 +7,7 @@ export interface DepartureTourStatistic extends BaseDdbModel {
   pf: number, // Profit
   rv: number, // Revenue
   c: number, // Cost
+  dtN: string, // Departure tour name
 }
 
 export interface TotalRevenueMetricResponse {
@@ -15,4 +16,12 @@ export interface TotalRevenueMetricResponse {
 
 export interface TotalProfitMetricResponse {
   totalProfit: number,
+}
+
+export interface ProficiencyTourResponse {
+  departureTourId: string,
+  departureTourName: string,
+  proficiency: number,
+  revenue: number,
+  cost: number,
 }
