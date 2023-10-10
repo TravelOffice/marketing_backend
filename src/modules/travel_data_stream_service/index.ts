@@ -1,5 +1,6 @@
 import { DynamoDBStreamEvent } from 'aws-lambda';
 import * as _ from 'lodash';
+import TenantSaleAnalyzer from './analyzer/TenantSaleAnalyzer';
 import { RequiredDynamoDBRecord } from './types/dynamodb';
 import logger from './utils/logger';
 import {
@@ -8,20 +9,33 @@ import {
   toPkSk,
   toUniquePkSkEventName,
 } from './utils/streamRecords';
+import { tenantSaleStatisticRepository } from './repositories';
 
 /**
- * Analyze lead records to update statistic data
- * With each tenant, following metrics will be analyzed:
- * 1. Number of leads
+ * Analyze records for each tenant to update statistic data
+ * Statistic items will be stored to database in batch
  *
- *
- * @param records Lead records to handle
+ * @param tenant Tenant id
+ * @param records Records to handle
  */
-async function handlerTenantHistoricalChanges(
+async function analyzeTenantSaleData(
   tenant: string,
   groupedRecords: RequiredDynamoDBRecord[],
 ): Promise<void> {
-  logger.log(`Handle historical changes for tenant ${tenant} ${groupedRecords}`);
+  // Analyze sale data including leads / bookings / departure tours
+  logger.log(`Start analyzing sale data of tenant ${tenant}`);
+  const tenantAnalyzer = new TenantSaleAnalyzer(tenant, groupedRecords);
+  await tenantAnalyzer.analyze();
+
+  // Store analyzed data to database
+  const saleStatisticItems = tenantAnalyzer.analyzedData;
+  if (saleStatisticItems.length === 0) {
+    logger.log(`No sale statistic items of tenant ${tenant} to store`);
+    return;
+  }
+
+  await tenantSaleStatisticRepository.batchWriteSaleStatistics(saleStatisticItems);
+  logger.table(`Stored sale statistic items of tenant ${tenant} with data`, saleStatisticItems);
 }
 
 // eslint-disable-next-line import/prefer-default-export
@@ -53,18 +67,18 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
 
     // Group records by tenant
     const groupedbyTenantRecords = _.groupBy(transformedRecords, getTenant);
-    logger.log(`Records by group need to handle ${JSON.stringify(groupedbyTenantRecords, null, 5)}`);
 
     // Start handling DynamoDB records to update statistic data
     // Data of all the tenants will be handled in parallel
     // There are two kinds of statistic data:
     // 1. Statistic data of the lead
     // 2. Statistic data of the booking
+    // 3. Statistic data of the departure tour
     // * Lambda handles maximum 100 (Batch size setup by Lambda trigger) records at a time
     // Number of records is large enough to reduce infrastructure cost and improve performance
     const tenantHandlerPromises = Object.keys(groupedbyTenantRecords).map(async (tenant) => {
       const tenantRecords = groupedbyTenantRecords[tenant];
-      await handlerTenantHistoricalChanges(tenant, tenantRecords);
+      await analyzeTenantSaleData(tenant, tenantRecords);
     });
     await Promise.all(tenantHandlerPromises);
   } catch (error) {

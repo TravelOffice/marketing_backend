@@ -14,6 +14,7 @@ export interface CreateBookingInput {
   },
   // Reference to TourTemplate model, each TourTemplate is identified by pk+sk pair
   tourTemplateId: string,
+  tourTemplateName: string,
   // One kind of ['shared', 'group', 'solo']
   tourType: BookingTourType,
   // Expected begin date of trip

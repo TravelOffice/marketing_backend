@@ -38,6 +38,7 @@ export default class CreateBookingFromLeadUseCaseImpl implements CreateBookingFr
       name,
       address,
       tourTemplateId,
+      tourTemplateName,
       sourceId,
       sourceName,
     } = lead;
@@ -75,6 +76,7 @@ export default class CreateBookingFromLeadUseCaseImpl implements CreateBookingFr
       paymentStatus: 'UNPAID',
       services,
       tourTemplateId,
+      tourTemplateName,
       departureDate,
       sourceId,
       sourceName,

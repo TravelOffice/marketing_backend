@@ -1,8 +1,10 @@
 import { DynamoDBRecord } from 'aws-lambda';
-import { dynamoProvider, logger } from 'core';
+import { dynamoProvider } from 'core';
 import { DdbModelChangeType } from '../models/dataSubscription/DdbModelChangeType';
 import { isBooking, isDepartureTour, isLead } from './dynamodb';
 import { RequiredDynamoDBRecord } from '../types/dynamodb';
+import AbstractMetricAnalyzer from '../analyzer/metrics/AbstractMetricAnalyzer';
+import MetricAnalyzerBuilder from '../analyzer/metrics/MetricAnalyzerBuilder';
 
 /**
  * Get model change type from DynamoDB record
@@ -12,14 +14,12 @@ import { RequiredDynamoDBRecord } from '../types/dynamodb';
  */
 export function getModelChangeType(record: DynamoDBRecord): DdbModelChangeType | undefined {
   // Extract data from record
-  const { dynamodb, eventName } = record;
+  const { dynamodb } = record;
   if (!dynamodb || !dynamodb.Keys) {
     return undefined;
   }
   const marshalledKeys = dynamoProvider.unmarshall(dynamodb.Keys);
-  const { pk, sk } = marshalledKeys;
-
-  logger.log(`Data change type ${eventName} with keys pk: ${pk}, sk: ${sk}`);
+  const { pk } = marshalledKeys;
 
   if (isLead(pk)) {
     return 'LEAD';
@@ -34,6 +34,24 @@ export function getModelChangeType(record: DynamoDBRecord): DdbModelChangeType |
   }
 
   return 'OTHER';
+}
+
+export function getMetricAnalyzers(tenant: string, records: RequiredDynamoDBRecord[]) {
+  const analyzers: AbstractMetricAnalyzer[] = [];
+  records.forEach((record) => {
+    const modelName = getModelChangeType(record)!;
+    if (modelName === 'BOOKING') {
+      analyzers.push(MetricAnalyzerBuilder.build('BOOKING_METRIC', tenant, record));
+    } else if (modelName === 'LEAD') {
+      analyzers.push(MetricAnalyzerBuilder.build('LEAD_METRIC', tenant, record));
+    } else if (modelName === 'DEPARTURE_TOUR') {
+      // Metric for analyzing departure tour revenue, cost, profit
+      analyzers.push(MetricAnalyzerBuilder.build('TOUR_METRIC', tenant, record));
+      // Metric for analyzing departure tour filling ratio
+      analyzers.push(MetricAnalyzerBuilder.build('TOUR_FILLINGRATIO_METRIC', tenant, record));
+    }
+  });
+  return analyzers;
 }
 
 /**
@@ -78,6 +96,9 @@ export function toUniquePkSkEventName(record: RequiredDynamoDBRecord): string {
 
 export function isNeededHandleRecord(record: DynamoDBRecord): boolean {
   const { dynamodb } = record;
+  if (!dynamodb || !dynamodb.Keys) {
+    return false;
+  }
   const modelChangeType = getModelChangeType(record);
-  return !dynamodb || !dynamodb.Keys || modelChangeType === 'OTHER';
+  return dynamodb && dynamodb.Keys && modelChangeType !== 'OTHER';
 }
