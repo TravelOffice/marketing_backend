@@ -23,5 +23,21 @@ export function getStatisticValidator() {
     query('metricName').notEmpty().withMessage('must be a non-string value'),
     query('startTime').optional().custom((value) => !Number.isNaN(new Date(value))).withMessage('must be a valid date string'),
     query('endTime').optional().custom((value) => !Number.isNaN(new Date(value))).withMessage('must be a valid date string'),
+    query('topCount').optional().isInt().withMessage('must be a integer'),
+    query('nextToken')
+      .optional()
+      .custom((value: string) => {
+        try {
+          JSON.parse(value);
+          return true;
+        } catch {
+          return false;
+        }
+      })
+      .withMessage('must be a JSON string'),
+    query('limit')
+      .optional()
+      .isInt()
+      .withMessage('must be a number'),
   ];
 }

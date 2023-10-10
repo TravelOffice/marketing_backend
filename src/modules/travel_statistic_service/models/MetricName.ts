@@ -6,7 +6,7 @@ export type MetricName =
   'topProficiencyTour' |
   'topFavouriteTour' |
   'topFavouriteLocation' |
-  'fillingRatioOfTour' |
+  'tourFillingRatio' |
   'totalLeadOfSale' |
   'totalBookingOfSale' |
   'totalRevenueOfSale' |

@@ -1,5 +1,6 @@
 import { getAwsSecretValue } from 'get-env';
 import { dynamoProvider } from 'core';
+import { PaginationParams } from 'core/providers/dynamodb/DynamoProvider';
 import {
   BOOKING_INDEX, DEPARTURE_TOUR_INDEX, FILLING_RATIO_INDEX, LEAD_INDEX, TENANT_INDEX,
 } from '../utils/constants';
@@ -26,9 +27,27 @@ export default class TenantStatisticRepositoryImpl implements TenantStatisticRep
     return this.queryStatistic<BookingStatistic>(pk, filteringDuration);
   };
 
-  getFillingRatioStatistic = async (tenant: string, filteringDuration?: FilteringDuration) => {
+  getFillingRatioStatistic = async (
+    tenant: string,
+    paginationParams: PaginationParams,
+  ) => {
     const pk = `${TENANT_INDEX}#${tenant}#${FILLING_RATIO_INDEX}`;
-    return this.queryStatistic<TourFillingRatioStatistic>(pk, filteringDuration);
+    const excludeKeys = [
+      'pk',
+    ] as (keyof TourFillingRatioStatistic)[];
+    const params = {
+      TableName: await getAwsSecretValue('DYNAMO_STATISTIC_TABLE'),
+      IndexName: 'Index1',
+      KeyConditionExpression: 'pk = :pk',
+      ExpressionAttributeValues: {
+        ':pk': pk,
+      },
+    };
+    return dynamoProvider.queryPagination<TourFillingRatioStatistic>(
+      params,
+      paginationParams,
+      excludeKeys,
+    );
   };
 
   private async queryStatistic<T>(pk: string, filteringDuration?: FilteringDuration) {

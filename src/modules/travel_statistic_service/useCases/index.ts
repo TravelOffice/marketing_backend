@@ -20,6 +20,8 @@ import { GetTotalRevenueOfSaleUseCase } from './interfaces/GetTotalRevenueOfSale
 import GetTotalRevenueOfSaleUseCaseImpl from './GetTotalRevenueOfSaleUseCaseImpl';
 import { GetConversionRatioOfSaleUseCase } from './interfaces/GetConversionRatioOfSaleUseCase';
 import GetConversionRatioOfSaleUseCaseImpl from './GetConversionRatioOfSaleUseCaseImpl';
+import { GetTourFillingRatioUseCase } from './interfaces/GetTourFillingRatioUseCase';
+import GetTourFillingRatioUseCaseImpl from './GetTourFillingRatioUseCaseImpl';
 
 interface UseCases {
   getTotalLeadOfSaleUserCase: GetTotalLeadOfSaleUseCase,
@@ -32,6 +34,7 @@ interface UseCases {
   getTopProficiencyTourUseCase: GetTopProficiencyTourUseCase,
   getTopFavouriteTourUseCase: GetTopFavouriteTourUseCase,
   getTopFavouriteLocationUseCase: GetTopFavouriteLocationUseCase,
+  getTourFillingRatioUseCase: GetTourFillingRatioUseCase,
 }
 
 const useCases: UseCases = {
@@ -45,6 +48,7 @@ const useCases: UseCases = {
   getTopProficiencyTourUseCase: new GetTopProficiencyTourUseCaseImpl(),
   getTopFavouriteTourUseCase: new GetTopFavouriteTourUseCaseImpl(),
   getTopFavouriteLocationUseCase: new GetTopFavouriteLocationUseCaseImpl(),
+  getTourFillingRatioUseCase: new GetTourFillingRatioUseCaseImpl(),
 };
 
 export const {
@@ -58,4 +62,5 @@ export const {
   getTopProficiencyTourUseCase,
   getTopFavouriteTourUseCase,
   getTopFavouriteLocationUseCase,
+  getTourFillingRatioUseCase,
 } = useCases;

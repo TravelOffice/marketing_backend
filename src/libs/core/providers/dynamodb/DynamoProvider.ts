@@ -94,7 +94,6 @@ export default class DynamoProvider {
     const { Items, LastEvaluatedKey } = await dynamoDB.query({
       ...queryParams,
       ScanIndexForward: sortType === 'ASC', // Default, sort record DESC
-      // ScanIndexForward: sortDesc !== null && sortDesc !== true;
       Limit: paginationLimit,
       ExclusiveStartKey: nextToken ? JSON.parse(nextToken) : undefined,
     }).promise();
