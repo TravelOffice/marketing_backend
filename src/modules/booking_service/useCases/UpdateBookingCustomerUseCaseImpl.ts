@@ -27,6 +27,7 @@ export default class UpdateBookingCustomerUseCaseImpl implements UpdateBookingCu
     'level',
     'socialLink',
     'sourceId',
+    'birthday',
   ];
 
   /**
