@@ -1,3 +1,4 @@
+import { PaginationParams, PaginationResponsePayload } from 'core/providers/dynamodb/DynamoProvider';
 import { BookingStatistic } from '../../models/BookingStatistic';
 import { DepartureTourStatistic } from '../../models/DepartureTourStatistic';
 import { FilteringDuration } from '../../models/FilteringDuration';
@@ -18,5 +19,8 @@ export interface TenantStatisticRepository {
     filteringDuration?: FilteringDuration,
   ): Promise<BookingStatistic[]>;
 
-  getFillingRatioStatistic(tenant: string): Promise<TourFillingRatioStatistic[]>;
+  getFillingRatioStatistic(
+    tenant: string,
+    paginationParams: PaginationParams,
+  ): Promise<PaginationResponsePayload<TourFillingRatioStatistic> | undefined>;
 }

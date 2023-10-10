@@ -18,6 +18,7 @@ import {
   getTotalProfitOfTenantUseCase,
   getTotalRevenueOfSaleUseCase,
   getTotalRevenueOfTenantUseCase,
+  getTourFillingRatioUseCase,
 } from './useCases';
 
 const app = express();
@@ -44,7 +45,7 @@ app.get('/statistic/tenant', getStatisticValidator(), async (req: Request, res: 
     validate(req);
     const { tenant } = getCurrentUserInfo(req.headers.authorization!);
     const {
-      metricName, startTime, endTime, topCount,
+      metricName, startTime, endTime, topCount, limit, nextToken,
     } = req.query;
     let result;
     let filteringDuration;
@@ -83,6 +84,16 @@ app.get('/statistic/tenant', getStatisticValidator(), async (req: Request, res: 
           tenant,
           filteringDuration,
           Number(topCount),
+        );
+        break;
+      case 'tourFillingRatio':
+        result = await getTourFillingRatioUseCase.invoke(
+          tenant,
+          {
+            nextToken: nextToken as string,
+            limit: Number(limit),
+            sortType: 'ASC',
+          },
         );
         break;
       default:
