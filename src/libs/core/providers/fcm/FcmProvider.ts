@@ -33,7 +33,9 @@ export default class FcmProvider {
   }
 
   private async init() {
-    const firebaseCredential = await getAwsSecretValue('FIREBASE_CREDENTIAL');
+    // Read firebase credential from infrastructure constant Secret manager
+    const secretId = `${process.env.NODE_ENV}-infrastructure-constant`;
+    const firebaseCredential = await getAwsSecretValue('FIREBASE_CREDENTIAL', secretId);
     const filePath = '/tmp/firebase_admin_sdk.json';
     process.env.GOOGLE_APPLICATION_CREDENTIALS = filePath;
     if (!fs.existsSync(filePath)) {
