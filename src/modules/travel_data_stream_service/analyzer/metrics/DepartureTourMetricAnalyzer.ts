@@ -11,6 +11,8 @@ export default class DepartureTourMetricAnalyzer extends AbstractMetricAnalyzer 
 
   output?: DepartureTourStatistic;
 
+  changeKeys?: string[];
+
   constructor(
     metricName: MetricName,
     tenant: string,
@@ -18,6 +20,7 @@ export default class DepartureTourMetricAnalyzer extends AbstractMetricAnalyzer 
   ) {
     super(metricName, tenant);
     this.inputData = data;
+    this.changeKeys = ['operationStatus'];
   }
 
   async analyze(): Promise<void> {
@@ -26,25 +29,33 @@ export default class DepartureTourMetricAnalyzer extends AbstractMetricAnalyzer 
     const old = dynamoProvider.unmarshall(OldImage) as DepartureTour;
     const current = dynamoProvider.unmarshall(NewImage) as DepartureTour;
 
-    // Analyze statistic data if operationStatus is changed to COMPLETED
-    if (old.operationStatus !== current.operationStatus && current.operationStatus === 'COMPLETED') {
-      const createdAt = current.createdAt?.toString() || Date.now().toString();
-      const {
-        totalRevenue: rv,
-        totalCost: c,
-        totalProfit: pf,
-        name: dtN,
-        code,
-      } = current;
-      this.output = {
-        pk: `${TENANT_STATISTIC_INDEX}#${this.tenant}#${DEPARTURE_TOUR_STATISTIC_INDEX}`,
-        sk: code,
-        lsi1: createdAt,
-        rv,
-        c,
-        pf,
-        dtN,
-      };
+    if (this.inputData.eventName === 'REMOVE') {
+      // Statistic data should be deleted
+      this.shouldBeDeleted = true;
+      const pk = `${TENANT_STATISTIC_INDEX}#${this.tenant}#${DEPARTURE_TOUR_STATISTIC_INDEX}`;
+      const { code: sk } = old;
+      this.output = { pk, sk };
+    } else if (this.inputData.eventName === 'INSERT' || this.isChangesDetected) {
+      // Analyze statistic data if operationStatus is changed to COMPLETED
+      if (current.operationStatus === 'COMPLETED') {
+        const createdAt = current.createdAt?.toString() || Date.now().toString();
+        const {
+          totalRevenue: rv,
+          totalCost: c,
+          totalProfit: pf,
+          name: dtN,
+          code,
+        } = current;
+        this.output = {
+          pk: `${TENANT_STATISTIC_INDEX}#${this.tenant}#${DEPARTURE_TOUR_STATISTIC_INDEX}`,
+          sk: code,
+          lsi1: createdAt,
+          rv,
+          c,
+          pf,
+          dtN,
+        };
+      }
     }
   }
 }

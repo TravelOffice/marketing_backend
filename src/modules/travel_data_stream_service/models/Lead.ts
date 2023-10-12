@@ -53,8 +53,8 @@ export interface Lead extends BaseDdbModel {
   sourceName: string,
   cancelledReason?: string,
 
-  locationId: string,
-  locationName: string,
+  endingLocationName: string,
+  endingLocationCode: string,
 
   // Indexes
   // lsi1: string, // <createdAt>
