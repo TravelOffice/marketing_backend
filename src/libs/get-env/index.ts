@@ -2,9 +2,10 @@ import AWS from 'aws';
 import dotenv from 'dotenv';
 import fs from 'fs';
 
-dotenv.config({ path: process.cwd() + '/.env.development' });
+dotenv.config({path: process.cwd() + '/.env.development'});
 const client = new AWS.SecretsManager({});
 let secretValues: any;
+
 export function isAwsEnv() {
   return !!process.env.AWS_REGION;
 }
@@ -21,13 +22,13 @@ export function isLocalEnv() {
   return process.env.NODE_ENV === 'local';
 }
 
-export async function getAwsSecretValue(key: string): Promise<string> {
+export async function getAwsSecretValue(key: string, secretId?: string): Promise<string> {
   let secretValue;
   if (!isLocalEnv()) {
     if (!secretValues) {
-      const secretId = process.env.SECRET_MANAGER_ID;
+      secretId = secretId ?? process.env.SECRET_MANAGER_ID;
       if (secretId) {
-        const data = await client.getSecretValue({ SecretId: secretId }).promise();
+        const data = await client.getSecretValue({SecretId: secretId}).promise();
         secretValues = JSON.parse(data.SecretString || {}.toString());
       }
     }
