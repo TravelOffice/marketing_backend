@@ -2,5 +2,6 @@ import { MetricSaleAnalyzerResult } from '../../models/statistic/TenantSaleAnaly
 
 export interface TenantSaleStatisticRepository {
   batchWriteSaleStatistics(items: MetricSaleAnalyzerResult[]): Promise<void>,
+  batchDeleteSaleStatistics(items: MetricSaleAnalyzerResult[]): Promise<void>,
   deleteStatisticItem(pk: string, sk: string): Promise<void>,
 }

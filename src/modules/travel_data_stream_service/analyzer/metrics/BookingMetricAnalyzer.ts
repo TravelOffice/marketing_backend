@@ -11,6 +11,8 @@ export default class BookingMetricAnalyzer extends AbstractMetricAnalyzer {
 
   output?: BookingStatistic;
 
+  changeKeys?: string[];
+
   constructor(
     metricName: MetricName,
     tenant: string,
@@ -18,11 +20,18 @@ export default class BookingMetricAnalyzer extends AbstractMetricAnalyzer {
   ) {
     super(metricName, tenant);
     this.inputData = data;
+    this.changeKeys = ['tourTemplateId', 'tourTemplateName', 'assigneeId', 'totalPayment'];
   }
 
   async analyze(): Promise<void> {
-    // Only new Booking data is analyzed
-    if (this.inputData.eventName === 'INSERT') {
+    if (this.inputData.eventName === 'REMOVE') {
+      // Statistic data should be deleted
+      this.shouldBeDeleted = true;
+      const pk = `${TENANT_STATISTIC_INDEX}#${this.tenant}#${BOOKING_STATISTIC_INDEX}`;
+      const { code: sk } = dynamoProvider.unmarshall(this.inputData.dynamodb.OldImage) as Booking;
+      this.output = { pk, sk };
+    } else if (this.inputData.eventName === 'INSERT' || this.isChangesDetected) {
+      // Add or modify statistic data
       const booking = dynamoProvider.unmarshall(this.inputData.dynamodb.NewImage) as Booking;
       const createdAt = booking.createdAt?.toString() || Date.now().toString();
       const {

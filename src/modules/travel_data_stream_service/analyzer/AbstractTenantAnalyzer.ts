@@ -19,5 +19,23 @@ export default abstract class AbstractTenantAnalyzer {
     return this.output;
   }
 
+  get modifiedItems(): TenantSaleAnalyzerResult {
+    return this.output
+      .filter((item) => !item.shouldBeDeleted)
+      .map((item) => {
+        const { shouldBeDeleted, ...rest } = item;
+        return rest;
+      });
+  }
+
+  get deletedItems(): TenantSaleAnalyzerResult {
+    return this.output
+      .filter((item) => item.shouldBeDeleted)
+      .map((item) => {
+        const { shouldBeDeleted, ...rest } = item;
+        return rest;
+      });
+  }
+
   abstract analyze(): Promise<void>;
 }

@@ -7,7 +7,6 @@ import {
   getTenant,
   isNeededHandleRecord,
   toPkSk,
-  toUniquePkSkEventName,
 } from './utils/streamRecords';
 import { tenantSaleStatisticRepository } from './repositories';
 
@@ -27,15 +26,18 @@ async function analyzeTenantSaleData(
   const tenantAnalyzer = new TenantSaleAnalyzer(tenant, groupedRecords);
   await tenantAnalyzer.analyze();
 
-  // Store analyzed data to database
-  const saleStatisticItems = tenantAnalyzer.analyzedData;
-  if (saleStatisticItems.length === 0) {
-    logger.log(`No sale statistic items of tenant ${tenant} to store`);
+  // Store or delete analyzed data to database
+  const { modifiedItems, deletedItems } = tenantAnalyzer;
+  if (modifiedItems.length === 0 && deletedItems.length === 0) {
+    logger.log(`No sale statistic items of tenant ${tenant} to update`);
     return;
   }
 
-  await tenantSaleStatisticRepository.batchWriteSaleStatistics(saleStatisticItems);
-  logger.table(`Stored sale statistic items of tenant ${tenant} with data`, saleStatisticItems);
+  await tenantSaleStatisticRepository.batchWriteSaleStatistics(modifiedItems);
+  logger.table(`Stored sale statistic items of tenant ${tenant} with data`, modifiedItems);
+
+  await tenantSaleStatisticRepository.batchDeleteSaleStatistics(deletedItems);
+  logger.table(`Deleted sale statistic items of tenant ${tenant} with data`, deletedItems);
 }
 
 // eslint-disable-next-line import/prefer-default-export
@@ -63,7 +65,7 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
         },
         toPkSk,
       ], ['desc', 'asc'])
-      .sortedUniqBy(toUniquePkSkEventName).value();
+      .sortedUniqBy(toPkSk).value();
 
     // Group records by tenant
     const groupedbyTenantRecords = _.groupBy(transformedRecords, getTenant);
