@@ -5,7 +5,7 @@ interface Repositories {
   marketplaceTermsEvidenceRepository: TermsAcceptedEvidenceRepository,
 }
 
-const repositories : Repositories = {
+const repositories: Repositories = {
   marketplaceTermsEvidenceRepository: new TermsAcceptedEvidenceRepositoryImpl(),
 };
 
