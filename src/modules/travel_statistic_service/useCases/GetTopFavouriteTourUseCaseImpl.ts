@@ -2,6 +2,7 @@ import { FilteringDuration } from '../models/FilteringDuration';
 import { tenantStatisticRepository } from '../repositories';
 import { GetTopFavouriteTourUseCase } from './interfaces/GetTopFavouriteTourUseCase';
 import { BookingStatistic, FavouriteTour } from '../models/BookingStatistic';
+import { DEFAULT_TOP_COUNT } from '../utils/constants';
 
 export default class GetTopFavouriteTourUseCaseImpl implements GetTopFavouriteTourUseCase {
   invoke = async (
@@ -26,14 +27,14 @@ export default class GetTopFavouriteTourUseCaseImpl implements GetTopFavouriteTo
       }
       return {
         ...group,
-        [tourTemplateId]: [],
+        [tourTemplateId]: [bookingStatistic],
       };
     }, {});
 
     // Sort tour template name by number of booking
     const sortedTourTemplateIds = Object.keys(groupByTourTemplate).sort(
       (a, b) => groupByTourTemplate[b].length - groupByTourTemplate[a].length,
-    ).splice(0, topCount);
+    ).splice(0, topCount || DEFAULT_TOP_COUNT);
     return sortedTourTemplateIds.map((id) => {
       const items = groupByTourTemplate[id];
       return {

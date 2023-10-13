@@ -2,6 +2,7 @@ import { FilteringDuration } from '../models/FilteringDuration';
 import { tenantStatisticRepository } from '../repositories';
 import { GetTopFavouriteLocationUseCase } from './interfaces/GetTopFavouriteLocationUseCase';
 import { FavouriteLocation, LeadStatistic } from '../models/LeadStatistic';
+import { DEFAULT_TOP_COUNT } from '../utils/constants';
 
 export default class GetTopFavouriteLocationUseCaseImpl implements GetTopFavouriteLocationUseCase {
   invoke = async (
@@ -24,14 +25,14 @@ export default class GetTopFavouriteLocationUseCaseImpl implements GetTopFavouri
       }
       return {
         ...group,
-        [locationId]: [],
+        [locationId]: [leadStatistic],
       };
     }, {});
 
     // Sort tour template name by number of booking
     const sortedLocationIds = Object.keys(groupByLocation).sort(
       (a, b) => groupByLocation[b].length - groupByLocation[a].length,
-    ).splice(0, topCount);
+    ).splice(0, topCount || DEFAULT_TOP_COUNT);
     return sortedLocationIds.map((id) => {
       const items = groupByLocation[id];
       return {
