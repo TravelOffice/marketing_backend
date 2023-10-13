@@ -1,27 +1,32 @@
-import { CognitoUser } from '../models/CognitoUser';
 import { subscribedUserRepository, userDeviceSessionRepository } from '../repositories';
 import { SubscribeToTopicUseCase } from './interfaces/SubscribeToTopicUseCase';
 import { SubscribedUser } from '../models/SubscribedUser';
+import { AppType } from '../models/UserDeviceSession';
+import logger from '../utils/logger';
 
 export default class SubscribeToTopicUseCaseImpl implements SubscribeToTopicUseCase {
   /**
    * Creates a new user device session.
    *
-   * @param {CognitoUser} currentUser - Current user.
+   * @param authorId
+   * @param appType
    * @param topic
    * @throws {Error}
    */
   invoke = async (
-    currentUser: CognitoUser,
+    authorId: string,
+    appType: AppType,
     topic: string,
   ): Promise<void> => {
-    const { tenant, username } = currentUser;
-    const userSessions = await userDeviceSessionRepository.listByUser(`${tenant}#${username}`);
+    const userSessions = await userDeviceSessionRepository.listByUser(authorId, appType);
     const deviceTokens = userSessions.map((session) => session.token);
-    await subscribedUserRepository.create({
-      userId: `${tenant}#${username}`,
-      topic,
-      deviceTokens,
-    } as SubscribedUser);
+    if (deviceTokens.length > 0) {
+      await subscribedUserRepository.create({
+        userId: authorId,
+        topic,
+        deviceTokens,
+      } as SubscribedUser);
+      logger.log(`Subscribed to ${topic} for user ${authorId} successfully`);
+    }
   };
 }

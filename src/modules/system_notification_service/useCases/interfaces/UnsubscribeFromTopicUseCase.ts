@@ -1,8 +1,9 @@
-import { CognitoUser } from '../../models/CognitoUser';
+import { AppType } from '../../models/UserDeviceSession';
 
 export interface UnsubscribeFromTopicUseCase {
   invoke(
-    currentUser: CognitoUser,
+    authorId: string,
+    appType: AppType,
     topic: string,
   ): Promise<void>,
 }

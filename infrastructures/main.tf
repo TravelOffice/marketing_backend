@@ -24,7 +24,7 @@ locals {
   constants           = jsondecode(data.aws_secretsmanager_secret_version.current.secret_string)
   remote_feature_name = "base_infrastructure"
   domain_name         = module.REMOTE_STATE.STATE.COMMON_CONFIG.route53.hosted_zone.domain.name
-  tags = {
+  tags                = {
     Env       = var.ENV
     Terraform = true
     Feature   = var.FEATURE_NAME
@@ -130,6 +130,17 @@ locals {
       LEAD_SERVICE_NAME          = "${var.ENV}-${var.FEATURE_NAME}-get_leads_from_marketplace_service"
       TOUR_TEMPLATE_SERVICE_NAME = "${var.ENV}-${var.FEATURE_NAME}-get_tour_tpls_from_marketplace_service"
     },
+    marketplace_data_stream_lambda_vars = {
+      REGION                          = var.AWS_REGION
+      NODE_ENV                        = var.ENV
+      HANDLE_NOTIFICATION_LAMBDA_NAME = "${var.ENV}-handle_notification_service"
+    },
+    handle_notification_lambda_vars = {
+      REGION                           = var.AWS_REGION
+      NODE_ENV                         = var.ENV
+      SECRET_MANAGER_ID                = module.REMOTE_STATE.STATE.MARKETING.backend.secret_manager.id
+      INFRASTRUCTURE_SECRET_MANAGER_ID = "${var.ENV}-infrastructure-constant"
+    },
   }
   MEILI_SEARCH_MASTER_KEY = local.constants["MEILI_SEARCH_MASTER_KEY"]
 }
@@ -216,20 +227,20 @@ module "AUTO_ASSIGN_MODULE_CONFIGURATION" {
 }
 
 module "DDB_STREAMS_CONFIGURATION" {
-  source       = "../../modules/application/dynamodb_stream"
-  ENV          = var.ENV
-  FEATURE_NAME = var.FEATURE_NAME
-  TAGS         = local.tags
+  source                                 = "../../modules/application/dynamodb_stream"
+  ENV                                    = var.ENV
+  FEATURE_NAME                           = var.FEATURE_NAME
+  TAGS                                   = local.tags
   # For marketplace stream
   MARKETPLACE_DDB_STREAM_ARN             = module.REMOTE_STATE.STATE.MARKETING.backend.dynamodb.marketplace_table.stream_arn
   MARKETPLACE_DDB_STREAM_BATCH_SIZE      = 100
   MARKETPLACE_LAMBDA_STREAM_HANDLER_ARN  = module.LAMBDA_FUNCTION.lambda_arns["marketplace_data_stream_service"]
   MARKETPLACE_DDB_STREAM_BATCHING_WINDOW = 90
   # For travel stream
-  TRAVEL_DDB_STREAM_ARN             = module.REMOTE_STATE.STATE.MARKETING.backend.dynamodb.travel_table.stream_arn
-  TRAVEL_DDB_STREAM_BATCH_SIZE      = 100
-  TRAVEL_LAMBDA_STREAM_HANDLER_ARN  = module.LAMBDA_FUNCTION.lambda_arns["travel_data_stream_service"]
-  TRAVEL_DDB_STREAM_BATCHING_WINDOW = 90
+  TRAVEL_DDB_STREAM_ARN                  = module.REMOTE_STATE.STATE.MARKETING.backend.dynamodb.travel_table.stream_arn
+  TRAVEL_DDB_STREAM_BATCH_SIZE           = 100
+  TRAVEL_LAMBDA_STREAM_HANDLER_ARN       = module.LAMBDA_FUNCTION.lambda_arns["travel_data_stream_service"]
+  TRAVEL_DDB_STREAM_BATCHING_WINDOW      = 90
 }
 
 module "SEARCH_QUEUE" {
@@ -269,9 +280,9 @@ module "SEARCH_INSTANCE" {
 }
 
 module "ECS" {
-  source       = "../../modules/ecs"
-  FEATURE_NAME = var.FEATURE_NAME
-  ENV          = var.ENV
+  source          = "../../modules/ecs"
+  FEATURE_NAME    = var.FEATURE_NAME
+  ENV             = var.ENV
   CUSTOM_POLICIES = [
     "EcsTaskStandardRole",
     "DynamoTableReadWrite",

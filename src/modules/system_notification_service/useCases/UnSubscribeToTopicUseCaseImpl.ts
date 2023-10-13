@@ -1,32 +1,33 @@
-import { fcmProvider } from 'core';
-import { CognitoUser } from '../models/CognitoUser';
 import { subscribedUserRepository, userDeviceSessionRepository } from '../repositories';
 import { UnsubscribeFromTopicUseCase } from './interfaces/UnsubscribeFromTopicUseCase';
 import { SubscribedUser } from '../models/SubscribedUser';
+import { AppType } from '../models/UserDeviceSession';
+import logger from '../utils/logger';
 
 export default class UnsubscribeToTopicUseCaseImpl implements UnsubscribeFromTopicUseCase {
   /**
    * Creates a new user device session.
    *
-   * @param {CognitoUser} currentUser - Current user.
+   * @param authorId
+   * @param appType
    * @param topic
    * @throws {Error}
    */
   invoke = async (
-    currentUser: CognitoUser,
+    authorId: string,
+    appType: AppType,
     topic: string,
   ): Promise<void> => {
-    const { tenant, username } = currentUser;
-    const userSessions = await userDeviceSessionRepository.listByUser(`${tenant}#${username}`);
+    const userSessions = await userDeviceSessionRepository.listByUser(authorId, appType);
     const deviceTokens = userSessions.map((session) => session.token);
-
-    // Subscribe to FCM topic
-    await fcmProvider.unsubscribeTopic(deviceTokens, topic);
-    // Save subscribe information into dynamo db
-    await subscribedUserRepository.delete({
-      topic,
-      userId: `${tenant}#${username}`,
-      deviceTokens,
-    } as SubscribedUser);
+    if (deviceTokens.length > 0) {
+      // Delete subscribe information into dynamo db
+      await subscribedUserRepository.delete({
+        topic,
+        userId: authorId,
+        deviceTokens,
+      } as SubscribedUser);
+    }
+    logger.log(`Unsubscribed to ${topic} for user ${authorId} successfully`);
   };
 }

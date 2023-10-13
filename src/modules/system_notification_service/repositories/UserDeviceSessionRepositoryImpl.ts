@@ -1,8 +1,8 @@
 import { dynamoProvider, helper } from 'core';
 import { getAwsSecretValue } from 'get-env';
-import { UserDeviceSession } from '../models/UserDeviceSession';
+import { AppType, UserDeviceSession } from '../models/UserDeviceSession';
 import { UserDeviceSessionRepository } from './interfaces/UserDeviceSessionRepository';
-import { USERNAME_INDEX, USER_SESSION_INDEX } from '../utils/constants';
+import { USER_SESSION_INDEX, USERNAME_INDEX } from '../utils/constants';
 
 const excludeKeys = [
   'pk',
@@ -17,24 +17,27 @@ const excludeKeys = [
 export class UserDeviceSessionRepositoryImpl implements UserDeviceSessionRepository {
   create = async (
     userId: string,
+    type: AppType,
     userDeviceSession: UserDeviceSession,
   ): Promise<UserDeviceSession | undefined> => {
     const table = await getAwsSecretValue('DYNAMO_NOTIFICATION_TABLE');
     const pk = `${USERNAME_INDEX}#${userId}#${USER_SESSION_INDEX}`;
-    const sk = userDeviceSession.token;
+    const sk = `${type}#${userDeviceSession.token}`;
     await dynamoProvider.putItem(table, pk, sk, userDeviceSession);
     return userDeviceSession;
   };
 
   listByUser = async (
     userId: string,
+    appType: AppType,
   ): Promise<UserDeviceSession[]> => {
     const table = await getAwsSecretValue('DYNAMO_NOTIFICATION_TABLE');
     const queryParams = {
       TableName: table,
-      KeyConditionExpression: 'pk = :pk',
+      KeyConditionExpression: 'pk = :pk AND begins_with(sk, :sk)',
       ExpressionAttributeValues: {
         ':pk': `${USERNAME_INDEX}#${userId}#${USER_SESSION_INDEX}`,
+        ':sk': `${appType}#`,
       },
     };
 
@@ -44,6 +47,7 @@ export class UserDeviceSessionRepositoryImpl implements UserDeviceSessionReposit
 
   getByDeviceToken = async (
     userId: string,
+    appType: AppType,
     deviceToken: string,
   ): Promise<UserDeviceSession | undefined> => {
     // Retrieve the UserDeviceSession from the DynamoDB table
@@ -51,7 +55,7 @@ export class UserDeviceSessionRepositoryImpl implements UserDeviceSessionReposit
     const tourPost = await dynamoProvider.getItem<UserDeviceSession>(
       table,
       `${USERNAME_INDEX}#${userId}#${USER_SESSION_INDEX}`,
-      deviceToken,
+      `${appType}#${deviceToken}`,
     );
 
     // If the UserDeviceSession doesn't exist, return undefined

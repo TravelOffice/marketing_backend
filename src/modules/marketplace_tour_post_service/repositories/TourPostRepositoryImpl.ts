@@ -737,7 +737,7 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
     const followedTourPostIds = followedItems.map((item) => item.tourPostId);
 
     // Get number of offers and rating average for each tour post
-    const transformedTourPosts = await Promise.all(
+    return Promise.all(
       tourPosts.map(async (item) => {
         const tourPostWithStatistic = await this.transformTourPostWithStatistic(item);
         return {
@@ -747,8 +747,6 @@ export default class TourPostRepositoryImpl implements TourPostRepository {
         };
       }),
     );
-
-    return transformedTourPosts;
   };
 
   /**
