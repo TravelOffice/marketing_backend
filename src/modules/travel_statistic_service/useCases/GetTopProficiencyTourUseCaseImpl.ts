@@ -17,7 +17,7 @@ export default class GetTopProficiencyTourUseCaseImpl implements GetTopProficien
     // Sort DESC top proficiency tour
     const topProficiencyTour = records.sort(
       (a, b) => b.rv / b.c - a.rv / a.c,
-    ).splice(0, topCount ?? DEFAULT_TOP_COUNT);
+    ).splice(0, topCount || DEFAULT_TOP_COUNT);
     return topProficiencyTour.map((tour) => ({
       departureTourId: tour.sk,
       departureTourName: tour.dtN,
