@@ -7,6 +7,7 @@ import { FAILED, SUCCESS } from './utils/constants';
 import logger from './utils/logger';
 import validate, { createUserDeviceSession, getMyNotificationsValidator } from './utils/validator';
 import wrapResponse from './utils/wrapResponse';
+import { AppType } from './models/UserDeviceSession';
 
 const app = express();
 
@@ -69,8 +70,13 @@ app.delete('/notification/sessions/:token', async (req: Request, res: Response) 
 app.get('/me/notification', getMyNotificationsValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
+    const { appType, ...rest } = req.query;
     const currentUser = getCurrentUserInfo(req.headers.authorization!);
-    const notificationData = await getUserNotificationsUseCase.invoke(currentUser, req.query);
+    const notificationData = await getUserNotificationsUseCase.invoke(
+      currentUser,
+      appType as AppType,
+      rest,
+    );
     res.json(wrapResponse(SUCCESS, notificationData));
   } catch (error: any) {
     logger.log(`[GET] Error ${error}`);

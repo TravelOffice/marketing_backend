@@ -2,3 +2,7 @@
 # yarn lockfile v1
 
 
+"@types/aws-lambda@^8.10.124":
+  "integrity" "sha512-PHqK0SuAkFS3tZjceqRXecxxrWIN3VqTicuialtK2wZmvBy7H9WGc3u3+wOgaZB7N8SpSXDpWk9qa7eorpTStg=="
+  "resolved" "https://registry.npmjs.org/@types/aws-lambda/-/aws-lambda-8.10.124.tgz"
+  "version" "8.10.124"

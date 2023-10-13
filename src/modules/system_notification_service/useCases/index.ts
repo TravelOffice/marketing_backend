@@ -1,4 +1,4 @@
-import GetUserNotificationsUseCaseImpl from './GetUserNotificationsUseCaseImpl';
+import GetMarketplaceNotificationsUseCaseImpl from './GetUserNotificationsUseCaseImpl';
 import StoreUserSessionUseCaseImpl from './StoreUserSessionUseCaseImpl';
 import { GetUserNotificationsUseCase } from './interfaces/GetUserNotificationsUseCase';
 import { StoreUserSessionUseCase } from './interfaces/StoreUserSessionUseCase';
@@ -19,7 +19,7 @@ interface UseCases {
 
 const useCases: UseCases = {
   storeUserSessionUseCase: new StoreUserSessionUseCaseImpl(),
-  getUserNotificationsUseCase: new GetUserNotificationsUseCaseImpl(),
+  getUserNotificationsUseCase: new GetMarketplaceNotificationsUseCaseImpl(),
   sendUserNotificationUserCase: new SendUserNotificationsUseCaseImpl(),
   subscribeToTopicUseCase: new SubscribeToTopicUseCaseImpl(),
   unsubScribeFromTopicUseCase: new UnsubscribeToTopicUseCaseImpl(),

@@ -1,16 +1,12 @@
-import { CognitoUser } from '../models/CognitoUser';
-import { userNotificationRepository } from '../repositories';
 import { SendUserNotificationsUseCase } from './interfaces/SendUserNotificationsUseCase';
 import { CreateUserNotificationDto } from '../models/UserNotification';
+import { userNotificationRepository } from '../repositories';
+import { AppType } from '../models/UserDeviceSession';
 
 export default class SendUserNotificationsUseCaseImpl implements SendUserNotificationsUseCase {
   invoke = async (
     topic: string,
-    currentUser: CognitoUser,
+    appType: AppType,
     createUserNotificationDto: CreateUserNotificationDto,
-  ) => {
-    const { tenant, username } = currentUser;
-    const userId = `${tenant}#${username}`;
-    return userNotificationRepository.sendToTopic(topic, userId, createUserNotificationDto);
-  };
+  ) => userNotificationRepository.sendToTopic(topic, appType, createUserNotificationDto);
 }

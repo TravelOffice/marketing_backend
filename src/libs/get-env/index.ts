@@ -26,7 +26,7 @@ export async function getAwsSecretValue(key: string, secretId?: string): Promise
   let secretValue;
   if (!isLocalEnv()) {
     if (!secretValues) {
-      secretId = secretId ?? process.env.SECRET_MANAGER_ID;
+      secretId = secretId || process.env.SECRET_MANAGER_ID;
       if (secretId) {
         const data = await client.getSecretValue({SecretId: secretId}).promise();
         secretValues = JSON.parse(data.SecretString || {}.toString());

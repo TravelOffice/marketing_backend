@@ -30,7 +30,6 @@ export class SubscribedUserRepositoryImpl implements SubscribedUserRepository {
         ':sk_filter': `${USERNAME_INDEX}#`,
       },
     };
-
     const subscribedUsers = await dynamoProvider.query<SubscribedUser>(queryParams);
     return subscribedUsers.map((item) => helper.excludeDataFromObject(item) as SubscribedUser);
   };

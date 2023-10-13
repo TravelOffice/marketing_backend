@@ -17,3 +17,15 @@ export const USER_NOTIFICATION_INDEX = 'NOTI';
 export const VALIDATE_REQUIRED_MSG = 'property is required';
 
 export const VALIDATE_STRING_MSG = 'property must be a string';
+
+export const POST_INDEX = 'P';
+
+export const COMMENT_INDEX = 'CMT';
+
+export const ORGANIZATION_INDEX = 'ORG';
+
+export const OFFER_INDEX = 'OF';
+
+export const RATING_INDEX = 'R';
+
+export const TOUR_POST_FOLLOW_INDEX = 'FL';

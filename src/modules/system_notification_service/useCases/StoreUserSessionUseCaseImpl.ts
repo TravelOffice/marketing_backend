@@ -3,6 +3,7 @@ import { UserDeviceSession } from '../models/UserDeviceSession';
 import { CreateUserDeviceSessionDto } from '../models/dto/CreateUserDeviceSessionDto';
 import { userDeviceSessionRepository } from '../repositories';
 import { StoreUserSessionUseCase } from './interfaces/StoreUserSessionUseCase';
+import logger from '../utils/logger';
 
 export default class StoreUserSessionUseCaseImpl implements StoreUserSessionUseCase {
   /**
@@ -17,14 +18,14 @@ export default class StoreUserSessionUseCaseImpl implements StoreUserSessionUseC
   invoke = async (
     currentUser: CognitoUser,
     createSessionDto: CreateUserDeviceSessionDto,
-  ) => {
+  ): Promise<UserDeviceSession> => {
     const { tenant, username } = currentUser;
     const userId = `${tenant}#${username}`;
-    const { token } = createSessionDto;
+    const { token, appType } = createSessionDto;
     // Check wether the device token exists in the database.
     // If it exists, return the existing user device session.
     const existingUserDeviceSession = await userDeviceSessionRepository
-      .getByDeviceToken(userId, token);
+      .getByDeviceToken(userId, appType, token);
     if (existingUserDeviceSession) {
       return existingUserDeviceSession;
     }
@@ -39,12 +40,15 @@ export default class StoreUserSessionUseCaseImpl implements StoreUserSessionUseC
     } as UserDeviceSession;
     const userDeviceSession = await userDeviceSessionRepository.create(
       userId,
+      appType,
       session,
     );
 
     if (!userDeviceSession) {
       throw new Error('Failed to create user device session');
     }
+
+    logger.log(`Create user ${userId} device session successfully`);
 
     return userDeviceSession;
   };

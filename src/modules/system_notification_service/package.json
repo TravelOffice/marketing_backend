@@ -1,11 +1,12 @@
 {
-  "name": "notificatin-service",
+  "name": "system-notificatin-service",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "lint": "npx eslint . --ext .js,.jsx,.ts,.tsx",
     "lint:fix": "npx eslint . --ext .js,.jsx,.ts,.tsx --fix",
+    "testLocal": "npx ts-node ./tests/localTest.ts",
     "dev": "nodemon app.local.ts",
     "build": "tsc"
   },
@@ -14,6 +15,7 @@
   "dependencies": {
     "@vendia/serverless-express": "^4.5.2",
     "aws": "link:../../libs/aws-sdk",
+    "aws-lambda": "^1.0.7",
     "common-models": "link:../../libs/common-models",
     "compression": "^1.7.4",
     "core": "link:../../libs/core",
@@ -25,6 +27,7 @@
     "reflect-metadata": "^0.1.13"
   },
   "devDependencies": {
+    "@types/aws-lambda": "^8.10.119",
     "@types/compression": "^1.7.2",
     "@types/cors": "^2.8.12",
     "@types/express": "^4.17.13",
