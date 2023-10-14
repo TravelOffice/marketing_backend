@@ -16,8 +16,6 @@ export default class TourFillingRatioMetricAnalyzer extends AbstractMetricAnalyz
 
   output?: TourFillingRatioStatistic;
 
-  changeKeys?: string[];
-
   constructor(
     metricName: MetricName,
     tenant: string,
@@ -25,7 +23,6 @@ export default class TourFillingRatioMetricAnalyzer extends AbstractMetricAnalyz
   ) {
     super(metricName, tenant);
     this.inputData = data;
-    this.changeKeys = ['fillingRatio'];
   }
 
   async analyze(): Promise<void> {
@@ -40,7 +37,7 @@ export default class TourFillingRatioMetricAnalyzer extends AbstractMetricAnalyz
       const pk = `${TENANT_STATISTIC_INDEX}#${this.tenant}#${BOOKING_FR_STATISTIC_INDEX}`;
       const { code: sk } = old;
       this.output = { pk, sk };
-    } else if (this.inputData.eventName === 'INSERT' || this.isChangesDetected) {
+    } else {
       const { code: sk, name: dtN, fillingRatio } = current;
       const pk = `${TENANT_STATISTIC_INDEX}#${this.tenant}#${BOOKING_FR_STATISTIC_INDEX}`;
 

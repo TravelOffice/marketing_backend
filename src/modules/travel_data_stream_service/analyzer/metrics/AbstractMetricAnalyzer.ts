@@ -1,4 +1,3 @@
-import { dynamoProvider } from 'core';
 import { MetricSaleAnalyzerResult } from '../../models/statistic/TenantSaleAnalyzerResult';
 import { SingleMetricInputData, MetricName } from '../../models/statistic/analyzer';
 
@@ -18,8 +17,6 @@ export default abstract class AbstractMetricAnalyzer {
   // Output data that is the result of analysis
   abstract output?: MetricSaleAnalyzerResult;
 
-  abstract changeKeys?: string[];
-
   constructor(metricName: MetricName, tenant: string) {
     this.metricName = metricName;
     this.tenant = tenant;
@@ -33,25 +30,6 @@ export default abstract class AbstractMetricAnalyzer {
       };
     }
     return undefined;
-  }
-
-  get isChangesDetected(): boolean {
-    if (this.changeKeys && this.changeKeys.length > 0) {
-      const { OldImage, NewImage } = this.inputData.dynamodb;
-      const old = dynamoProvider.unmarshall(OldImage);
-      const current = dynamoProvider.unmarshall(NewImage);
-      // Any change in changeKeys will be triggered as a change
-      for (let i = 0; i < this.changeKeys.length; i += 1) {
-        const key = this.changeKeys[i];
-        if (old[key] !== current[key]) {
-          return true;
-        }
-      }
-      return false;
-    }
-
-    // If changeKeys is not defined, we assume that there is a change
-    return true;
   }
 
   abstract analyze(): Promise<void>;
