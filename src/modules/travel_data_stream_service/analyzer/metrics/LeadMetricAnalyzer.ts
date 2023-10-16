@@ -32,16 +32,17 @@ export default class LeadMetricAnalyzer extends AbstractMetricAnalyzer {
       const lead = dynamoProvider.unmarshall(this.inputData.dynamodb.NewImage) as Lead;
       const createdAt = lead.createdAt?.toString() || Date.now().toString();
       const {
-        assigneeId, code,
+        assigneeId, code, sourceId,
         endingLocationCode: lcId, endingLocationName: lcN,
       } = lead;
       this.output = {
         pk: `${TENANT_STATISTIC_INDEX}#${this.tenant}#${LEAD_STATISTIC_INDEX}`,
         sk: code,
-        lsi1: createdAt,
-        lsi2: `${assigneeId}#${createdAt}`,
         lcId,
         lcN,
+        lsi1: createdAt,
+        lsi2: `${assigneeId}#${createdAt}`,
+        lsi3: sourceId,
       };
     }
   }

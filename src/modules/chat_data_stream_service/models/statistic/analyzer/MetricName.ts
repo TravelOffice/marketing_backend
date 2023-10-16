@@ -1,0 +1,4 @@
+export type MetricName =
+  'CONVERSATION_METRIC'
+  | 'ORG_SESSION_METRIC'
+  | 'ASSIGNEE_SESSION_METRIC';
