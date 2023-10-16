@@ -28,7 +28,7 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
   next();
 });
 
-app.get('/notification/sessions/:token', async (req: Request, res: Response) => {
+app.get('/notifications/sessions/:token', async (req: Request, res: Response) => {
   try {
     throw new Error('Not implemented');
   } catch (error: any) {
@@ -37,7 +37,7 @@ app.get('/notification/sessions/:token', async (req: Request, res: Response) => 
   }
 });
 
-app.get('/notification/sessions', async (req: Request, res: Response) => {
+app.get('/notifications/sessions', async (req: Request, res: Response) => {
   try {
     throw new Error('Not implemented');
   } catch (error: any) {
@@ -46,7 +46,7 @@ app.get('/notification/sessions', async (req: Request, res: Response) => {
   }
 });
 
-app.post('/notification/sessions', createUserDeviceSession(), async (req: Request, res: Response) => {
+app.post('/notifications/sessions', createUserDeviceSession(), async (req: Request, res: Response) => {
   try {
     validate(req);
     const currentUser = getCurrentUserInfo(req.headers.authorization!);
@@ -58,7 +58,7 @@ app.post('/notification/sessions', createUserDeviceSession(), async (req: Reques
   }
 });
 
-app.delete('/notification/sessions/:token', async (req: Request, res: Response) => {
+app.delete('/notifications/sessions/:token', async (req: Request, res: Response) => {
   try {
     throw new Error('Not implemented');
   } catch (error: any) {
@@ -67,7 +67,7 @@ app.delete('/notification/sessions/:token', async (req: Request, res: Response) 
   }
 });
 
-app.get('/me/notification', getMyNotificationsValidator(), async (req: Request, res: Response) => {
+app.get('/me/notifications', getMyNotificationsValidator(), async (req: Request, res: Response) => {
   try {
     validate(req);
     const { appType, ...rest } = req.query;
