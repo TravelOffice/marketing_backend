@@ -130,11 +130,6 @@ locals {
       LEAD_SERVICE_NAME          = "${var.ENV}-${var.FEATURE_NAME}-get_leads_from_marketplace_service"
       TOUR_TEMPLATE_SERVICE_NAME = "${var.ENV}-${var.FEATURE_NAME}-get_tour_tpls_from_marketplace_service"
     },
-    marketplace_data_stream_lambda_vars = {
-      REGION                          = var.AWS_REGION
-      NODE_ENV                        = var.ENV
-      HANDLE_NOTIFICATION_LAMBDA_NAME = "${var.ENV}-handle_notification_service"
-    },
     handle_notification_lambda_vars = {
       REGION                           = var.AWS_REGION
       NODE_ENV                         = var.ENV
@@ -241,6 +236,9 @@ module "DDB_STREAMS_CONFIGURATION" {
   TRAVEL_DDB_STREAM_BATCH_SIZE           = 100
   TRAVEL_LAMBDA_STREAM_HANDLER_ARN       = module.LAMBDA_FUNCTION.lambda_arns["travel_data_stream_service"]
   TRAVEL_DDB_STREAM_BATCHING_WINDOW      = 90
+  # For notification stream
+  NOTIFICATION_DDB_STREAM_BATCH_SIZE     = 1
+  HANDLE_NOTIFICATIONLAMBDA_HANDLER_ARN  = module.LAMBDA_FUNCTION.lambda_arns["handle_notification_service"]
 }
 
 module "SEARCH_QUEUE" {
@@ -306,10 +304,4 @@ module "ECS" {
   PRIVATE_SUBNETS     = module.REMOTE_STATE.STATE.MARKETING.backend.vpc.private_subnets
   VPC_ID              = module.REMOTE_STATE.STATE.MARKETING.backend.vpc.id
   SCHEDULE_EXPRESSION = "cron(0 17 * * ? *)"
-}
-
-module "NOTIFICATION_LAMBDA_SQS_MAPPING" {
-  source     = "../../modules/application/notification/queue"
-  LAMBDA_ARN = module.LAMBDA_FUNCTION.lambda_arns["system_notification_service"]
-  SOURCE_ARN = module.REMOTE_STATE.STATE.MARKETING.queue.system_notification_queue
 }

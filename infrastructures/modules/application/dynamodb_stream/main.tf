@@ -9,6 +9,8 @@ variable "MARKETPLACE_DDB_STREAM_ARN" {}
 variable "MARKETPLACE_DDB_STREAM_BATCH_SIZE" {}
 variable "MARKETPLACE_LAMBDA_STREAM_HANDLER_ARN" {}
 variable "MARKETPLACE_DDB_STREAM_BATCHING_WINDOW" {}
+variable "NOTIFICATION_DDB_STREAM_BATCH_SIZE" {}
+variable "HANDLE_NOTIFICATIONLAMBDA_HANDLER_ARN" {}
 
 module "marketplace_ddb_stream_trigger" {
   source                                 = "./marketplace_stream/trigger"
@@ -18,6 +20,17 @@ module "marketplace_ddb_stream_trigger" {
   MARKETPLACE_DDB_STREAM_ARN             = var.MARKETPLACE_DDB_STREAM_ARN
   MARKETPLACE_DDB_STREAM_BATCH_SIZE      = var.MARKETPLACE_DDB_STREAM_BATCH_SIZE
   MARKETPLACE_LAMBDA_STREAM_HANDLER_ARN  = var.MARKETPLACE_LAMBDA_STREAM_HANDLER_ARN
+  MARKETPLACE_DDB_STREAM_BATCHING_WINDOW = var.MARKETPLACE_DDB_STREAM_BATCHING_WINDOW
+}
+
+module "marketplace_notitication_ddb_stream_trigger" {
+  source                                 = "./marketplace_stream/trigger"
+  ENV                                    = var.ENV
+  FEATURE_NAME                           = var.FEATURE_NAME
+  TAGS                                   = var.TAGS
+  MARKETPLACE_DDB_STREAM_ARN             = var.MARKETPLACE_DDB_STREAM_ARN
+  MARKETPLACE_DDB_STREAM_BATCH_SIZE      = var.NOTIFICATION_DDB_STREAM_BATCH_SIZE
+  MARKETPLACE_LAMBDA_STREAM_HANDLER_ARN  = var.HANDLE_NOTIFICATIONLAMBDA_HANDLER_ARN
   MARKETPLACE_DDB_STREAM_BATCHING_WINDOW = var.MARKETPLACE_DDB_STREAM_BATCHING_WINDOW
 }
 

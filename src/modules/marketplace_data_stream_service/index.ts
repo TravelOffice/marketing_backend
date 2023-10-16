@@ -22,7 +22,6 @@
  */
 import { DynamoDBRecord, DynamoDBStreamEvent } from 'aws-lambda';
 import { dynamoProvider } from 'core';
-import { getEnv } from 'get-env';
 import { Offer } from './models/Offer';
 import { DdbModelChangeType } from './models/dataSubscription/DdbModelChangeType';
 import { MarketplaceStatistic, MarketplaceStats } from './models/statistic/MarketplaceStatistic';
@@ -48,7 +47,6 @@ import { TourPost } from './models/TourPost';
 import { TopCommissionTourPost } from './models/statistic/TopCommissionTourPosts';
 import { TourPostStatus } from './models/TourPostStatus';
 import { padZeroToLeft } from './utils/number';
-import invokeFunction from './utils/lambda';
 
 /**
  * Get model change type from DynamoDB record
@@ -392,15 +390,6 @@ async function handleTopCommissionPosts(records: DynamoDBRecord[]): Promise<void
   await tourPostStatisticRepository.batchDeleteTopCommissionTourPosts(deletingItems);
 }
 
-const handleNotifications = async (event: DynamoDBStreamEvent) => {
-  await invokeFunction({
-    FunctionName: getEnv('SYSTEM_NOTIFICATION_SERVICE_NAME'),
-    InvocationType: 'Event',
-    LogType: 'Tail',
-    Payload: JSON.stringify(event),
-  });
-};
-
 // eslint-disable-next-line import/prefer-default-export
 export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
   try {
@@ -411,9 +400,6 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
       logger.log('No DynamoDB records to handle');
       return;
     }
-
-    // Handle notifications
-    await handleNotifications(event);
 
     // Start handling DynamoDB records to update statistic data
     // There are two kinds of statistic data:

@@ -25,8 +25,7 @@ export default class UserNotificationRepositoryImpl implements UserNotificationR
     const marketplaceTable = await getAwsSecretValue('DYNAMO_NOTIFICATION_TABLE');
     const queryParams = {
       TableName: marketplaceTable,
-      IndexName: 'Index1',
-      KeyConditionExpression: 'pk = :pk ADN begins_with(sk, :sk)',
+      KeyConditionExpression: 'pk = :pk AND begins_with(sk, :sk)',
       ExpressionAttributeValues: {
         ':pk': `${USERNAME_INDEX}#${currentUserId}#${USER_NOTIFICATION_INDEX}`,
         ':sk': `${appType}#`,
