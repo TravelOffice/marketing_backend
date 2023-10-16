@@ -11,6 +11,10 @@ variable "MARKETPLACE_LAMBDA_STREAM_HANDLER_ARN" {}
 variable "MARKETPLACE_DDB_STREAM_BATCHING_WINDOW" {}
 variable "NOTIFICATION_DDB_STREAM_BATCH_SIZE" {}
 variable "HANDLE_NOTIFICATIONLAMBDA_HANDLER_ARN" {}
+variable "CHAT_DDB_STREAM_ARN" {}
+variable "CHAT_DDB_STREAM_BATCH_SIZE" {}
+variable "CHAT_LAMBDA_STREAM_HANDLER_ARN" {}
+variable "CHAT_DDB_STREAM_BATCHING_WINDOW" {}
 
 module "marketplace_ddb_stream_trigger" {
   source                                 = "./marketplace_stream/trigger"
@@ -43,4 +47,15 @@ module "travel_ddb_stream_trigger" {
   TRAVEL_DDB_STREAM_BATCH_SIZE      = var.TRAVEL_DDB_STREAM_BATCH_SIZE
   TRAVEL_LAMBDA_STREAM_HANDLER_ARN  = var.TRAVEL_LAMBDA_STREAM_HANDLER_ARN
   TRAVEL_DDB_STREAM_BATCHING_WINDOW = var.TRAVEL_DDB_STREAM_BATCHING_WINDOW
+}
+
+module "chat_ddb_stream_trigger" {
+  source                          = "./chat_stream/trigger"
+  ENV                             = var.ENV
+  FEATURE_NAME                    = var.FEATURE_NAME
+  TAGS                            = var.TAGS
+  CHAT_DDB_STREAM_ARN             = var.CHAT_DDB_STREAM_ARN
+  CHAT_DDB_STREAM_BATCH_SIZE      = var.CHAT_DDB_STREAM_BATCH_SIZE
+  CHAT_LAMBDA_STREAM_HANDLER_ARN  = var.CHAT_LAMBDA_STREAM_HANDLER_ARN
+  CHAT_DDB_STREAM_BATCHING_WINDOW = var.CHAT_DDB_STREAM_BATCHING_WINDOW
 }

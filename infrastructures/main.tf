@@ -24,7 +24,7 @@ locals {
   constants           = jsondecode(data.aws_secretsmanager_secret_version.current.secret_string)
   remote_feature_name = "base_infrastructure"
   domain_name         = module.REMOTE_STATE.STATE.COMMON_CONFIG.route53.hosted_zone.domain.name
-  tags                = {
+  tags = {
     Env       = var.ENV
     Terraform = true
     Feature   = var.FEATURE_NAME
@@ -222,23 +222,28 @@ module "AUTO_ASSIGN_MODULE_CONFIGURATION" {
 }
 
 module "DDB_STREAMS_CONFIGURATION" {
-  source                                 = "../../modules/application/dynamodb_stream"
-  ENV                                    = var.ENV
-  FEATURE_NAME                           = var.FEATURE_NAME
-  TAGS                                   = local.tags
+  source       = "../../modules/application/dynamodb_stream"
+  ENV          = var.ENV
+  FEATURE_NAME = var.FEATURE_NAME
+  TAGS         = local.tags
   # For marketplace stream
   MARKETPLACE_DDB_STREAM_ARN             = module.REMOTE_STATE.STATE.MARKETING.backend.dynamodb.marketplace_table.stream_arn
   MARKETPLACE_DDB_STREAM_BATCH_SIZE      = 100
   MARKETPLACE_LAMBDA_STREAM_HANDLER_ARN  = module.LAMBDA_FUNCTION.lambda_arns["marketplace_data_stream_service"]
   MARKETPLACE_DDB_STREAM_BATCHING_WINDOW = 90
   # For travel stream
-  TRAVEL_DDB_STREAM_ARN                  = module.REMOTE_STATE.STATE.MARKETING.backend.dynamodb.travel_table.stream_arn
-  TRAVEL_DDB_STREAM_BATCH_SIZE           = 100
-  TRAVEL_LAMBDA_STREAM_HANDLER_ARN       = module.LAMBDA_FUNCTION.lambda_arns["travel_data_stream_service"]
-  TRAVEL_DDB_STREAM_BATCHING_WINDOW      = 90
+  TRAVEL_DDB_STREAM_ARN             = module.REMOTE_STATE.STATE.MARKETING.backend.dynamodb.travel_table.stream_arn
+  TRAVEL_DDB_STREAM_BATCH_SIZE      = 100
+  TRAVEL_LAMBDA_STREAM_HANDLER_ARN  = module.LAMBDA_FUNCTION.lambda_arns["travel_data_stream_service"]
+  TRAVEL_DDB_STREAM_BATCHING_WINDOW = 90
   # For notification stream
-  NOTIFICATION_DDB_STREAM_BATCH_SIZE     = 1
-  HANDLE_NOTIFICATIONLAMBDA_HANDLER_ARN  = module.LAMBDA_FUNCTION.lambda_arns["handle_notification_service"]
+  NOTIFICATION_DDB_STREAM_BATCH_SIZE    = 1
+  HANDLE_NOTIFICATIONLAMBDA_HANDLER_ARN = module.LAMBDA_FUNCTION.lambda_arns["handle_notification_service"]
+  # For chat stream
+  CHAT_DDB_STREAM_ARN             = module.REMOTE_STATE.STATE.MARKETING.backend.dynamodb.chat_table.stream_arn
+  CHAT_DDB_STREAM_BATCH_SIZE      = 100
+  CHAT_LAMBDA_STREAM_HANDLER_ARN  = module.LAMBDA_FUNCTION.lambda_arns["chat_data_stream_service"]
+  CHAT_DDB_STREAM_BATCHING_WINDOW = 90
 }
 
 module "SEARCH_QUEUE" {
@@ -278,9 +283,9 @@ module "SEARCH_INSTANCE" {
 }
 
 module "ECS" {
-  source          = "../../modules/ecs"
-  FEATURE_NAME    = var.FEATURE_NAME
-  ENV             = var.ENV
+  source       = "../../modules/ecs"
+  FEATURE_NAME = var.FEATURE_NAME
+  ENV          = var.ENV
   CUSTOM_POLICIES = [
     "EcsTaskStandardRole",
     "DynamoTableReadWrite",

@@ -5,6 +5,7 @@ export interface LeadStatistic extends BaseDdbModel {
   // sk = <lead_code>
   // lsi1 = <createdAt>
   // lsi2 = <saleId>#<createdAt>
+  // lsi3 = source // CHAT, EMAIL, PHONE, WEBSITE...
   lcId: string, // location ID
   lcN: string, // location name
 }
