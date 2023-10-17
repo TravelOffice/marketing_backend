@@ -251,8 +251,7 @@ async function handleTourPostsStatisticChange(records: DynamoDBRecord[]): Promis
     }
 
     const newModelData = dynamoProvider.unmarshall(record.dynamodb?.NewImage);
-    const { tourPostId, linkedToTargetKeys } = newModelData;
-    const linkedTargetId = `${linkedToTargetKeys?.pk}#${linkedToTargetKeys?.sk}`;
+    const tourPostId = (newModelData.tourPostId || newModelData.code) as string;
     const organization = (newModelData.receivedOrg || newModelData.organization) as string;
 
     // Initialize statistic data for tour post if it doesn't exist
@@ -265,8 +264,12 @@ async function handleTourPostsStatisticChange(records: DynamoDBRecord[]): Promis
       };
     }
 
-    // Add lsi to query tour post that linked to target lead or tour template
-    tourPostsChangedStats[tourPostId].lsi1 = linkedTargetId;
+    if (newModelData.linkedToTargetKeys) {
+      const { linkedToTargetKeys } = newModelData;
+      const linkedTargetId = `${linkedToTargetKeys?.pk}#${linkedToTargetKeys?.sk}`;
+      // Add lsi to query tour post that linked to target lead or tour template
+      tourPostsChangedStats[tourPostId].lsi1 = linkedTargetId;
+    }
 
     // Handle new data added to database
     // * Rating data is not allowed to be changed, so there is no need to handle `MODIFY` event
