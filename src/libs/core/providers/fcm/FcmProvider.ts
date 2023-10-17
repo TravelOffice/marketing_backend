@@ -46,9 +46,9 @@ export default class FcmProvider {
     process.env.GOOGLE_APPLICATION_CREDENTIALS = filePath;
     if (!fs.existsSync(filePath)) {
       fs.writeFileSync(filePath, firebaseCredential);
+      this.app = firebase.initializeApp({
+        credential: firebase.credential.cert(filePath),
+      });
     }
-    this.app = firebase.initializeApp({
-      credential: firebase.credential.cert(filePath),
-    });
   }
 }

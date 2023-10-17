@@ -66,8 +66,10 @@ export default class UserNotificationRepositoryImpl implements UserNotificationR
       href,
       read: 'unread',
     }, subscribedUsers);
-    await this.executeBatchWrite(batchWriteInput);
-    logger.log(`Save notification ${notificationId} to dynamodb successfully`);
+    if (batchWriteInput.length > 0) {
+      await this.executeBatchWrite(batchWriteInput);
+      logger.log(`Save notification ${notificationId} to dynamodb successfully`);
+    }
   };
 
   private buildBatchWriteNotifications = (
