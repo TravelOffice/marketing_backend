@@ -1,8 +1,8 @@
 import { Request } from 'express';
 import {
-  ValidationError, body, query, validationResult,
+  body, query, ValidationError, validationResult,
 } from 'express-validator';
-import { deviceTypes } from '../models/UserDeviceSession';
+import { AppTypeEnum, appTypes, deviceTypes } from '../models/UserDeviceSession';
 import { VALIDATE_REQUIRED_MSG, VALIDATE_STRING_MSG } from './constants';
 
 export default function validate(req: Request) {
@@ -56,5 +56,23 @@ export function getMyNotificationsValidator() {
       .optional()
       .isIn(['ASC', 'DESC'])
       .withMessage('property must be one of ASC, DESC'),
+    query('appType')
+      .isIn(Object.values(AppTypeEnum)).withMessage(`must be one of ${Object.values(AppTypeEnum)}`),
+  ];
+}
+
+export function markAsReadValidator() {
+  return [
+    body('notificationId').isString().notEmpty().withMessage('must be a string'),
+    body('appType')
+      .isIn(appTypes).withMessage(`must be one of ${appTypes}`),
+  ];
+}
+
+export function markAllReadValidator() {
+  return [
+    body('markedTime').notEmpty().custom((value) => !Number.isNaN(value) && Number.isFinite(value)),
+    body('appType')
+      .isIn(appTypes).withMessage(`must be one of ${appTypes}`),
   ];
 }
