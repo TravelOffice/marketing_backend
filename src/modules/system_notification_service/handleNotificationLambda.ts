@@ -115,23 +115,23 @@ async function handleNotifications(records: DynamoDBRecord[]) {
           type = UserNotificationType.OFFER;
           title = 'Yêu cầu ghép mới';
           body = 'Bài đăng của bạn nhận được một yêu cầu mới';
-          href = `/post/${tourPostId}?offer=${code}`;
+          href = `/posts/${tourPostId}?offer=${code}`;
         } else if (modelChangeType === 'COMMENT') {
           topic = `post_${tourPostId}`;
           type = UserNotificationType.COMMENT;
           title = 'Bình luận mới';
           body = 'Bài đăng của bạn có bình luận mới';
-          href = `/post/${tourPostId}?comment=${code}`;
+          href = `/posts/${tourPostId}?comment=${code}`;
         }
       } else if (record.eventName === 'MODIFY') {
         if (modelChangeType === 'POST') {
           topic = `post_${tourPostId}`;
           title = 'Cập nhật mới';
           body = 'Bài đăng có cập nhật mới';
-          href = `/post/${tourPostId}`;
+          href = `/posts/${tourPostId}`;
         } else if (modelChangeType === 'OFFER') {
           type = UserNotificationType.OFFER;
-          href = `/post/${tourPostId}?offer=${code}`;
+          href = `/posts/${tourPostId}?offer=${code}`;
           const { offerStatus } = newModelData;
           if (offerStatus === 'ACCEPTED') {
             topic = `post_${tourPostId}-offer_${code}`;
@@ -153,10 +153,15 @@ async function handleNotifications(records: DynamoDBRecord[]) {
 
       if (topic !== '') {
         promises.push(sendUserNotificationUserCase.invoke(topic, 'MARKETPLACE', {
-          title,
-          body,
-          type,
-          href,
+          notification: {
+            title,
+            body,
+          },
+          data: {
+            type,
+            read: 'unread',
+            href,
+          },
         }));
       }
     }

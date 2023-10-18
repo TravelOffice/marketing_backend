@@ -8,6 +8,10 @@ import { SendUserNotificationsUseCase } from './interfaces/SendUserNotifications
 import SendUserNotificationsUseCaseImpl from './SendUserNotificationsUseCaseImpl';
 import SubscribeToTopicUseCaseImpl from './SubscribeToTopicUseCaseImpl';
 import UnsubscribeToTopicUseCaseImpl from './UnSubscribeToTopicUseCaseImpl';
+import { MarkNotificationAsReadUseCase } from './interfaces/MarkNotificationAsReadUseCase';
+import MarkNotificationAsReadUseCaseImpl from './MarkNotificationAsReadUseCaseImpl';
+import MarkAllNotificationsAsReadUseCaseImpl from './MarkAllNotificationsAsReadUseCaseImpl';
+import { MarkAllNotificationsAsReadUseCase } from './interfaces/MarkAllNotificationsAsReadUseCase';
 
 interface UseCases {
   storeUserSessionUseCase: StoreUserSessionUseCase,
@@ -15,6 +19,8 @@ interface UseCases {
   sendUserNotificationUserCase: SendUserNotificationsUseCase,
   subscribeToTopicUseCase: SubscribeToTopicUseCase,
   unsubScribeFromTopicUseCase: UnsubscribeFromTopicUseCase,
+  markNotificationAsReadUseCase: MarkNotificationAsReadUseCase,
+  markAllNotificationsAsReadUseCase: MarkAllNotificationsAsReadUseCase,
 }
 
 const useCases: UseCases = {
@@ -23,6 +29,8 @@ const useCases: UseCases = {
   sendUserNotificationUserCase: new SendUserNotificationsUseCaseImpl(),
   subscribeToTopicUseCase: new SubscribeToTopicUseCaseImpl(),
   unsubScribeFromTopicUseCase: new UnsubscribeToTopicUseCaseImpl(),
+  markNotificationAsReadUseCase: new MarkNotificationAsReadUseCaseImpl(),
+  markAllNotificationsAsReadUseCase: new MarkAllNotificationsAsReadUseCaseImpl(),
 };
 
 export const {
@@ -31,4 +39,6 @@ export const {
   sendUserNotificationUserCase,
   subscribeToTopicUseCase,
   unsubScribeFromTopicUseCase,
+  markNotificationAsReadUseCase,
+  markAllNotificationsAsReadUseCase,
 } = useCases;

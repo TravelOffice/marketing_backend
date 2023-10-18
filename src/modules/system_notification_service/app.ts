@@ -2,10 +2,20 @@ import compression from 'compression';
 import cors from 'cors';
 import { getCurrentUserInfo } from 'decode-token';
 import express, { NextFunction, Request, Response } from 'express';
-import { getUserNotificationsUseCase, storeUserSessionUseCase } from './useCases';
+import {
+  getUserNotificationsUseCase,
+  markAllNotificationsAsReadUseCase,
+  markNotificationAsReadUseCase,
+  storeUserSessionUseCase,
+} from './useCases';
 import { FAILED, SUCCESS } from './utils/constants';
 import logger from './utils/logger';
-import validate, { createUserDeviceSession, getMyNotificationsValidator } from './utils/validator';
+import validate, {
+  createUserDeviceSession,
+  getMyNotificationsValidator,
+  markAllReadValidator,
+  markAsReadValidator,
+} from './utils/validator';
 import wrapResponse from './utils/wrapResponse';
 import { AppType } from './models/UserDeviceSession';
 
@@ -84,4 +94,37 @@ app.get('/me/notifications', getMyNotificationsValidator(), async (req: Request,
   }
 });
 
+app.put('/me/notifications/mark-all-read', markAllReadValidator(), async (req: Request, res: Response) => {
+  try {
+    validate(req);
+    const { appType, markedTime } = req.body;
+    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    await markAllNotificationsAsReadUseCase.invoke(
+      currentUser,
+      appType,
+      markedTime,
+    );
+    res.json(wrapResponse(SUCCESS));
+  } catch (error: any) {
+    logger.log(`[GET] Error ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.put('/me/notifications/mark-as-read', markAsReadValidator(), async (req: Request, res: Response) => {
+  try {
+    validate(req);
+    const { notificationId, appType } = req.body;
+    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    await markNotificationAsReadUseCase.invoke(
+      currentUser,
+      appType,
+      notificationId,
+    );
+    res.json(wrapResponse(SUCCESS));
+  } catch (error: any) {
+    logger.log(`[GET] Error ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
 export default app;
