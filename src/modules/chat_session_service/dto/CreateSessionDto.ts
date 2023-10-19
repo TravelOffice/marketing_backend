@@ -1,6 +1,6 @@
-import { Session } from '../models/Session';
+import { ChatSession } from '../models/ChatSession';
 
-export type CreateSessionDto = Pick<Session,
+export type CreateSessionDto = Pick<ChatSession,
   'code' |
   'conversationId' |
   'startTime' |

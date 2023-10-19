@@ -1,5 +1,5 @@
 import { helper, logger } from 'core';
-import { ChatSessionStatus, Session } from '../models/Session';
+import { ChatSession, ChatSessionStatus } from '../models/ChatSession';
 import { CognitoUser } from '../models/CognitoUser';
 import { sessionRepository } from '../repositories';
 import { ActivateSessionUseCase } from './interfaces/ActivateSessionUseCase';
@@ -18,7 +18,7 @@ export default class ActivateSessionUseCaseImpl implements ActivateSessionUseCas
     currentUser: CognitoUser,
     conversationId: string,
     sessionId: string,
-  ): Promise<Session> {
+  ): Promise<ChatSession> {
     logger.log(`Activate session ${sessionId} of conversation ${conversationId} for tenant ${currentUser.tenant}`);
 
     const currentSession = await sessionRepository.get(
@@ -39,7 +39,7 @@ export default class ActivateSessionUseCaseImpl implements ActivateSessionUseCas
 
     const now = Date.now();
     const responseTime = (now - currentSession.startTime) / 1000; // convert milliseconds to seconds
-    const dataToUpdate: Partial<Session> = {
+    const dataToUpdate: Partial<ChatSession> = {
       status: ChatSessionStatus.ACTIVE,
       updatedAt: now,
       responseTime,
@@ -53,6 +53,6 @@ export default class ActivateSessionUseCaseImpl implements ActivateSessionUseCas
       sessionId,
       dataToUpdate,
     );
-    return helper.excludeDataFromObject(updatedSession) as Session;
+    return helper.excludeDataFromObject(updatedSession) as ChatSession;
   }
 }

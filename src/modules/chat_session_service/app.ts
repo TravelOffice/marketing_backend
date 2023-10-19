@@ -9,11 +9,10 @@ import {
   createSessionUseCase,
   getListOfSessionByConversationId,
   getSessionUseCase,
-  updateSessionUseCase,
 } from './useCases';
 import wrapResponse from './utils/wrapResponse';
 import { FAILED, SUCCESS } from './utils/constants';
-import validate, { closeSessionValidator, updateSessionValidator } from './utils/validator';
+import validate, { createSessionValidator } from './utils/validator';
 
 const app = express();
 
@@ -45,11 +44,13 @@ app.get('/conversations/:id/chat-sessions/:sessionId', async (req: Request, res:
   }
 });
 
-app.post('/conversations/:id/chat-sessions', async (req: Request, res: Response) => {
+app.post('/conversations/:id/chat-sessions', createSessionValidator(), async (req: Request, res: Response) => {
   try {
+    validate(req);
     const { id: conversationId } = req.params;
+    const { platform } = req.body;
     const currentUser = getCurrentUserInfo(req.headers.authorization!);
-    const session = await createSessionUseCase.invoke(currentUser, conversationId);
+    const session = await createSessionUseCase.invoke(currentUser, conversationId, platform);
     res.json(wrapResponse(SUCCESS, session));
   } catch (e: any) {
     res.json(wrapResponse(FAILED, undefined, e.message));
@@ -61,23 +62,6 @@ app.get('/conversations/:id/chat-sessions', async (req: Request, res: Response) 
     const { id } = req.params;
     const currentUser = getCurrentUserInfo(req.headers.authorization!);
     const session = await getListOfSessionByConversationId.invoke(currentUser, id);
-    res.json(wrapResponse(SUCCESS, session));
-  } catch (e: any) {
-    res.json(wrapResponse(FAILED, undefined, e.message));
-  }
-});
-
-app.put('/conversations/:id/chat-sessions/:sessionId', updateSessionValidator(), async (req: Request, res: Response) => {
-  try {
-    validate(req);
-    const { id: conversationId, sessionId } = req.params;
-    const currentUser = getCurrentUserInfo(req.headers.authorization!);
-    const session = await updateSessionUseCase.invoke(
-      currentUser,
-      conversationId,
-      sessionId,
-      req.body,
-    );
     res.json(wrapResponse(SUCCESS, session));
   } catch (e: any) {
     res.json(wrapResponse(FAILED, undefined, e.message));
@@ -99,17 +83,14 @@ app.put('/conversations/:id/chat-sessions/:sessionId/activate', async (req: Requ
   }
 });
 
-app.put('/conversations/:id/chat-sessions/:sessionId/close', closeSessionValidator(), async (req: Request, res: Response) => {
+app.put('/conversations/:id/chat-sessions/:sessionId/close', async (req: Request, res: Response) => {
   try {
-    validate(req);
     const { id: conversationId, sessionId } = req.params;
-    const { latestMessage } = req.body;
     const currentUser = getCurrentUserInfo(req.headers.authorization!);
     const session = await closeSessionUseCase.invoke(
       currentUser,
       conversationId,
       sessionId,
-      latestMessage,
     );
     res.json(wrapResponse(SUCCESS, session));
   } catch (e: any) {

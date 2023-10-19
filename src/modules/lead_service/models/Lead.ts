@@ -45,6 +45,8 @@ export interface Lead extends BaseDdbModel {
   numberOfChildrenPassengers: number,
   endingLocationName: string,
   endingLocationCode: string,
+  conversationId?: string,
+  sessionId?: string,
 
   // Manage
   leadStatus: LeadStatus,

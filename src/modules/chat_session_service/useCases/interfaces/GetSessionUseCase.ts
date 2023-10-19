@@ -1,4 +1,4 @@
-import { Session } from '../../models/Session';
+import { ChatSession } from '../../models/ChatSession';
 import { CognitoUser } from '../../models/CognitoUser';
 
 export interface GetSessionUseCase {
@@ -6,5 +6,5 @@ export interface GetSessionUseCase {
     currentUser: CognitoUser,
     conversationId: string,
     sessionId: string
-  ): Promise<Session | undefined>,
+  ): Promise<ChatSession | undefined>,
 }
