@@ -27,18 +27,18 @@ export default class AssigneeChatSessionMetricAnalyzer extends AbstractMetricAna
 
   async analyze(): Promise<void> {
     // Pk from Keys
-    const { sk } = this.recordKeys;
+    const { sk: sessionId } = this.recordKeys;
+    const { conversationId, assigneeId } = this.oldImage as ChatSession;
+    const pk = `${TENANT_STATISTIC_INDEX}#${this.tenant}#${assigneeId}#${ASSIGNEE_CHAT_SESSION_STATISTIC_INDEX}`;
+    const sk = `${conversationId}#${sessionId}`;
     if (this.inputData.eventName === 'REMOVE') {
       // Statistic data should be deleted
       this.shouldBeDeleted = true;
-      const { assigneeId } = this.oldImage as ChatSession;
-      const pk = `${TENANT_STATISTIC_INDEX}#${this.tenant}#${assigneeId}#${ASSIGNEE_CHAT_SESSION_STATISTIC_INDEX}`;
       this.output = { pk, sk };
     } else {
       const {
-        assigneeId, startTime, duration, status, responseTime,
+        startTime, duration, status, responseTime,
       } = this.newImage as ChatSession;
-      const pk = `${TENANT_STATISTIC_INDEX}#${this.tenant}#${assigneeId}#${ASSIGNEE_CHAT_SESSION_STATISTIC_INDEX}`;
       this.output = {
         pk,
         sk,

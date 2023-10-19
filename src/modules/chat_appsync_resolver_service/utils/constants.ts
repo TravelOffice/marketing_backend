@@ -4,6 +4,10 @@ export const EMPLOYEE_INDEX = 'EMPLOYEE';
 
 export const CONVERSATION_INDEX = 'CONVERSATION';
 
+export const CHAT_SESSION_INDEX = 'SESSION';
+
+export const CHAT_SESSION_OPEN_STATUS = 'OPEN';
+
 export const MESSAGE_INDEX = 'MESSAGE';
 
 export const ASSIGNEE_INDEX = 'ASSIGNEE';

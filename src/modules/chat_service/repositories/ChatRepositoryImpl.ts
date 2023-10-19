@@ -124,4 +124,6 @@ export default class ChatRepositoryImpl implements ChatRepository {
     );
     logger.log(`Conversation has been updated, new data is ${updatedConversation}`);
   };
+
+  createChatSession = async () => { };
 }

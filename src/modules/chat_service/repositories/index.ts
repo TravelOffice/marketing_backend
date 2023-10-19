@@ -1,19 +1,20 @@
-// TODO: Declare repository objects which can be used in this service here
-
 import ChatRepositoryImpl from './ChatRepositoryImpl';
-import { ChatRepository } from './interfaces/ChatRepository';
-import { TenantRepository } from './interfaces/TenantRepository';
-import { UserRepository } from './interfaces/UserRepository';
+import ChatSessionRepositoryImpl from './ChatSessionRepositoryImpl';
+import PageRepositoryImpl from './PageRepositoryImpl';
 import TenantRepositoryImpl from './TenantRepositoryImpl';
 import UserRepositoryImpl from './UserRepositoryImpl';
+import { ChatRepository } from './interfaces/ChatRepository';
+import { ChatSessionRepository } from './interfaces/ChatSessionRepository';
 import { PageRepository } from './interfaces/PageRepository';
-import PageRepositoryImpl from './PageRepositoryImpl';
+import { TenantRepository } from './interfaces/TenantRepository';
+import { UserRepository } from './interfaces/UserRepository';
 
 interface Repositories {
   chatRepository: ChatRepository,
   userRepository: UserRepository,
   tenantRepository: TenantRepository,
   pageRepository: PageRepository,
+  chatSessionRepository: ChatSessionRepository,
 }
 
 const repositories: Repositories = {
@@ -21,6 +22,7 @@ const repositories: Repositories = {
   userRepository: new UserRepositoryImpl(),
   tenantRepository: new TenantRepositoryImpl(),
   pageRepository: new PageRepositoryImpl(),
+  chatSessionRepository: new ChatSessionRepositoryImpl(),
 };
 
 export const {
@@ -28,4 +30,5 @@ export const {
   userRepository,
   tenantRepository,
   pageRepository,
+  chatSessionRepository,
 } = repositories;

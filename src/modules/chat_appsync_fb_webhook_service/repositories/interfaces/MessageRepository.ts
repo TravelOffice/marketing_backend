@@ -1,5 +1,6 @@
 import {
   ChatPlatform,
+  DDBMessage,
   FacebookConversation,
   FacebookMessage,
   FacebookPage,
@@ -19,7 +20,7 @@ export interface MessageRepository {
     page: FacebookPage,
     fbConversationId: string,
     message: FacebookMessage,
-  ) => Promise<void>
+  ) => Promise<Partial<DDBMessage>>
 
   getConversationInfo: (
     page: FacebookPage,

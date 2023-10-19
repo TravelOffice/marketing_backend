@@ -91,6 +91,7 @@ export default class MessageRepositoryImpl implements MessageRepository {
     logger.log(`[MessageRepository.saveChatMessage] saved message: ${JSON.stringify({
       pk, sk, lsi1, lsi2, content: message,
     }, null, 2)}`);
+    return conversationMessage;
   };
 
   getConversationInfo = async (

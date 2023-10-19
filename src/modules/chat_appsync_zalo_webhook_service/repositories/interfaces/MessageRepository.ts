@@ -4,6 +4,7 @@ import {
   ReceiveMessageCommandResponse,
   ZaloReceivedMessageContent,
   ChatPlatform,
+  DDBMessage,
 } from 'common-models';
 import { ZaloConversationWithAssignee } from '../../models/RestrictedZaloModels';
 
@@ -19,7 +20,7 @@ export interface MessageRepository {
     customerId: string,
     message: ZaloReceivedMessageContent,
     eventName: string,
-  ) => Promise<void>
+  ) => Promise<Partial<DDBMessage>>
 
   saveConversation: (
     tenantId: string,
