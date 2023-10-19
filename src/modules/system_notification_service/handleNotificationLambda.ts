@@ -12,6 +12,7 @@ import {
 } from './utils/dynamodb';
 import logger from './utils/logger';
 import { UserNotificationType } from './models/UserNotification';
+import { marketplaceUserReposity, tourPostRepository } from './repositories';
 
 /**
  * Get model change type from DynamoDB record
@@ -51,123 +52,136 @@ function getModelChangeType(record: DynamoDBRecord): DdbModelChangeType | undefi
   return 'OTHER';
 }
 
-async function handleSubscribingChange(records: DynamoDBRecord[]): Promise<void> {
+async function handleSubscribingChange(record: DynamoDBRecord): Promise<void> {
   const appType = 'MARKETPLACE';
-  const promises: Promise<void>[] = [];
+  if (!record.dynamodb?.NewImage) {
+    return;
+  }
 
-  records.forEach((record) => {
-    if (!record.dynamodb?.NewImage) {
-      return;
-    }
+  const modelChangeType = getModelChangeType(record);
+  const newModelData = dynamoProvider.unmarshall(record.dynamodb?.NewImage);
+  const { tourPostId, authorId, code } = newModelData;
 
-    const modelChangeType = getModelChangeType(record);
-    const newModelData = dynamoProvider.unmarshall(record.dynamodb?.NewImage);
-    const { tourPostId, authorId, code } = newModelData;
+  if (modelChangeType && ['POST', 'OFFER', 'COMMENT', 'FOLLOW'].includes(modelChangeType)) {
+    if (record.eventName === 'INSERT') {
+      // Notify when tour post is updated or has a new comment
+      const topic = tourPostId ? `post_${tourPostId}` : `post_${code}`; // When create new POST, use code instead of tourPostId
+      await subscribeToTopicUseCase.invoke(authorId, appType, `${topic}`);
+      logger.log(`Subscribed to '${topic}' for user ${authorId}`);
 
-    if (modelChangeType && ['POST', 'OFFER', 'COMMENT', 'FOLLOW'].includes(modelChangeType)) {
-      if (record.eventName === 'INSERT') {
-        // Notify when tour post is updated or has a new comment
-        const topic = tourPostId ? `post_${tourPostId}` : `post_${code}`; // When create new POST, use code instead of tourPostId
-        promises.push(subscribeToTopicUseCase.invoke(authorId, appType, `${topic}`));
-        logger.log(`Subscribed to '${topic}' for user ${authorId}`);
-
-        if (modelChangeType === 'POST') {
-          // Notify when having a new offer or having one offer is canceled
-          promises.push(subscribeToTopicUseCase.invoke(authorId, appType, `post_${code}-author`));
-          logger.log(`Subscribed to 'post_${code}-author' for user ${authorId}`);
-        } else if (modelChangeType === 'OFFER') {
-          // Notify when an offer is accepted or rejected
-          promises.push(subscribeToTopicUseCase.invoke(authorId, appType, `post_${tourPostId}-offer_${code}`));
-          logger.log(`Subscribed to 'post_${tourPostId}-offer_${code}' for user ${authorId}`);
-        }
-      } else if (record.eventName === 'REMOVE' && modelChangeType === 'FOLLOW') {
-        promises.push(unsubScribeFromTopicUseCase.invoke(authorId, appType, `post_${tourPostId}`));
-        logger.log(`Unsubscribed from 'post_${tourPostId}' for user ${authorId}`);
+      if (modelChangeType === 'POST') {
+        // Notify when having a new offer or having one offer is canceled
+        await subscribeToTopicUseCase.invoke(authorId, appType, `post_${code}-author`);
+        logger.log(`Subscribed to 'post_${code}-author' for user ${authorId}`);
+      } else if (modelChangeType === 'OFFER') {
+        // Notify when an offer is accepted or rejected
+        await subscribeToTopicUseCase.invoke(authorId, appType, `post_${tourPostId}-offer_${code}`);
+        logger.log(`Subscribed to 'post_${tourPostId}-offer_${code}' for user ${authorId}`);
       }
+    } else if (record.eventName === 'REMOVE' && modelChangeType === 'FOLLOW') {
+      await unsubScribeFromTopicUseCase.invoke(authorId, appType, `post_${tourPostId}`);
+      logger.log(`Unsubscribed from 'post_${tourPostId}' for user ${authorId}`);
     }
-  });
-
-  await Promise.all(promises);
+  }
 }
 
-async function handleNotifications(records: DynamoDBRecord[]) {
-  const promises: Promise<void>[] = [];
+async function handleNotifications(record: DynamoDBRecord) {
+  if (!record.dynamodb?.NewImage) {
+    return;
+  }
 
-  records.forEach((record) => {
-    if (!record.dynamodb?.NewImage) {
-      return;
-    }
+  const modelChangeType = getModelChangeType(record);
+  const newModelData = dynamoProvider.unmarshall(record.dynamodb?.NewImage);
+  const { tourPostId, code, authorId } = newModelData;
 
-    const modelChangeType = getModelChangeType(record);
-    const newModelData = dynamoProvider.unmarshall(record.dynamodb?.NewImage);
-    const { tourPostId, code } = newModelData;
+  let topic = '';
+  let title = '';
+  let body = '';
+  let href = '';
+  let type = UserNotificationType.POST;
 
-    let topic = '';
-    let title = '';
-    let body = '';
-    let href = '';
-    let type = UserNotificationType.POST;
+  if (modelChangeType && ['POST', 'OFFER', 'COMMENT'].includes(modelChangeType)) {
+    const tourPost = await tourPostRepository.getById(tourPostId);
+    if (!tourPost) return;
 
-    if (modelChangeType && ['POST', 'OFFER', 'COMMENT'].includes(modelChangeType)) {
-      if (record.eventName === 'INSERT') {
-        if (modelChangeType === 'OFFER') {
+    const author = await marketplaceUserReposity.getById(authorId);
+    if (!author) return;
+
+    let image = author.avatar;
+
+    if (record.eventName === 'INSERT') {
+      if (modelChangeType === 'OFFER') {
+        // Have new offer for post
+        const { commission, totalPax } = newModelData;
+        topic = `post_${tourPostId}-author`;
+        type = UserNotificationType.OFFER;
+        title = `${author?.name} đã gửi yêu cầu ghép tour cho bài đăng ${tourPost.name}`;
+        body = `Chiết khấu: ${commission}, Số khách: ${totalPax}`;
+        href = `/posts/${tourPostId}?offer=${code}`;//
+      } else if (modelChangeType === 'COMMENT') {
+        // Have new comment in post
+        const { description } = newModelData;
+        topic = `post_${tourPostId}`;
+        type = UserNotificationType.COMMENT;
+        title = `${author?.name} đã bình luận về bài đăng "${tourPost.name}"`;
+        body = `${author?.name}: ${description}`;
+        href = `/posts/${tourPostId}?comment=${code}`;
+      }
+    } else if (record.eventName === 'MODIFY') {
+      if (modelChangeType === 'POST') {
+        // Post was updated
+        topic = `post_${tourPostId}`;
+        title = `${author?.name} đã cập nhật bài đăng ${tourPost.name}`;
+        body = '';
+        href = `/posts/${tourPostId}`;
+      } else if (modelChangeType === 'OFFER') {
+        // Offer is accepted, rejected, canceled or updated
+        type = UserNotificationType.OFFER;
+        href = `/posts/${tourPostId}?offer=${code}`;
+        const { offerStatus } = newModelData;
+        const authorOfPost = await marketplaceUserReposity.getById(tourPostId.authorId);
+        if (offerStatus === 'ACCEPTED') {
+          topic = `post_${tourPostId}-offer_${code}`;
+          title = `${authorOfPost?.name} đã chấp nhận yêu cầu ghép cho bài đăng "${tourPost.name}"`;
+          body = '';
+          image = authorOfPost?.avatar;
+        } else if (offerStatus === 'REJECTED') {
+          const { rejectReason } = newModelData;
+          topic = `post_${tourPostId}-offer_${code}`;
+          title = `${authorOfPost?.name} đã từ chối yêu cầu ghép cho bài đăng "${tourPost.name}"`;
+          body = `Lí do: ${rejectReason}`;
+          image = authorOfPost?.avatar;
+        } else if (offerStatus === 'CANCELED') {
+          const { canceledReason } = newModelData;
           topic = `post_${tourPostId}-author`;
-          type = UserNotificationType.OFFER;
-          title = 'Yêu cầu ghép mới';
-          body = 'Bài đăng của bạn nhận được một yêu cầu mới';
-          href = `/posts/${tourPostId}?offer=${code}`;
-        } else if (modelChangeType === 'COMMENT') {
-          topic = `post_${tourPostId}`;
-          type = UserNotificationType.COMMENT;
-          title = 'Bình luận mới';
-          body = 'Bài đăng của bạn có bình luận mới';
-          href = `/posts/${tourPostId}?comment=${code}`;
+          title = `${author.name} đã hủy yêu cầu ghép cho bài đăng "${tourPost.name}"`;
+          body = `Lí do: ${canceledReason}`;
+        } else {
+          topic = `post_${tourPostId}-offer_${code}`;
+          title = `${authorOfPost?.name} đã cập nhật một yêu cầu ghép cho bài đăng "${tourPost.name}"`;
+          body = '';
+          image = authorOfPost?.avatar;
         }
-      } else if (record.eventName === 'MODIFY') {
-        if (modelChangeType === 'POST') {
-          topic = `post_${tourPostId}`;
-          title = 'Cập nhật mới';
-          body = 'Bài đăng có cập nhật mới';
-          href = `/posts/${tourPostId}`;
-        } else if (modelChangeType === 'OFFER') {
-          type = UserNotificationType.OFFER;
-          href = `/posts/${tourPostId}?offer=${code}`;
-          const { offerStatus } = newModelData;
-          if (offerStatus === 'ACCEPTED') {
-            topic = `post_${tourPostId}-offer_${code}`;
-            title = 'Ghép thành công';
-            body = 'Yêu cầu của bạn đã được chấp nhận';
-          } else if (offerStatus === 'REJECTED') {
-            topic = `post_${tourPostId}-offer_${code}`;
-            title = 'Từ chối ghép';
-            body = 'Yêu cầu của bạn đã bị từ chối';
-          } else if (offerStatus === 'CANCELED') {
-            topic = `post_${tourPostId}-author`;
-            title = 'Hủy yêu cầu';
-            body = 'Có một yêu cầu ghép bị hủy';
-          }
-        }
-      }
-
-      logger.log(`Send notification to - topic: ${topic}, title: ${title}, body: ${body}, hef: ${href}`);
-
-      if (topic !== '') {
-        promises.push(sendUserNotificationUserCase.invoke(topic, 'MARKETPLACE', {
-          notification: {
-            title,
-            body,
-          },
-          data: {
-            type,
-            read: 'unread',
-            href,
-          },
-        }));
       }
     }
-  });
 
-  await Promise.all(promises);
+    logger.log(`Send notification to - topic: ${topic}, title: ${title}, body: ${body}, hef: ${href}`);
+
+    if (topic !== '') {
+      await sendUserNotificationUserCase.invoke(topic, 'MARKETPLACE', {
+        notification: {
+          title,
+          body,
+        },
+        data: {
+          type,
+          image,
+          read: 'unread',
+          href,
+        },
+      });
+    }
+  }
 }
 
 // eslint-disable-next-line import/prefer-default-export
@@ -182,14 +196,13 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
     }
 
     // Start handling DynamoDB records to handle notifications
-    // * Lambda handles maximum 100 (Batch size setup by Lambda trigger) records at a time
-    // Number of records is large enough to reduce infrastructure cost and improve performance
+    // * Lambda handles one record at a time
 
-    // 1. Handle subscribe/unsubscribe to FCM topic
-    await handleSubscribingChange(records);
+    // 1. Handle sending notifications
+    await handleNotifications(records[0]);
 
-    // 2. Handle sending notifications
-    await handleNotifications(records);
+    // 2. Handle subscribe/unsubscribe to FCM topic
+    await handleSubscribingChange(records[0]);
   } catch (error) {
     logger.log(`Error occurred when handling notifications ${error}`);
   }

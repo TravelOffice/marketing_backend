@@ -35,3 +35,5 @@ export const LATEST_READ_NOTIFICATION = 'LATEST_READ_NOTI';
 export const NOTIFICATION_INDEX = 'NOTIFICATION';
 
 export const COUNTER_INDEX = 'COUNTER';
+
+export const USER_INDEX = 'USR';

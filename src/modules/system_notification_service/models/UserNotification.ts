@@ -15,6 +15,7 @@ export interface UserNotification extends BaseDdbModel {
     id?: string,
     href: string,
     type: UserNotificationType,
+    image?: string,
     read: 'read' | 'unread',
   }
 }
