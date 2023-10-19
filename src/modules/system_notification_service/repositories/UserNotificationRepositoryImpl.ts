@@ -1,9 +1,17 @@
 import { BatchWriteItemInput, PaginationParams, PaginationResponsePayload } from 'core/providers/dynamodb/DynamoProvider';
 import { getAwsSecretValue } from 'get-env';
-import { dynamoProvider, fcmProvider, logger } from 'core';
+import {
+  dynamoProvider, fcmProvider, helper, logger,
+} from 'core';
 import { UserNotificationRepository } from './interfaces/UserNotificationRepository';
 import { CreateUserNotificationDto, UserNotification } from '../models/UserNotification';
-import { LATEST_READ_NOTIFICATION, USER_NOTIFICATION_INDEX, USERNAME_INDEX } from '../utils/constants';
+import {
+  COUNTER_INDEX,
+  LATEST_READ_NOTIFICATION,
+  NOTIFICATION_INDEX,
+  USER_NOTIFICATION_INDEX,
+  USERNAME_INDEX,
+} from '../utils/constants';
 import { subscribedUserRepository } from './index';
 import { SubscribedUser } from '../models/SubscribedUser';
 import { AppType } from '../models/UserDeviceSession';
@@ -85,7 +93,14 @@ export default class UserNotificationRepositoryImpl implements UserNotificationR
     const { notification, data } = createUserNotificationDto;
 
     // Send the notification to the specified topic using FCM (Firebase Cloud Messaging).
-    const notificationId = await fcmProvider.sendMessageToTopic(topic, createUserNotificationDto);
+    // Handle error when registration tokens are no longer exist
+    try {
+      await fcmProvider.sendMessageToTopic(topic, createUserNotificationDto);
+    } catch (error) {
+      logger.log(error);
+    }
+
+    const notificationId = await this.generateCode();
 
     // Log a success message for the sent notification.
     logger.log(`Send notification to ${topic} successfully`);
@@ -102,7 +117,7 @@ export default class UserNotificationRepositoryImpl implements UserNotificationR
         notification,
         data: {
           ...data,
-          id: notificationId.toString(),
+          id: notificationId,
         },
       },
       subscribedUsers,
@@ -153,16 +168,54 @@ export default class UserNotificationRepositoryImpl implements UserNotificationR
     const table = await getAwsSecretValue('DYNAMO_NOTIFICATION_TABLE');
     const pk = `${USERNAME_INDEX}#${currentUserId}#${USER_NOTIFICATION_INDEX}`;
     const sk = `${appType}#${notificationId}`;
-
+    const notification = await this.listById(currentUserId, appType, notificationId);
+    if (!notification) throw new Error(`Notification ${notificationId} doesn't exist`);
+    const { data } = notification;
     await dynamoProvider.updateItemWithSetExpression(
       table,
       pk,
       sk,
       {
-        read: 'read',
+        data: {
+          ...data,
+          read: 'read',
+        },
         updatedAt: Date.now(),
       },
     );
+  };
+
+  private listById = async (
+    currentUserId: string,
+    appType: AppType,
+    notificationId: string,
+  ): Promise<UserNotification | undefined> => {
+    const table = await getAwsSecretValue('DYNAMO_NOTIFICATION_TABLE');
+    const pk = `${USERNAME_INDEX}#${currentUserId}#${USER_NOTIFICATION_INDEX}`;
+    const sk = `${appType}#${notificationId}`;
+    return dynamoProvider.getItem<UserNotification>(
+      table,
+      pk,
+      sk,
+    );
+  };
+
+  /**
+   * Method to generate notification code
+   */
+  private generateCode = async () => {
+    try {
+      const table = await getAwsSecretValue('DYNAMO_NOTIFICATION_TABLE');
+      const count = await helper.generateCode(
+        table,
+        NOTIFICATION_INDEX,
+        COUNTER_INDEX,
+      );
+      return count.toString();
+    } catch (error) {
+      logger.log(`Error during increment operation for notification: ${error}`);
+      throw error;
+    }
   };
 
   private buildBatchWriteNotifications = (

@@ -1,6 +1,5 @@
 import { subscribedUserRepository, userDeviceSessionRepository } from '../repositories';
 import { SubscribeToTopicUseCase } from './interfaces/SubscribeToTopicUseCase';
-import { SubscribedUser } from '../models/SubscribedUser';
 import { AppType } from '../models/UserDeviceSession';
 import logger from '../utils/logger';
 
@@ -21,11 +20,7 @@ export default class SubscribeToTopicUseCaseImpl implements SubscribeToTopicUseC
     const userSessions = await userDeviceSessionRepository.listByUser(authorId, appType);
     const deviceTokens = userSessions.map((session) => session.token);
     if (deviceTokens.length > 0) {
-      await subscribedUserRepository.create({
-        userId: authorId,
-        topic,
-        deviceTokens,
-      } as SubscribedUser);
+      await subscribedUserRepository.create(topic, authorId, deviceTokens);
       logger.log(`Subscribed to ${topic} for user ${authorId} successfully`);
     }
   };

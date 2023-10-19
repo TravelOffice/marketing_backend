@@ -30,12 +30,11 @@ export default class FcmProvider {
   public async sendMessageToTopic(
     topic: string,
     payload: MessagingPayload,
-  ): Promise<number> {
+  ): Promise<void> {
     if (!this.app) {
       await this.init();
     }
-    const { messageId } = await messaging().sendToTopic(`/topics/${topic}`, payload);
-    return messageId;
+    await messaging().sendToTopic(`/topics/${topic}`, payload);
   }
 
   private async init() {

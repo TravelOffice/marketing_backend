@@ -31,7 +31,7 @@ export default class GetMarketplaceNotificationsUseCaseImpl implements GetUserNo
             ...notification,
             data: {
               ...notificationData,
-              read: Number(notification.createdAt) > Number(latestTimeMarkAllRead) ? 'unread' : 'read',
+              read: Number(notification.createdAt) > Number(latestTimeMarkAllRead) ? notificationData.read : 'read',
             },
           } as UserNotification;
         }),

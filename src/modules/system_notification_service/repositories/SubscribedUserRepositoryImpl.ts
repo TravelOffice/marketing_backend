@@ -6,16 +6,19 @@ import { SubscribedUser } from '../models/SubscribedUser';
 
 export class SubscribedUserRepositoryImpl implements SubscribedUserRepository {
   create = async (
-    subscribedUser: SubscribedUser,
-  ): Promise<SubscribedUser> => {
-    const { topic, userId, deviceTokens } = subscribedUser;
+    topic: string,
+    userId: string,
+    deviceTokens: string[],
+  ): Promise<void> => {
     // Subscribe to FCM topic
     await fcmProvider.subscribeToTopic(deviceTokens, topic);
     const table = await getAwsSecretValue('DYNAMO_NOTIFICATION_TABLE');
     const pk = `${FCM_NOTIFICATION_TOPIC_INDEX}#${topic}`;
     const sk = `${USERNAME_INDEX}#${userId}`;
-    await dynamoProvider.putItem(table, pk, sk, subscribedUser);
-    return subscribedUser;
+    await dynamoProvider.putItem(table, pk, sk, {
+      topic,
+      userId,
+    });
   };
 
   listByTopic = async (
@@ -34,10 +37,28 @@ export class SubscribedUserRepositoryImpl implements SubscribedUserRepository {
     return subscribedUsers.map((item) => helper.excludeDataFromObject(item) as SubscribedUser);
   };
 
+  listByUser = async (
+    userId: string,
+  ): Promise<SubscribedUser[]> => {
+    const table = await getAwsSecretValue('DYNAMO_NOTIFICATION_TABLE');
+    const queryParams = {
+      TableName: table,
+      IndexName: 'ReverseIndex',
+      KeyConditionExpression: 'sk = :sk and begins_with(pk, :pk_filter)',
+      ExpressionAttributeValues: {
+        ':sk': `${USERNAME_INDEX}#${userId}`,
+        ':pk_filter': `${FCM_NOTIFICATION_TOPIC_INDEX}#`,
+      },
+    };
+    const subscribedUsers = await dynamoProvider.query<SubscribedUser>(queryParams);
+    return subscribedUsers.map((item) => helper.excludeDataFromObject(item) as SubscribedUser);
+  };
+
   delete = async (
-    subscribedUser: SubscribedUser,
+    topic: string,
+    userId: string,
+    deviceTokens: string[],
   ): Promise<void> => {
-    const { topic, userId, deviceTokens } = subscribedUser;
     // Unsubscribe from FCM topic
     await fcmProvider.unsubscribeTopic(deviceTokens, topic);
     const table = await getAwsSecretValue('DYNAMO_NOTIFICATION_TABLE');
