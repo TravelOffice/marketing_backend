@@ -1,6 +1,5 @@
 import { subscribedUserRepository, userDeviceSessionRepository } from '../repositories';
 import { UnsubscribeFromTopicUseCase } from './interfaces/UnsubscribeFromTopicUseCase';
-import { SubscribedUser } from '../models/SubscribedUser';
 import { AppType } from '../models/UserDeviceSession';
 import logger from '../utils/logger';
 
@@ -22,11 +21,11 @@ export default class UnsubscribeToTopicUseCaseImpl implements UnsubscribeFromTop
     const deviceTokens = userSessions.map((session) => session.token);
     if (deviceTokens.length > 0) {
       // Delete subscribe information into dynamo db
-      await subscribedUserRepository.delete({
+      await subscribedUserRepository.delete(
         topic,
-        userId: authorId,
+        authorId,
         deviceTokens,
-      } as SubscribedUser);
+      );
     }
     logger.log(`Unsubscribed to ${topic} for user ${authorId} successfully`);
   };

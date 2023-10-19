@@ -1,7 +1,8 @@
+import { fcmProvider } from 'core';
 import { CognitoUser } from '../models/CognitoUser';
 import { UserDeviceSession } from '../models/UserDeviceSession';
 import { CreateUserDeviceSessionDto } from '../models/dto/CreateUserDeviceSessionDto';
-import { userDeviceSessionRepository } from '../repositories';
+import { subscribedUserRepository, userDeviceSessionRepository } from '../repositories';
 import { StoreUserSessionUseCase } from './interfaces/StoreUserSessionUseCase';
 import logger from '../utils/logger';
 
@@ -22,7 +23,7 @@ export default class StoreUserSessionUseCaseImpl implements StoreUserSessionUseC
     const { tenant, username } = currentUser;
     const userId = `${tenant}#${username}`;
     const { token, appType } = createSessionDto;
-    // Check wether the device token exists in the database.
+    // Check whether the device token exists in the database.
     // If it exists, return the existing user device session.
     const existingUserDeviceSession = await userDeviceSessionRepository
       .getByDeviceToken(userId, appType, token);
@@ -49,6 +50,17 @@ export default class StoreUserSessionUseCaseImpl implements StoreUserSessionUseC
     }
 
     logger.log(`Create user ${userId} device session successfully`);
+
+    // Subscribe new device token to current user's topics
+    const subscribedUsers = await subscribedUserRepository.listByUser(userId);
+    if (subscribedUsers.length > 0) {
+      const promises: Promise<void>[] = [];
+      subscribedUsers.forEach((item) => {
+        const { topic } = item;
+        promises.push(fcmProvider.subscribeToTopic([token], topic));
+      });
+      await Promise.all(promises);
+    }
 
     return userDeviceSession;
   };
