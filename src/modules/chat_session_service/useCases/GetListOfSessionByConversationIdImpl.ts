@@ -1,7 +1,7 @@
 import { helper } from 'core';
 import { sessionRepository } from '../repositories';
 import { GetListOfSessionByConversationIdUseCase } from './interfaces/GetListOfSessionByConversationIdUseCase';
-import { Session } from '../models/Session';
+import { ChatSession } from '../models/ChatSession';
 import { CognitoUser } from '../models/CognitoUser';
 
 export default class GetListOfSessionByConversationIdImpl
@@ -16,11 +16,11 @@ implements GetListOfSessionByConversationIdUseCase {
   async invoke(
     currentUser: CognitoUser,
     conversationId: string,
-  ): Promise<Array<Session>> {
+  ): Promise<Array<ChatSession>> {
     const sessions = await sessionRepository.listByConversationId(
       currentUser.tenant,
       conversationId,
     );
-    return sessions.map((session) => helper.excludeDataFromObject(session) as Session);
+    return sessions.map((session) => helper.excludeDataFromObject(session) as ChatSession);
   }
 }

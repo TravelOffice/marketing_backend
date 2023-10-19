@@ -1,9 +1,9 @@
-import { Session } from '../../models/Session';
+import { ChatSession } from '../../models/ChatSession';
 import { CognitoUser } from '../../models/CognitoUser';
 
 export interface GetListOfSessionByConversationIdUseCase {
   invoke(
     currentUser: CognitoUser,
     conversationId: string,
-  ): Promise<Array<Session>>,
+  ): Promise<Array<ChatSession>>,
 }

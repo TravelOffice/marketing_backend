@@ -1,5 +1,6 @@
 import { helper } from 'core';
-import { ChatSessionStatus, Session } from '../models/Session';
+import { ChatPlatform } from 'common-models';
+import { ChatSession, ChatSessionStatus } from '../models/ChatSession';
 import { sessionRepository } from '../repositories';
 import { CreateSessionUseCase } from './interfaces/CreateSessionUseCase';
 import { CognitoUser } from '../models/CognitoUser';
@@ -13,9 +14,14 @@ export default class CreateSessionUseCaseImpl implements CreateSessionUseCase {
    *
    * @param currentUser - The current user invoking the use case.
    * @param conversationId - The conversation ID of the session.
+   * @param platform - The platform of the session.
    * @returns A Promise that resolves to the created session.
    */
-  async invoke(currentUser: CognitoUser, conversationId: string): Promise<Session> {
+  async invoke(
+    currentUser: CognitoUser,
+    conversationId: string,
+    platform: ChatPlatform,
+  ): Promise<ChatSession> {
     // Check if the user already has an open session for the conversation
     const openSessionsOfUser = await sessionRepository.listByAssigneeIdAndStatus(
       currentUser.tenant,
@@ -36,13 +42,13 @@ export default class CreateSessionUseCaseImpl implements CreateSessionUseCase {
       throw new Error(`User ${currentUser.username} already has an active session for conversation ${conversationId}`);
     }
 
-    const dataToCreate = await this.buildSession({ currentUser, conversationId });
+    const dataToCreate = await this.buildSession({ currentUser, conversationId, platform });
     const createdSession = await sessionRepository.create(
       currentUser.tenant,
       conversationId,
       dataToCreate,
     );
-    return helper.excludeDataFromObject(createdSession) as Session;
+    return helper.excludeDataFromObject(createdSession) as ChatSession;
   }
 
   /**
@@ -54,13 +60,15 @@ export default class CreateSessionUseCaseImpl implements CreateSessionUseCase {
   private async buildSession(options: {
     currentUser: CognitoUser,
     conversationId: string,
-  }): Promise<Partial<Session>> {
+    platform: ChatPlatform,
+  }): Promise<Partial<ChatSession>> {
     const now = Date.now();
-    const { currentUser, conversationId } = options;
+    const { currentUser, conversationId, platform } = options;
 
     return {
       code: await sessionRepository.generateChatSessionCode(currentUser.tenant),
       conversationId,
+      platform,
       startTime: now,
       assigneeId: currentUser.username,
       assigneeName: currentUser.name,

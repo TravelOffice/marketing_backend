@@ -1,25 +1,32 @@
-import { ChatSessionStatus, Session } from '../../models/Session';
-import { UpdateSessionDto } from '../../dto/UpdateSessionDto';
+import { ChatSession, ChatSessionStatus } from '../../models/ChatSession';
 
 export interface SessionRepository {
-  listByConversationId(tenantId: string, conversationId: string): Promise<Array<Session>>,
+  listByConversationId(tenantId: string, conversationId: string): Promise<Array<ChatSession>>,
 
   listByAssigneeIdAndStatus(
     tenantId: string,
     assigneeId: string,
     status: ChatSessionStatus,
-  ): Promise<Array<Session>>,
+  ): Promise<Array<ChatSession>>,
 
-  create(tenantId: string, conversationId: string, session: Partial<Session>): Promise<Session>,
+  create(
+    tenantId: string,
+    conversationId: string,
+    session: Partial<ChatSession>
+  ): Promise<ChatSession>,
 
   update(
     tenantId: string,
     conversationId: string,
     sessionId: string,
-    session: Partial<UpdateSessionDto>,
-  ): Promise<Session>,
+    session: Partial<ChatSession>,
+  ): Promise<ChatSession>,
 
-  get(tenantId: string, conversationId: string, sessionId: string): Promise<Session | undefined>,
+  get(
+    tenantId: string,
+    conversationId: string,
+    sessionId: string
+  ): Promise<ChatSession | undefined>,
 
   generateChatSessionCode(tenantId: string): Promise<string>,
 }

@@ -1,10 +1,9 @@
 import { dynamoProvider, helper } from 'core';
 import { getAwsSecretValue } from 'get-env';
-import { ChatSessionStatus, Session } from '../models/Session';
+import { ChatSession, ChatSessionStatus } from '../models/ChatSession';
 import { SESSION_COUNTER_INDEX, SESSION_INDEX, TENANT_INDEX } from '../utils/constants';
 import { SessionRepository } from './interfaces/SessionRepository';
 import { CreateSessionDto } from '../dto/CreateSessionDto';
-import { UpdateSessionDto } from '../dto/UpdateSessionDto';
 
 /**
  * Implementation of the SessionRepository interface.
@@ -17,7 +16,7 @@ export default class SessionRepositoryImpl implements SessionRepository {
    * @param conversationId - The ID of the conversation.
    * @returns A Promise that resolves to an array of sessions.
    */
-  async listByConversationId(tenantId: string, conversationId: string): Promise<Session[]> {
+  async listByConversationId(tenantId: string, conversationId: string): Promise<ChatSession[]> {
     return dynamoProvider.query({
       TableName: await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
       KeyConditionExpression: 'pk = :pk AND begins_with(sk, :sk)',
@@ -40,7 +39,7 @@ export default class SessionRepositoryImpl implements SessionRepository {
     tenantId: string,
     assigneeId: string,
     status: ChatSessionStatus,
-  ): Promise<Session[]> {
+  ): Promise<ChatSession[]> {
     return dynamoProvider.query({
       TableName: await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
       IndexName: 'Index3',
@@ -64,8 +63,8 @@ export default class SessionRepositoryImpl implements SessionRepository {
     tenantId: string,
     conversationId: string,
     sessionId: string,
-  ): Promise<Session | undefined> {
-    return dynamoProvider.getItem<Session>(
+  ): Promise<ChatSession | undefined> {
+    return dynamoProvider.getItem<ChatSession>(
       await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
       `${TENANT_INDEX}#${tenantId}#${SESSION_INDEX}`,
       `${conversationId}#${sessionId}`,
@@ -84,14 +83,14 @@ export default class SessionRepositoryImpl implements SessionRepository {
     tenantId: string,
     conversationId: string,
     session: CreateSessionDto,
-  ): Promise<Session> {
+  ): Promise<ChatSession> {
     await dynamoProvider.putItem(
       await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
       `${TENANT_INDEX}#${tenantId}#${SESSION_INDEX}`,
       `${conversationId}#${session.code}`,
       session,
     );
-    return helper.excludeDataFromObject(session) as Session;
+    return helper.excludeDataFromObject(session) as ChatSession;
   }
 
   /**
@@ -107,8 +106,8 @@ export default class SessionRepositoryImpl implements SessionRepository {
     tenantId: string,
     conversationId: string,
     sessionId: string,
-    sessionToUpdate: Partial<UpdateSessionDto>,
-  ): Promise<Session> {
+    sessionToUpdate: Partial<ChatSession>,
+  ): Promise<ChatSession> {
     const updatedSession = await dynamoProvider.updateItemWithSetExpression(
       await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
       `${TENANT_INDEX}#${tenantId}#${SESSION_INDEX}`,
@@ -116,7 +115,7 @@ export default class SessionRepositoryImpl implements SessionRepository {
       sessionToUpdate,
     );
 
-    return helper.excludeDataFromObject(updatedSession.Attributes as Session) as Session;
+    return helper.excludeDataFromObject(updatedSession.Attributes as ChatSession) as ChatSession;
   }
 
   /**

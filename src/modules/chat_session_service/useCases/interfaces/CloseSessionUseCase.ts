@@ -1,4 +1,4 @@
-import { Session } from '../../models/Session';
+import { ChatSession } from '../../models/ChatSession';
 import { CognitoUser } from '../../models/CognitoUser';
 
 export interface CloseSessionUseCase {
@@ -6,6 +6,5 @@ export interface CloseSessionUseCase {
     currentUser: CognitoUser,
     conversationId: string,
     sessionId: string,
-    latestMessage?: string,
-  ): Promise<Session>,
+  ): Promise<ChatSession>,
 }
