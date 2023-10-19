@@ -2,7 +2,9 @@ import { saleAssignmentRepository } from 'auto-assign-utilities';
 import { ChatPlatform } from 'common-models';
 import AppSyncHandlerFactory from './handlers/AppSyncHandlerFactory';
 import { AppSyncEvent, SendMessageMutationArgs } from './models';
-import { chatPlatformRepository, rolePermissionRepository, userRepository } from './repositories';
+import {
+  chatPlatformRepository, chatSessionRepository, rolePermissionRepository, userRepository,
+} from './repositories';
 import { VALIDATION_EVENTS } from './utils/constants';
 import logger from './utils/logger';
 
@@ -29,8 +31,15 @@ export const handler = async (event: AppSyncEvent) => {
 
   const data = await appSyncHandler.handle(event);
   // Post-handle send message event
-  // Send task token to StepFunctions to stop auto assignment process
+  // 1. Update the latest chat session that currenly OPEN and assigned to the user
+  // 2. Send task token to StepFunctions to stop auto assignment process
   if (eventField === 'sendMessage') {
+    const chatSession = await chatSessionRepository.getOpenSession(tenant, username);
+    if (chatSession) {
+      await chatSessionRepository.markSessionActiveIfNeeded(chatSession);
+      logger.log(`Mark chat session ${chatSession.pk} ${chatSession.sk} as active`);
+    }
+
     logger.log('Start sending task token to StepFunctions to stop auto assignment process if needed');
     const { conversationId, chatPlatform, sender } = event.arguments as SendMessageMutationArgs;
     await saleAssignmentRepository.onSentMessageToCustomer(

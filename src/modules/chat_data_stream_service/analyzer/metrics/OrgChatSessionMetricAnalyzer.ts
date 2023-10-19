@@ -27,7 +27,9 @@ export default class OrgChatSessionMetricAnalyzer extends AbstractMetricAnalyzer
 
   async analyze(): Promise<void> {
     const pk = `${TENANT_STATISTIC_INDEX}#${this.tenant}#${ORG_CHAT_SESSION_STATISTIC_INDEX}`;
-    const { sk } = this.recordKeys;
+    const { sk: sessionId } = this.recordKeys;
+    const { conversationId } = this.oldImage as ChatSession;
+    const sk = `${conversationId}#${sessionId}`;
     if (this.inputData.eventName === 'REMOVE') {
       // Statistic data should be deleted
       this.shouldBeDeleted = true;

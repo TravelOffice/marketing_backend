@@ -44,7 +44,7 @@ export default class ReceiveWebhookUseCaseImpl implements ReceiveWebhookUseCase 
     const fbMessage = await messageRepository.getMessageInfo(page, message.mid);
 
     // Save the chat message
-    await messageRepository.saveChatMessage(
+    const savedMessage = await messageRepository.saveChatMessage(
       page.tenantId,
       ChatPlatform.facebook,
       page,
@@ -81,11 +81,13 @@ export default class ReceiveWebhookUseCaseImpl implements ReceiveWebhookUseCase 
     if (assignee === UNKNOWN_USER) {
       logger.log(`Conversation ${conversation.info.id} is unassigned, continue process auto assignment`);
       // Send to SQS message to process auto assignment
+      const { createdAt: lastMessageSentAt = Date.now() } = savedMessage;
       await saleAssignmentRepository.notifyNewIncomingConversation({
         tenant: page.tenantId,
         pageId: page.id,
         chatPlatform: page.platform,
         conversationId: conversation.info.id.toString(),
+        lastMessageSentAt: lastMessageSentAt.toString(),
       });
     } else {
       logger.log(`Conversation ${conversation.info.id} is assigned to ${conversation.assignee}, skip process auto assignment`);

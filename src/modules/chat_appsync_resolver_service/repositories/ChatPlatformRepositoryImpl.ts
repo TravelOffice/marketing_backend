@@ -2,7 +2,7 @@ import {
   ChatPlatform,
 } from 'common-models';
 import { getAwsSecretValue } from 'get-env';
-import { dynamoProvider } from '../providers';
+import { dynamoProvider } from 'auto-assign-utilities/providers';
 import {
   CONVERSATION_INDEX,
   PARTITION_KEY_DELIMITER,
@@ -26,7 +26,7 @@ export default class ChatPlatformRepositoryImpl implements ChatPlatformRepositor
   ) => {
     const table = await getAwsSecretValue('DYNAMO_CHAT_TABLE');
 
-    const item = await dynamoProvider.get(
+    const item = await dynamoProvider.getItem(
       table,
       `${TENANT_INDEX}#${tenantId}#${CONVERSATION_INDEX}#${chatPlatform.toUpperCase()}#${pageId}`,
       `${CONVERSATION_INDEX}#${conversationId}`,

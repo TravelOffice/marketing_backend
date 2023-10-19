@@ -145,7 +145,8 @@
         "conversation.$": "$.conversation",
         "assignment": {
           "code": "AUTO_ASSIGN_NOT_RESPONSE_NEW_CHAT",
-          "assignedSale.$": "$.assignment.assignedSale"
+          "assignedSale.$": "$.assignment.assignedSale",
+          "attachedChatSession.$": "$.assignment.attachedChatSession"
         }
       }
     },
@@ -215,6 +216,36 @@
         },
         "ReturnValues": "UPDATED_NEW"
       },
+      "Next": "Close chat session when employee not response",
+      "ResultPath": null
+    },
+    "Close chat session when employee not response": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::dynamodb:updateItem",
+      "Parameters": {
+        "TableName.$": "$.env.dynamoChatTable",
+        "Key": {
+          "pk": {
+            "S.$": "$.assignment.attachedChatSession.pk"
+          },
+          "sk": {
+            "S.$": "$.assignment.attachedChatSession.pk"
+          }
+        },
+        "UpdateExpression": "SET status = :status, lsi3 = :lsi3, lsi4 = :lsi4",
+        "ExpressionAttributeValues": {
+          ":status": {
+            "S": "CLOSED"
+          },
+          ":lsi3": {
+            "S": "$.assignment.attachedChatSession#CLOSED"
+          },
+          ":lsi4": {
+            "S": "CLOSED"
+          }
+        },
+        "ReturnValues": "UPDATED_NEW"
+      },
       "Next": "Auto assign notification service - Handle error",
       "ResultPath": null
     },
@@ -278,7 +309,8 @@
       "ResultPath": "$.assignment",
       "TimeoutSeconds": 3,
       "ResultSelector": {
-        "assignedSale.$": "$.Payload.assignedSale"
+        "assignedSale.$": "$.Payload.assignedSale",
+        "attachedChatSession.$": "$.Payload.attachedChatSession"
       }
     },
     "Generate sale assigned successfully code": {
@@ -290,7 +322,8 @@
         "conversation.$": "$.conversation",
         "assignment": {
           "code": "AUTO_ASSIGN_NEW_CHAT_SUCCESSFULLY",
-          "assignedSale.$": "$.assignment.assignedSale"
+          "assignedSale.$": "$.assignment.assignedSale",
+          "attachedChatSession.$": "$.assignment.attachedChatSession"
         }
       }
     },
@@ -341,7 +374,8 @@
         "conversation.$": "$.conversation",
         "assignment": {
           "code": "AUTO_ASSIGN_NEW_CHAT_SUCCESSFULLY",
-          "assignedSale.$": "$.assignment.assignedSale"
+          "assignedSale.$": "$.assignment.assignedSale",
+          "attachedChatSession.$": "$.assignment.attachedChatSession"
         }
       }
     },

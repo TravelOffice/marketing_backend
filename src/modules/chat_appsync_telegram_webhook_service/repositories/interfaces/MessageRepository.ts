@@ -1,5 +1,5 @@
 import {
-  ChatPlatform, TelegramBot, TelegramMessageContent,
+  ChatPlatform, DDBMessage, TelegramBot, TelegramMessageContent,
 } from 'common-models';
 import { TelegramConversationWithAssignee } from '../../models/RestrictedTelegramModels';
 
@@ -16,7 +16,7 @@ export interface MessageRepository {
     platform: ChatPlatform,
     page: TelegramBot,
     message: TelegramMessageContent
-  ) => Promise<void>
+  ) => Promise<Partial<DDBMessage>>
 
   saveConversation: (
     tenantId: string,

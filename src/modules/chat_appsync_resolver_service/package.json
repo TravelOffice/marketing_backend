@@ -20,7 +20,8 @@
     "object-assign": "^4.1.1",
     "reflect-metadata": "^0.1.13",
     "auto-assign-utilities": "link:../../libs/auto-assign-utilities",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.21",
+    "core": "link:../../libs/core"
   },
   "devDependencies": {
     "@types/compression": "^1.7.2",

@@ -16,6 +16,5 @@ export const handler = async (event: AutoAssignChatEvent) => {
   // Since sales are get from DynamoDB in same order
   // Array of sales should be suffled to avoid the same sales will be assigned
   // when number of assigned chats is equal
-  const assignedSale = await autoAssignChatUseCase.invoke(conversation, shuffle(marshalledSales));
-  return { assignedSale };
+  return autoAssignChatUseCase.invoke(conversation, shuffle(marshalledSales));
 };

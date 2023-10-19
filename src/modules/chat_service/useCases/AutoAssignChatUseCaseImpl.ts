@@ -1,7 +1,9 @@
+import { ChatPlatform } from 'common-models';
+import { ChatSession, ChatSessionStatus } from '../models/ChatSession';
 import { ConversationQueryParams } from '../models/ConversationQueryParams';
 import { DDBUser } from '../models/dynamodb/DDBUser';
 import { AttributeValues, dynamoProvider, saleDistributionProvider } from '../providers';
-import { chatRepository, userRepository } from '../repositories';
+import { chatRepository, chatSessionRepository, userRepository } from '../repositories';
 import logger from '../utils/logger';
 import { AutoAssignChatUseCase } from './interfaces';
 
@@ -27,7 +29,11 @@ export default class AutoAssignChatUseCaseImpl implements AutoAssignChatUseCase 
     // Get conversation from DynamoDB
     const conversation = await chatRepository.getConversation(conversationQueryParams);
     const {
-      tenant, pageId, conversationId,
+      tenant,
+      pageId,
+      conversationId,
+      chatPlatform,
+      lastMessageSentAt = Date.now().toString(),
     } = conversationQueryParams;
     if (!conversation) {
       // Return error if conversation is not existed
@@ -47,6 +53,61 @@ export default class AutoAssignChatUseCaseImpl implements AutoAssignChatUseCase 
 
     logger.log(`Conversation ${JSON.stringify(conversationQueryParams, null, 2)} has be assigned to employee ${JSON.stringify(nextAssignedUser, null, 2)}`);
 
-    return nextAssignedUser;
+    // Create chat session after assigned sale
+    const chatSession = await this.createChatSession({
+      tenant,
+      conversationId,
+      lastMessageSentAt,
+      chatPlatform,
+      assignedEmployee: nextAssignedUser,
+    });
+
+    logger.log(`Chat session for conversation ${JSON.stringify(chatSession, null, 2)} has be created`);
+
+    return {
+      assignedSale: nextAssignedUser,
+      attachedChatSession: chatSession,
+    };
+  };
+
+  private createChatSession = async (params: {
+    tenant: string,
+    conversationId: string,
+    lastMessageSentAt: string,
+    chatPlatform: ChatPlatform,
+    assignedEmployee: DDBUser,
+  }) => {
+    // Extract information from params
+    const {
+      tenant,
+      conversationId,
+      chatPlatform,
+      assignedEmployee,
+      lastMessageSentAt,
+    } = params;
+    const { username: assigneeId, firstName, lastName } = assignedEmployee;
+    const assigneeName = `${firstName} ${lastName}`;
+    const code = await chatSessionRepository.generateChatSessionCode(tenant);
+
+    const createdAt = Date.now();
+    const status = ChatSessionStatus.OPEN;
+    const chatSession: Omit<ChatSession, 'pk' | 'sk'> = {
+      code,
+      conversationId,
+      assigneeId,
+      assigneeName,
+      platform: chatPlatform,
+      status,
+      startTime: parseInt(lastMessageSentAt, 10),
+      createdAt,
+      updatedAt: createdAt,
+      lsi1: createdAt.toString(),
+      lsi3: `${assigneeId}#${status}}`,
+      lsi4: status,
+    };
+
+    // TODO: Get creation time from latest message sent by customer
+
+    return chatSessionRepository.create(tenant, conversationId, chatSession);
   };
 }
