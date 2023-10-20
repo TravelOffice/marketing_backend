@@ -9,9 +9,26 @@ export interface UserNotificationRepository {
     paginationParams: PaginationParams, // Pagination settings
   ) => Promise<PaginationResponsePayload<UserNotification> | undefined>,
 
-  sendToTopic(
+  getLatestTimeMarkAllRead: (
+    currentUserId: string,
+    appType: AppType,
+  ) => Promise<number | undefined>,
+
+  sendToTopic: (
     topic: string,
     appType: AppType,
     createUserNotificationDto: CreateUserNotificationDto,
-  ): Promise<void>
+  ) => Promise<void>
+
+  markAllRead: (
+    currentUserId: string,
+    appType: AppType,
+    markedTime: number,
+  ) => Promise<void>
+
+  martAsRead: (
+    currentUserid: string,
+    appType: AppType,
+    notificationId: string
+  ) => Promise<void>
 }

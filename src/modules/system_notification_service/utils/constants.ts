@@ -29,3 +29,11 @@ export const OFFER_INDEX = 'OF';
 export const RATING_INDEX = 'R';
 
 export const TOUR_POST_FOLLOW_INDEX = 'FL';
+
+export const LATEST_READ_NOTIFICATION = 'LATEST_READ_NOTI';
+
+export const NOTIFICATION_INDEX = 'NOTIFICATION';
+
+export const COUNTER_INDEX = 'COUNTER';
+
+export const USER_INDEX = 'USR';

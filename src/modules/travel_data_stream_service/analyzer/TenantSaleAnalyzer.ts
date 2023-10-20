@@ -20,7 +20,7 @@ export default class TenantSaleAnalyzer extends AbstractTenantAnalyzer {
     const analyzers = getMetricAnalyzers(this.tenant, this.inputData);
     const promises = analyzers.map(async (analyzer) => {
       await analyzer.analyze();
-      return analyzer.output;
+      return analyzer.analyzedValue;
     });
     const results = await Promise.all(promises);
     this.output = results.filter((item) => item !== undefined) as MetricSaleAnalyzerResult[];

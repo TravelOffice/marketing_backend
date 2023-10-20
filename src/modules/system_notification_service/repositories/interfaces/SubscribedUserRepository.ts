@@ -1,13 +1,23 @@
 import { SubscribedUser } from '../../models/SubscribedUser';
 
 export interface SubscribedUserRepository {
-  create: (subscribedUser: SubscribedUser) => Promise<SubscribedUser>,
+  create: (
+    topic: string,
+    userId: string,
+    deviceTokens: string[]
+  ) => Promise<void>,
+
+  listByUser: (
+    userId: string,
+  ) => Promise<SubscribedUser[]>,
 
   listByTopic: (
     topic: string,
   ) => Promise<SubscribedUser[]>,
 
   delete: (
-    subscribedUser: SubscribedUser,
+    topic: string,
+    userId: string,
+    deviceTokens: string[],
   ) => Promise<void>,
 }

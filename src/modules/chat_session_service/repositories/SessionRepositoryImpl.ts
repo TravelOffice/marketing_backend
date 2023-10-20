@@ -1,0 +1,136 @@
+import { dynamoProvider, helper } from 'core';
+import { getAwsSecretValue } from 'get-env';
+import { ChatSessionStatus, Session } from '../models/Session';
+import { SESSION_COUNTER_INDEX, SESSION_INDEX, TENANT_INDEX } from '../utils/constants';
+import { SessionRepository } from './interfaces/SessionRepository';
+import { CreateSessionDto } from '../dto/CreateSessionDto';
+import { UpdateSessionDto } from '../dto/UpdateSessionDto';
+
+/**
+ * Implementation of the SessionRepository interface.
+ */
+export default class SessionRepositoryImpl implements SessionRepository {
+  /**
+   * Lists all sessions by conversationId for the specified tenant.
+   *
+   * @param tenantId - The ID of the tenant.
+   * @param conversationId - The ID of the conversation.
+   * @returns A Promise that resolves to an array of sessions.
+   */
+  async listByConversationId(tenantId: string, conversationId: string): Promise<Session[]> {
+    return dynamoProvider.query({
+      TableName: await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
+      KeyConditionExpression: 'pk = :pk AND begins_with(sk, :sk)',
+      ExpressionAttributeValues: {
+        ':pk': `${TENANT_INDEX}#${tenantId}#${SESSION_INDEX}`,
+        ':sk': `${conversationId}#`,
+      },
+    });
+  }
+
+  /**
+   * Lists all sessions by assigneeId and status for the specified tenant.
+   *
+   * @param tenantId - The ID of the tenant.
+   * @param assigneeId - The ID of the assignee.
+   * @param status - The status of the session.
+   * @returns A Promise that resolves to an array of sessions.
+   */
+  async listByAssigneeIdAndStatus(
+    tenantId: string,
+    assigneeId: string,
+    status: ChatSessionStatus,
+  ): Promise<Session[]> {
+    return dynamoProvider.query({
+      TableName: await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
+      IndexName: 'Index3',
+      KeyConditionExpression: 'pk = :pk AND begins_with(lsi3, :lsi3)',
+      ExpressionAttributeValues: {
+        ':pk': `${TENANT_INDEX}#${tenantId}#${SESSION_INDEX}`,
+        ':lsi3': `${assigneeId}#${status}`,
+      },
+    });
+  }
+
+  /**
+   * Retrieves a session by its ID, conversationId, tenant ID.
+   *
+   * @param tenantId - The ID of the tenant.
+   * @param conversationId - The ID of the conversation.
+   * @param sessionId - The ID of the session.
+   * @returns A Promise that resolves to the retrieved session, or undefined if not found.
+   */
+  async get(
+    tenantId: string,
+    conversationId: string,
+    sessionId: string,
+  ): Promise<Session | undefined> {
+    return dynamoProvider.getItem<Session>(
+      await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
+      `${TENANT_INDEX}#${tenantId}#${SESSION_INDEX}`,
+      `${conversationId}#${sessionId}`,
+    );
+  }
+
+  /**
+   * Creates a new session of a conversation for the specified tenant.
+   *
+   * @param tenantId - The ID of the tenant.
+   * @param conversationId - The ID of the conversation.
+   * @param session - The session object to create.
+   * @returns A Promise that resolves to the created session.
+   */
+  async create(
+    tenantId: string,
+    conversationId: string,
+    session: CreateSessionDto,
+  ): Promise<Session> {
+    await dynamoProvider.putItem(
+      await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
+      `${TENANT_INDEX}#${tenantId}#${SESSION_INDEX}`,
+      `${conversationId}#${session.code}`,
+      session,
+    );
+    return helper.excludeDataFromObject(session) as Session;
+  }
+
+  /**
+   * Updates a session for the specified tenant.
+   *
+   * @param tenantId - The ID of the tenant.
+   * @param conversationId - The ID of the conversation.
+   * @param sessionId - The ID of the session to update.
+   * @param sessionToUpdate - The session object to update.
+   * @returns A Promise that resolves to the updated session.
+   */
+  async update(
+    tenantId: string,
+    conversationId: string,
+    sessionId: string,
+    sessionToUpdate: Partial<UpdateSessionDto>,
+  ): Promise<Session> {
+    const updatedSession = await dynamoProvider.updateItemWithSetExpression(
+      await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
+      `${TENANT_INDEX}#${tenantId}#${SESSION_INDEX}`,
+      `${conversationId}#${sessionId}`,
+      sessionToUpdate,
+    );
+
+    return helper.excludeDataFromObject(updatedSession.Attributes as Session) as Session;
+  }
+
+  /**
+   * Generates a chat session code for the specified tenant.
+   *
+   * @param tenantId - The ID of the tenant.
+   * @returns A Promise that resolves to the generated chat session code.
+   */
+  async generateChatSessionCode(tenantId: string): Promise<string> {
+    const code = await helper.generateCode(
+      await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
+      `${TENANT_INDEX}#${tenantId}`,
+      SESSION_COUNTER_INDEX,
+    );
+    return code.toString();
+  }
+}

@@ -1,5 +1,7 @@
+import { dynamoProvider } from 'core';
+import { DdbItemKeys } from '../../models/DdbItemKeys';
 import { MetricSaleAnalyzerResult } from '../../models/statistic/TenantSaleAnalyzerResult';
-import { SingleMetricInputData, MetricName } from '../../models/statistic/analyzer';
+import { MetricName, SingleMetricInputData } from '../../models/statistic/analyzer';
 
 export default abstract class AbstractMetricAnalyzer {
   // Tenant
@@ -30,6 +32,20 @@ export default abstract class AbstractMetricAnalyzer {
       };
     }
     return undefined;
+  }
+
+  get newImage(): any {
+    const img = this.inputData.dynamodb.NewImage;
+    return dynamoProvider.unmarshall(img);
+  }
+
+  get oldImage(): any {
+    const img = this.inputData.dynamodb.OldImage;
+    return dynamoProvider.unmarshall(img);
+  }
+
+  get recordKeys(): DdbItemKeys {
+    return dynamoProvider.unmarshall(this.inputData.dynamodb.Keys) as DdbItemKeys;
   }
 
   abstract analyze(): Promise<void>;
