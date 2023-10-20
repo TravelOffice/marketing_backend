@@ -4,6 +4,7 @@ import { DepartureTourStatistic } from '../../models/DepartureTourStatistic';
 import { FilteringDuration } from '../../models/FilteringDuration';
 import { LeadStatistic } from '../../models/LeadStatistic';
 import { TourFillingRatioStatistic } from '../../models/TourFillingRatioStatistic';
+import { Session, SessionQueryParams } from '../../models/SessionStatistic';
 
 export interface TenantStatisticRepository {
 
@@ -23,4 +24,9 @@ export interface TenantStatisticRepository {
     tenant: string,
     paginationParams: PaginationParams,
   ): Promise<PaginationResponsePayload<TourFillingRatioStatistic> | undefined>;
+
+  getTotalSessionOrgByParams(
+    tenant: string,
+    params?: SessionQueryParams,
+  ): Promise<Session[]>;
 }

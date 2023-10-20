@@ -22,6 +22,30 @@ import { GetConversionRatioOfSaleUseCase } from './interfaces/GetConversionRatio
 import GetConversionRatioOfSaleUseCaseImpl from './GetConversionRatioOfSaleUseCaseImpl';
 import { GetTourFillingRatioUseCase } from './interfaces/GetTourFillingRatioUseCase';
 import GetTourFillingRatioUseCaseImpl from './GetTourFillingRatioUseCaseImpl';
+import { GetOrgTotalSessionUseCase } from './interfaces/GetOrgTotalSessionUseCase';
+import GetOrgTotalSessionUseCaseImpl from './GetOrgTotalSessionUseCaseImpl';
+import { GetOrgTotalSessionByConversationUseCase } from './interfaces/GetOrgTotalSessionByConversationUseCase';
+import GetOrgTotalSessionByConversationUseCaseImpl from './GetOrgTotalSessionByConversationUseCaseImpl';
+import { GetOrgTotalSessionByStatusUseCase } from './interfaces/GetOrgTotalSessionByStatusUseCase';
+import GetOrgTotalSessionByStatusUseCaseImpl from './GetOrgTotalSessionByStatusUseCaseImpl';
+import { GetOrgTotalSessionByDurationUseCase } from './interfaces/GetOrgTotalSessionByDurationUseCase';
+import GetOrgTotalSessionByDurationUseCaseImpl from './GetOrgTotalSessionByDurationUseCaseImpl';
+import { GetUserTotalSessionUseCase } from './interfaces/GetUserTotalSessionUseCase';
+import GetUserTotalSessionUseCaseImpl from './GetUserTotalSessionUseCaseImpl';
+import { GetUserTotalSessionByConversationUseCase } from './interfaces/GetUserTotalSessionByConversationUseCase';
+import GetUserTotalSessionByConversationUseCaseImpl from './GetUserTotalSessionByConversationUseCaseImpl';
+import { GetUserTotalSessionByDurationUseCase } from './interfaces/GetUserTotalSessionByDurationUseCase';
+import GetUserTotalSessionByDurationUseCaseImpl from './GetUserTotalSessionByDurationUseCaseImpl';
+import { GetUserTotalSessionByStatusUseCase } from './interfaces/GetUserTotalSessionByStatusUseCase';
+import GetUserTotalSessionByStatusUseCaseImpl from './GetUserTotalSessionByStatusUseCaseImpl';
+import { GetOrgAverageResponseTimeUseCase } from './interfaces/GetOrgAverageResponseTimeUseCase';
+import GetOrgAverageResponseTimeUseCaseImpl from './GetOrgAverageResponseTimeUseCaseImpl';
+import { GetUserAverageResponseTimeUseCase } from './interfaces/GetUserAverageResponseTimeUseCase';
+import GetUserAverageResponseTimeUseCaseImpl from './GetUserAverageResponseTimeUseCaseImpl';
+import { GetOrgResponseByConditionTimeUseCase } from './interfaces/GetOrgResponseByConditionTimeUseCase';
+import GetOrgResponseByConditionTimeUseCaseImpl from './GetOrgResponseByConditionTimeUseCaseImpl';
+import { GetUserResponseByConditionTimeUseCase } from './interfaces/GetUserResponseByConditionTimeUseCase';
+import GetUserResponseByConditionTimeUseCaseImpl from './GetUserResponseByConditionTimeUseCaseImpl';
 
 interface UseCases {
   getTotalLeadOfSaleUserCase: GetTotalLeadOfSaleUseCase,
@@ -35,6 +59,18 @@ interface UseCases {
   getTopFavouriteTourUseCase: GetTopFavouriteTourUseCase,
   getTopFavouriteLocationUseCase: GetTopFavouriteLocationUseCase,
   getTourFillingRatioUseCase: GetTourFillingRatioUseCase,
+  getOrgTotalSessionUseCase: GetOrgTotalSessionUseCase;
+  getOrgTotalSessionByConversationUseCase: GetOrgTotalSessionByConversationUseCase;
+  getOrgTotalSessionByStatusUseCase: GetOrgTotalSessionByStatusUseCase;
+  getOrgTotalSessionByDurationUseCase: GetOrgTotalSessionByDurationUseCase;
+  getUserTotalSessionUseCase: GetUserTotalSessionUseCase;
+  getUserTotalSessionByConversationUseCase: GetUserTotalSessionByConversationUseCase;
+  getUserTotalSessionByDurationUseCase: GetUserTotalSessionByDurationUseCase;
+  getUserTotalSessionByStatusUseCase: GetUserTotalSessionByStatusUseCase;
+  getOrgAverageResponseTimeUseCase: GetOrgAverageResponseTimeUseCase;
+  getUserAverageResponseTimeUseCase: GetUserAverageResponseTimeUseCase;
+  getOrgResponseByConditionTimeUseCase: GetOrgResponseByConditionTimeUseCase;
+  getUserResponseByConditionTimeUseCase: GetUserResponseByConditionTimeUseCase;
 }
 
 const useCases: UseCases = {
@@ -49,6 +85,18 @@ const useCases: UseCases = {
   getTopFavouriteTourUseCase: new GetTopFavouriteTourUseCaseImpl(),
   getTopFavouriteLocationUseCase: new GetTopFavouriteLocationUseCaseImpl(),
   getTourFillingRatioUseCase: new GetTourFillingRatioUseCaseImpl(),
+  getOrgTotalSessionUseCase: new GetOrgTotalSessionUseCaseImpl(),
+  getOrgTotalSessionByConversationUseCase: new GetOrgTotalSessionByConversationUseCaseImpl(),
+  getOrgTotalSessionByStatusUseCase: new GetOrgTotalSessionByStatusUseCaseImpl(),
+  getOrgTotalSessionByDurationUseCase: new GetOrgTotalSessionByDurationUseCaseImpl(),
+  getUserTotalSessionUseCase: new GetUserTotalSessionUseCaseImpl(),
+  getUserTotalSessionByConversationUseCase: new GetUserTotalSessionByConversationUseCaseImpl(),
+  getUserTotalSessionByDurationUseCase: new GetUserTotalSessionByDurationUseCaseImpl(),
+  getUserTotalSessionByStatusUseCase: new GetUserTotalSessionByStatusUseCaseImpl(),
+  getOrgAverageResponseTimeUseCase: new GetOrgAverageResponseTimeUseCaseImpl(),
+  getUserAverageResponseTimeUseCase: new GetUserAverageResponseTimeUseCaseImpl(),
+  getOrgResponseByConditionTimeUseCase: new GetOrgResponseByConditionTimeUseCaseImpl(),
+  getUserResponseByConditionTimeUseCase: new GetUserResponseByConditionTimeUseCaseImpl(),
 };
 
 export const {
@@ -63,4 +111,16 @@ export const {
   getTopFavouriteTourUseCase,
   getTopFavouriteLocationUseCase,
   getTourFillingRatioUseCase,
+  getOrgTotalSessionUseCase,
+  getOrgTotalSessionByConversationUseCase,
+  getOrgTotalSessionByStatusUseCase,
+  getOrgTotalSessionByDurationUseCase,
+  getUserTotalSessionUseCase,
+  getUserTotalSessionByConversationUseCase,
+  getUserTotalSessionByDurationUseCase,
+  getUserTotalSessionByStatusUseCase,
+  getOrgAverageResponseTimeUseCase,
+  getUserAverageResponseTimeUseCase,
+  getOrgResponseByConditionTimeUseCase,
+  getUserResponseByConditionTimeUseCase,
 } = useCases;

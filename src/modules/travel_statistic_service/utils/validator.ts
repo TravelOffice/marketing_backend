@@ -1,5 +1,11 @@
 import { Request } from 'express';
 import { query, ValidationError, validationResult } from 'express-validator';
+import { Condition, SessionMetric, SessionStatus } from '../models/SessionStatistic';
+
+function isTimestamp(n: string) {
+  const parsed = parseFloat(n);
+  return !Number.isNaN(parsed) && Number.isFinite(parsed) && /^\d+\.?\d+$/.test(n);
+}
 
 export default function validate(req: Request) {
   const errors = validationResult(req);
@@ -39,5 +45,40 @@ export function getStatisticValidator() {
       .optional()
       .isInt()
       .withMessage('must be a number'),
+  ];
+}
+
+export function getSessionStatisticValidator() {
+  return [
+    query('metricName').notEmpty().withMessage('must be a non-string value').custom((value, { req }) => {
+      if (value === SessionMetric.TOTAL) return true;
+      if (value === SessionMetric.TOTAL_BY_CONVERSATION && req.query?.conversationId) {
+        return true;
+      }
+      if (value === SessionMetric.TOTAL_BY_STATUS && req.query?.status) {
+        return true;
+      }
+      if (value === SessionMetric.TOTAL_BY_DURATION && req.query?.duration) {
+        return true;
+      }
+      if (value === SessionMetric.AVERAGE_RESPONSE_TIME && req.query?.startTime) {
+        return true;
+      }
+      if (
+        value === SessionMetric.TOTAL_RESPONSE_TIME_BY_CONDITION
+        && req.query?.comparasionTime
+        && req.query?.condition
+      ) {
+        return true;
+      }
+      return false;
+    })
+      .withMessage('missing required param corresponding the metric'),
+    query('conversationId').optional().isString().withMessage('must be string'),
+    query('status').optional().isIn(Object.values(SessionStatus)).withMessage('must be correct type'),
+    query('duration').optional().isString().withMessage('must be string'),
+    query('startTime').optional().custom((value) => isTimestamp(value)).withMessage('must be a valid date string'),
+    query('comparasionTime').optional().isInt().withMessage('must be integer'),
+    query('condition').optional().isIn(Object.values(Condition)).withMessage('must be correct type'),
   ];
 }
