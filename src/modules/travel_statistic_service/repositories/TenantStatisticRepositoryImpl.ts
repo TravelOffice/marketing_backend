@@ -10,6 +10,7 @@ import { DepartureTourStatistic } from '../models/DepartureTourStatistic';
 import { LeadStatistic } from '../models/LeadStatistic';
 import { BookingStatistic } from '../models/BookingStatistic';
 import { TourFillingRatioStatistic } from '../models/TourFillingRatioStatistic';
+import { Session, SessionQueryParams } from '../models/SessionStatistic';
 
 export default class TenantStatisticRepositoryImpl implements TenantStatisticRepository {
   getDepartureTourStatistic = async (tenant: string, filteringDuration?: FilteringDuration) => {
@@ -74,4 +75,42 @@ export default class TenantStatisticRepositoryImpl implements TenantStatisticRep
       },
     });
   }
+
+  getTotalSessionOrgByParams = async (
+    tenant: string,
+    params?: SessionQueryParams,
+  ) => {
+    // Default query params
+    let IndexName;
+    let KeyConditionExpression = 'pk = :pk';
+    const ExpressionAttributeValues: any = {
+      ':pk': params?.username ? `TN#${tenant}#${params.username}#ACS` : `TN#${tenant}#OCS`,
+    };
+    // Setup query params by specific param
+    if (params?.conversationId) {
+      KeyConditionExpression += ' AND begins_with(sk, :bw)';
+      ExpressionAttributeValues[':bw'] = params.conversationId;
+    } else if (params?.duration) {
+      IndexName = 'Index2';
+      KeyConditionExpression += ' AND lsi2 BETWEEN :start AND :end';
+      ExpressionAttributeValues[':start'] = '000010';
+      ExpressionAttributeValues[':end'] = params.duration;
+    } else if (params?.status) {
+      IndexName = 'Index3';
+      KeyConditionExpression += ' AND lsi3 = :lsi3';
+      ExpressionAttributeValues[':lsi3'] = params.status;
+    } else if (params?.startTime) {
+      IndexName = 'Index1';
+      KeyConditionExpression += ' AND lsi1 BETWEEN :start AND :end';
+      ExpressionAttributeValues[':start'] = params.startTime;
+      ExpressionAttributeValues[':end'] = Date.now().toString();
+    }
+    // Query data
+    return dynamoProvider.query<Session>({
+      TableName: await getAwsSecretValue('DYNAMO_STATISTIC_TABLE'),
+      IndexName,
+      KeyConditionExpression,
+      ExpressionAttributeValues,
+    });
+  };
 }
