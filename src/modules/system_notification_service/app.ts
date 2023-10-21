@@ -1,6 +1,5 @@
 import compression from 'compression';
 import cors from 'cors';
-import { getCurrentUserInfo } from 'decode-token';
 import express, { NextFunction, Request, Response } from 'express';
 import {
   getUserNotificationsUseCase,
@@ -18,6 +17,7 @@ import validate, {
 } from './utils/validator';
 import wrapResponse from './utils/wrapResponse';
 import { AppType } from './models/UserDeviceSession';
+import { getUserInfoByAppType } from './utils/utils';
 
 const app = express();
 
@@ -59,7 +59,8 @@ app.get('/notifications/sessions', async (req: Request, res: Response) => {
 app.post('/notifications/sessions', createUserDeviceSession(), async (req: Request, res: Response) => {
   try {
     validate(req);
-    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const { appType } = req.body;
+    const currentUser = getUserInfoByAppType(appType, req.headers.authorization!);
     const session = await storeUserSessionUseCase.invoke(currentUser, req.body);
     res.json(wrapResponse(SUCCESS, session));
   } catch (error: any) {
@@ -81,7 +82,7 @@ app.get('/me/notifications', getMyNotificationsValidator(), async (req: Request,
   try {
     validate(req);
     const { appType, ...rest } = req.query;
-    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const currentUser = getUserInfoByAppType(appType as AppType, req.headers.authorization!);
     const notificationData = await getUserNotificationsUseCase.invoke(
       currentUser,
       appType as AppType,
@@ -98,7 +99,7 @@ app.put('/me/notifications/mark-all-read', markAllReadValidator(), async (req: R
   try {
     validate(req);
     const { appType, markedTime } = req.body;
-    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const currentUser = getUserInfoByAppType(appType, req.headers.authorization!);
     await markAllNotificationsAsReadUseCase.invoke(
       currentUser,
       appType,
@@ -115,7 +116,7 @@ app.put('/me/notifications/mark-as-read', markAsReadValidator(), async (req: Req
   try {
     validate(req);
     const { notificationId, appType } = req.body;
-    const currentUser = getCurrentUserInfo(req.headers.authorization!);
+    const currentUser = getUserInfoByAppType(appType, req.headers.authorization!);
     await markNotificationAsReadUseCase.invoke(
       currentUser,
       appType,
