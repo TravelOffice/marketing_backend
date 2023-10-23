@@ -19,10 +19,33 @@ export default class SessionRepositoryImpl implements SessionRepository {
   async listByConversationId(tenantId: string, conversationId: string): Promise<ChatSession[]> {
     return dynamoProvider.query({
       TableName: await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
-      KeyConditionExpression: 'pk = :pk AND begins_with(sk, :sk)',
+      KeyConditionExpression: 'pk = :pk',
       ExpressionAttributeValues: {
-        ':pk': `${TENANT_INDEX}#${tenantId}#${SESSION_INDEX}`,
-        ':sk': `${conversationId}#`,
+        ':pk': `${TENANT_INDEX}#${tenantId}#${SESSION_INDEX}#${conversationId}`,
+      },
+    });
+  }
+
+  /**
+   * Lists all sessions by conversationId and status for the specified tenant.
+   *
+   * @param tenantId - The ID of the tenant.
+   * @param conversationId - The ID of the conversation.
+   * @param status - The status of the session.
+   * @returns A Promise that resolves to an array of sessions.
+   */
+  async listByConversationIdAndStatus(
+    tenantId: string,
+    conversationId: string,
+    status: ChatSessionStatus,
+  ): Promise<ChatSession[]> {
+    return dynamoProvider.query({
+      TableName: await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
+      IndexName: 'Index4',
+      KeyConditionExpression: 'pk = :pk AND lsi4 = :lsi4',
+      ExpressionAttributeValues: {
+        ':pk': `${TENANT_INDEX}#${tenantId}#${SESSION_INDEX}#${conversationId}`,
+        ':lsi4': `${status}`,
       },
     });
   }
@@ -32,12 +55,14 @@ export default class SessionRepositoryImpl implements SessionRepository {
    *
    * @param tenantId - The ID of the tenant.
    * @param assigneeId - The ID of the assignee.
+   * @param conversationId - The ID of the conversation.
    * @param status - The status of the session.
    * @returns A Promise that resolves to an array of sessions.
    */
   async listByAssigneeIdAndStatus(
     tenantId: string,
     assigneeId: string,
+    conversationId: string,
     status: ChatSessionStatus,
   ): Promise<ChatSession[]> {
     return dynamoProvider.query({
@@ -45,7 +70,7 @@ export default class SessionRepositoryImpl implements SessionRepository {
       IndexName: 'Index3',
       KeyConditionExpression: 'pk = :pk AND begins_with(lsi3, :lsi3)',
       ExpressionAttributeValues: {
-        ':pk': `${TENANT_INDEX}#${tenantId}#${SESSION_INDEX}`,
+        ':pk': `${TENANT_INDEX}#${tenantId}#${SESSION_INDEX}#${conversationId}`,
         ':lsi3': `${assigneeId}#${status}`,
       },
     });
@@ -66,8 +91,8 @@ export default class SessionRepositoryImpl implements SessionRepository {
   ): Promise<ChatSession | undefined> {
     return dynamoProvider.getItem<ChatSession>(
       await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
-      `${TENANT_INDEX}#${tenantId}#${SESSION_INDEX}`,
-      `${conversationId}#${sessionId}`,
+      `${TENANT_INDEX}#${tenantId}#${SESSION_INDEX}#${conversationId}`,
+      `${sessionId}`,
     );
   }
 
@@ -86,8 +111,8 @@ export default class SessionRepositoryImpl implements SessionRepository {
   ): Promise<ChatSession> {
     await dynamoProvider.putItem(
       await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
-      `${TENANT_INDEX}#${tenantId}#${SESSION_INDEX}`,
-      `${conversationId}#${session.code}`,
+      `${TENANT_INDEX}#${tenantId}#${SESSION_INDEX}#${conversationId}`,
+      `${session.code}`,
       session,
     );
     return helper.excludeDataFromObject(session) as ChatSession;
@@ -110,8 +135,8 @@ export default class SessionRepositoryImpl implements SessionRepository {
   ): Promise<ChatSession> {
     const updatedSession = await dynamoProvider.updateItemWithSetExpression(
       await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
-      `${TENANT_INDEX}#${tenantId}#${SESSION_INDEX}`,
-      `${conversationId}#${sessionId}`,
+      `${TENANT_INDEX}#${tenantId}#${SESSION_INDEX}#${conversationId}`,
+      `${sessionId}`,
       sessionToUpdate,
     );
 
