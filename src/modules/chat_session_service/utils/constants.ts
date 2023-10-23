@@ -4,9 +4,9 @@ export const FAILED = 'Failed!';
 
 export const TENANT_INDEX = 'TENANT';
 
-export const SESSION_INDEX = 'SESSION';
+export const SESSION_INDEX = 'CSESSION';
 
-export const SESSION_COUNTER_INDEX = 'SESSION_COUNTER_INDEX';
+export const SESSION_COUNTER_INDEX = 'CSESSION_COUNTER_INDEX';
 
 export const VALIDATE_NON_EMPTY_STRING_MSG = 'property must be a non-empty string';
 

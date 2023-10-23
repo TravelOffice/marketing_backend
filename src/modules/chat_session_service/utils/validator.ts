@@ -1,6 +1,9 @@
 import { Request } from 'express';
-import { body, ValidationError, validationResult } from 'express-validator';
+import {
+  body, query, ValidationError, validationResult,
+} from 'express-validator';
 import { ChatPlatform } from 'common-models';
+import { ChatSessionStatus } from '../models/ChatSession';
 
 export default function validate(req: Request) {
   const errors = validationResult(req);
@@ -24,5 +27,14 @@ export function createSessionValidator() {
       .notEmpty()
       .isIn(Object.values(ChatPlatform))
       .withMessage(`platform must be one of ${Object.values(ChatPlatform).join(', ')}`),
+  ];
+}
+
+export function getListOfSessionByConversationIdValidator() {
+  return [
+    query('status')
+      .optional()
+      .isIn(Object.values(ChatSessionStatus))
+      .withMessage(`status in query must be one of ${Object.values(ChatSessionStatus).join(', ')}`),
   ];
 }

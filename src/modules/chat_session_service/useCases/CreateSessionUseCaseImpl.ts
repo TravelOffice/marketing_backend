@@ -26,6 +26,7 @@ export default class CreateSessionUseCaseImpl implements CreateSessionUseCase {
     const openSessionsOfUser = await sessionRepository.listByAssigneeIdAndStatus(
       currentUser.tenant,
       currentUser.username,
+      conversationId,
       ChatSessionStatus.OPEN,
     );
     if (openSessionsOfUser.some((session) => session.conversationId === conversationId)) {
@@ -36,6 +37,7 @@ export default class CreateSessionUseCaseImpl implements CreateSessionUseCase {
     const activeSessionsOfUser = await sessionRepository.listByAssigneeIdAndStatus(
       currentUser.tenant,
       currentUser.username,
+      conversationId,
       ChatSessionStatus.ACTIVE,
     );
     if (activeSessionsOfUser.some((session) => session.conversationId === conversationId)) {
