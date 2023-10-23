@@ -175,7 +175,7 @@ async function handleNotifications(record: DynamoDBRecord) {
         },
         data: {
           type,
-          image,
+          image: image || '',
           read: 'unread',
           href,
         },
