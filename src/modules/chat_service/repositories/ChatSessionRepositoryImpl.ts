@@ -21,14 +21,16 @@ export default class ChatSessionRepositoryImpl implements ChatSessionRepository 
     tenantId: string,
     conversationId: string,
     chatSession: Partial<ChatSession>,
-  ): Promise<ChatSession> {
-    await dynamoProvider.putItem(
-      await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
-      `${TENANT_INDEX}#${tenantId}#${CHAT_SESSION_INDEX}#${conversationId}`,
-      `${chatSession.code}`,
-      chatSession,
-    );
-    return helper.excludeDataFromObject(chatSession) as ChatSession;
+  ): Promise<Partial<ChatSession>> {
+    const chatTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const pk = `${TENANT_INDEX}#${tenantId}#${CHAT_SESSION_INDEX}#${conversationId}`;
+    const sk = `${chatSession.code}`;
+    await dynamoProvider.putItem(chatTable, pk, sk, chatSession);
+    return {
+      pk,
+      sk,
+      ...chatSession,
+    };
   }
 
   /**
