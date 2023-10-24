@@ -62,7 +62,7 @@ export default class AutoAssignChatUseCaseImpl implements AutoAssignChatUseCase 
       assignedEmployee: nextAssignedUser,
     });
 
-    logger.log(`Chat session for conversation ${JSON.stringify(chatSession, null, 2)} has be created`);
+    logger.log(`Chat session for conversation ${JSON.stringify(chatSession, null, 2)} has been created`);
 
     return {
       assignedSale: nextAssignedUser,
@@ -102,7 +102,7 @@ export default class AutoAssignChatUseCaseImpl implements AutoAssignChatUseCase 
       createdAt,
       updatedAt: createdAt,
       lsi1: createdAt.toString(),
-      lsi3: `${assigneeId}#${status}}`,
+      lsi3: `${assigneeId}#${status}`,
       lsi4: status,
     };
 

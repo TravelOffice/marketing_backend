@@ -3,5 +3,5 @@ import { User } from './User';
 
 export interface AutoAssignResponsePayload {
   assignedSale: User;
-  attachedChatSession: ChatSession;
+  attachedChatSession: Partial<ChatSession>;
 }

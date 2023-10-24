@@ -6,7 +6,7 @@ export interface ChatSessionRepository {
     tenantId: string,
     conversationId: string,
     session: Partial<ChatSession>,
-  ): Promise<ChatSession>,
+  ): Promise<Partial<ChatSession>>,
 
   generateChatSessionCode(tenantId: string): Promise<string>,
 }
