@@ -82,12 +82,14 @@ export default class ReceiveWebhookUseCaseImpl implements ReceiveWebhookUseCase 
       logger.log(`Conversation ${conversation.info.id} is unassigned, continue process auto assignment`);
       // Send to SQS message to process auto assignment
       const { createdAt: lastMessageSentAt = Date.now() } = savedMessage;
+      const expectedEndAtIfNotReplied = lastMessageSentAt + 5 * 60 * 1000;
       await saleAssignmentRepository.notifyNewIncomingConversation({
         tenant: page.tenantId,
         pageId: page.id,
         chatPlatform: page.platform,
         conversationId: conversation.info.id.toString(),
-        lastMessageSentAt: lastMessageSentAt.toString(),
+        lastMessageSentAt,
+        expectedEndAtIfNotReplied,
       });
     } else {
       logger.log(`Conversation ${conversation.info.id} is assigned to ${conversation.assignee}, skip process auto assignment`);

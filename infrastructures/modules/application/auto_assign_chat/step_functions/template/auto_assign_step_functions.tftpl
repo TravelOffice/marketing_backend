@@ -232,7 +232,7 @@
             "S.$": "$.assignment.attachedChatSession.sk"
           }
         },
-        "UpdateExpression": "SET #status = :status, #lsi3 = :lsi3, #lsi4 = :lsi4, #endTime = :endTime",
+        "UpdateExpression": "SET #status = :status, #lsi3 = :lsi3, #lsi4 = :lsi4, #endTime = :endTime, #updatedAt = :updatedAt",
         "ExpressionAttributeValues": {
           ":status": {
             "S": "CLOSED"
@@ -244,14 +244,18 @@
             "S": "CLOSED"
           },
           ":endTime": {
-            "S.$": "States.MathAdd($.assignment.attachedChatSession.startTime, 300000)"
+            "N.$": "$.conversation.expectedEndAtIfNotReplied"
+          },
+          ":updatedAt": {
+            "N.$": "$.conversation.expectedEndAtIfNotReplied"
           }
         },
         "ExpressionAttributeNames": {
           "#status": "status",
           "#lsi3": "lsi3",
           "#lsi4": "lsi4",
-          "#endTime": "endTime"
+          "#endTime": "endTime",
+          "#updatedAt": "updatedAt"
         },
         "ReturnValues": "UPDATED_NEW"
       },
