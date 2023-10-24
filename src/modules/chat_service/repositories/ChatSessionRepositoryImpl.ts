@@ -22,7 +22,7 @@ export default class ChatSessionRepositoryImpl implements ChatSessionRepository 
     conversationId: string,
     chatSession: Partial<ChatSession>,
   ): Promise<Partial<ChatSession>> {
-    const chatTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const chatTable = await getAwsSecretValue('DYNAMO_CHAT_TABLE');
     const pk = `${TENANT_INDEX}#${tenantId}#${CHAT_SESSION_INDEX}#${conversationId}`;
     const sk = `${chatSession.code}`;
     await dynamoProvider.putItem(chatTable, pk, sk, chatSession);
@@ -41,7 +41,7 @@ export default class ChatSessionRepositoryImpl implements ChatSessionRepository 
    */
   async generateChatSessionCode(tenantId: string): Promise<string> {
     const code = await helper.generateCode(
-      await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
+      await getAwsSecretValue('DYNAMO_CHAT_TABLE'),
       `${TENANT_INDEX}#${tenantId}`,
       CHAT_SESSION_COUNTER_INDEX,
     );
