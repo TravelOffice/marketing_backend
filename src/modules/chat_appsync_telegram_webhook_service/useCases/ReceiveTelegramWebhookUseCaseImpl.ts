@@ -73,13 +73,13 @@ export default class ReceiveTelegramWebhookUseCaseImpl implements ReceiveTelegra
       logger.log(`Conversation ${conversation.info.id} is unassigned, continue process auto assignment`);
       // Send to SQS message to process auto assignment
       const { createdAt: lastMessageSentAt = Date.now() } = savedMessage;
-      const expectedEndAtIfNotReplied = lastMessageSentAt + 5 * 60 * 1000;
+      const expectedEndAtIfNotReplied = (lastMessageSentAt + 5 * 60 * 1000).toString();
       await saleAssignmentRepository.notifyNewIncomingConversation({
         tenant: page.tenantId,
         pageId: page.id.toString(),
         chatPlatform: page.platform,
         conversationId: conversation.info.id.toString(),
-        lastMessageSentAt,
+        lastMessageSentAt: lastMessageSentAt.toString(),
         expectedEndAtIfNotReplied,
       });
     } else {
