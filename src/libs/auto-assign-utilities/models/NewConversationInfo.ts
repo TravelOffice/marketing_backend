@@ -5,6 +5,6 @@ export interface NewConversationInfo {
   pageId: string,
   chatPlatform: ChatPlatform,
   conversationId: string,
-  lastMessageSentAt?: number,
-  expectedEndAtIfNotReplied?: number,
+  lastMessageSentAt?: string,
+  expectedEndAtIfNotReplied?: string,
 }
