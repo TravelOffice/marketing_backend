@@ -229,20 +229,29 @@
             "S.$": "$.assignment.attachedChatSession.pk"
           },
           "sk": {
-            "S.$": "$.assignment.attachedChatSession.pk"
+            "S.$": "$.assignment.attachedChatSession.sk"
           }
         },
-        "UpdateExpression": "SET status = :status, lsi3 = :lsi3, lsi4 = :lsi4",
+        "UpdateExpression": "SET #status = :status, #lsi3 = :lsi3, #lsi4 = :lsi4, #endTime = :endTime",
         "ExpressionAttributeValues": {
           ":status": {
             "S": "CLOSED"
           },
           ":lsi3": {
-            "S": "$.assignment.attachedChatSession#CLOSED"
+            "S.$": "States.Format('{}#CLOSED', $.assignment.attachedChatSession.assigneeId)"
           },
           ":lsi4": {
             "S": "CLOSED"
+          },
+          ":endTime": {
+            "S.$": "States.MathAdd($.assignment.attachedChatSession.startTime, 300000)"
           }
+        },
+        "ExpressionAttributeNames": {
+          "#status": "status",
+          "#lsi3": "lsi3",
+          "#lsi4": "lsi4",
+          "#endTime": "endTime"
         },
         "ReturnValues": "UPDATED_NEW"
       },
