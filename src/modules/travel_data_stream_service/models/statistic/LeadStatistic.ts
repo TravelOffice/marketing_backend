@@ -6,6 +6,7 @@ export interface LeadStatistic extends BaseDdbModel {
   // lsi1 = <createdAt>
   // lsi2 = <saleId>#<createdAt>
   // lsi3 = sourceId // CHAT, EMAIL, PHONE, WEBSITE...
+  // lsi4 = FROMCHAT#<createdAt>
 
   // Location id
   // Used to analyze the most of locations that users are interested in
