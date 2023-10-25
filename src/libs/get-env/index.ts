@@ -1,9 +1,10 @@
-import AWS from 'aws';
+import {GetSecretValueCommand, SecretsManagerClient} from '@aws-sdk/client-secrets-manager';
 import dotenv from 'dotenv';
 import fs from 'fs';
 
 dotenv.config({path: process.cwd() + '/.env.development'});
-const client = new AWS.SecretsManager({});
+const client = new SecretsManagerClient();
+
 let secretValues: any;
 
 export function isAwsEnv() {
@@ -28,13 +29,16 @@ export async function getAwsSecretValue(key: string, secretId?: string): Promise
     if (!secretValues) {
       secretId = secretId || process.env.SECRET_MANAGER_ID;
       if (secretId) {
-        const data = await client.getSecretValue({SecretId: secretId}).promise();
+        const command = new GetSecretValueCommand({
+          SecretId: secretId,
+        })
+        const data = await client.send(command);
         secretValues = JSON.parse(data.SecretString || {}.toString());
       }
     }
     secretValue = secretValues[key];
   } else {
-    const content = await fs.readFileSync(process.cwd() + '/.env.awslocal');
+    const content = fs.readFileSync(process.cwd() + '/.env.awslocal');
     const values = dotenv.parse(content);
     secretValue = values[key];
   }

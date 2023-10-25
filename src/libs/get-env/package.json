@@ -9,7 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "aws": "link:../aws-sdk",
+    "@aws-sdk/client-secrets-manager": "^3.435.0",
     "dotenv": "^16.0.0"
   },
   "devDependencies": {
