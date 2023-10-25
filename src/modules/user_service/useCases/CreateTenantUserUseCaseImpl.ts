@@ -1,12 +1,9 @@
 import omit from 'lodash/omit';
-import {
-  LANGUAGES_TYPE,
-  THEMES_TYPE,
-  User,
-} from '../models';
+import { LANGUAGES_TYPE, THEMES_TYPE, User } from '../models';
 import { rolePermissionRepository, userRepository } from '../repositories';
 import { OMITTED_USER_ATTRIBUTES } from '../utils/constants';
 import { CreateTenantUserUseCase } from './interfaces/CreateTenantUserUseCase';
+import { reformatPhoneNumber } from '../utils/utils';
 
 export default class CreateTenantUserUseCaseImpl implements CreateTenantUserUseCase {
   /**
@@ -36,6 +33,7 @@ export default class CreateTenantUserUseCaseImpl implements CreateTenantUserUseC
 
     const newUser: User = {
       ...user,
+      phoneNumber: reformatPhoneNumber(user.phoneNumber),
       username: user.username,
       tenant: tenantId,
       roles: user.roles,

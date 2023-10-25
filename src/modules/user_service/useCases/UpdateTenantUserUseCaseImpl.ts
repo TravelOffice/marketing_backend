@@ -3,6 +3,7 @@ import { User } from '../models';
 import { rolePermissionRepository, userRepository } from '../repositories';
 import { OMITTED_USER_ATTRIBUTES } from '../utils/constants';
 import { UpdateTenantUserUseCase } from './interfaces/UpdateTenantUserUseCase';
+import { reformatPhoneNumber } from '../utils/utils';
 
 export default class UpdateTenantUserUseCaseImpl implements UpdateTenantUserUseCase {
   /**
@@ -36,6 +37,7 @@ export default class UpdateTenantUserUseCaseImpl implements UpdateTenantUserUseC
     const newUser: User = {
       ...oldUser,
       ...user,
+      phoneNumber: reformatPhoneNumber(user.phoneNumber || oldUser.phoneNumber),
       username: userId,
       tenant: tenantId,
       roles: user.roles || oldUser.roles,
