@@ -1,6 +1,6 @@
 /**
- * This lambda function aims to handle the event from AWS DynamoDB Stream Trigger
- * Following features that this lambda function will handle:
+ * This cognito function aims to handle the event from AWS DynamoDB Stream Trigger
+ * Following features that this cognito function will handle:
  * - Handle TourPost related event and update statistical data for market place
  * - Handle TourPost related event and update statistical data for each organization
  * - Handle TourPost related event and update statistical data for each sale user
@@ -13,14 +13,14 @@
  * + Post expired
  * + And so on
  *
- * TODO: In the future, this lambda function will be splited into multiple lambda functions
- * to handle each specific task. For example, we will have a lambda function to handle:
+ * TODO: In the future, this cognito function will be splited into multiple cognito functions
+ * to handle each specific task. For example, we will have a cognito function to handle:
  * - Handle historical data change on specific data model such as TourPost, Org, Offer
  * and update statistical data for market place
  * - Record new data change to system history table
  * - Make a notification on data changed
  */
-import { DynamoDBRecord, DynamoDBStreamEvent } from 'aws-lambda';
+import { _Record } from '@aws-sdk/client-dynamodb-streams';
 import { dynamoProvider } from 'core';
 import { Offer } from './models/Offer';
 import { DdbModelChangeType } from './models/dataSubscription/DdbModelChangeType';
@@ -53,7 +53,7 @@ import { padZeroToLeft } from './utils/number';
  * @param record DynamoDB record
  * @returns Model change type
  */
-function getModelChangeType(record: DynamoDBRecord): DdbModelChangeType | undefined {
+function getModelChangeType(record: _Record): DdbModelChangeType | undefined {
   // Extract data from record
   const { dynamodb, eventName } = record;
   if (!dynamodb || !dynamodb.Keys) {
@@ -88,7 +88,7 @@ function getModelChangeType(record: DynamoDBRecord): DdbModelChangeType | undefi
  *
  * @param records DynamoDB records
  */
-async function handleMarketplaceStatisticChange(records: DynamoDBRecord[]): Promise<void> {
+async function handleMarketplaceStatisticChange(records: _Record[]): Promise<void> {
   // Get statistic data of the whole marketplace from database
   let marketplaceStatistic = await marketplaceStatisticRepository.getMarketplaceStatistic();
   if (marketplaceStatistic === undefined) {
@@ -139,7 +139,7 @@ async function handleMarketplaceStatisticChange(records: DynamoDBRecord[]): Prom
   await marketplaceStatisticRepository.updateMarketplaceStatistic({ ...stats, updatedAt });
 }
 
-async function handleOrganizationsStatisticChange(records: DynamoDBRecord[]): Promise<void> {
+async function handleOrganizationsStatisticChange(records: _Record[]): Promise<void> {
   // Attribute to count number of posts, offers or success offer added for each organization
   const orgsChangedStats: OrganizationsStatistic = {};
   const initOrgChangedStats = {
@@ -230,7 +230,7 @@ async function handleOrganizationsStatisticChange(records: DynamoDBRecord[]): Pr
   await organizationStatisticRepository.batchUpdateOrganizationsStatistic(orgsChangedStats);
 }
 
-async function handleTourPostsStatisticChange(records: DynamoDBRecord[]): Promise<void> {
+async function handleTourPostsStatisticChange(records: _Record[]): Promise<void> {
   // Attribute to count number of offers added for each post
   // as well as total rating of each post and number of users rated for each post
   const tourPostsChangedStats: TourPostsStatistic = {};
@@ -266,9 +266,8 @@ async function handleTourPostsStatisticChange(records: DynamoDBRecord[]): Promis
 
     if (newModelData.linkedToTargetKeys) {
       const { linkedToTargetKeys } = newModelData;
-      const linkedTargetId = `${linkedToTargetKeys?.pk}#${linkedToTargetKeys?.sk}`;
       // Add lsi to query tour post that linked to target lead or tour template
-      tourPostsChangedStats[tourPostId].lsi1 = linkedTargetId;
+      tourPostsChangedStats[tourPostId].lsi1 = `${linkedToTargetKeys?.pk}#${linkedToTargetKeys?.sk}`;
     }
 
     // Handle new data added to database
@@ -297,9 +296,9 @@ async function handleTourPostsStatisticChange(records: DynamoDBRecord[]): Promis
   await tourPostStatisticRepository.batchUpdateTourPostsStatistic(tourPostsChangedStats);
 }
 
-async function handleTopCommissionPosts(records: DynamoDBRecord[]): Promise<void> {
+async function handleTopCommissionPosts(records: _Record[]): Promise<void> {
   const tourPostRecords = records.filter((record) => getModelChangeType(record) === 'POST');
-  const uniqueTourPostRecords: DynamoDBRecord[] = [];
+  const uniqueTourPostRecords: _Record[] = [];
   // Remove duplicate tour post records with compraing pk, sk
   // and keep record item have sequence number is maximum
   type PkSkType = {
@@ -394,7 +393,7 @@ async function handleTopCommissionPosts(records: DynamoDBRecord[]): Promise<void
 }
 
 // eslint-disable-next-line import/prefer-default-export
-export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
+export const handler = async (event: { Records: _Record[] }): Promise<void> => {
   try {
     const { Records: records } = event;
     logger.log(`Start handling DynamoDB Stream event records ${JSON.stringify(records, null, 5)}`);

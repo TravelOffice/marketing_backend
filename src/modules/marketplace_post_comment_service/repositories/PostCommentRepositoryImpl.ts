@@ -79,7 +79,7 @@ export default class PostCommentRepositoryImpl implements PostCommentRepository 
     comment: Partial<PostComment>,
   ): Promise<PostComment> {
     const expressionNamesAndValues = helper.generateUpdateExpressionNamesAndValues(comment);
-    const result = await dynamoProvider.rawUpdateItem({
+    const result = await dynamoProvider.updateItemWithPrebuiltExpression({
       TableName: await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE'),
       Key: {
         pk: `${POST_INDEX}#${tourPostId}#${COMMENT_INDEX}`,

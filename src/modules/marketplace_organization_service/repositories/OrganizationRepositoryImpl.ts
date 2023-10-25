@@ -65,7 +65,7 @@ export default class OrganizationRepositoryImpl implements OrganizationRepositor
     organization: Partial<Organization>,
   ): Promise<Organization> {
     const expressionNamesAndValues = helper.generateUpdateExpressionNamesAndValues(organization);
-    const result = await dynamoProvider.rawUpdateItem({
+    const result = await dynamoProvider.updateItemWithPrebuiltExpression({
       TableName: await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE'),
       Key: {
         pk: ORGANIZATION_INDEX,

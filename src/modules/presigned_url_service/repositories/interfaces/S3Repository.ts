@@ -7,17 +7,17 @@ import {
 } from '../../models/GeneratePassengerAttachedDocPresignedUrlOption';
 
 export interface S3Repository {
-  generatePresignedUrl: (option: GenerateMailPresignedUrlOption) => Promise<PresignedUrl>;
+  generateSignedUrl: (option: GenerateMailPresignedUrlOption) => Promise<PresignedUrl>;
 
-  generatePresignedUrls: (key: string, fileType: string) => Promise<PresignedUrl>;
+  generateSignedUrls: (key: string, fileType: string) => Promise<PresignedUrl>;
 
-  generateAvatarPresignedUrl: (option: GenerateAvatarPresignedUrlOption) => Promise<PresignedUrl>
+  generateAvatarSignedUrl: (option: GenerateAvatarPresignedUrlOption) => Promise<PresignedUrl>
 
-  generatePaymentVoucherPresignedUrl: (
+  generatePaymentVoucherSignedUrl: (
     option: GeneratePaymentVoucherPresignedUrlOption
   ) => Promise<PresignedUrl>
 
-  generatePassengerAttachedDocPresignedUrl: (
+  generatePassengerAttachedDocSignedUrl: (
     option: GeneratePassengerAttachedDocPresignedUrlOption
   ) => Promise<PresignedUrl>
 }

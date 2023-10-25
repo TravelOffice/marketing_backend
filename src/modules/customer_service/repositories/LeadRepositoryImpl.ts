@@ -1,13 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { getAwsSecretValue } from 'get-env';
-import { helper, dynamoProvider, QueryInput } from 'core';
+import { dynamoProvider, helper, QueryInput } from 'core';
 import { Lead } from '../models/Lead';
 
-import {
-  CUSTOMER_INDEX,
-  LEAD_INDEX,
-  TENANT_INDEX,
-} from '../utils/constants';
+import { CUSTOMER_INDEX, LEAD_INDEX, TENANT_INDEX } from '../utils/constants';
 import { LeadRepository } from './interfaces/LeadRepository';
 
 export default class LeadRepositoryImpl implements LeadRepository {
@@ -18,7 +14,7 @@ export default class LeadRepositoryImpl implements LeadRepository {
    * @param {string} customerId - The ID of the customer.
    * @returns {Promise<Lead[]>} - A promise that resolves to an array of customer's lead.
    */
-  getByCustomer = async (tenantId: string, customerId: string) => {
+  getByCustomer = async (tenantId: string, customerId: string): Promise<Lead[]> => {
     // Build the query parameters to retrieve leads by customer
     const queryParameters = {
       TableName: await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'), // Name of the DynamoDB table

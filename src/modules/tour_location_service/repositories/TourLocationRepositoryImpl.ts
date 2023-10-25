@@ -1,4 +1,3 @@
-import AWS from 'aws';
 import { getAwsSecretValue } from 'get-env';
 import { dynamoProvider, helper } from 'core';
 import { TourLocation } from '../models/TourLocation';
@@ -7,8 +6,6 @@ import {
   CREATED_AT_INDEX, TENANT_INDEX, TOUR_LOCATION_COUNTER_INDEX, TOUR_LOCATION_INDEX,
 } from '../utils/constants';
 import logger from '../utils/logger';
-
-type QueryInput = AWS.DynamoDB.DocumentClient.QueryInput;
 
 export default class TourLocationRepositoryImpl implements TourLocationRepository {
   /**
@@ -41,7 +38,7 @@ export default class TourLocationRepositoryImpl implements TourLocationRepositor
    */
   list = async (tenantId: string) => {
     const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
-    const params: QueryInput = {
+    const params = {
       TableName: table,
       IndexName: 'Index1',
       KeyConditionExpression: 'pk = :pk AND begins_with(lsi1, :lsi1_filter_value)',

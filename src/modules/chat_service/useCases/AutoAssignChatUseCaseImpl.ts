@@ -1,8 +1,9 @@
 import { ChatPlatform } from 'common-models';
+import { AttributeValues, dynamoProvider } from 'core';
 import { ChatSession, ChatSessionStatus } from '../models/ChatSession';
 import { ConversationQueryParams } from '../models/ConversationQueryParams';
 import { DDBUser } from '../models/dynamodb/DDBUser';
-import { AttributeValues, dynamoProvider, saleDistributionProvider } from '../providers';
+import { saleDistributionProvider } from '../providers';
 import { chatRepository, chatSessionRepository, userRepository } from '../repositories';
 import logger from '../utils/logger';
 import { AutoAssignChatUseCase } from './interfaces';
@@ -14,7 +15,7 @@ export default class AutoAssignChatUseCaseImpl implements AutoAssignChatUseCase 
   ) => {
     // Sales data to assign
     const sales = marshalledSales.map((sale) => {
-      const saleObj = dynamoProvider.unmarshallValues(sale);
+      const saleObj = dynamoProvider.unmarshall(sale);
       // Number of assigned chats
       if (saleObj.nacs) {
         saleObj.nacs = 0;

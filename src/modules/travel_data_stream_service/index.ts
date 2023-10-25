@@ -1,13 +1,9 @@
-import { DynamoDBStreamEvent } from 'aws-lambda';
 import * as _ from 'lodash';
+import { _Record } from '@aws-sdk/client-dynamodb-streams';
 import TenantSaleAnalyzer from './analyzer/TenantSaleAnalyzer';
 import { RequiredDynamoDBRecord } from './types/dynamodb';
 import logger from './utils/logger';
-import {
-  getTenant,
-  isNeededHandleRecord,
-  toPkSk,
-} from './utils/streamRecords';
+import { getTenant, isNeededHandleRecord, toPkSk } from './utils/streamRecords';
 import { tenantSaleStatisticRepository } from './repositories';
 
 /**
@@ -41,7 +37,7 @@ async function analyzeTenantSaleData(
 }
 
 // eslint-disable-next-line import/prefer-default-export
-export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
+export const handler = async (event: { Records: _Record[] }): Promise<void> => {
   try {
     const { Records: records } = event;
     logger.log(`Start handling DynamoDB Stream event records ${JSON.stringify(records, null, 5)}`);

@@ -7,7 +7,7 @@ export function decodeToken(jwtToken: string) {
 export function getCurrentUserInfo(jwtToken: string) {
   const decoded = decodeToken(jwtToken);
   return {
-    username: decoded['cognito:username'],
+    username: decoded['lambda1:username'],
     name: decoded.name,
   };
 }

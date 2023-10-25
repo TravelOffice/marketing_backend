@@ -1,4 +1,4 @@
-import { AttributeValue, DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { AttributeValue, DynamoDBClient, ReturnValue } from '@aws-sdk/client-dynamodb';
 
 import {
   BatchGetCommand,
@@ -19,7 +19,7 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { marshall, NativeAttributeValue, unmarshall } from '@aws-sdk/util-dynamodb';
-import { getEnv } from 'get-env';
+import { getAwsSecretValue, getEnv } from 'get-env';
 import { helper } from '../../utils';
 
 export type QueryInput = QueryCommandInput;
@@ -28,7 +28,11 @@ export type GetItemInput = GetCommandInput;
 export type UpdateItemInput = UpdateCommandInput;
 export type DeleteItemInput = DeleteCommandInput;
 export type BatchGetItemInput = BatchGetCommandInput;
+export type BatchWriteItemInput = BatchWriteCommandInput;
 export type KeyList = Record<string, NativeAttributeValue>[];
+export type AttributeValues = Record<string, AttributeValue>;
+
+export { ReturnValue } from '@aws-sdk/client-dynamodb';
 
 const client = new DynamoDBClient({ region: getEnv('AWS_REGION') });
 const docClient = DynamoDBDocumentClient.from(client);
@@ -253,5 +257,20 @@ export default class DynamoProvider {
 
   marshall = (data: any) => marshall(data);
 
-  unmarshall = (obj: AttributeValue) => unmarshall(obj);
+  unmarshall = (obj: AttributeValues) => unmarshall(obj);
+
+  /**
+   * Function used to get user object from userId
+   * @param tenant Tenant ID
+   * @param userId User ID
+   * @returns Promise of User
+   */
+  getTravelUserAttributes = async (tenant: string, userId: string) => {
+    const ddbTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    return this.getItem(
+      ddbTable,
+      `TENANT#${tenant}`,
+      `EMPLOYEE#${userId}`,
+    );
+  };
 }

@@ -13,11 +13,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "aws": "link:../../libs/aws-sdk",
     "axios": "^0.26.0",
     "common-models": "link:../../libs/common-models",
     "decode-token": "link:../../libs/decode-token",
     "get-env": "link:../../libs/get-env",
+    "core": "link:../../libs/core",
     "express": "^4.17.2",
     "express-validator": "^6.14.0",
     "cors": "^2.8.5",

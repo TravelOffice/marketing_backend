@@ -1,5 +1,5 @@
+import { AttributeValues } from 'core';
 import { ConversationQueryParams } from './models/ConversationQueryParams';
-import { AttributeValues } from './providers';
 import { autoAssignChatUseCase } from './useCases';
 import { shuffle } from './utils/array';
 import logger from './utils/logger';

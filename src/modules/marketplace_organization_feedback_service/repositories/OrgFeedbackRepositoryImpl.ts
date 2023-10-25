@@ -76,7 +76,7 @@ export default class OrgFeedbackRepositoryImpl implements OrgFeedbackRepository 
     feedback: Partial<OrgFeedback>,
   ) => {
     const expressionNamesAndValues = helper.generateUpdateExpressionNamesAndValues(feedback);
-    const result = await dynamoProvider.rawUpdateItem({
+    const result = await dynamoProvider.updateItemWithPrebuiltExpression({
       TableName: await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE'),
       Key: {
         pk: `${ORGANIZATION_INDEX}#${organization}#${FEEDBACK_INDEX}`,

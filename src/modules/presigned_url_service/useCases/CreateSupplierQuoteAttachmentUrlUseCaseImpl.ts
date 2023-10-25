@@ -15,6 +15,6 @@ implements CreateSupplierQuoteAttachmentUrlUseCase {
     const randomByteLength = 16;
     const uid = crypto.randomBytes(randomByteLength).toString('hex');
     const key = `${tenant}/supplier-quote-attachment/${uid}.${fileExtension}`;
-    return s3Repository.generatePresignedUrls(key, fileType);
+    return s3Repository.generateSignedUrls(key, fileType);
   };
 }

@@ -1,4 +1,5 @@
 import { ChatPlatform, DDBConversation } from 'common-models';
+import { dynamoProvider } from 'core';
 import { getAwsSecretValue } from 'get-env';
 import omit from 'lodash/omit';
 import {
@@ -7,7 +8,7 @@ import {
   SendMessageMutationArgs,
   toSendFbMessagePayload,
 } from '../models';
-import { dynamoProvider, fbMessagePlatformProvider } from '../providers';
+import { fbMessagePlatformProvider } from '../providers';
 import {
   ASSIGNEE_INDEX,
   CONVERSATION_INDEX,
@@ -15,7 +16,6 @@ import {
   FACEBOK_PAGE_INDEX,
   MESSAGE_INDEX,
   OMITTED_CONVERSATION_ATTRIBUTES,
-  PAGINATION_LIMIT,
   PARTITION_KEY_DELIMITER,
   TENANT_INDEX,
 } from '../utils/constants';
@@ -23,40 +23,6 @@ import logger from '../utils/logger';
 import { FbMessagePlatformRepository } from './interfaces/FbMessagePlatformRepository';
 
 export default class FbMessagePlatformRepositoryImpl implements FbMessagePlatformRepository {
-  /**
-   * Get Facebook access token stored in DynamoDB
-   * @param pageId Page id
-   * @returns Facebook access token
-   */
-  private readonly getFbMessagePlatformToken = async (pageId: string): Promise<string> => {
-    const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
-    const params = {
-      TableName: travelTable,
-      IndexName: 'PageIdIndex',
-      KeyConditionExpression: '#pageId = :id',
-      ExpressionAttributeNames: {
-        '#pageId': 'id',
-        '#sk': 'sk',
-      },
-      // Filter the item startwith `PAGE#FACEBOOK#` to make sure the item is facebook token
-      // Prevent the same token with other providers such as Zalo, Telegram
-      FilterExpression: 'begins_with(#sk, :sk_filter_value)',
-      ExpressionAttributeValues: {
-        // Given page id
-        ':id': pageId,
-        // Prefix to Facebook item
-        ':sk_filter_value': FACEBOK_PAGE_INDEX,
-      },
-      ProjectionExpression: 'sk,accessToken,id',
-    };
-    const rs = await dynamoProvider.query(params);
-    if (rs.Items && rs.Items?.length > 0) {
-      logger.log('[FbMessagePlatformRepositoryImpl.getFbMessagePlatformToken] DynamoDB item', rs.Items[0]);
-      return rs.Items[0].accessToken;
-    }
-    throw new Error(`Can not get token for Facebook page with id ${pageId}`);
-  };
-
   /**
    * Send message to customer from Fb page
    * @param message Message data
@@ -104,7 +70,7 @@ export default class FbMessagePlatformRepositoryImpl implements FbMessagePlatfor
       },
     };
 
-    const { Items: items } = await dynamoProvider.query(params) as { Items: DDBConversation[] };
+    const items: DDBConversation[] = await dynamoProvider.query(params);
     if (items) {
       const conversations = items.map(
         (conversation) => {
@@ -160,7 +126,6 @@ export default class FbMessagePlatformRepositoryImpl implements FbMessagePlatfor
   ) => {
     try {
       const dynamoTable = await getAwsSecretValue('DYNAMO_CHAT_TABLE');
-      const paginationLimit = limit || PAGINATION_LIMIT;
       const platformStr = ChatPlatform.facebook.toUpperCase();
       const params = {
         TableName: dynamoTable,
@@ -174,28 +139,19 @@ export default class FbMessagePlatformRepositoryImpl implements FbMessagePlatfor
           ':pk': `${TENANT_INDEX}#${tenantId}#${MESSAGE_INDEX}#${platformStr}#${pageId}`,
           ':lsi_filter_value': `${CONVERSATION_INDEX}#${conversationId}#${CREATED_TIME_INDEX}`,
         },
-        ScanIndexForward: false, // Sort descending
-        Limit: paginationLimit,
-        ExclusiveStartKey: nextToken ? JSON.parse(nextToken) : undefined,
       };
 
-      const { LastEvaluatedKey, Items: messageItems } = await dynamoProvider.rawQuery(params);
-      if (messageItems) {
+      const queryResult = await dynamoProvider.queryPagination(params, {
+        limit,
+        nextToken,
+      });
+      if (queryResult) {
         return {
-          data: messageItems.map((message: any) => {
-            const {
-              sk, pk, lsi1, lsi2, lsi3, lsi4, lsi5, ...rest
-            } = message;
-            return {
-              content: rest.content,
-            };
-          }),
-          paging: {
-            cursors: {
-              before: LastEvaluatedKey ? JSON.stringify(LastEvaluatedKey) : '',
-              after: nextToken || '',
-            },
-          },
+          ...queryResult,
+          data: queryResult.data.map((item) => (
+            {
+              content: item.content,
+            })),
         } as FacebookMessageResponsePayload;
       }
       return {
@@ -231,5 +187,39 @@ export default class FbMessagePlatformRepositoryImpl implements FbMessagePlatfor
       logger.log(`[FbMessagePlatformRepositoryImpl.getUserProfile] Generated an error ${error}`);
       return undefined;
     }
+  };
+
+  /**
+   * Get Facebook access token stored in DynamoDB
+   * @param pageId Page id
+   * @returns Facebook access token
+   */
+  private readonly getFbMessagePlatformToken = async (pageId: string): Promise<string> => {
+    const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const params = {
+      TableName: travelTable,
+      IndexName: 'PageIdIndex',
+      KeyConditionExpression: '#pageId = :id',
+      ExpressionAttributeNames: {
+        '#pageId': 'id',
+        '#sk': 'sk',
+      },
+      // Filter the item start with `PAGE#FACEBOOK#` to make sure the item is facebook token
+      // Prevent the same token with other providers such as Zalo, Telegram
+      FilterExpression: 'begins_with(#sk, :sk_filter_value)',
+      ExpressionAttributeValues: {
+        // Given page id
+        ':id': pageId,
+        // Prefix to Facebook item
+        ':sk_filter_value': FACEBOK_PAGE_INDEX,
+      },
+      ProjectionExpression: 'sk,accessToken,id',
+    };
+    const items = await dynamoProvider.query(params);
+    if (items && items?.length > 0) {
+      logger.log('[FbMessagePlatformRepositoryImpl.getFbMessagePlatformToken] DynamoDB item:', items[0]);
+      return items[0].accessToken;
+    }
+    throw new Error(`Can not get token for Facebook page with id ${pageId}`);
   };
 }

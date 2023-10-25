@@ -1,22 +1,28 @@
-import AWS from 'aws';
+import {
+  DeleteMessageCommand,
+  DeleteMessageRequest,
+  Message,
+  ReceiveMessageCommand,
+  ReceiveMessageRequest,
+  SendMessageCommand,
+  SendMessageRequest,
+  SQSClient,
+} from '@aws-sdk/client-sqs';
 import { getEnv } from 'get-env';
 import logger from '../utils/logger';
 
-export type SQSMesssage = AWS.SQS.Message;
-export type SQSSendMessageRequest = AWS.SQS.SendMessageRequest;
-export type SQSReceiveMessageResult = AWS.SQS.ReceiveMessageResult;
+const client = new SQSClient({ region: getEnv('AWS_REGION') });
 
 export default class SQSProvider {
-  private sqs = new AWS.SQS({ region: getEnv('AWS_REGION') });
-
   /**
    * Send new message to SQS queue endpoint
    * @param sendMessageRequest Send message request parameters
    * @returns Message data
    */
-  sendMessage = async (sendMessageRequest: SQSSendMessageRequest) => {
+  sendMessage = async (sendMessageRequest: SendMessageRequest) => {
     // Send message
-    const data = await this.sqs.sendMessage(sendMessageRequest).promise();
+    const command = new SendMessageCommand(sendMessageRequest);
+    const data = await client.send(command);
 
     logger.log(`Message ${data.MessageId} placed in the Queue: ${sendMessageRequest.QueueUrl}`);
 
@@ -29,22 +35,22 @@ export default class SQSProvider {
    * @param receiptHandler Receipt handler
    */
   deleteMessage = async (queueUrl: string, receiptHandler: string) => {
-    const deleteParams: AWS.SQS.DeleteMessageRequest = {
+    const input: DeleteMessageRequest = {
       QueueUrl: queueUrl,
       ReceiptHandle: receiptHandler,
     };
-
-    await this.sqs.deleteMessage(deleteParams).promise();
+    const command = new DeleteMessageCommand(input);
+    await client.send(command);
   };
 
   /**
-   * Get messsages from SQS queue from given queue url
+   * Get messages from SQS queue from given queue url
    * @param queueUrl SQS queue endpoint
    * @returns List of messages returned from queue
    */
   getMessages = async (queueUrl: string) => {
-    const params = {
-      AttributeNames: ['SentTimestamp'],
+    const input: ReceiveMessageRequest = {
+      AttributeNames: ['All'],
       MaxNumberOfMessages: 1,
       MessageAttributeNames: ['All'],
       QueueUrl: queueUrl,
@@ -53,19 +59,18 @@ export default class SQSProvider {
     };
 
     // Get messages
-    let messages: SQSMesssage[] = [];
+    let messages: Message[] = [];
     try {
       // Receive messages from queue
-      const data: SQSReceiveMessageResult = await this.sqs.receiveMessage(params).promise();
+      const data = await client.send(new ReceiveMessageCommand(input));
 
       // Delete received messages from queue
-      await Promise.all(messages.map(async (message) => {
-        const deleteParams: AWS.SQS.DeleteMessageRequest = {
+      await Promise.all(data.Messages!.map(async (message) => {
+        const deleteMessageRequest: DeleteMessageRequest = {
           QueueUrl: queueUrl,
           ReceiptHandle: message.ReceiptHandle || '',
         };
-
-        await this.sqs.deleteMessage(deleteParams).promise();
+        await client.send(new DeleteMessageCommand(deleteMessageRequest));
       }));
 
       messages = data.Messages || [];

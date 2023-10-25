@@ -1,10 +1,8 @@
-import AWS from 'aws';
-import { getEnv, getAwsSecretValue } from 'get-env';
+import { getAwsSecretValue } from 'get-env';
+import { cognitoProvider, DeliveryMediumType } from 'core';
 import { User } from '../models';
 import logger from '../utils/logger';
 import { toUserAttributes } from '../utils/utils';
-
-const cognito = new AWS.CognitoIdentityServiceProvider({ region: getEnv('AWS_REGION') });
 
 export default class AuthProvider {
   /**
@@ -12,7 +10,7 @@ export default class AuthProvider {
    * @param user information to be created
    * @returns The created user attributes
    */
-  adminCreateUser = async (user: User) : Promise<User> => {
+  adminCreateUser = async (user: User): Promise<User> => {
     const newUser: Partial<User> = {
       username: user.username,
       firstName: user.firstName,
@@ -32,14 +30,14 @@ export default class AuthProvider {
       ...toUserAttributes(newUser),
     ];
 
-    const params : AWS.CognitoIdentityServiceProvider.AdminCreateUserRequest = {
+    const params = {
       UserPoolId: await getAwsSecretValue('COGNITO_USER_POOL_ID') || '',
       Username: user.username,
       UserAttributes: userAttributes,
-      DesiredDeliveryMediums: ['EMAIL'],
+      DesiredDeliveryMediums: ['EMAIL' as DeliveryMediumType],
     };
     logger.log(`params: , ${JSON.stringify(params)}`);
-    await cognito.adminCreateUser(params).promise();
+    await cognitoProvider.createUser(params);
     return user;
   };
 
@@ -48,7 +46,7 @@ export default class AuthProvider {
    * @param user information to be updated
    * @returns The updated user attributes
    */
-  adminUpdateUser = async (user: User) : Promise<User> => {
+  adminUpdateUser = async (user: User): Promise<User> => {
     const updatedUser: Partial<User> = {
       username: user.username,
       firstName: user.firstName,
@@ -56,13 +54,13 @@ export default class AuthProvider {
       email: user.email,
       phoneNumber: user.phoneNumber,
     };
-    const params: AWS.CognitoIdentityServiceProvider.AdminUpdateUserAttributesRequest = {
+    const params = {
       UserPoolId: await getAwsSecretValue('COGNITO_USER_POOL_ID') || '',
       Username: user.username,
       UserAttributes: toUserAttributes(updatedUser),
     };
     logger.log(`params: , ${JSON.stringify(params)}`);
-    await cognito.adminUpdateUserAttributes(params).promise();
+    await cognitoProvider.updateUser(params);
     return user;
   };
 }

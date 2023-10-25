@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import AWS from 'aws';
 import { getAwsSecretValue } from 'get-env';
-import { helper, dynamoProvider } from 'core';
-import { PaginationParams } from 'core/providers/dynamodb/DynamoProvider';
+import {
+  dynamoProvider, helper, PaginationParams, QueryInput, ReturnValue, UpdateItemInput,
+} from 'core';
 import { Lead, LeadStatus } from '../models/Lead';
 
 import {
@@ -16,9 +16,6 @@ import {
 import logger from '../utils/logger';
 import { LeadRepository } from './interfaces/LeadRepository';
 import { User } from '../models/User';
-
-type UpdateItemInput = AWS.DynamoDB.DocumentClient.UpdateItemInput;
-type QueryInput = AWS.DynamoDB.DocumentClient.QueryInput;
 
 export default class LeadRepositoryImpl implements LeadRepository {
   getById = async (tenantId: string, leadId: string) => {
@@ -94,7 +91,7 @@ export default class LeadRepositoryImpl implements LeadRepository {
 
   update = async (tenantId: string, leadId: string, lead: Partial<Lead>) => {
     const expressionNamesAndValues = helper.generateUpdateExpressionNamesAndValues(lead);
-    const result = await dynamoProvider.rawUpdateItem({
+    const result = await dynamoProvider.updateItemWithPrebuiltExpression({
       TableName: await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
       Key: {
         pk: `${TENANT_INDEX}#${tenantId}#${LEAD_INDEX}`,
@@ -131,7 +128,7 @@ export default class LeadRepositoryImpl implements LeadRepository {
       },
       ReturnValues: 'UPDATED_NEW',
     };
-    const rs = await dynamoProvider.rawUpdateItem(updateParams);
+    const rs = await dynamoProvider.updateItemWithPrebuiltExpression(updateParams);
     return rs.Attributes as Lead;
   };
 
@@ -160,7 +157,7 @@ export default class LeadRepositoryImpl implements LeadRepository {
       },
       ReturnValues: 'UPDATED_NEW',
     };
-    const rs = await dynamoProvider.rawUpdateItem(updateParams);
+    const rs = await dynamoProvider.updateItemWithPrebuiltExpression(updateParams);
     return rs.Attributes as Lead;
   };
 
@@ -173,7 +170,7 @@ export default class LeadRepositoryImpl implements LeadRepository {
    * @returns {Lead} - The updated lead after cancellation.
    * @throws {Error} - If an error occurs during the cancellation process.
    */
-  cancel = async (tenantId: string, leadId: string, cancelledReason: string) => {
+  cancel = async (tenantId: string, leadId: string, cancelledReason: string): Promise<Lead> => {
     try {
       // Log the start of the cancellation process
       logger.log('Cancellation process started.');
@@ -189,7 +186,7 @@ export default class LeadRepositoryImpl implements LeadRepository {
       const sk = `${leadId}`;
 
       // Define the parameters for updating the lead in the DynamoDB table
-      const updateParams: UpdateItemInput = {
+      const updateParams = {
         TableName: travelTable,
         Key: {
           pk,
@@ -202,11 +199,11 @@ export default class LeadRepositoryImpl implements LeadRepository {
           ':cancelledReason': cancelledReason,
           ':updatedAt': Date.now(),
         },
-        ReturnValues: 'UPDATED_NEW',
+        ReturnValues: 'UPDATED_NEW' as ReturnValue,
       };
 
       // Update the lead in the DynamoDB table and retrieve the updated attributes
-      const rs = await dynamoProvider.rawUpdateItem(updateParams);
+      const rs = await dynamoProvider.updateItemWithPrebuiltExpression(updateParams);
 
       // Log the success of the cancellation process
       logger.log('[]Cancellation process completed successfully.');
@@ -229,7 +226,7 @@ export default class LeadRepositoryImpl implements LeadRepository {
   generateLeadCode = async (tenantId: string) => {
     const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
     try {
-      const result = await dynamoProvider.rawUpdateItem({
+      const result = await dynamoProvider.updateItemWithPrebuiltExpression({
         TableName: table,
         Key: {
           pk: `${TENANT_INDEX}#${tenantId}`,

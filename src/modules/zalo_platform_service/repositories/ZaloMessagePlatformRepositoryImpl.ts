@@ -1,18 +1,18 @@
 import { getAwsSecretValue } from 'get-env';
-import AWS from 'aws';
-import { AppSyncSendMessageData, ChatPlatform, DDBConversation } from 'common-models';
+import { AppSyncSendMessageData, ChatPlatform } from 'common-models';
 import omit from 'lodash/omit';
 import * as crypto from 'crypto';
 import amrToMp3 from 'amrToMp3';
 import path from 'path';
 import fs from 'fs';
+import { dynamoProvider, ReturnValue } from 'core';
 import {
   SendMessageMutationArgs,
   SendZaloMessageResponsePayload,
   toSendZaloMessagePayload,
   ZaloMessageResponsePayload,
 } from '../models';
-import { dynamoProvider, s3Provider, zaloMessagePlatformProvider } from '../providers';
+import { fileProvider, zaloMessagePlatformProvider } from '../providers';
 import {
   ASSIGNEE_INDEX,
   CONVERSATION_INDEX,
@@ -20,7 +20,6 @@ import {
   FILE_INDEX,
   MESSAGE_INDEX,
   OMITTED_CONVERSATION_ATTRIBUTES,
-  PAGINATION_LIMIT,
   PARTITION_KEY_DELIMITER,
   TEMPORARY_MESSAGE_INDEX,
   TENANT_INDEX,
@@ -29,75 +28,10 @@ import {
 import logger from '../utils/logger';
 import { ZaloMessagePlatformRepository } from './interfaces/ZaloMessagePlatformRepository';
 
-type DDBUpdateItemInput = AWS.DynamoDB.DocumentClient.UpdateItemInput;
-
 export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePlatformRepository {
   /**
-   * Get Zalo access token stored in DynamoDB
-   * @param pageId Page id
-   * @returns Zalo access token
-   */
-  private readonly getZaloMessagePlatformToken = async (pageId: string): Promise<string> => {
-    const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
-    const params = {
-      TableName: travelTable,
-      IndexName: 'PageIdIndex',
-      KeyConditionExpression: '#pageId = :id',
-      ExpressionAttributeNames: {
-        '#pageId': 'id',
-        '#sk': 'sk',
-      },
-      // Filter the item startwith `PAGE#ZALO#` to make sure the item is Zalo token
-      // Prevent the same token with other providers such as Facebook, Telegram
-      FilterExpression: 'begins_with(#sk, :sk_filter_value)',
-      ExpressionAttributeValues: {
-        // Given page id
-        ':id': pageId,
-        // Prefix to Zalo item
-        ':sk_filter_value': ZALO_PAGE_INDEX,
-      },
-      ProjectionExpression: 'pk,sk,accessToken,refreshToken,id,expireIn',
-    };
-    const rs = await dynamoProvider.query(params);
-    if (rs.Items && rs.Items?.length > 0) {
-      const dynamoItem = rs.Items[0];
-      logger.log('[ZaloMessagePlatformRepositoryImpl.getZaloMessagePlatformToken] DynamoDB item', dynamoItem);
-      if (dynamoItem.accessTokenExpireIn > Date.now()) {
-        return dynamoItem.accessToken;
-      }
-      if (dynamoItem.refreshTokenExpireIn < Date.now()) {
-        throw new Error('Refresh token is expired');
-      }
-      const refreshTokenResponse = await zaloMessagePlatformProvider.refreshToken(
-        dynamoItem.refreshToken,
-      );
-      if (refreshTokenResponse) {
-        const expireIn = new Date(Date.now() + refreshTokenResponse.expires_in * 1000);
-        const updateParams: DDBUpdateItemInput = {
-          TableName: travelTable,
-          Key: {
-            pk: dynamoItem.pk, // pk and sk can be unmarshall
-            sk: dynamoItem.sk,
-          },
-          UpdateExpression: 'set accessToken = :at, refreshToken= :rt, expireIn = :ei',
-          ExpressionAttributeValues: {
-            ':at': refreshTokenResponse.access_token,
-            ':rt': refreshTokenResponse.refresh_token,
-            ':ei': expireIn.getTime(),
-          },
-          ReturnValues: 'UPDATED_NEW',
-        };
-        const updatedRs = await dynamoProvider.update(updateParams);
-        if (updatedRs) {
-          return refreshTokenResponse.access_token;
-        }
-      }
-    }
-    throw new Error(`Can not get token for Zalo page with id ${pageId}`);
-  };
-
-  /**
    * Send message to customer from Zalo OA
+   * @param tenantId The ID of tenant
    * @param message Message data
    */
   sendMessage = async (
@@ -114,14 +48,14 @@ export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePla
       /**
        * Save the temporary metadata of this message to database to mark message
        * sent by webhook later. Data will visible only 3 minutes
-      */
+       */
       const ttl = Math.floor(Date.now() / 1000) + 3 * 60;
       const travelTable = await getAwsSecretValue('DYNAMO_CHAT_TABLE');
       const zaloPlatformStr = ChatPlatform.zalo.toUpperCase(); // Platform unique code
       const pk = `${TENANT_INDEX}#${tenantId}#${CONVERSATION_INDEX}#${zaloPlatformStr}#${pageId}`;
       const sk = `${CONVERSATION_INDEX}#${message.recipient}#${TEMPORARY_MESSAGE_INDEX}#${sendResponse.data.message_id}`;
 
-      await dynamoProvider.put(travelTable, pk, sk, {
+      await dynamoProvider.putItem(travelTable, pk, sk, {
         metadata: (message.messageData as AppSyncSendMessageData).metadata,
         ttl,
       });
@@ -163,8 +97,8 @@ export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePla
       },
     };
 
-    const { Items: items } = await dynamoProvider.query(params) as { Items: DDBConversation[] };
-    if (items) {
+    const items = await dynamoProvider.query(params);
+    if (items.length > 0) {
       const conversations = items.map(
         (conversation) => {
           const { lsi1, sk } = conversation;
@@ -204,8 +138,8 @@ export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePla
   /**
    * Method to get conversation messages
    * @param tenantId The id of the Tenant which the user should belong to
-   * @param botId The id of telegram bot
-   * @param chatId The id of the conversation
+   * @param pageId
+   * @param userId
    * @param nextToken The token to get next paging item
    * @param limit The page size
    * @returns Promise<ZaloMessageResponsePayload> All messages of the conversation
@@ -219,7 +153,6 @@ export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePla
   ) => {
     try {
       const dynamoTable = await getAwsSecretValue('DYNAMO_CHAT_TABLE');
-      const paginationLimit = limit || PAGINATION_LIMIT;
       const platformStr = ChatPlatform.zalo.toUpperCase();
       const params = {
         TableName: dynamoTable,
@@ -234,26 +167,18 @@ export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePla
           ':lsi_filter_value': `${CONVERSATION_INDEX}#${userId}#${CREATED_TIME_INDEX}`,
         },
         ScanIndexForward: false, // Sort descending
-        Limit: paginationLimit,
-        ExclusiveStartKey: nextToken ? JSON.parse(nextToken) : undefined,
       };
-      const { LastEvaluatedKey, Items: messageItems } = await dynamoProvider.rawQuery(params);
-      if (messageItems) {
+      const queryResult = await dynamoProvider.queryPagination(params, {
+        nextToken,
+        limit,
+      });
+      if (queryResult) {
         return {
-          data: messageItems.map((message: any) => {
-            const {
-              sk, pk, lsi1, lsi2, lsi3, lsi4, lsi5, ...rest
-            } = message;
-            return {
-              content: rest.content,
-            };
-          }),
-          paging: {
-            cursors: {
-              before: LastEvaluatedKey ? JSON.stringify(LastEvaluatedKey) : '',
-              after: nextToken || '',
-            },
-          },
+          ...queryResult,
+          data: queryResult.data.map((item) => (
+            {
+              content: item.content,
+            })),
         } as ZaloMessageResponsePayload;
       }
       return {
@@ -273,7 +198,7 @@ export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePla
 
   /**
    * Convert Zalo audio to MP3 file
-   * @param fileUrl Zalo arm file path
+   * @param filePath Zalo arm file path
    * @param fileName output file name
    * @returns
    */
@@ -283,7 +208,7 @@ export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePla
   ): Promise<string> => {
     const randomByteLength = 16;
     const outputFolderName = crypto.randomBytes(randomByteLength).toString('hex');
-    // In lambda we using the tmp folder to save the temporary file
+    // In cognito we using the tmp folder to save the temporary file
     const outputFolderPath = path.join('/tmp/', outputFolderName);
     if (!fs.existsSync(outputFolderPath)) {
       fs.mkdirSync(outputFolderPath);
@@ -295,7 +220,7 @@ export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePla
    * Get Zalo audio file
    * @param tenantId tenant id
    * @param pageId Page id
-   * @param userId Conversation id
+   * @param conversationId Conversation id
    * @param messageId Message id of the audio file
    * @param fileUrl Zalo audio url file
    * @returns
@@ -315,7 +240,7 @@ export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePla
       const fileSk = `${FILE_INDEX}#${messageId}`;
 
       // Get the file information from database
-      const item = await dynamoProvider.get(table, filePk, fileSk);
+      const item = await dynamoProvider.getItem(table, filePk, fileSk);
 
       if (item) {
         const {
@@ -332,16 +257,16 @@ export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePla
       const chatFileBucket = await getAwsSecretValue('CHAT_FILE_BUCKET');
 
       // Dowload arm file to local storage
-      const armFilePath = await s3Provider.downloadFileFromCDN(fileUrl);
+      const armFilePath = await fileProvider.downloadFileFromCDN(fileUrl);
       const mp3FilePath = await this.convertArmToMp3(armFilePath, outputFileName);
 
-      const filePath = await s3Provider.saveFile(
+      const filePath = await fileProvider.saveFile(
         chatFileBucket,
         `${tenantId}/${messageId}/${outputFileName}`,
         mp3FilePath,
       );
 
-      await dynamoProvider.put(table, filePk, fileSk, { filePath });
+      await dynamoProvider.putItem(table, filePk, fileSk, { filePath });
       return {
         data: `${chatFileBucketUrl}/${filePath}`,
       } as ZaloMessageResponsePayload;
@@ -349,5 +274,69 @@ export default class ZaloMessagePlatformRepositoryImpl implements ZaloMessagePla
       logger.log(`[ZaloMessagePlatformRepositoryImpl.getZaloAudio] Generated an error ${error}`);
       throw error;
     }
+  };
+
+  /**
+   * Get Zalo access token stored in DynamoDB
+   * @param pageId Page id
+   * @returns Zalo access token
+   */
+  private readonly getZaloMessagePlatformToken = async (pageId: string): Promise<string> => {
+    const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
+    const params = {
+      TableName: travelTable,
+      IndexName: 'PageIdIndex',
+      KeyConditionExpression: '#pageId = :id',
+      ExpressionAttributeNames: {
+        '#pageId': 'id',
+        '#sk': 'sk',
+      },
+      // Filter the item startwith `PAGE#ZALO#` to make sure the item is Zalo token
+      // Prevent the same token with other providers such as Facebook, Telegram
+      FilterExpression: 'begins_with(#sk, :sk_filter_value)',
+      ExpressionAttributeValues: {
+        // Given page id
+        ':id': pageId,
+        // Prefix to Zalo item
+        ':sk_filter_value': ZALO_PAGE_INDEX,
+      },
+      ProjectionExpression: 'pk,sk,accessToken,refreshToken,id,expireIn',
+    };
+    const items = await dynamoProvider.query(params);
+    if (items?.length > 0) {
+      const dynamoItem = items[0];
+      logger.log('[ZaloMessagePlatformRepositoryImpl.getZaloMessagePlatformToken] DynamoDB item', dynamoItem);
+      if (dynamoItem.accessTokenExpireIn > Date.now()) {
+        return dynamoItem.accessToken;
+      }
+      if (dynamoItem.refreshTokenExpireIn < Date.now()) {
+        throw new Error('Refresh token is expired');
+      }
+      const refreshTokenResponse = await zaloMessagePlatformProvider.refreshToken(
+        dynamoItem.refreshToken,
+      );
+      if (refreshTokenResponse) {
+        const expireIn = new Date(Date.now() + refreshTokenResponse.expires_in * 1000);
+        const updateParams = {
+          TableName: travelTable,
+          Key: {
+            pk: dynamoItem.pk, // pk and sk can be unmarshall
+            sk: dynamoItem.sk,
+          },
+          UpdateExpression: 'set accessToken = :at, refreshToken= :rt, expireIn = :ei',
+          ExpressionAttributeValues: {
+            ':at': refreshTokenResponse.access_token,
+            ':rt': refreshTokenResponse.refresh_token,
+            ':ei': expireIn.getTime(),
+          },
+          ReturnValues: 'UPDATED_NEW' as ReturnValue,
+        };
+        const updatedRs = await dynamoProvider.updateItemWithPrebuiltExpression(updateParams);
+        if (updatedRs) {
+          return refreshTokenResponse.access_token;
+        }
+      }
+    }
+    throw new Error(`Can not get token for Zalo page with id ${pageId}`);
   };
 }

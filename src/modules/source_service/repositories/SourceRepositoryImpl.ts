@@ -31,7 +31,7 @@ export default class SourceRepositoryImpl implements SourceRepository {
    * @param id - The ID of the source.
    * @returns A Promise that resolves to the retrieved source, or undefined if not found.
    */
-  async get(tenantId: string, id: string): Promise<Source|undefined> {
+  async get(tenantId: string, id: string): Promise<Source | undefined> {
     return dynamoProvider.getItem<Source>(
       await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
       `${TENANT_INDEX}#${tenantId}#${SOURCE_INDEX}`,
@@ -66,7 +66,7 @@ export default class SourceRepositoryImpl implements SourceRepository {
    */
   async update(tenantId: string, id: string, source: Partial<Source>): Promise<Source> {
     const expressionNamesAndValues = helper.generateUpdateExpressionNamesAndValues(source);
-    const result = await dynamoProvider.rawUpdateItem({
+    const result = await dynamoProvider.updateItemWithPrebuiltExpression({
       TableName: await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
       Key: {
         pk: `${TENANT_INDEX}#${tenantId}#${SOURCE_INDEX}`,

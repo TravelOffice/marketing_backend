@@ -1,14 +1,11 @@
-import AWS from 'aws';
 import { getAwsSecretValue, getEnv } from 'get-env';
-import { dynamoProvider, s3Provider, helper } from 'core';
+import { dynamoProvider, helper, s3Provider } from 'core';
 import { PaymentVoucher } from '../models/PaymentVoucher';
 import {
   CREATED_AT_INDEX, PAYMENT_VOUCHER_INDEX, TENANT_INDEX, TOUR_OPERATION_INDEX,
 } from '../utils/constants';
 import { PaymentVoucherRepository } from './interfaces/PaymentVoucherRepository';
 import logger from '../utils/logger';
-
-type QueryInput = AWS.DynamoDB.DocumentClient.QueryInput;
 
 export default class PaymentVoucherRepositoryImpl implements PaymentVoucherRepository {
   /**
@@ -41,7 +38,7 @@ export default class PaymentVoucherRepositoryImpl implements PaymentVoucherRepos
    */
   list = async (tenantId: string) => {
     const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
-    const params: QueryInput = {
+    const params = {
       TableName: table,
       IndexName: 'Index1',
       KeyConditionExpression: 'pk = :pk AND begins_with(lsi1, :lsi1_filter_value)',
@@ -70,7 +67,7 @@ export default class PaymentVoucherRepositoryImpl implements PaymentVoucherRepos
    */
   listByTour = async (tenantId: string, tourId: string) => {
     const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
-    const params: QueryInput = {
+    const params = {
       TableName: table,
       IndexName: 'Index5',
       KeyConditionExpression: 'pk = :pk AND begins_with(lsi5, :lsi5_filter_value)',

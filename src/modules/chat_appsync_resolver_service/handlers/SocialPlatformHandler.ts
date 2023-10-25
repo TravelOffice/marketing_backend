@@ -1,21 +1,19 @@
-import AWS from 'aws';
+import { InvocationType, lambdaProvider, LogType } from 'core';
 import { AppSyncEvent } from '../models';
 import getSocialPlatformService from '../utils/platformServices';
 import { AppSyncHandler } from './AppSyncHandler';
-
-const lambda = new AWS.Lambda();
 
 export default class SocialPlatformHandler implements AppSyncHandler {
   // Handle events for Social platform such as Facebook, Zalo, Telegram
   handle = async (event: AppSyncEvent) => {
     const socialPlatformService = getSocialPlatformService(event);
-    const invokeParams: AWS.Lambda.Types.InvocationRequest = {
+    const invokeParams = {
       FunctionName: socialPlatformService,
-      InvocationType: 'RequestResponse',
-      LogType: 'Tail',
-      Payload: JSON.stringify(event),
+      InvocationType: 'RequestResponse' as InvocationType,
+      LogType: 'Tail' as LogType,
+      Payload: Buffer.from(JSON.stringify(event)),
     };
-    const { Payload: payloadString } = await lambda.invoke(invokeParams).promise();
+    const { Payload: payloadString } = await lambdaProvider.invokeFunction(invokeParams);
     if (payloadString && typeof payloadString === 'string') {
       return JSON.parse(payloadString);
     }

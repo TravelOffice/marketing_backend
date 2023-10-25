@@ -1,4 +1,4 @@
-import { SESSendEmailResponse } from '../../providers/MailProvider';
+import { SendEmailCommandOutput } from '@aws-sdk/client-ses';
 
 export interface NotificationRepository {
   sendEmail: (
@@ -8,9 +8,9 @@ export interface NotificationRepository {
     html: string,
     text: string,
     subject: string,
-  ) => Promise<SESSendEmailResponse>
+  ) => Promise<SendEmailCommandOutput>
   sendAppSyncNotification: (
-    notificationtype: string,
+    notificationRype: string,
     data: string,
     timestamp: number,
     tenant?: string,

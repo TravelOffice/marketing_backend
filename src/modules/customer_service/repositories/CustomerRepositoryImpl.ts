@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import AWS from 'aws';
 import { getAwsSecretValue } from 'get-env';
 import { dynamoProvider, helper } from 'core';
 import { Customer } from '../models/Customer';
@@ -15,17 +14,17 @@ import { CustomerRepository } from './interfaces/CustomerRepository';
 import logger from '../utils/logger';
 import { User } from '../models/User';
 
-type UpdateItemInput = AWS.DynamoDB.DocumentClient.UpdateItemInput;
-type QueryInput = AWS.DynamoDB.DocumentClient.QueryInput;
-
 export default class CustomerRepositoryImpl implements CustomerRepository {
-  /**
+  /*
    * Retrieves a customer for a specific tenant and customer ID.
    * @param tenantId The ID of the tenant.
-   * @param customerID The ID of the customer.
+   * @param customerId The ID of the customer.
    * @returns The retrieved customer.
    */
-  get = async (tenantId: string, customerId: string) => {
+  get = async (
+    tenantId: string,
+    customerId: string,
+  ) => {
     const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
 
     logger.log(`Retrieving Customer for tenant ${tenantId} with [${customerId}]`);
@@ -85,7 +84,7 @@ export default class CustomerRepositoryImpl implements CustomerRepository {
     const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
 
     // Set the query parameters to retrieve customers by assignee
-    const params: QueryInput = {
+    const params = {
       TableName: travelTable, // Name of the DynamoDB table
       IndexName: 'Index5', // Name of the index to query
       KeyConditionExpression: 'pk = :pk AND begins_with(lsi5, :lsi5_filter_value)', // Key condition expression for the query
@@ -116,7 +115,7 @@ export default class CustomerRepositoryImpl implements CustomerRepository {
     const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
 
     // Set the query parameters to retrieve customers by creator
-    const params: QueryInput = {
+    const params = {
       TableName: travelTable, // Name of the DynamoDB table
       IndexName: 'Index4', // Name of the index to query
       KeyConditionExpression: 'pk = :pk AND begins_with(lsi4, :lsi4_filter_value)', // Key condition expression for the query
@@ -137,7 +136,7 @@ export default class CustomerRepositoryImpl implements CustomerRepository {
 
   findOneByPhone = async (tenantId: string, phone: string) => {
     const travelTable = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
-    const params: QueryInput = {
+    const params = {
       TableName: travelTable,
       IndexName: 'Index3',
       KeyConditionExpression: 'pk = :pk AND begins_with(lsi3, :lsi3_filter_value)',
@@ -155,7 +154,7 @@ export default class CustomerRepositoryImpl implements CustomerRepository {
 
   update = async (tenantId: string, customerId: string, customer: Partial<Customer>) => {
     const expressionNamesAndValues = helper.generateUpdateExpressionNamesAndValues(customer);
-    const result = await dynamoProvider.rawUpdateItem({
+    const result = await dynamoProvider.updateItemWithPrebuiltExpression({
       TableName: await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
       Key: {
         pk: `${TENANT_INDEX}#${tenantId}#${CUSTOMER_INDEX}`,

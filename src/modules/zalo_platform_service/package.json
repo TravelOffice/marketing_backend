@@ -13,11 +13,11 @@
   "license": "ISC",
   "dependencies": {
     "amrToMp3": "^2.0.0",
-    "aws": "link:../../libs/aws-sdk",
     "axios": "^0.26.0",
     "common-models": "link:../../libs/common-models",
     "form-data": "^4.0.0",
     "get-env": "link:../../libs/get-env",
+    "core": "link:../../libs/core",
     "lodash": "^4.17.21",
     "object-assign": "^4.1.1",
     "reflect-metadata": "^0.1.13",

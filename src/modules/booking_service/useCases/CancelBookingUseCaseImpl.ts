@@ -9,7 +9,7 @@ export default class CancelBookingUseCaseImpl implements CancelBookingUseCase {
   /**
    * Invokes the cancellation of a booking for a specific tenant.
    *
-   * @param {CognitoUser} userInfo - The current cognito user.
+   * @param {CognitoUser} userInfo - The current lambda1 user.
    * @param {string} bookingId - The ID of the booking to cancel.
    * @param {string} reason - The reason for the cancellation.
    * @returns {Promise<Booking>} - A promise that resolves to the canceled booking.

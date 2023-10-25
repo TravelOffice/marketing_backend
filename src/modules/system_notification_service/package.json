@@ -13,8 +13,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@aws-sdk/client-dynamodb-streams": "^3.435.0",
     "@vendia/serverless-express": "^4.5.2",
-    "aws": "link:../../libs/aws-sdk",
     "aws-lambda": "^1.0.7",
     "common-models": "link:../../libs/common-models",
     "compression": "^1.7.4",

@@ -1,6 +1,7 @@
 import { ChatPlatform } from 'common-models';
 import { getAwsSecretValue } from 'get-env';
-import { dynamoProvider, telegramProvider } from '../providers';
+import { dynamoProvider } from 'core';
+import { telegramProvider } from '../providers';
 import { PAGE_INDEX, TENANT_INDEX } from '../utils/constants';
 import logger from '../utils/logger';
 import { TelegramRepository } from './interfaces/TelegramRepository';
@@ -19,7 +20,6 @@ export default class TelegramRepositoryImpl implements TelegramRepository {
   /**
    * Get the linked page in dynamo DB
    * @param tenantId ID of the tenant
-   * @param platform Platform of page
    * @param pageId Id of page
    * @returns The linked page
    */

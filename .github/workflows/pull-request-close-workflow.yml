@@ -22,7 +22,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [14.x]
+        node-version: [ 18.x ]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     # Steps represent a sequence of tasks that will be executed as part of the job
@@ -105,7 +105,7 @@ jobs:
         if: ${{ steps.get-deployment-services-name.outputs.services-existed == 'true' }}
         uses: hashicorp/setup-terraform@v1
 
-      # Provision lambda and ApiGateway
+      # Provision cognito and ApiGateway
       - name: Provision Lambda and ApiGateway
         if: ${{ steps.get-deployment-services-name.outputs.services-existed == 'true' }}
         run: |

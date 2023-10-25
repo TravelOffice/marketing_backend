@@ -1,13 +1,9 @@
-import { DynamoDBStreamEvent } from 'aws-lambda';
 import * as _ from 'lodash';
+import { _Record } from '@aws-sdk/client-dynamodb-streams';
 import TenantChatAnalyzer from './analyzer/TenantChatAnalyzer';
 import { RequiredDynamoDBRecord } from './types/dynamodb';
 import logger from './utils/logger';
-import {
-  getTenant,
-  isNeededHandleRecord,
-  toPkSk,
-} from './utils/streamRecords';
+import { getTenant, isNeededHandleRecord, toPkSk } from './utils/streamRecords';
 import { tenantSaleStatisticRepository } from './repositories';
 
 /**
@@ -15,7 +11,7 @@ import { tenantSaleStatisticRepository } from './repositories';
  * Statistic items will be stored to database in batch
  *
  * @param tenant Tenant id
- * @param records Records to handle
+ * @param groupedRecords
  */
 async function analyzeTenantSaleData(
   tenant: string,
@@ -41,7 +37,7 @@ async function analyzeTenantSaleData(
 }
 
 // eslint-disable-next-line import/prefer-default-export
-export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
+export const handler = async (event: { Records: _Record[] }): Promise<void> => {
   try {
     const { Records: records } = event;
     logger.log(`Start handling DynamoDB Stream event records ${JSON.stringify(records, null, 5)}`);

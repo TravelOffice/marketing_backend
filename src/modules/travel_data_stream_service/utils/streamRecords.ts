@@ -1,5 +1,5 @@
-import { DynamoDBRecord } from 'aws-lambda';
 import { dynamoProvider } from 'core';
+import { _Record } from '@aws-sdk/client-dynamodb-streams';
 import { DdbModelChangeType } from '../models/dataSubscription/DdbModelChangeType';
 import { isBooking, isDepartureTour, isLead } from './dynamodb';
 import { RequiredDynamoDBRecord } from '../types/dynamodb';
@@ -12,7 +12,7 @@ import MetricAnalyzerBuilder from '../analyzer/metrics/MetricAnalyzerBuilder';
  * @param record DynamoDB record
  * @returns Model change type
  */
-export function getModelChangeType(record: DynamoDBRecord): DdbModelChangeType | undefined {
+export function getModelChangeType(record: _Record): DdbModelChangeType | undefined {
   // Extract data from record
   const { dynamodb } = record;
   if (!dynamodb || !dynamodb.Keys) {
@@ -94,7 +94,7 @@ export function toUniquePkSkEventName(record: RequiredDynamoDBRecord): string {
   return `${pk}#${sk}#${eventName}`;
 }
 
-export function isNeededHandleRecord(record: DynamoDBRecord): boolean {
+export function isNeededHandleRecord(record: _Record): boolean {
   const { dynamodb } = record;
   if (!dynamodb || !dynamodb.Keys) {
     return false;
