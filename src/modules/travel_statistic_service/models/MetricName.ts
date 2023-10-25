@@ -10,4 +10,5 @@ export type MetricName =
   'totalLeadOfSale' |
   'totalBookingOfSale' |
   'totalRevenueOfSale' |
-  'conversionRatioOfSale';
+  'conversionRatioOfSale' |
+  'leadChatConversionRatio';

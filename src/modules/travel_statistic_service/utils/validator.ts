@@ -1,6 +1,6 @@
 import { Request } from 'express';
 import { query, ValidationError, validationResult } from 'express-validator';
-import { Condition, SessionMetric, SessionStatus } from '../models/SessionStatistic';
+import { Condition, SessionMetric, SessionStatus } from '../models/ChatSessionStatistic';
 
 function isTimestamp(n: string) {
   const parsed = parseFloat(n);

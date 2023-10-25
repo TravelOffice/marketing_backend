@@ -1,4 +1,4 @@
-import { ResponseTimeFilterParams, SessionStatistic } from '../../models/SessionStatistic';
+import { ResponseTimeFilterParams, TotalChatSessionStatisticResponse } from '../../models/ChatSessionStatistic';
 
 export interface GetUserResponseByConditionTimeUseCase {
   invoke(
@@ -6,5 +6,5 @@ export interface GetUserResponseByConditionTimeUseCase {
     username: string,
     filterParam: ResponseTimeFilterParams,
     startTime?: string
-  ): Promise<SessionStatistic>;
+  ): Promise<TotalChatSessionStatisticResponse>;
 }

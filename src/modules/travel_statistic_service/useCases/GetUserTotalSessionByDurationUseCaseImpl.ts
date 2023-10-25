@@ -6,7 +6,7 @@ implements GetUserTotalSessionByDurationUseCase {
   invoke = async (
     tenant: string,
     username: string,
-    duration: string,
+    duration: number,
   ) => {
     const records = await tenantStatisticRepository.getTotalSessionOrgByParams(
       tenant,

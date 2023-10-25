@@ -1,10 +1,10 @@
-import { FilteringDuration } from '../../models/FilteringDuration';
+import { FilteringTimeRange } from '../../models/FilteringDuration';
 import { TotalBookingMetricResponse } from '../../models/BookingStatistic';
 
 export interface GetTotalBookingOfSaleUseCase {
   invoke(
     tenant: string,
     saleId: string,
-    filteringDuration?: FilteringDuration
+    filteringDuration?: FilteringTimeRange
   ): Promise<TotalBookingMetricResponse>;
 }

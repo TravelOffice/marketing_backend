@@ -1,4 +1,4 @@
-import { FilteringDuration } from '../models/FilteringDuration';
+import { FilteringTimeRange } from '../models/FilteringDuration';
 import { tenantStatisticRepository } from '../repositories';
 import { GetTopFavouriteLocationUseCase } from './interfaces/GetTopFavouriteLocationUseCase';
 import { FavouriteLocation, LeadStatistic } from '../models/LeadStatistic';
@@ -7,7 +7,7 @@ import { DEFAULT_TOP_COUNT } from '../utils/constants';
 export default class GetTopFavouriteLocationUseCaseImpl implements GetTopFavouriteLocationUseCase {
   invoke = async (
     tenant: string,
-    filteringDuration?: FilteringDuration,
+    filteringDuration?: FilteringTimeRange,
     topCount?: number,
   ): Promise<FavouriteLocation[]> => {
     const records = await tenantStatisticRepository.getLeadStatistic(

@@ -55,7 +55,7 @@ export const ddbStreamEvent: DynamoDBStreamEvent = {
             S: '2497293378443431012#1',
           },
           pk: {
-            S: 'TENANT#pys#SESSION',
+            S: 'TENANT#pys#CSESSION',
           },
         },
         OldImage: {

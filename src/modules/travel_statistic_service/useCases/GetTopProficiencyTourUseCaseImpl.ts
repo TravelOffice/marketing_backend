@@ -1,5 +1,5 @@
 import { GetTopProficiencyTourUseCase } from './interfaces/GetTopProficiencyTourUseCase';
-import { FilteringDuration } from '../models/FilteringDuration';
+import { FilteringTimeRange } from '../models/FilteringDuration';
 import { ProficiencyTourResponse } from '../models/DepartureTourStatistic';
 import { tenantStatisticRepository } from '../repositories';
 import { DEFAULT_TOP_COUNT } from '../utils/constants';
@@ -7,7 +7,7 @@ import { DEFAULT_TOP_COUNT } from '../utils/constants';
 export default class GetTopProficiencyTourUseCaseImpl implements GetTopProficiencyTourUseCase {
   invoke = async (
     tenant: string,
-    filteringDuration?: FilteringDuration,
+    filteringDuration?: FilteringTimeRange,
     topCount?: number,
   ): Promise<ProficiencyTourResponse[]> => {
     const records = await tenantStatisticRepository.getDepartureTourStatistic(

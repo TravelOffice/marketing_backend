@@ -1,7 +1,6 @@
 import { ChatSession } from '../../models/ChatSession';
 
 export interface ChatSessionRepository {
-
   create(
     tenantId: string,
     conversationId: string,

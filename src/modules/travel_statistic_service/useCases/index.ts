@@ -46,6 +46,8 @@ import { GetOrgResponseByConditionTimeUseCase } from './interfaces/GetOrgRespons
 import GetOrgResponseByConditionTimeUseCaseImpl from './GetOrgResponseByConditionTimeUseCaseImpl';
 import { GetUserResponseByConditionTimeUseCase } from './interfaces/GetUserResponseByConditionTimeUseCase';
 import GetUserResponseByConditionTimeUseCaseImpl from './GetUserResponseByConditionTimeUseCaseImpl';
+import { GetLeadChatConversionRatioUseCase } from './interfaces/GetLeadChatConversionRatioUseCase';
+import GetLeadChatConversionRatioUseCaseImpl from './GetLeadChatConversionRatioUseCaseImpl';
 
 interface UseCases {
   getTotalLeadOfSaleUserCase: GetTotalLeadOfSaleUseCase,
@@ -71,6 +73,7 @@ interface UseCases {
   getUserAverageResponseTimeUseCase: GetUserAverageResponseTimeUseCase;
   getOrgResponseByConditionTimeUseCase: GetOrgResponseByConditionTimeUseCase;
   getUserResponseByConditionTimeUseCase: GetUserResponseByConditionTimeUseCase;
+  getLeadChatConversionRatioUseCase: GetLeadChatConversionRatioUseCase;
 }
 
 const useCases: UseCases = {
@@ -97,6 +100,7 @@ const useCases: UseCases = {
   getUserAverageResponseTimeUseCase: new GetUserAverageResponseTimeUseCaseImpl(),
   getOrgResponseByConditionTimeUseCase: new GetOrgResponseByConditionTimeUseCaseImpl(),
   getUserResponseByConditionTimeUseCase: new GetUserResponseByConditionTimeUseCaseImpl(),
+  getLeadChatConversionRatioUseCase: new GetLeadChatConversionRatioUseCaseImpl(),
 };
 
 export const {
@@ -123,4 +127,5 @@ export const {
   getUserAverageResponseTimeUseCase,
   getOrgResponseByConditionTimeUseCase,
   getUserResponseByConditionTimeUseCase,
+  getLeadChatConversionRatioUseCase,
 } = useCases;

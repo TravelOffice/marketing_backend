@@ -1,8 +1,8 @@
-import { SessionStatistic, SessionStatus } from '../../models/SessionStatistic';
+import { TotalChatSessionStatisticResponse, SessionStatus } from '../../models/ChatSessionStatistic';
 
 export interface GetOrgTotalSessionByStatusUseCase {
   invoke(
     tenant: string,
     status: SessionStatus,
-  ): Promise<SessionStatistic>;
+  ): Promise<TotalChatSessionStatisticResponse>;
 }
