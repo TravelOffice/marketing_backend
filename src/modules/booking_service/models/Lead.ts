@@ -1,14 +1,18 @@
+import { BaseDdbModel } from 'common-models';
+
 export enum SexType {
   MALE = 'MALE',
   FEMALE = 'FEMALE',
   OTHER = 'OTHER',
 }
+
 export enum HonorificType {
   MR_YOUNG = 'MR_YOUNG',
   MRS_YOUNG = 'MRS_YOUNG',
   MR_OLD = 'MR_OLD',
   MRS_OLD = 'MRS_OLD',
 }
+
 export enum LeadStatus {
   NEW = 'NEW',
   PROCESSING = 'PROCESSING',
@@ -16,7 +20,7 @@ export enum LeadStatus {
   CANCEL = 'CANCEL',
 }
 
-export interface Lead {
+export interface Lead extends BaseDdbModel {
   code: string,
 
   // Contact
@@ -34,10 +38,15 @@ export interface Lead {
   tourType?: string,
   type: string,
   departure: string,
+  departureName: string,
   startDate: string,
   description?: string,
   numberOfAdultPassengers: number,
   numberOfChildrenPassengers: number,
+  endingLocationName: string,
+  endingLocationCode: string,
+  conversationId?: string,
+  sessionId?: string,
 
   // Manage
   leadStatus: LeadStatus,
@@ -48,16 +57,7 @@ export interface Lead {
   assigneeName?: string,
   sourceId: string,
   sourceName: string,
-  cancelledReason?: string,
-  createdAt: number,
-  updatedAt: number,
-
-  // Indexes
-  lsi1: string, // <createdAt>
-  lsi2: string, // <updatedAt>
-  lsi3: string, // <status>,
-  lsi4: string, // <assignee>,
-  lsi5: string, // <start_date>
+  cancelledReason?: string
 }
 
 export const CHANGING_STATUS_RULES = [

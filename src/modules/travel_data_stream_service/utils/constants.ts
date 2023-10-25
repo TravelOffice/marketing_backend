@@ -12,6 +12,8 @@ export const DEPARTURE_TOUR_STATISTIC_INDEX = 'DT';
 
 export const LEAD_STATISTIC_INDEX = 'L';
 
+export const LEAD_CREATE_FROM_CHAT_INDEX = 'FROMCHAT';
+
 export const BOOKING_STATISTIC_INDEX = 'BK';
 
 export const BOOKING_FR_STATISTIC_INDEX = 'FR';

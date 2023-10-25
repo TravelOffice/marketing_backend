@@ -5,12 +5,14 @@ export enum SexType {
   FEMALE = 'FEMALE',
   OTHER = 'OTHER',
 }
+
 export enum HonorificType {
   MR_YOUNG = 'MR_YOUNG',
   MRS_YOUNG = 'MRS_YOUNG',
   MR_OLD = 'MR_OLD',
   MRS_OLD = 'MRS_OLD',
 }
+
 export enum LeadStatus {
   NEW = 'NEW',
   PROCESSING = 'PROCESSING',
@@ -41,6 +43,10 @@ export interface Lead extends BaseDdbModel {
   description?: string,
   numberOfAdultPassengers: number,
   numberOfChildrenPassengers: number,
+  endingLocationName: string,
+  endingLocationCode: string,
+  conversationId?: string,
+  sessionId?: string,
 
   // Manage
   leadStatus: LeadStatus,
@@ -51,17 +57,7 @@ export interface Lead extends BaseDdbModel {
   assigneeName?: string,
   sourceId: string,
   sourceName: string,
-  cancelledReason?: string,
-
-  endingLocationName: string,
-  endingLocationCode: string,
-
-  // Indexes
-  // lsi1: string, // <createdAt>
-  // lsi2: string, // <updatedAt>
-  // lsi3: string, // <status>,
-  // lsi4: string, // <assignee>,
-  // lsi5: string, // <start_date>
+  cancelledReason?: string
 }
 
 export const CHANGING_STATUS_RULES = [
