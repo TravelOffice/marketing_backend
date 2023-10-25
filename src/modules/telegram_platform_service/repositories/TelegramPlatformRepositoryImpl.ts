@@ -1,4 +1,3 @@
-import AWS from 'aws';
 import {
   ChatPlatform,
   ChatPlatformFile,
@@ -7,6 +6,7 @@ import {
   UserProfilePhotos,
 } from 'common-models';
 import { getAwsSecretValue } from 'get-env';
+import { dynamoProvider } from 'core';
 import {
   RestrictedTelegramConversation,
   RestrictedTelegramFile,
@@ -23,12 +23,13 @@ import {
   SendTextMessageStrategy,
   SendVideoMessageStrategy,
 } from '../patterns/send-message';
-import { dynamoProvider, s3Provider, telegramProvider } from '../providers';
-import { QueryInput } from '../providers/DynamoProvider';
+import { fileProvider, telegramProvider } from '../providers';
 import {
-  ASSIGNEE_INDEX, CONVERSATION_INDEX,
+  ASSIGNEE_INDEX,
+  CONVERSATION_INDEX,
   CREATED_TIME_INDEX,
-  FILE_INDEX, MESSAGE_INDEX,
+  FILE_INDEX,
+  MESSAGE_INDEX,
   PAGINATION_LIMIT,
   PARTITION_KEY_DELIMITER,
   TELEGRAM_PAGE_INDEX,
@@ -86,7 +87,7 @@ export default class TelegramPlatformRepositoryImpl implements TelegramPlatformR
     const dynamoTable = await getAwsSecretValue('DYNAMO_CHAT_TABLE');
     const paginationLimit = limit || PAGINATION_LIMIT;
     const telegramPlatformStr = ChatPlatform.telegram.toUpperCase();
-    const params: QueryInput = {
+    const params = {
       TableName: dynamoTable,
       IndexName: 'Index2',
       KeyConditionExpression: '#pk = :pk AND begins_with ( #lsi, :lsi_filter_value )',
@@ -95,32 +96,24 @@ export default class TelegramPlatformRepositoryImpl implements TelegramPlatformR
         '#lsi': 'lsi2',
       },
       ExpressionAttributeValues: {
-        ':pk': { S: `${TENANT_INDEX}#${tenantId}#${MESSAGE_INDEX}#${telegramPlatformStr}#${botId}` },
-        ':lsi_filter_value': { S: `${CONVERSATION_INDEX}#${chatId}#${CREATED_TIME_INDEX}` },
+        ':pk': `${TENANT_INDEX}#${tenantId}#${MESSAGE_INDEX}#${telegramPlatformStr}#${botId}`,
+        ':lsi_filter_value': `${CONVERSATION_INDEX}#${chatId}#${CREATED_TIME_INDEX}`,
       },
       ScanIndexForward: false, // Sort descending
-      Limit: paginationLimit,
-      ExclusiveStartKey: nextToken ? AWS.DynamoDB.Converter.marshall(
-        JSON.parse(nextToken),
-      ) : undefined,
     };
-    const { LastEvaluatedKey, Items: messageItems } = await dynamoProvider.rawQuery(params);
-    if (messageItems) {
+    const queryResult = await dynamoProvider.queryPagination(
+      params,
+      { limit: paginationLimit, nextToken },
+    );
+    if (queryResult) {
       return {
-        nextToken: LastEvaluatedKey ? JSON.stringify(
-          AWS.DynamoDB.Converter.unmarshall(LastEvaluatedKey),
-        ) : undefined,
-        messages: messageItems.map((item: AWS.DynamoDB.AttributeMap) => {
-          const messages = AWS.DynamoDB.Converter.unmarshall(item);
-          const {
-            sk, pk, lsi1, ...rest
-          } = messages;
-          return {
-            content: rest.content,
-          } as RestrictedTelegramMessage;
-        }),
+        nextToken: queryResult.paging.cursors.before,
+        messages: queryResult.data.map((message) => ({
+          content: message.content,
+        } as RestrictedTelegramMessage)),
       } as TelegramPagingMessage;
     }
+
     return {
       messages: [],
     } as TelegramPagingMessage;
@@ -190,20 +183,19 @@ export default class TelegramPlatformRepositoryImpl implements TelegramPlatformR
     // Combination of ASSIGNEE#<username>
     const assigneeIndex = assigneeId ? `${ASSIGNEE_INDEX}#${assigneeId}` : `${ASSIGNEE_INDEX}#`;
 
-    const params: QueryInput = {
+    const params = {
       TableName: dynamoTable,
       IndexName: 'Index1',
       KeyConditionExpression: 'pk = :pk AND begins_with(lsi1, :lsi_filter_value)',
       ExpressionAttributeValues: {
         // Combination of TENANT#<tenant_id>#CONVERSATION#<platform>#<id>
-        ':pk': { S: `${TENANT_INDEX}#${tenantId}#${CONVERSATION_INDEX}#${telegramPlatformStr.toUpperCase()}#${botId}` },
-        ':lsi_filter_value': { S: assigneeIndex },
+        ':pk': `${TENANT_INDEX}#${tenantId}#${CONVERSATION_INDEX}#${telegramPlatformStr.toUpperCase()}#${botId}`,
+        ':lsi_filter_value': assigneeIndex,
       },
     };
-    const { Items: conversationItems } = await dynamoProvider.rawQuery(params);
+    const conversationItems = await dynamoProvider.query(params);
     if (conversationItems) {
-      return conversationItems.map((item: AWS.DynamoDB.AttributeMap) => {
-        const conversation = AWS.DynamoDB.Converter.unmarshall(item);
+      return conversationItems.map((conversation) => {
         const {
           sk, pk, lsi1, ...rest
         } = conversation;
@@ -240,9 +232,9 @@ export default class TelegramPlatformRepositoryImpl implements TelegramPlatformR
       FilterExpression: 'begins_with(#sk, :sk_filter_value)',
       ExpressionAttributeValues: {
         // Given page id
-        ':id': { S: botId },
+        ':id': botId,
         // Prefix to Telegram item
-        ':sk_filter_value': { S: TELEGRAM_PAGE_INDEX },
+        ':sk_filter_value': TELEGRAM_PAGE_INDEX,
       },
       ProjectionExpression: 'sk,accessToken,id',
     };
@@ -362,18 +354,18 @@ export default class TelegramPlatformRepositoryImpl implements TelegramPlatformR
     }
 
     // Check whether file id with other conversation have information or not
-    const params: QueryInput = {
+    const params = {
       TableName: table,
       IndexName: 'ReverseIndex',
       KeyConditionExpression: 'sk = :sk AND begins_with(pk, :pk_filter)',
       ExpressionAttributeValues: {
-        ':sk': { S: `${FILE_INDEX}#${fileId}` },
-        ':pk_filter': { S: `${TENANT_INDEX}#${tenantId}#${CONVERSATION_INDEX}#${telegramPlatformStr}#` },
+        ':sk': `${FILE_INDEX}#${fileId}`,
+        ':pk_filter': `${TENANT_INDEX}#${tenantId}#${CONVERSATION_INDEX}#${telegramPlatformStr}#`,
       },
     };
-    const { Items: files } = await dynamoProvider.rawQuery(params);
-    if (files && files?.length > 0) {
-      const { fileInfo } = AWS.DynamoDB.Converter.unmarshall(files[0]);
+    const files = await dynamoProvider.query(params);
+    if (files?.length > 0) {
+      const { fileInfo } = files[0];
       const info = await this.saveFileInfo(tenantId, chatId, fileId, fileInfo);
       info.fileInfo.file_path = `${chatFileBucketUrl}/${info.fileInfo.file_path}`;
       return info;
@@ -384,7 +376,7 @@ export default class TelegramPlatformRepositoryImpl implements TelegramPlatformR
     if (!originalFile || !originalFile.file_path) throw new Error(`Cannot get original file ${fileId} from Telegram`);
 
     // Save file to S3
-    const filePath = await s3Provider.downloadFileToS3FromUrl(
+    const filePath = await fileProvider.downloadFileToS3FromUrl(
       `${chatFileBucket}`,
       `${tenantId}/${fileId}/${originalFile.file_path}`,
       telegramProvider.getFilePath(accessToken, originalFile.file_path),

@@ -1,25 +1,21 @@
 import AppSyncProvider from './AppSyncProvider';
-import DynamoProvider from './DynamoProvider';
 import TelegramPlatformProvider from './TelegramPlatformProvider';
-import S3Provider from './S3Provider';
+import FileProvider from './FileProvider';
 
 interface Providers {
-  dynamoProvider: DynamoProvider,
   telegramProvider: TelegramPlatformProvider,
   appsyncProvider: AppSyncProvider,
-  s3Provider: S3Provider,
+  fileProvider: FileProvider,
 }
 
 const providers: Providers = {
-  dynamoProvider: new DynamoProvider(),
   telegramProvider: new TelegramPlatformProvider(),
   appsyncProvider: new AppSyncProvider(),
-  s3Provider: new S3Provider(),
+  fileProvider: new FileProvider(),
 };
 
 export const {
-  dynamoProvider,
   telegramProvider,
   appsyncProvider,
-  s3Provider,
+  fileProvider,
 } = providers;

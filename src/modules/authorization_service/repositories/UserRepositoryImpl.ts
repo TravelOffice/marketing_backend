@@ -1,9 +1,8 @@
 import { getAwsSecretValue } from 'get-env';
-import { Role, User } from '../models';
-import { dynamoProvider } from '../providers';
+import { dynamoProvider } from 'core';
+import { Permission, Role, User } from '../models';
 import {
-  DEFAULT_ROLES,
-  EMPLOYEE_INDEX, ROLE_INDEX, TENANT_INDEX,
+  DEFAULT_ROLES, EMPLOYEE_INDEX, ROLE_INDEX, TENANT_INDEX,
 } from '../utils/constants';
 import logger from '../utils/logger';
 import { UserRepository } from './interfaces/UserRepository';
@@ -36,9 +35,9 @@ export default class UserRepositoryImpl implements UserRepository {
       TableName: ddbTable,
       KeyConditionExpression: 'pk = :pk AND begins_with(sk, :sk_filter_value)',
       ExpressionAttributeValues: {
-        ':pk': { S: `${TENANT_INDEX}#${tenantId}` },
-        ':sk_filter_value': { S: EMPLOYEE_INDEX },
-        ':role_filter_value': { S: `#${roleName}#` },
+        ':pk': `${TENANT_INDEX}#${tenantId}`,
+        ':sk_filter_value': EMPLOYEE_INDEX,
+        ':role_filter_value': `#${roleName}#`,
       },
       FilterExpression: 'contains(roleStr, :role_filter_value)',
       ProjectionExpression: 'username',
@@ -56,7 +55,7 @@ export default class UserRepositoryImpl implements UserRepository {
     logger.log(`Tenant: ${tenantId}, User: ${user.username}`);
     const table = await getAwsSecretValue('DYNAMO_ROLE_PERMISSION_TABLE');
     const { roles } = user;
-    const permissions : Array<string> = [];
+    const permissions: Array<string> = [];
     await Promise.all(roles.map(async (role) => {
       const pk = DEFAULT_ROLES.includes(role) ? ROLE_INDEX : `${TENANT_INDEX}#${tenantId}`;
       const item = await dynamoProvider.getItem<Role>(
@@ -64,13 +63,15 @@ export default class UserRepositoryImpl implements UserRepository {
         pk,
         `${ROLE_INDEX}#${role}`,
       );
-      if (!item) { throw new Error(`Role [${role}] not found`); }
-      item.permissions.forEach((permission) => {
+      if (!item) {
+        throw new Error(`Role [${role}] not found`);
+      }
+      item.permissions.forEach((permission: Permission) => {
         permissions.push(permission.name);
       });
     }));
 
-    // Remove dupplicated permission
+    // Remove duplicated permission
     return [...new Set(permissions)];
   };
 }

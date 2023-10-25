@@ -1,21 +1,17 @@
-import DynamoProvider from './DynamoProvider';
-import S3Provider from './S3Provider';
+import FileProvider from './FileProvider';
 import ZaloMessagePlatformProvider from './ZaloMessagePlatformProvider';
 
 interface Providers {
-  dynamoProvider: DynamoProvider,
   zaloMessagePlatformProvider: ZaloMessagePlatformProvider,
-  s3Provider: S3Provider,
+  fileProvider: FileProvider,
 }
 
 const providers: Providers = {
-  dynamoProvider: new DynamoProvider(),
   zaloMessagePlatformProvider: new ZaloMessagePlatformProvider(),
-  s3Provider: new S3Provider(),
+  fileProvider: new FileProvider(),
 };
 
 export const {
-  dynamoProvider,
   zaloMessagePlatformProvider,
-  s3Provider,
+  fileProvider,
 } = providers;

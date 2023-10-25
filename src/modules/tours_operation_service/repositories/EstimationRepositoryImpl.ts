@@ -2,9 +2,7 @@ import { dynamoProvider, helper } from 'core';
 import { getAwsSecretValue } from 'get-env';
 import { Estimation } from '../models/Estimation';
 import { EstimationRepository } from './interfaces/EstimationRepository';
-import {
-  ESTIMATION_COUNTER_INDEX, ESTIMATION_INDEX, TENANT_INDEX,
-} from '../utils/constants';
+import { ESTIMATION_COUNTER_INDEX, ESTIMATION_INDEX, TENANT_INDEX } from '../utils/constants';
 
 export default class EstimationRepositoryImpl implements EstimationRepository {
   /**
@@ -78,7 +76,7 @@ export default class EstimationRepositoryImpl implements EstimationRepository {
     estimation: Partial<Estimation>,
   ): Promise<Estimation> {
     const expressionNamesAndValues = helper.generateUpdateExpressionNamesAndValues(estimation);
-    const result = await dynamoProvider.rawUpdateItem({
+    const result = await dynamoProvider.updateItemWithPrebuiltExpression({
       TableName: await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
       Key: {
         pk: `${TENANT_INDEX}#${tenantId}#${ESTIMATION_INDEX}#${tourId}`,

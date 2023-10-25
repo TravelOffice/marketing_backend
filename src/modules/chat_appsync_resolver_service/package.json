@@ -13,7 +13,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "aws": "link:../../libs/aws-sdk",
     "axios": "^0.26.0",
     "common-models": "link:../../libs/common-models",
     "get-env": "link:../../libs/get-env",

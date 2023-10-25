@@ -47,7 +47,7 @@ app.get('/presigned-url', getPresignedUrlValidator(), async (req: Request, res: 
       fileType: String(fileType),
       fileName: String(fileName),
     };
-    const rs = await s3Repository.generatePresignedUrl(option);
+    const rs = await s3Repository.generateSignedUrl(option);
     res.json(wrapResponse(SUCCESS, rs));
   } catch (error: any) {
     logger.log(`[GET /presigned-url] Generated an error ${error}`);
@@ -101,7 +101,7 @@ app.get('/me/avatar/presigned-url', getAvatarPresignedUrlValidator(), async (req
       fileName: String(fileName),
       expires,
     };
-    const rs = await s3Repository.generateAvatarPresignedUrl(option);
+    const rs = await s3Repository.generateAvatarSignedUrl(option);
     res.json(wrapResponse(SUCCESS, rs));
   } catch (error: any) {
     logger.log(`[GET /me/avatar/presigned-url] Generated an error ${error}`);
@@ -125,7 +125,7 @@ app.get('/payment-vouchers/presigned-url', getPaymentVoucherPresignedUrlValidato
       fileName: String(fileName),
       expires,
     };
-    const rs = await s3Repository.generatePaymentVoucherPresignedUrl(option);
+    const rs = await s3Repository.generatePaymentVoucherSignedUrl(option);
     res.json(wrapResponse(SUCCESS, rs));
   } catch (error: any) {
     logger.log(`[GET /payment-vouchers/presigned-url] Generated an error ${error}`);
@@ -149,7 +149,7 @@ app.get('/passengers/attached-docs/presigned-url', getPassengerAttachedDocPresig
       fileName: String(fileName),
       expires,
     };
-    const rs = await s3Repository.generatePassengerAttachedDocPresignedUrl(option);
+    const rs = await s3Repository.generatePassengerAttachedDocSignedUrl(option);
     res.json(wrapResponse(SUCCESS, rs));
   } catch (error: any) {
     logger.log(`[GET /passengers/attached-docs/presigned-url] Generated an error ${error}`);

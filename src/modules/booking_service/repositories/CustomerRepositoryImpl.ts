@@ -13,7 +13,7 @@ export default class CustomerRepositoryImpl implements CustomerRepository {
   /**
    * Retrieves a customer for a specific tenant and customer ID.
    * @param tenantId The ID of the tenant.
-   * @param customerID The ID of the customer.
+   * @param customerId The ID of the customer.
    * @returns The retrieved customer.
    */
   get = async (tenantId: string, customerId: string) => {
@@ -68,13 +68,13 @@ export default class CustomerRepositoryImpl implements CustomerRepository {
 
   /**
    * Update customer
-   * @param tenant Tenant id
-   * @param customerId ID of Customer
+   * @param tenantId Tenant id
+   * @param customerId The id of customer
    * @returns customer Data to update
    */
   update = async (tenantId: string, customerId: string, customer: Partial<Customer>) => {
     const expressionNamesAndValues = helper.generateUpdateExpressionNamesAndValues(customer);
-    const result = await dynamoProvider.rawUpdateItem({
+    const result = await dynamoProvider.updateItemWithPrebuiltExpression({
       TableName: await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
       Key: {
         pk: `${TENANT_INDEX}#${tenantId}#${CUSTOMER_INDEX}`,
@@ -132,7 +132,11 @@ export default class CustomerRepositoryImpl implements CustomerRepository {
    * @param {number} bookingRevenue - The revenue to be added to the customer's existing revenue.
    * @returns {Promise<number>} - A promise that resolves to the updated revenue of the customer.
    */
-  updateRevenue = async (tenant: string, customerId: string, bookingRevenue: number) => {
+  updateRevenue = async (
+    tenant: string,
+    customerId: string,
+    bookingRevenue: number,
+  ): Promise<void> => {
     logger.log('Update revenue process started.');
 
     // Retrieve the name of the DynamoDB table
@@ -159,7 +163,7 @@ export default class CustomerRepositoryImpl implements CustomerRepository {
     };
 
     // Perform the update operation
-    await dynamoProvider.rawUpdateItem(updateParams);
+    await dynamoProvider.updateItemWithPrebuiltExpression(updateParams);
   };
 
   /**
@@ -195,6 +199,6 @@ export default class CustomerRepositoryImpl implements CustomerRepository {
     };
 
     // Perform the update operation
-    await dynamoProvider.rawUpdateItem(updateParams);
+    await dynamoProvider.updateItemWithPrebuiltExpression(updateParams);
   };
 }

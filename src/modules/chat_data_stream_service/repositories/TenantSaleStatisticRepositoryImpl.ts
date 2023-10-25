@@ -1,7 +1,7 @@
 import { getAwsSecretValue } from 'get-env';
 import { BatchWriteItemInput } from 'core/providers/dynamodb/DynamoProvider';
 import { dynamoProvider } from 'core';
-import { MetricChatAnalyzerResult } from '../models/statistic/TenantSaleAnalyzerResult';
+import { MetricChatAnalyzerResult } from '../models/statistic';
 import { TenantSaleStatisticRepository } from './interfaces/TenantSaleStatisticRepository';
 
 export default class TenantSaleStatisticRepositoryImpl implements TenantSaleStatisticRepository {

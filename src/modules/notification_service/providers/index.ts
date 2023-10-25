@@ -13,5 +13,3 @@ const providers: Providers = {
 
 // eslint-disable-next-line import/prefer-default-export
 export const { mailProvider, appSyncProvider } = providers;
-
-export { SESSendEmailRequest } from './MailProvider';

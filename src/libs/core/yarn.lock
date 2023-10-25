@@ -79,6 +79,49 @@
     "@aws-sdk/util-utf8-browser" "^3.0.0"
     tslib "^1.11.1"
 
+"@aws-sdk/client-cognito-identity-provider@^3.435.0":
+  version "3.435.0"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/client-cognito-identity-provider/-/client-cognito-identity-provider-3.435.0.tgz#29624ccfc6cf6639612303490f78aa189b5ec369"
+  integrity sha512-Pg6zFUOac0quJHhmeGRxRTGXeaPESydWnnK86KDwL5Xy423XYkmBNc2c1ccUP21dHY72HLxNR8mFIs3Mibfrgg==
+  dependencies:
+    "@aws-crypto/sha256-browser" "3.0.0"
+    "@aws-crypto/sha256-js" "3.0.0"
+    "@aws-sdk/client-sts" "3.435.0"
+    "@aws-sdk/credential-provider-node" "3.435.0"
+    "@aws-sdk/middleware-host-header" "3.433.0"
+    "@aws-sdk/middleware-logger" "3.433.0"
+    "@aws-sdk/middleware-recursion-detection" "3.433.0"
+    "@aws-sdk/middleware-signing" "3.433.0"
+    "@aws-sdk/middleware-user-agent" "3.433.0"
+    "@aws-sdk/region-config-resolver" "3.433.0"
+    "@aws-sdk/types" "3.433.0"
+    "@aws-sdk/util-endpoints" "3.433.0"
+    "@aws-sdk/util-user-agent-browser" "3.433.0"
+    "@aws-sdk/util-user-agent-node" "3.433.0"
+    "@smithy/config-resolver" "^2.0.16"
+    "@smithy/fetch-http-handler" "^2.2.4"
+    "@smithy/hash-node" "^2.0.12"
+    "@smithy/invalid-dependency" "^2.0.12"
+    "@smithy/middleware-content-length" "^2.0.14"
+    "@smithy/middleware-endpoint" "^2.1.3"
+    "@smithy/middleware-retry" "^2.0.18"
+    "@smithy/middleware-serde" "^2.0.12"
+    "@smithy/middleware-stack" "^2.0.6"
+    "@smithy/node-config-provider" "^2.1.3"
+    "@smithy/node-http-handler" "^2.1.8"
+    "@smithy/protocol-http" "^3.0.8"
+    "@smithy/smithy-client" "^2.1.12"
+    "@smithy/types" "^2.4.0"
+    "@smithy/url-parser" "^2.0.12"
+    "@smithy/util-base64" "^2.0.0"
+    "@smithy/util-body-length-browser" "^2.0.0"
+    "@smithy/util-body-length-node" "^2.1.0"
+    "@smithy/util-defaults-mode-browser" "^2.0.16"
+    "@smithy/util-defaults-mode-node" "^2.0.21"
+    "@smithy/util-retry" "^2.0.5"
+    "@smithy/util-utf8" "^2.0.0"
+    tslib "^2.5.0"
+
 "@aws-sdk/client-dynamodb@^3.435.0":
   version "3.435.0"
   resolved "https://registry.yarnpkg.com/@aws-sdk/client-dynamodb/-/client-dynamodb-3.435.0.tgz#86ce87ad57dcd2055ffb2e9055bc517c94b7bd8c"
@@ -168,6 +211,54 @@
     "@smithy/util-defaults-mode-node" "^2.0.21"
     "@smithy/util-retry" "^2.0.5"
     "@smithy/util-utf8" "^2.0.0"
+    tslib "^2.5.0"
+
+"@aws-sdk/client-lambda@^3.435.0":
+  version "3.435.0"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/client-lambda/-/client-lambda-3.435.0.tgz#1cd4a970ef0d672702cdc73490246fed3789cc05"
+  integrity sha512-T3d9aUZGishxxnrKEobrC06hNAzbLa1qr6+5dPvF5m/qGWNoK8JdMgy6//6WGjGGnffBgyURDRNmpHgszE20mA==
+  dependencies:
+    "@aws-crypto/sha256-browser" "3.0.0"
+    "@aws-crypto/sha256-js" "3.0.0"
+    "@aws-sdk/client-sts" "3.435.0"
+    "@aws-sdk/credential-provider-node" "3.435.0"
+    "@aws-sdk/middleware-host-header" "3.433.0"
+    "@aws-sdk/middleware-logger" "3.433.0"
+    "@aws-sdk/middleware-recursion-detection" "3.433.0"
+    "@aws-sdk/middleware-signing" "3.433.0"
+    "@aws-sdk/middleware-user-agent" "3.433.0"
+    "@aws-sdk/region-config-resolver" "3.433.0"
+    "@aws-sdk/types" "3.433.0"
+    "@aws-sdk/util-endpoints" "3.433.0"
+    "@aws-sdk/util-user-agent-browser" "3.433.0"
+    "@aws-sdk/util-user-agent-node" "3.433.0"
+    "@smithy/config-resolver" "^2.0.16"
+    "@smithy/eventstream-serde-browser" "^2.0.12"
+    "@smithy/eventstream-serde-config-resolver" "^2.0.12"
+    "@smithy/eventstream-serde-node" "^2.0.12"
+    "@smithy/fetch-http-handler" "^2.2.4"
+    "@smithy/hash-node" "^2.0.12"
+    "@smithy/invalid-dependency" "^2.0.12"
+    "@smithy/middleware-content-length" "^2.0.14"
+    "@smithy/middleware-endpoint" "^2.1.3"
+    "@smithy/middleware-retry" "^2.0.18"
+    "@smithy/middleware-serde" "^2.0.12"
+    "@smithy/middleware-stack" "^2.0.6"
+    "@smithy/node-config-provider" "^2.1.3"
+    "@smithy/node-http-handler" "^2.1.8"
+    "@smithy/protocol-http" "^3.0.8"
+    "@smithy/smithy-client" "^2.1.12"
+    "@smithy/types" "^2.4.0"
+    "@smithy/url-parser" "^2.0.12"
+    "@smithy/util-base64" "^2.0.0"
+    "@smithy/util-body-length-browser" "^2.0.0"
+    "@smithy/util-body-length-node" "^2.1.0"
+    "@smithy/util-defaults-mode-browser" "^2.0.16"
+    "@smithy/util-defaults-mode-node" "^2.0.21"
+    "@smithy/util-retry" "^2.0.5"
+    "@smithy/util-stream" "^2.0.17"
+    "@smithy/util-utf8" "^2.0.0"
+    "@smithy/util-waiter" "^2.0.12"
     tslib "^2.5.0"
 
 "@aws-sdk/client-s3@^3.435.0":
@@ -612,6 +703,20 @@
     "@smithy/util-middleware" "^2.0.5"
     tslib "^2.5.0"
 
+"@aws-sdk/s3-request-presigner@^3.435.0":
+  version "3.435.0"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/s3-request-presigner/-/s3-request-presigner-3.435.0.tgz#71157fb9137cd255275f0ccc19415371b20ddd48"
+  integrity sha512-1vNsy2YVT0gvX6q3GLI42v5hLqzQDqlvU5NkKv2/Oa426c5c7eIaC2DafUfrdMgR9hBsey93MxYdCCcWvSInmw==
+  dependencies:
+    "@aws-sdk/signature-v4-multi-region" "3.433.0"
+    "@aws-sdk/types" "3.433.0"
+    "@aws-sdk/util-format-url" "3.433.0"
+    "@smithy/middleware-endpoint" "^2.1.3"
+    "@smithy/protocol-http" "^3.0.8"
+    "@smithy/smithy-client" "^2.1.12"
+    "@smithy/types" "^2.4.0"
+    tslib "^2.5.0"
+
 "@aws-sdk/signature-v4-multi-region@3.433.0":
   version "3.433.0"
   resolved "https://registry.yarnpkg.com/@aws-sdk/signature-v4-multi-region/-/signature-v4-multi-region-3.433.0.tgz#9cbf5383b0606d9ec4fc2a754a482e57c5e60508"
@@ -693,6 +798,16 @@
   integrity sha512-LFNUh9FH7RMtYjSjPGz9lAJQMzmJ3RcXISzc5X5k2R/9mNwMK7y1k2VAfvx+RbuDbll6xwsXlgv6QHcxVdF2zw==
   dependencies:
     "@aws-sdk/types" "3.433.0"
+    tslib "^2.5.0"
+
+"@aws-sdk/util-format-url@3.433.0":
+  version "3.433.0"
+  resolved "https://registry.yarnpkg.com/@aws-sdk/util-format-url/-/util-format-url-3.433.0.tgz#65c11be0e071342ebfeecea04be7bc181ac36699"
+  integrity sha512-Z6T7I4hELoQ4eeIuKIKx+52B9bc3SCPhjgMcFAFQeesjmHAr0drHyoGNJIat6ckvgI6zzFaeaBZTvWDA2hyDkA==
+  dependencies:
+    "@aws-sdk/types" "3.433.0"
+    "@smithy/querystring-builder" "^2.0.12"
+    "@smithy/types" "^2.4.0"
     tslib "^2.5.0"
 
 "@aws-sdk/util-locate-window@^3.0.0":

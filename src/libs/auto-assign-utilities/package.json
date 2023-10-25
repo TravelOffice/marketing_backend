@@ -11,7 +11,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "aws": "link:../aws-sdk",
+    "@aws-sdk/client-dynamodb": "^3.436.0",
+    "@aws-sdk/client-sfn": "^3.435.0",
+    "@aws-sdk/client-sqs": "^3.435.0",
+    "@aws-sdk/lib-dynamodb": "^3.436.0",
     "common-models": "link:../common-models",
     "get-env": "link:../get-env"
   },
@@ -27,7 +30,7 @@
     "eslint-plugin-jsx-a11y": "^6.5.1",
     "eslint-plugin-react": "^7.28.0",
     "eslint-plugin-react-hooks": "^4.3.0",
-    "utility-types": "^3.10.0",
-    "typescript": "^4.5.4"
+    "typescript": "^4.5.4",
+    "utility-types": "^3.10.0"
   }
 }

@@ -117,7 +117,7 @@ cat <<EOF >>  ${SERVERLESS_DEF_FILE}
 }
 EOF
 
-# Define the lambda function
+# Define the cognito function
 cat <<EOF >>  ${SERVERLESS_DEF_FILE}
 variable "LAMBDA_FUNCTIONS" {
   default = {
@@ -198,7 +198,7 @@ cat <<EOF >>  ${SERVERLESS_DEF_FILE}
 }
 EOF
 
-# Define the lambda env
+# Define the cognito env
 cat <<EOF >>  ${SERVERLESS_DEF_FILE}
 variable "LAMBDA_ENV" {
   default = {

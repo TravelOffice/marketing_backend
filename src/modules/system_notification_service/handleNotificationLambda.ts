@@ -1,5 +1,5 @@
-import { DynamoDBRecord, DynamoDBStreamEvent } from 'aws-lambda';
 import { dynamoProvider } from 'core';
+import { _Record } from '@aws-sdk/client-dynamodb-streams';
 import { DdbModelChangeType } from './models/dataSubscription/DdbModelChangeType';
 import { sendUserNotificationUserCase, subscribeToTopicUseCase, unsubScribeFromTopicUseCase } from './useCases';
 import {
@@ -19,7 +19,7 @@ import { marketplaceUserReposity, tourPostRepository } from './repositories';
  * @param record DynamoDB record
  * @returns Model change type
  */
-function getModelChangeType(record: DynamoDBRecord): DdbModelChangeType | undefined {
+function getModelChangeType(record: _Record): DdbModelChangeType | undefined {
   // Extract data from record
   const { dynamodb, eventName } = record;
   if (!dynamodb || !dynamodb.Keys) {
@@ -52,7 +52,7 @@ function getModelChangeType(record: DynamoDBRecord): DdbModelChangeType | undefi
   return 'OTHER';
 }
 
-async function handleSubscribingChange(record: DynamoDBRecord): Promise<void> {
+async function handleSubscribingChange(record: _Record): Promise<void> {
   const appType = 'MARKETPLACE';
   if (!record.dynamodb?.NewImage) {
     return;
@@ -85,7 +85,7 @@ async function handleSubscribingChange(record: DynamoDBRecord): Promise<void> {
   }
 }
 
-async function handleNotifications(record: DynamoDBRecord) {
+async function handleNotifications(record: _Record) {
   if (!record.dynamodb?.NewImage) {
     return;
   }
@@ -185,7 +185,7 @@ async function handleNotifications(record: DynamoDBRecord) {
 }
 
 // eslint-disable-next-line import/prefer-default-export
-export const handler = async (event: DynamoDBStreamEvent): Promise<void> => {
+export const handler = async (event: { Records: _Record[] }): Promise<void> => {
   try {
     const { Records: records } = event;
     logger.log(`Start handling DynamoDB Stream event records ${JSON.stringify(records, null, 5)}`);

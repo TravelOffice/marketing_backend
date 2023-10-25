@@ -1,17 +1,17 @@
-import DynamoProvider from './DynamoProvider';
 import SQSProvider from './SqsProvider';
 import StepFunctionsProvider from './StepFunctionsProvider';
+import DynamoProvider from './DynamoProvider';
 
 interface Providers {
+  dynamoProvider: DynamoProvider,
   sqsProvider: SQSProvider,
   sfnProvider: StepFunctionsProvider,
-  dynamoProvider: DynamoProvider,
 }
 
 const providers: Providers = {
+  dynamoProvider: new DynamoProvider(),
   sqsProvider: new SQSProvider(),
   sfnProvider: new StepFunctionsProvider(),
-  dynamoProvider: new DynamoProvider(),
 };
 
 export const { sqsProvider, sfnProvider, dynamoProvider } = providers;

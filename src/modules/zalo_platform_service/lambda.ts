@@ -1,4 +1,4 @@
-import { zaloMessagePlatformRepository } from './repositories';
+import {zaloMessagePlatformRepository} from './repositories';
 import logger from './utils/logger';
 
 interface AppSyncEvent {
@@ -15,7 +15,7 @@ interface AppSyncEvent {
  */
 const handleAppSyncEvent = async (event: AppSyncEvent) => {
   const args = event.arguments; // Args from AppSync
-  const { tenant, username } = event;
+  const {tenant, username} = event;
   let resolverMessage: string; // Resolved result as a message
   let returnedData: any; // Resolved data
   // Handle each case of resolver type
@@ -74,7 +74,7 @@ const handleAppSyncEvent = async (event: AppSyncEvent) => {
       resolverMessage = 'The message has been converted from Zalo platform';
       break;
     default: {
-      const { field } = event;
+      const {field} = event;
       throw new Error(`Unknown field, unable to resolve ${field}`);
     }
   }
@@ -85,7 +85,7 @@ const handleAppSyncEvent = async (event: AppSyncEvent) => {
 };
 
 /**
- * Handler for invocation from AppSync resolver lambda
+ * Handler for invocation from AppSync resolver cognito
  * This function handle the event forwarded from AppSync and return data from Telegram platform
  * @param event Invocation event
  * @param context Invocation context

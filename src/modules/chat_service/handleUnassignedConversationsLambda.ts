@@ -1,9 +1,7 @@
-import AWS from 'aws';
+import { InvocationType, lambdaProvider } from 'core';
 import { getEnv } from 'get-env';
 import { chatRepository } from './repositories';
 import logger from './utils/logger';
-
-const lambda = new AWS.Lambda();
 
 export const handler = async (event: any, context: any, callback: any) => {
   logger.log(`[handleUnassignedConversationsLambda] Received EventBridge event ${event}`);
@@ -11,12 +9,12 @@ export const handler = async (event: any, context: any, callback: any) => {
     const tenants = await chatRepository.getListTenantHasUnassignedConversations();
     logger.log(`[handleUnassignedConversationsLambda] Invoke handle unassigned conversation for tenants:  ${JSON.stringify(tenants)}`);
     tenants.map((tenant) => {
-      const invokeParams: AWS.Lambda.Types.InvocationRequest = {
+      const invokeParams = {
         FunctionName: getEnv('TENANT_HANDLE_UNASSIGNED_CONVERSATION_SERVICE_NAME'),
-        InvocationType: 'Event', // Invoke the function asynchronously
-        Payload: JSON.stringify(tenant),
+        InvocationType: 'Event' as InvocationType, // Invoke the function asynchronously
+        Payload: Buffer.from(JSON.stringify(tenant)),
       };
-      return lambda.invoke(invokeParams).promise();
+      return lambdaProvider.invokeFunction(invokeParams);
     });
   } catch (error: any) {
     logger.log(`[handleUnassignedConversationsLambda] Error ${error}`);
