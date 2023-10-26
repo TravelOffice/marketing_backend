@@ -21,7 +21,7 @@ export default class SessionRepositoryImpl implements SessionRepository {
       TableName: await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
       KeyConditionExpression: 'pk = :pk',
       ExpressionAttributeValues: {
-        ':pk': `${TENANT_INDEX}#${tenantId}#${SESSION_INDEX}#${conversationId}`,
+        ':pk': `${TENANT_INDEX}#${tenantId}#${SESSION_INDEX}`,
       },
     });
   }
@@ -44,7 +44,7 @@ export default class SessionRepositoryImpl implements SessionRepository {
       IndexName: 'Index4',
       KeyConditionExpression: 'pk = :pk AND lsi4 = :lsi4',
       ExpressionAttributeValues: {
-        ':pk': `${TENANT_INDEX}#${tenantId}#${SESSION_INDEX}#${conversationId}`,
+        ':pk': `${TENANT_INDEX}#${tenantId}#${SESSION_INDEX}`,
         ':lsi4': `${status}`,
       },
     });
@@ -70,7 +70,7 @@ export default class SessionRepositoryImpl implements SessionRepository {
       IndexName: 'Index3',
       KeyConditionExpression: 'pk = :pk AND begins_with(lsi3, :lsi3)',
       ExpressionAttributeValues: {
-        ':pk': `${TENANT_INDEX}#${tenantId}#${SESSION_INDEX}#${conversationId}`,
+        ':pk': `${TENANT_INDEX}#${tenantId}#${SESSION_INDEX}`,
         ':lsi3': `${assigneeId}#${status}`,
       },
     });

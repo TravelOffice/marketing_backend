@@ -45,7 +45,7 @@ export default class CloseSessionUseCaseImpl implements CloseSessionUseCase {
       endTime: now,
       duration,
       lsi1: now.toString(), // createdAt
-      lsi2: duration.toString(), // duration
+      lsi2: `${conversationId}#${ChatSessionStatus.CLOSED}`, // conversationId#status
       lsi3: `${currentUser.username}#${ChatSessionStatus.CLOSED}`, // assigneeId#status
       lsi4: ChatSessionStatus.CLOSED, // status
     };

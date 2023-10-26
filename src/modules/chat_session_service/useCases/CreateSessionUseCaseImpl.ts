@@ -78,6 +78,7 @@ export default class CreateSessionUseCaseImpl implements CreateSessionUseCase {
       createdAt: now,
       updatedAt: now,
       lsi1: now.toString(), // createdAt
+      lsi2: `${conversationId}#${ChatSessionStatus.OPEN}`, // conversationId#status
       lsi3: `${currentUser.username}#${ChatSessionStatus.OPEN}`, // assigneeId#status
       lsi4: ChatSessionStatus.OPEN, // status
     };
