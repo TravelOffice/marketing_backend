@@ -1,4 +1,4 @@
-import { Condition, ResponseTimeFilterParams } from '../models/SessionStatistic';
+import { Condition, ResponseTimeFilterParams } from '../models/ChatSessionStatistic';
 import { tenantStatisticRepository } from '../repositories';
 import { GetOrgResponseByConditionTimeUseCase } from './interfaces/GetOrgResponseByConditionTimeUseCase';
 

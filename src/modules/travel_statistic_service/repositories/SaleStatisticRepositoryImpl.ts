@@ -1,7 +1,7 @@
 import { getAwsSecretValue } from 'get-env';
 import { dynamoProvider } from 'core';
 import { SaleStatisticRepository } from './interfaces/SaleStatisticRepository';
-import { FilteringDuration } from '../models/FilteringDuration';
+import { FilteringTimeRange } from '../models/FilteringDuration';
 import { BOOKING_INDEX, LEAD_INDEX, TENANT_INDEX } from '../utils/constants';
 import { LeadStatistic } from '../models/LeadStatistic';
 import { BookingStatistic } from '../models/BookingStatistic';
@@ -10,7 +10,7 @@ export default class SaleStatisticRepositoryImpl implements SaleStatisticReposit
   getLeadStatistic = async (
     tenant: string,
     saleId: string,
-    filteringDuration?: FilteringDuration | undefined,
+    filteringDuration?: FilteringTimeRange | undefined,
   ): Promise<LeadStatistic[]> => {
     const pk = `${TENANT_INDEX}#${tenant}#${LEAD_INDEX}`;
     return this.queryStatistic<LeadStatistic>(pk, saleId, filteringDuration);
@@ -19,7 +19,7 @@ export default class SaleStatisticRepositoryImpl implements SaleStatisticReposit
   getBookingStatistic = async (
     tenant: string,
     saleId: string,
-    filteringDuration?: FilteringDuration | undefined,
+    filteringDuration?: FilteringTimeRange | undefined,
   ): Promise<BookingStatistic[]> => {
     const pk = `${TENANT_INDEX}#${tenant}#${BOOKING_INDEX}`;
     return this.queryStatistic<BookingStatistic>(pk, saleId, filteringDuration);
@@ -28,7 +28,7 @@ export default class SaleStatisticRepositoryImpl implements SaleStatisticReposit
   private async queryStatistic<T>(
     pk: string,
     saleId: string,
-    filteringDuration?: FilteringDuration,
+    filteringDuration?: FilteringTimeRange,
   ) {
     if (filteringDuration) {
       const { startTime, endTime } = filteringDuration;

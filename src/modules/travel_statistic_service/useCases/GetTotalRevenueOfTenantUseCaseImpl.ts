@@ -1,12 +1,12 @@
 import { tenantStatisticRepository } from '../repositories';
-import { FilteringDuration } from '../models/FilteringDuration';
+import { FilteringTimeRange } from '../models/FilteringDuration';
 import { TotalRevenueMetricResponse } from '../models/DepartureTourStatistic';
 import { GetTotalRevenueOfTenantUseCase } from './interfaces/GetTotalRevenueOfTenantUseCase';
 
 export default class GetTotalRevenueOfTenantUseCaseImpl implements GetTotalRevenueOfTenantUseCase {
   invoke = async (
     tenant: string,
-    filteringDuration?: FilteringDuration,
+    filteringDuration?: FilteringTimeRange,
   ): Promise<TotalRevenueMetricResponse> => {
     const records = await tenantStatisticRepository.getDepartureTourStatistic(
       tenant,

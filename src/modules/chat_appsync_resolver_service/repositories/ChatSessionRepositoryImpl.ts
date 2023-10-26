@@ -14,7 +14,7 @@ export default class ChatSessionRepositoryImpl implements ChatSessionRepository 
       KeyConditionExpression: 'pk = :pk and lsi4 = :lsi4_filter',
       ExpressionAttributeValues: {
         ':pk': pk,
-        ':lsi1_filter': CHAT_SESSION_OPEN_STATUS,
+        ':lsi4_filter': CHAT_SESSION_OPEN_STATUS,
       },
     };
 
@@ -40,7 +40,7 @@ export default class ChatSessionRepositoryImpl implements ChatSessionRepository 
     // Calculate response time in seconds
     const now = Date.now();
     const responseTime = Math.floor((now - startTime) / 1000);
-    const updatingData: Pick<ChatSession, 'lsi3' | 'lsi4' | 'lsi5' | 'responseTime' | 'status'> = {
+    const updatingData: Partial<ChatSession> = {
       responseTime,
       status: newStatus,
       lsi3: `${assigneeId}#${newStatus}`,

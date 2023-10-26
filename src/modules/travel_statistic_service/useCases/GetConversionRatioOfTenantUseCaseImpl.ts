@@ -1,5 +1,5 @@
 import { tenantStatisticRepository } from '../repositories';
-import { FilteringDuration } from '../models/FilteringDuration';
+import { FilteringTimeRange } from '../models/FilteringDuration';
 import { GetConversionRatioOfTenantUseCase } from './interfaces/GetConversionRatioOfTenantUseCase';
 import { ConversionRatioMetricResponse } from '../models/LeadStatistic';
 
@@ -7,7 +7,7 @@ export default class GetConversionRatioOfTenantUseCaseImpl
 implements GetConversionRatioOfTenantUseCase {
   invoke = async (
     tenant: string,
-    filteringDuration?: FilteringDuration,
+    filteringDuration?: FilteringTimeRange,
   ): Promise<ConversionRatioMetricResponse> => {
     let conversionRatio = 0;
 

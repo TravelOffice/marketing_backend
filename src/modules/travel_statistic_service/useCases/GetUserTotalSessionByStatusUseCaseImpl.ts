@@ -1,4 +1,4 @@
-import { SessionStatus } from '../models/SessionStatistic';
+import { SessionStatus } from '../models/ChatSessionStatistic';
 import { tenantStatisticRepository } from '../repositories';
 import { GetUserTotalSessionByStatusUseCase } from './interfaces/GetUserTotalSessionByStatusUseCase';
 

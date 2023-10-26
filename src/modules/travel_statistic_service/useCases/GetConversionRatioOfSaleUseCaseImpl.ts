@@ -1,5 +1,5 @@
 import { saleStatisticRepository } from '../repositories';
-import { FilteringDuration } from '../models/FilteringDuration';
+import { FilteringTimeRange } from '../models/FilteringDuration';
 import { ConversionRatioMetricResponse } from '../models/LeadStatistic';
 import { GetConversionRatioOfSaleUseCase } from './interfaces/GetConversionRatioOfSaleUseCase';
 
@@ -8,7 +8,7 @@ implements GetConversionRatioOfSaleUseCase {
   invoke = async (
     tenant: string,
     saleId: string,
-    filteringDuration?: FilteringDuration,
+    filteringDuration?: FilteringTimeRange,
   ): Promise<ConversionRatioMetricResponse> => {
     let conversionRatio = 0;
 

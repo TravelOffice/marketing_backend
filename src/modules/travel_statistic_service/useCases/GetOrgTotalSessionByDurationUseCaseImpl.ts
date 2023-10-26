@@ -5,7 +5,7 @@ export default class GetOrgTotalSessionByDurationUseCaseImpl
 implements GetOrgTotalSessionByDurationUseCase {
   invoke = async (
     tenant: string,
-    duration: string,
+    duration: number,
   ) => {
     const records = await tenantStatisticRepository.getTotalSessionOrgByParams(
       tenant,

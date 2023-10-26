@@ -1,9 +1,9 @@
-import { ResponseTimeFilterParams, SessionStatistic } from '../../models/SessionStatistic';
+import { ResponseTimeFilterParams, TotalChatSessionStatisticResponse } from '../../models/ChatSessionStatistic';
 
 export interface GetOrgResponseByConditionTimeUseCase {
   invoke(
     tenant: string,
     filterParam: ResponseTimeFilterParams,
     startTime?: string
-  ): Promise<SessionStatistic>;
+  ): Promise<TotalChatSessionStatisticResponse>;
 }

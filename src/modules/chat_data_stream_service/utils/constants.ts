@@ -10,7 +10,7 @@ export const TENANT_INDEX = 'TENANT';
 
 export const CONVERSATION_INDEX = 'CONVERSATION';
 
-export const CHAT_SESSION_INDEX = 'SESSION';
+export const CHAT_SESSION_INDEX = 'CSESSION';
 
 export const PADDING_ZERO_PREFIX = '0';
 

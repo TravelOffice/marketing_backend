@@ -31,8 +31,9 @@ import {
   getUserAverageResponseTimeUseCase,
   getOrgResponseByConditionTimeUseCase,
   getUserResponseByConditionTimeUseCase,
+  getLeadChatConversionRatioUseCase,
 } from './useCases';
-import { Condition, SessionMetric, SessionStatus } from './models/SessionStatistic';
+import { Condition, SessionMetric, SessionStatus } from './models/ChatSessionStatistic';
 
 const app = express();
 
@@ -108,6 +109,9 @@ app.get('/statistic/tenant', getStatisticValidator(), async (req: Request, res: 
             sortType: 'ASC',
           },
         );
+        break;
+      case 'leadChatConversionRatio':
+        result = await getLeadChatConversionRatioUseCase.invoke(tenant, filteringDuration);
         break;
       default:
         break;
@@ -186,7 +190,7 @@ app.get('/statistic/chat-sessions', getSessionStatisticValidator(), async (req: 
         break;
       case SessionMetric.TOTAL_BY_DURATION:
         result = await getOrgTotalSessionByDurationUseCase
-          .invoke(tenant, duration as string);
+          .invoke(tenant, Number(duration));
         break;
       case SessionMetric.AVERAGE_RESPONSE_TIME:
         result = await getOrgAverageResponseTimeUseCase
@@ -243,7 +247,7 @@ app.get('/statistic/:username/chat-sessions', getSessionStatisticValidator(), as
         break;
       case SessionMetric.TOTAL_BY_DURATION:
         result = await getUserTotalSessionByDurationUseCase
-          .invoke(tenant, username, duration as string);
+          .invoke(tenant, username, Number(duration));
         break;
       case SessionMetric.AVERAGE_RESPONSE_TIME:
         result = await getUserAverageResponseTimeUseCase

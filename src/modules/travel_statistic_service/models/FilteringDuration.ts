@@ -1,4 +1,4 @@
-export interface FilteringDuration {
+export interface FilteringTimeRange {
   startTime: string,
   endTime: string,
 }

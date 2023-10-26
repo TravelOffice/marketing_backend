@@ -1,9 +1,9 @@
-import { SessionStatistic } from '../../models/SessionStatistic';
+import { TotalChatSessionStatisticResponse } from '../../models/ChatSessionStatistic';
 
 export interface GetUserTotalSessionByDurationUseCase {
   invoke(
     tenant: string,
     username: string,
-    duration: string,
-  ): Promise<SessionStatistic>;
+    duration: number,
+  ): Promise<TotalChatSessionStatisticResponse>;
 }

@@ -13,7 +13,7 @@ export default class ChatSessionRepositoryImpl implements ChatSessionRepository 
    * Creates a new session of a conversation for the specified tenant.
    *
    * @param tenantId - The ID of the tenant.
-   * @param conversationId - The ID of the conversation.
+   * @param conversationId - Conversation ID
    * @param chatSession - The session object to create.
    * @returns A Promise that resolves to the created session.
    */

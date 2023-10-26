@@ -23,19 +23,19 @@ export type ResponseTimeFilterParams = {
   comparasionTime: number;
 }
 
-export type SessionStatistic = {
+export type TotalChatSessionStatisticResponse = {
   total: number;
 };
 
-export type SessionQueryParams = {
+export type ChatSessionQueryParams = {
   username?: string,
   conversationId?: string,
-  duration?: string,
+  duration?: number,
   status?: SessionStatus,
   startTime?: string,
 }
 
-export interface Session {
+export interface ChatSessionStatistic {
   lsi1: string,
   lsi2: string,
   lsi3: string,
