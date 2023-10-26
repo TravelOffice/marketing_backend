@@ -24,7 +24,7 @@ echo "Building dependencies..."
 DEPENDENCIES_DIR=${CUR_DIR}/src/libs
 cd ${DEPENDENCIES_DIR}
 LIBS_DIR=$(ls -d */ | cut -f1 -d'/')
-PRE_BUILD_DEPENDENCIES="aws-sdk common-models get-env"
+PRE_BUILD_DEPENDENCIES="common-models get-env core"
 
 build_lib() {
   dir=${1}
@@ -39,6 +39,8 @@ build_lib() {
     yarn install --ignore-optional
     yarn build
   fi
+
+  npx node-prune
 }
 
 for dir in ${PRE_BUILD_DEPENDENCIES}

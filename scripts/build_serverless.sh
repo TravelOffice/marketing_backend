@@ -45,6 +45,8 @@ build_service() {
   rm -rf ${SERVICE_DIR}/node_modules
   echo "Install production dependencies"
   yarn install --production --ignore-optional
+  npx node-prune
+
   echo "Finished installing production"
   LAYER_DIR=${CUR_DIR}/src/layers/${SERVICENAME}/nodejs
   mkdir -p ${LAYER_DIR}

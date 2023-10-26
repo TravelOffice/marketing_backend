@@ -8,6 +8,7 @@ phases:
       - chmod +x /usr/bin/terraform
       - n 18
       - npm install -g typescript
+      - npm install -g node-prune
     finally:
       - node --version
       - terraform --version

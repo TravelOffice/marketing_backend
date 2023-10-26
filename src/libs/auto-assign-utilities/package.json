@@ -11,12 +11,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.436.0",
     "@aws-sdk/client-sfn": "^3.435.0",
     "@aws-sdk/client-sqs": "^3.435.0",
-    "@aws-sdk/lib-dynamodb": "^3.436.0",
     "common-models": "link:../common-models",
-    "get-env": "link:../get-env"
+    "get-env": "link:../get-env",
+    "core": "link:../core"
   },
   "devDependencies": {
     "@types/node": "^17.0.8",
