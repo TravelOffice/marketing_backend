@@ -1,8 +1,7 @@
 import { BatchWriteItemInput, PaginationParams, PaginationResponsePayload } from 'core/providers/dynamodb/DynamoProvider';
 import { getAwsSecretValue } from 'get-env';
-import {
-  dynamoProvider, fcmProvider, helper, logger,
-} from 'core';
+import { dynamoProvider, helper, logger } from 'core';
+import { fcmProvider } from 'fcm';
 import { UserNotificationRepository } from './interfaces/UserNotificationRepository';
 import { CreateUserNotificationDto, UserNotification } from '../models/UserNotification';
 import {

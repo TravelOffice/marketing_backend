@@ -1,6 +1,7 @@
+import { dynamoProvider } from 'core';
 import { getAwsSecretValue } from 'get-env';
 import { NewConversationInfo } from '../models';
-import { sfnProvider, sqsProvider, dynamoProvider } from '../providers';
+import { sfnProvider, sqsProvider } from '../providers';
 import {
   PAGE_INDEX, SQS_ID_DELIMITER, TASK_TOKEN_INDEX, TENANT_INDEX,
 } from '../utils/constants';

@@ -19,7 +19,6 @@
     "@aws-sdk/lib-dynamodb": "^3.435.0",
     "@aws-sdk/s3-request-presigner": "^3.435.0",
     "@aws-sdk/util-dynamodb": "^3.435.0",
-    "firebase-admin": "^11.11.0",
     "get-env": "link:../get-env"
   },
   "devDependencies": {

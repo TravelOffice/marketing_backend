@@ -1,5 +1,6 @@
-import { dynamoProvider, fcmProvider, helper } from 'core';
+import { dynamoProvider, helper } from 'core';
 import { getAwsSecretValue } from 'get-env';
+import { fcmProvider } from 'fcm';
 import { FCM_NOTIFICATION_TOPIC_INDEX, USERNAME_INDEX } from '../utils/constants';
 import { SubscribedUserRepository } from './interfaces/SubscribedUserRepository';
 import { SubscribedUser } from '../models/SubscribedUser';

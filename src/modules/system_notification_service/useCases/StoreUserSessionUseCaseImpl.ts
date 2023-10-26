@@ -1,4 +1,4 @@
-import { fcmProvider } from 'core';
+import { fcmProvider } from 'fcm';
 import { CognitoUser } from '../models/CognitoUser';
 import { UserDeviceSession } from '../models/UserDeviceSession';
 import { CreateUserDeviceSessionDto } from '../models/dto/CreateUserDeviceSessionDto';
