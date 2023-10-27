@@ -1,18 +1,19 @@
-// TODO: Declare repository objects which can be used in this service here
-
-import SessionRepositoryImpl from './SessionRepositoryImpl';
-import { SessionRepository } from './interfaces/SessionRepository';
+import ChatRepositoryImpl from './ChatRepositoryImpl';
+import ChatSessionRepositoryImpl from './ChatSessionRepositoryImpl';
+import { ChatRepository } from './interfaces/ChatRepository';
+import { ChatSessionRepository } from './interfaces/ChatSessionRepository';
 
 interface Repositories {
-  sessionRepository: SessionRepository,
+  chatSessionRepository: ChatSessionRepository,
+  chatRepository: ChatRepository,
 }
 
 const repositories: Repositories = {
-  sessionRepository: new SessionRepositoryImpl(),
+  chatSessionRepository: new ChatSessionRepositoryImpl(),
+  chatRepository: new ChatRepositoryImpl(),
 };
 
-// TODO: Remove below line if there are two or more repository
-// eslint-disable-next-line import/prefer-default-export
 export const {
-  sessionRepository,
+  chatSessionRepository,
+  chatRepository,
 } = repositories;

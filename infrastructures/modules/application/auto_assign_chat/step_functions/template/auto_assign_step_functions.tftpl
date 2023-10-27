@@ -259,6 +259,41 @@
         },
         "ReturnValues": "UPDATED_NEW"
       },
+      "Next": "Close chat conversation after chat session is closed",
+      "ResultPath": null
+    },
+    "Close chat conversation after chat session is closed": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::dynamodb:updateItem",
+      "Parameters": {
+        "TableName.$": "$.env.dynamoChatTable",
+        "Key": {
+          "pk": {
+            "S.$": "$.conversation.pk"
+          },
+          "sk": {
+            "S.$": "$.conversation.sk"
+          }
+        },
+        "UpdateExpression": "SET #assignee = :assignee, #updatedAt = :updatedAt, #lsi1 = :lsi1",
+        "ExpressionAttributeValues": {
+          ":assignee": {
+            "S": "unknown"
+          },
+          ":updatedAt": {
+            "N.$": "$.conversation.expectedEndAtIfNotReplied"
+          },
+          ":lsi1": {
+            "S": "ASSIGNEE#unknown"
+          }
+        },
+        "ExpressionAttributeNames": {
+          "#assignee": "assignee",
+          "#updatedAt": "updatedAt",
+          "#lsi1": "lsi1"
+        },
+        "ReturnValues": "UPDATED_NEW"
+      },
       "Next": "Auto assign notification service - Handle error",
       "ResultPath": null
     },

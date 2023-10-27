@@ -1,6 +1,6 @@
 import { ChatSession, ChatSessionStatus } from '../../models/ChatSession';
 
-export interface SessionRepository {
+export interface ChatSessionRepository {
   listByConversationId(tenantId: string, conversationId: string): Promise<Array<ChatSession>>,
 
   listByConversationIdAndStatus(

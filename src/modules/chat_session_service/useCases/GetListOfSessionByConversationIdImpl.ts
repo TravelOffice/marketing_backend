@@ -1,5 +1,5 @@
 import { helper } from 'core';
-import { sessionRepository } from '../repositories';
+import { chatSessionRepository } from '../repositories';
 import { GetListOfSessionByConversationIdUseCase } from './interfaces/GetListOfSessionByConversationIdUseCase';
 import { ChatSession, ChatSessionStatus } from '../models/ChatSession';
 import { CognitoUser } from '../models/CognitoUser';
@@ -21,13 +21,13 @@ implements GetListOfSessionByConversationIdUseCase {
   ): Promise<Array<ChatSession>> {
     let sessions: ChatSession[] = [];
     if (status) {
-      sessions = await sessionRepository.listByConversationIdAndStatus(
+      sessions = await chatSessionRepository.listByConversationIdAndStatus(
         currentUser.tenant,
         conversationId,
         status,
       );
     } else {
-      sessions = await sessionRepository.listByConversationId(
+      sessions = await chatSessionRepository.listByConversationId(
         currentUser.tenant,
         conversationId,
       );

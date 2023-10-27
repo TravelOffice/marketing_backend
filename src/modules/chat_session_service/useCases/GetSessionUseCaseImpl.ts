@@ -2,7 +2,7 @@ import { helper } from 'core';
 import { GetSessionUseCase } from './interfaces/GetSessionUseCase';
 import { ChatSession } from '../models/ChatSession';
 import { CognitoUser } from '../models/CognitoUser';
-import { sessionRepository } from '../repositories';
+import { chatSessionRepository } from '../repositories';
 
 export default class GetSessionUseCaseImpl implements GetSessionUseCase {
   /**
@@ -18,7 +18,7 @@ export default class GetSessionUseCaseImpl implements GetSessionUseCase {
     conversationId: string,
     sessionId: string,
   ): Promise<ChatSession | undefined> {
-    const source = await sessionRepository.get(currentUser.tenant, conversationId, sessionId);
+    const source = await chatSessionRepository.get(currentUser.tenant, conversationId, sessionId);
     if (!source) return undefined;
     return helper.excludeDataFromObject(source) as ChatSession;
   }

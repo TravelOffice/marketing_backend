@@ -1,7 +1,7 @@
 import { helper } from 'core';
 import { ChatPlatform } from 'common-models';
 import { ChatSession, ChatSessionStatus } from '../models/ChatSession';
-import { sessionRepository } from '../repositories';
+import { chatSessionRepository } from '../repositories';
 import { CreateSessionUseCase } from './interfaces/CreateSessionUseCase';
 import { CognitoUser } from '../models/CognitoUser';
 
@@ -23,7 +23,7 @@ export default class CreateSessionUseCaseImpl implements CreateSessionUseCase {
     platform: ChatPlatform,
   ): Promise<ChatSession> {
     // Check if the user already has an open session for the conversation
-    const openSessionsOfUser = await sessionRepository.listByAssigneeIdAndStatus(
+    const openSessionsOfUser = await chatSessionRepository.listByAssigneeIdAndStatus(
       currentUser.tenant,
       currentUser.username,
       conversationId,
@@ -34,7 +34,7 @@ export default class CreateSessionUseCaseImpl implements CreateSessionUseCase {
     }
 
     // Check if the user already has an active session for the conversation
-    const activeSessionsOfUser = await sessionRepository.listByAssigneeIdAndStatus(
+    const activeSessionsOfUser = await chatSessionRepository.listByAssigneeIdAndStatus(
       currentUser.tenant,
       currentUser.username,
       conversationId,
@@ -45,7 +45,7 @@ export default class CreateSessionUseCaseImpl implements CreateSessionUseCase {
     }
 
     const dataToCreate = await this.buildSession({ currentUser, conversationId, platform });
-    const createdSession = await sessionRepository.create(
+    const createdSession = await chatSessionRepository.create(
       currentUser.tenant,
       conversationId,
       dataToCreate,
@@ -68,7 +68,7 @@ export default class CreateSessionUseCaseImpl implements CreateSessionUseCase {
     const { currentUser, conversationId, platform } = options;
 
     return {
-      code: await sessionRepository.generateChatSessionCode(currentUser.tenant),
+      code: await chatSessionRepository.generateChatSessionCode(currentUser.tenant),
       conversationId,
       platform,
       startTime: now,
@@ -78,7 +78,6 @@ export default class CreateSessionUseCaseImpl implements CreateSessionUseCase {
       createdAt: now,
       updatedAt: now,
       lsi1: now.toString(), // createdAt
-      lsi2: `${conversationId}#${ChatSessionStatus.OPEN}`, // conversationId#status
       lsi3: `${currentUser.username}#${ChatSessionStatus.OPEN}`, // assigneeId#status
       lsi4: ChatSessionStatus.OPEN, // status
     };
