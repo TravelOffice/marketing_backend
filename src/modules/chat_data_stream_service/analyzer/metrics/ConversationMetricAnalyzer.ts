@@ -31,8 +31,9 @@ export default class ConversationMetricAnalyzer extends AbstractMetricAnalyzer {
       this.output = {
         pk,
         sk: conversationId,
-        lsi1: chatPlatform,
-        lsi2: pageId,
+        lsi1: Date.now().toString(),
+        lsi2: chatPlatform,
+        lsi3: pageId,
       };
     }
   }

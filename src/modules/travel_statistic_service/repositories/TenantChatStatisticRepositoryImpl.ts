@@ -2,7 +2,7 @@ import { dynamoProvider } from 'core';
 import { getAwsSecretValue } from 'get-env';
 import { ChatSessionStatistic } from '../models/ChatSessionStatistic';
 import { FilteringTimeRange } from '../models/FilteringDuration';
-import { ORG_CHAT_SESSION_STATISTIC_INDEX, TENANT_INDEX } from '../utils/constants';
+import { CONVERSATION_STATISTIC_INDEX, ORG_CHAT_SESSION_STATISTIC_INDEX, TENANT_INDEX } from '../utils/constants';
 import { TenantChatStatisticRepository } from './interfaces/TenantChatStatisticRepository';
 
 export default class TenantChatStatisticRepositoryImpl implements TenantChatStatisticRepository {
@@ -15,7 +15,7 @@ export default class TenantChatStatisticRepositoryImpl implements TenantChatStat
       const { startTime, endTime } = filteringDuration;
       return dynamoProvider.query<ChatSessionStatistic>({
         TableName: await getAwsSecretValue('DYNAMO_STATISTIC_TABLE'),
-        IndexName: 'Index1', // FROMCHAT#createdAt
+        IndexName: 'Index1', // createdAt
         KeyConditionExpression: 'pk = :pk AND lsi1 BETWEEN :start AND :end',
         ExpressionAttributeValues: {
           ':pk': pk,
@@ -33,4 +33,19 @@ export default class TenantChatStatisticRepositoryImpl implements TenantChatStat
       },
     });
   };
+
+  getConversationPlatformStatistic = async (
+    tenant: string,
+    startTime: string,
+    endTime: string,
+  ) => dynamoProvider.query({
+    TableName: await getAwsSecretValue('DYNAMO_STATISTIC_TABLE'),
+    IndexName: 'Index1', // createdAt
+    KeyConditionExpression: 'pk = :pk AND lsi1 BETWEEN :start AND :end',
+    ExpressionAttributeValues: {
+      ':pk': `${TENANT_INDEX}#${tenant}#${CONVERSATION_STATISTIC_INDEX}`,
+      ':start': startTime,
+      ':end': endTime,
+    },
+  });
 }
