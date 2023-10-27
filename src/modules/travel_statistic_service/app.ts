@@ -5,14 +5,23 @@ import { getCurrentUserInfo } from 'decode-token';
 import wrapResponse from './utils/wrapResponse';
 import { FAILED, SUCCESS } from './utils/constants';
 import logger from './utils/logger';
-import validate, { getSessionStatisticValidator, getStatisticValidator } from './utils/validator';
+import validate, {
+  getSessionPlatformStatisticValidator,
+  getSessionStatisticValidator,
+  getStatisticValidator,
+} from './utils/validator';
 import { MetricName } from './models/MetricName';
 import {
   getConversionRatioOfTenantUseCase,
   getConversionRatiosOfSaleUseCase,
+  getLeadChatConversionRatioUseCase,
+  getOrgAverageResponseTimeUseCase,
+  getOrgResponseByConditionTimeUseCase,
   getOrgTotalSessionByConversationUseCase,
   getOrgTotalSessionByDurationUseCase,
   getOrgTotalSessionByStatusUseCase,
+  getOrgTotalSessionUseCase,
+  getSessionPlatformStatisticUseCase,
   getTopFavouriteLocationUseCase,
   getTopFavouriteTourUseCase,
   getTopProficiencyTourUseCase,
@@ -21,17 +30,13 @@ import {
   getTotalProfitOfTenantUseCase,
   getTotalRevenueOfSaleUseCase,
   getTotalRevenueOfTenantUseCase,
-  getOrgTotalSessionUseCase,
-  getUserTotalSessionUseCase,
   getTourFillingRatioUseCase,
+  getUserAverageResponseTimeUseCase,
+  getUserResponseByConditionTimeUseCase,
   getUserTotalSessionByConversationUseCase,
   getUserTotalSessionByDurationUseCase,
   getUserTotalSessionByStatusUseCase,
-  getOrgAverageResponseTimeUseCase,
-  getUserAverageResponseTimeUseCase,
-  getOrgResponseByConditionTimeUseCase,
-  getUserResponseByConditionTimeUseCase,
-  getLeadChatConversionRatioUseCase,
+  getUserTotalSessionUseCase,
 } from './useCases';
 import { Condition, SessionMetric, SessionStatus } from './models/ChatSessionStatistic';
 
@@ -269,6 +274,24 @@ app.get('/statistic/:username/chat-sessions', getSessionStatisticValidator(), as
         break;
     }
     logger.log(`[GET] Get session statistic ${sessionMetric} Successfully`);
+    res.json(wrapResponse(SUCCESS, result));
+  } catch (error: any) {
+    logger.log(`[GET] Error ${error}`);
+    res.json(wrapResponse(FAILED, undefined, error.message));
+  }
+});
+
+app.get('/statistic/tenant/conversation-platforms', getSessionPlatformStatisticValidator(), async (req: Request, res: Response) => {
+  try {
+    validate(req);
+    const { tenant } = getCurrentUserInfo(req.headers.authorization!);
+    const { startTime, endTime } = req.query;
+    const result = await getSessionPlatformStatisticUseCase.invoke(
+      tenant,
+      startTime as string,
+      endTime as string,
+    );
+    logger.log('[GET] Get session platform statistic successfully');
     res.json(wrapResponse(SUCCESS, result));
   } catch (error: any) {
     logger.log(`[GET] Error ${error}`);

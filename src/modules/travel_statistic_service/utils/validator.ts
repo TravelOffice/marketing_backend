@@ -1,6 +1,7 @@
 import { Request } from 'express';
 import { query, ValidationError, validationResult } from 'express-validator';
 import { Condition, SessionMetric, SessionStatus } from '../models/ChatSessionStatistic';
+import { VALIDATE_DATE_STRING_MSG } from './constants';
 
 function isTimestamp(n: string) {
   const parsed = parseFloat(n);
@@ -80,5 +81,12 @@ export function getSessionStatisticValidator() {
     query('startTime').optional().custom((value) => isTimestamp(value)).withMessage('must be a valid date string'),
     query('comparasionTime').optional().isInt().withMessage('must be integer'),
     query('condition').optional().isIn(Object.values(Condition)).withMessage('must be correct type'),
+  ];
+}
+
+export function getSessionPlatformStatisticValidator() {
+  return [
+    query('startTime').notEmpty().custom((value) => isTimestamp(value)).withMessage(VALIDATE_DATE_STRING_MSG),
+    query('endTime').notEmpty().custom((value) => isTimestamp(value)).withMessage(VALIDATE_DATE_STRING_MSG),
   ];
 }
