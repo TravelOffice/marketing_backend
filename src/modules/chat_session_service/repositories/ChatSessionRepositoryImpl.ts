@@ -2,13 +2,13 @@ import { dynamoProvider, helper } from 'core';
 import { getAwsSecretValue } from 'get-env';
 import { ChatSession, ChatSessionStatus } from '../models/ChatSession';
 import { SESSION_COUNTER_INDEX, SESSION_INDEX, TENANT_INDEX } from '../utils/constants';
-import { SessionRepository } from './interfaces/SessionRepository';
+import { ChatSessionRepository } from './interfaces/ChatSessionRepository';
 import { CreateSessionDto } from '../dto/CreateSessionDto';
 
 /**
  * Implementation of the SessionRepository interface.
  */
-export default class SessionRepositoryImpl implements SessionRepository {
+export default class ChatSessionRepositoryImpl implements ChatSessionRepository {
   /**
    * Lists all sessions by conversationId for the specified tenant.
    *
@@ -18,10 +18,10 @@ export default class SessionRepositoryImpl implements SessionRepository {
    */
   async listByConversationId(tenantId: string, conversationId: string): Promise<ChatSession[]> {
     return dynamoProvider.query({
-      TableName: await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
+      TableName: await getAwsSecretValue('DYNAMO_CHAT_TABLE'),
       KeyConditionExpression: 'pk = :pk',
       ExpressionAttributeValues: {
-        ':pk': `${TENANT_INDEX}#${tenantId}#${SESSION_INDEX}`,
+        ':pk': `${TENANT_INDEX}#${tenantId}#${SESSION_INDEX}#${conversationId}`,
       },
     });
   }
@@ -40,11 +40,11 @@ export default class SessionRepositoryImpl implements SessionRepository {
     status: ChatSessionStatus,
   ): Promise<ChatSession[]> {
     return dynamoProvider.query({
-      TableName: await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
+      TableName: await getAwsSecretValue('DYNAMO_CHAT_TABLE'),
       IndexName: 'Index4',
       KeyConditionExpression: 'pk = :pk AND lsi4 = :lsi4',
       ExpressionAttributeValues: {
-        ':pk': `${TENANT_INDEX}#${tenantId}#${SESSION_INDEX}`,
+        ':pk': `${TENANT_INDEX}#${tenantId}#${SESSION_INDEX}#${conversationId}`,
         ':lsi4': `${status}`,
       },
     });
@@ -66,11 +66,11 @@ export default class SessionRepositoryImpl implements SessionRepository {
     status: ChatSessionStatus,
   ): Promise<ChatSession[]> {
     return dynamoProvider.query({
-      TableName: await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
+      TableName: await getAwsSecretValue('DYNAMO_CHAT_TABLE'),
       IndexName: 'Index3',
       KeyConditionExpression: 'pk = :pk AND begins_with(lsi3, :lsi3)',
       ExpressionAttributeValues: {
-        ':pk': `${TENANT_INDEX}#${tenantId}#${SESSION_INDEX}`,
+        ':pk': `${TENANT_INDEX}#${tenantId}#${SESSION_INDEX}#${conversationId}`,
         ':lsi3': `${assigneeId}#${status}`,
       },
     });
@@ -90,7 +90,7 @@ export default class SessionRepositoryImpl implements SessionRepository {
     sessionId: string,
   ): Promise<ChatSession | undefined> {
     return dynamoProvider.getItem<ChatSession>(
-      await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
+      await getAwsSecretValue('DYNAMO_CHAT_TABLE'),
       `${TENANT_INDEX}#${tenantId}#${SESSION_INDEX}#${conversationId}`,
       `${sessionId}`,
     );
@@ -110,7 +110,7 @@ export default class SessionRepositoryImpl implements SessionRepository {
     session: CreateSessionDto,
   ): Promise<ChatSession> {
     await dynamoProvider.putItem(
-      await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
+      await getAwsSecretValue('DYNAMO_CHAT_TABLE'),
       `${TENANT_INDEX}#${tenantId}#${SESSION_INDEX}#${conversationId}`,
       `${session.code}`,
       session,
@@ -134,7 +134,7 @@ export default class SessionRepositoryImpl implements SessionRepository {
     sessionToUpdate: Partial<ChatSession>,
   ): Promise<ChatSession> {
     const updatedSession = await dynamoProvider.updateItemWithSetExpression(
-      await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
+      await getAwsSecretValue('DYNAMO_CHAT_TABLE'),
       `${TENANT_INDEX}#${tenantId}#${SESSION_INDEX}#${conversationId}`,
       `${sessionId}`,
       sessionToUpdate,
@@ -151,7 +151,7 @@ export default class SessionRepositoryImpl implements SessionRepository {
    */
   async generateChatSessionCode(tenantId: string): Promise<string> {
     const code = await helper.generateCode(
-      await getAwsSecretValue('DYNAMO_TRAVEL_TABLE'),
+      await getAwsSecretValue('DYNAMO_CHAT_TABLE'),
       `${TENANT_INDEX}#${tenantId}`,
       SESSION_COUNTER_INDEX,
     );

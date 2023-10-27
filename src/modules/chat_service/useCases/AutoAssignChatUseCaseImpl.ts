@@ -15,7 +15,27 @@ export default class AutoAssignChatUseCaseImpl implements AutoAssignChatUseCase 
   ) => {
     // Sales data to assign
     const sales = marshalledSales.map((sale) => {
-      const saleObj = dynamoProvider.unmarshall(sale);
+      // Since DynamoDB data returned from StepFunctions is old version
+      // and it's not compatible with the new version of dynamo client js
+      // Do the trick to make it compatible by transform `Bool` and `Nul` to `BOOL` and `NULL`
+      const marshalledSale = ({ ...sale }) as any;
+      Object.keys(marshalledSale).forEach((key) => {
+        // With each key, check if it has property Bool or Nul
+        // Transform it to BOOL or NULL
+        // Check `Bool` key
+        if (marshalledSale[key].Bool) {
+          marshalledSale[key].BOOL = marshalledSale[key].Bool;
+          delete marshalledSale[key].Bool;
+        }
+
+        // Check `Nul` key
+        if (marshalledSale[key].Nul) {
+          marshalledSale[key].NULL = marshalledSale[key].Nul;
+          delete marshalledSale[key].Nul;
+        }
+      });
+
+      const saleObj = dynamoProvider.unmarshall(marshalledSale);
       // Number of assigned chats
       if (saleObj.nacs) {
         saleObj.nacs = 0;
@@ -106,8 +126,6 @@ export default class AutoAssignChatUseCaseImpl implements AutoAssignChatUseCase 
       lsi3: `${assigneeId}#${status}`,
       lsi4: status,
     };
-
-    // TODO: Get creation time from latest message sent by customer
 
     return chatSessionRepository.create(tenant, conversationId, chatSession);
   };

@@ -1,7 +1,7 @@
 import { helper, logger } from 'core';
 import { ChatSession, ChatSessionStatus } from '../models/ChatSession';
 import { CognitoUser } from '../models/CognitoUser';
-import { sessionRepository } from '../repositories';
+import { chatRepository, chatSessionRepository } from '../repositories';
 import { CloseSessionUseCase } from './interfaces/CloseSessionUseCase';
 
 export default class CloseSessionUseCaseImpl implements CloseSessionUseCase {
@@ -21,7 +21,7 @@ export default class CloseSessionUseCaseImpl implements CloseSessionUseCase {
   ): Promise<ChatSession> {
     logger.log(`Close session ${sessionId} of conversation ${conversationId} for tenant ${currentUser.tenant}`);
 
-    const currentSession = await sessionRepository.get(
+    const currentSession = await chatSessionRepository.get(
       currentUser.tenant,
       conversationId,
       sessionId,
@@ -45,16 +45,30 @@ export default class CloseSessionUseCaseImpl implements CloseSessionUseCase {
       endTime: now,
       duration,
       lsi1: now.toString(), // createdAt
-      lsi2: `${conversationId}#${ChatSessionStatus.CLOSED}`, // conversationId#status
+      lsi2: duration.toString(), // duration
       lsi3: `${currentUser.username}#${ChatSessionStatus.CLOSED}`, // assigneeId#status
       lsi4: ChatSessionStatus.CLOSED, // status
     };
-    const updatedSession = await sessionRepository.update(
+    const updatedSession = await chatSessionRepository.update(
       currentUser.tenant,
       conversationId,
       sessionId,
       dataToUpdate,
     );
+
+    // Remove conversation assignee
+    // User can't see the conversation at the web app
+    // until another assignee is assigned
+    const conversation = await chatRepository.getConversationByReverseIndex({
+      tenant: currentUser.tenant,
+      chatPlatform: updatedSession.platform,
+      conversationId,
+    });
+    if (conversation) {
+      await chatRepository.closeConversation(conversation);
+    }
+
+    // Return chat session data
     return helper.excludeDataFromObject(updatedSession) as ChatSession;
   }
 }
