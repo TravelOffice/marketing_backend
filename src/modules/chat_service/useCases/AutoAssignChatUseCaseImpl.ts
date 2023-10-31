@@ -23,13 +23,13 @@ export default class AutoAssignChatUseCaseImpl implements AutoAssignChatUseCase 
         // With each key, check if it has property Bool or Nul
         // Transform it to BOOL or NULL
         // Check `Bool` key
-        if (marshalledSale[key].Bool) {
+        if (marshalledSale[key].hasOwnProperty('Bool')) {
           marshalledSale[key].BOOL = marshalledSale[key].Bool;
           delete marshalledSale[key].Bool;
         }
 
         // Check `Nul` key
-        if (marshalledSale[key].Nul) {
+        if (marshalledSale[key].hasOwnProperty('Nul')) {
           marshalledSale[key].NULL = marshalledSale[key].Nul;
           delete marshalledSale[key].Nul;
         }
