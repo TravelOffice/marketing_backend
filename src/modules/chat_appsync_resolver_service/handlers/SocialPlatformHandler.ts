@@ -13,10 +13,6 @@ export default class SocialPlatformHandler implements AppSyncHandler {
       LogType: 'Tail' as LogType,
       Payload: Buffer.from(JSON.stringify(event)),
     };
-    const { Payload: payloadString } = await lambdaProvider.invokeFunction(invokeParams);
-    if (payloadString && typeof payloadString === 'string') {
-      return JSON.parse(payloadString);
-    }
-    throw new Error('Unable to read payload returned from invocation');
+    return lambdaProvider.invokeFunction(invokeParams);
   };
 }
