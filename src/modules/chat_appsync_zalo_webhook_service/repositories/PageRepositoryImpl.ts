@@ -19,8 +19,8 @@ export default class PageRepositoryImpl implements PageRepository {
       IndexName: 'ReverseIndex',
       KeyConditionExpression: 'sk = :sk_page AND begins_with(pk, :pk_filter)',
       ExpressionAttributeValues: {
-        ':sk_page': { S: `${PAGE_INDEX}#${chatPlatformIndex}#${pageId}` },
-        ':pk_filter': { S: `${TENANT_INDEX}#` },
+        ':sk_page': `${PAGE_INDEX}#${chatPlatformIndex}#${pageId}`,
+        ':pk_filter': `${TENANT_INDEX}#`,
       },
     };
     const pageItems = await dynamoProvider.query(input);
