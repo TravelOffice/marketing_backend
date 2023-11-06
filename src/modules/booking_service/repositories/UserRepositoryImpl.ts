@@ -1,5 +1,5 @@
 import { getAwsSecretValue } from 'get-env';
-import { QueryInput, dynamoProvider, helper } from 'core';
+import { dynamoProvider, helper, QueryInput } from 'core';
 import { EMPLOYEE_INDEX, TENANT_INDEX } from '../utils/constants';
 import { UserRepository } from './interfaces/UserRepository';
 import { User } from '../models/User';
@@ -18,8 +18,8 @@ export default class UserRepositoryImpl implements UserRepository {
       IndexName: 'ReverseIndex',
       KeyConditionExpression: 'sk = :sk_employee AND begins_with(pk, :pk_filter)',
       ExpressionAttributeValues: {
-        ':pk_filter': { S: `${TENANT_INDEX}#` },
-        ':sk_employee': { S: `${EMPLOYEE_INDEX}#${userId}` },
+        ':pk_filter': `${TENANT_INDEX}#`,
+        ':sk_employee': `${EMPLOYEE_INDEX}#${userId}`,
       },
     };
     const users = await dynamoProvider.query(queryParams);
