@@ -5,4 +5,5 @@ export interface ConversationQueryParams {
   chatPlatform: ChatPlatform,
   pageId: string,
   conversationId: string,
+  lastMessageSentAt?: string,
 }

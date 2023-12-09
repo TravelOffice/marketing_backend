@@ -1,7 +1,10 @@
+import { ChatPlatform } from 'common-models';
+import { AttributeValues, dynamoProvider } from 'core';
+import { ChatSession, ChatSessionStatus } from '../models/ChatSession';
 import { ConversationQueryParams } from '../models/ConversationQueryParams';
 import { DDBUser } from '../models/dynamodb/DDBUser';
-import { AttributeValues, dynamoProvider, saleDistributionProvider } from '../providers';
-import { chatRepository, userRepository } from '../repositories';
+import { saleDistributionProvider } from '../providers';
+import { chatRepository, chatSessionRepository, userRepository } from '../repositories';
 import logger from '../utils/logger';
 import { AutoAssignChatUseCase } from './interfaces';
 
@@ -12,7 +15,27 @@ export default class AutoAssignChatUseCaseImpl implements AutoAssignChatUseCase 
   ) => {
     // Sales data to assign
     const sales = marshalledSales.map((sale) => {
-      const saleObj = dynamoProvider.unmarshallValues(sale);
+      // Since DynamoDB data returned from StepFunctions is old version
+      // and it's not compatible with the new version of dynamo client js
+      // Do the trick to make it compatible by transform `Bool` and `Nul` to `BOOL` and `NULL`
+      const marshalledSale = ({ ...sale }) as any;
+      Object.keys(marshalledSale).forEach((key) => {
+        // With each key, check if it has property Bool or Nul
+        // Transform it to BOOL or NULL
+        // Check `Bool` key
+        if (marshalledSale[key].hasOwnProperty('Bool')) {
+          marshalledSale[key].BOOL = marshalledSale[key].Bool;
+          delete marshalledSale[key].Bool;
+        }
+
+        // Check `Nul` key
+        if (marshalledSale[key].hasOwnProperty('Nul')) {
+          marshalledSale[key].NULL = marshalledSale[key].Nul;
+          delete marshalledSale[key].Nul;
+        }
+      });
+
+      const saleObj = dynamoProvider.unmarshall(marshalledSale);
       // Number of assigned chats
       if (saleObj.nacs) {
         saleObj.nacs = 0;
@@ -27,7 +50,11 @@ export default class AutoAssignChatUseCaseImpl implements AutoAssignChatUseCase 
     // Get conversation from DynamoDB
     const conversation = await chatRepository.getConversation(conversationQueryParams);
     const {
-      tenant, pageId, conversationId,
+      tenant,
+      pageId,
+      conversationId,
+      chatPlatform,
+      lastMessageSentAt = Date.now().toString(),
     } = conversationQueryParams;
     if (!conversation) {
       // Return error if conversation is not existed
@@ -47,6 +74,59 @@ export default class AutoAssignChatUseCaseImpl implements AutoAssignChatUseCase 
 
     logger.log(`Conversation ${JSON.stringify(conversationQueryParams, null, 2)} has be assigned to employee ${JSON.stringify(nextAssignedUser, null, 2)}`);
 
-    return nextAssignedUser;
+    // Create chat session after assigned sale
+    const chatSession = await this.createChatSession({
+      tenant,
+      conversationId,
+      lastMessageSentAt,
+      chatPlatform,
+      assignedEmployee: nextAssignedUser,
+    });
+
+    logger.log(`Chat session for conversation ${JSON.stringify(chatSession, null, 2)} has been created`);
+
+    return {
+      assignedSale: nextAssignedUser,
+      attachedChatSession: chatSession,
+    };
+  };
+
+  private createChatSession = async (params: {
+    tenant: string,
+    conversationId: string,
+    lastMessageSentAt: string,
+    chatPlatform: ChatPlatform,
+    assignedEmployee: DDBUser,
+  }) => {
+    // Extract information from params
+    const {
+      tenant,
+      conversationId,
+      chatPlatform,
+      assignedEmployee,
+      lastMessageSentAt,
+    } = params;
+    const { username: assigneeId, firstName, lastName } = assignedEmployee;
+    const assigneeName = `${firstName} ${lastName}`;
+    const code = await chatSessionRepository.generateChatSessionCode(tenant);
+
+    const createdAt = Date.now();
+    const status = ChatSessionStatus.OPEN;
+    const chatSession: Omit<ChatSession, 'pk' | 'sk'> = {
+      code,
+      conversationId,
+      assigneeId,
+      assigneeName,
+      platform: chatPlatform,
+      status,
+      startTime: parseInt(lastMessageSentAt, 10),
+      createdAt,
+      updatedAt: createdAt,
+      lsi1: createdAt.toString(),
+      lsi3: `${assigneeId}#${status}`,
+      lsi4: status,
+    };
+
+    return chatSessionRepository.create(tenant, conversationId, chatSession);
   };
 }

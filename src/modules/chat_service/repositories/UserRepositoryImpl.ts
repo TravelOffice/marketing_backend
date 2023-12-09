@@ -1,6 +1,6 @@
 import { getAwsSecretValue } from 'get-env';
+import { dynamoProvider } from 'core';
 import { DDBUser } from '../models/dynamodb/DDBUser';
-import { dynamoProvider } from '../providers';
 import { EMPLOYEE_INDEX, TENANT_INDEX } from '../utils/dynamodbConstants';
 import logger from '../utils/logger';
 import { UserRepository } from './interfaces/UserRepository';

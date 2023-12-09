@@ -1,7 +1,7 @@
 import { helper } from 'core';
-import { sessionRepository } from '../repositories';
+import { chatSessionRepository } from '../repositories';
 import { GetListOfSessionByConversationIdUseCase } from './interfaces/GetListOfSessionByConversationIdUseCase';
-import { Session } from '../models/Session';
+import { ChatSession, ChatSessionStatus } from '../models/ChatSession';
 import { CognitoUser } from '../models/CognitoUser';
 
 export default class GetListOfSessionByConversationIdImpl
@@ -11,16 +11,28 @@ implements GetListOfSessionByConversationIdUseCase {
    *
    * @param currentUser - The current user invoking the use case.
    * @param conversationId - The ID of the conversation.
+   * @param status - The status of the session.
    * @returns A Promise that resolves to an array of sources.
    */
   async invoke(
     currentUser: CognitoUser,
     conversationId: string,
-  ): Promise<Array<Session>> {
-    const sessions = await sessionRepository.listByConversationId(
-      currentUser.tenant,
-      conversationId,
-    );
-    return sessions.map((session) => helper.excludeDataFromObject(session) as Session);
+    status?: ChatSessionStatus,
+  ): Promise<Array<ChatSession>> {
+    let sessions: ChatSession[] = [];
+    if (status) {
+      sessions = await chatSessionRepository.listByConversationIdAndStatus(
+        currentUser.tenant,
+        conversationId,
+        status,
+      );
+    } else {
+      sessions = await chatSessionRepository.listByConversationId(
+        currentUser.tenant,
+        conversationId,
+      );
+    }
+
+    return sessions.map((session) => helper.excludeDataFromObject(session) as ChatSession);
   }
 }

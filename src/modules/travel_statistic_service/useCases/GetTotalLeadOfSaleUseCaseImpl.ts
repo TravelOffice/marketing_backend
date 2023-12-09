@@ -1,13 +1,13 @@
 import { GetTotalLeadOfSaleUseCase } from './interfaces/GetTotalLeadOfSaleUseCase';
 import { saleStatisticRepository } from '../repositories';
-import { FilteringDuration } from '../models/FilteringDuration';
+import { FilteringTimeRange } from '../models/FilteringDuration';
 import { TotalLeadMetricResponse } from '../models/LeadStatistic';
 
 export default class GetTotalLeadOfSaleUseCaseImpl implements GetTotalLeadOfSaleUseCase {
   invoke = async (
     tenant: string,
     saleId: string,
-    filteringDuration?: FilteringDuration,
+    filteringDuration?: FilteringTimeRange,
   ): Promise<TotalLeadMetricResponse> => {
     const records = await saleStatisticRepository.getLeadStatistic(
       tenant,

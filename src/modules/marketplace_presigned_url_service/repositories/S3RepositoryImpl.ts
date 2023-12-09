@@ -1,5 +1,5 @@
+import { s3Provider } from 'core';
 import { getAwsSecretValue, getEnv } from 'get-env';
-import { s3Provider } from '../providers';
 import { S3Repository } from './interfaces/S3Repository';
 
 export default class S3RepositoryImpl implements S3Repository {
@@ -15,6 +15,7 @@ export default class S3RepositoryImpl implements S3Repository {
   ) => {
     const bucket = await getAwsSecretValue('MARKETPLACE_FILE_BUCKET');
     const expires = Number(getEnv('PRESIGNED_URL_EXPIRES'));
-    return s3Provider.generatePresignedUrl(bucket, key, expires, fileType);
+    const cdnUrl = await getAwsSecretValue('MARKETPLACE_FILE_CDN');
+    return s3Provider.generateSignedUrl(bucket, key, expires, fileType, cdnUrl);
   };
 }

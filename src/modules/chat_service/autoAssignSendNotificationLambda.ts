@@ -1,11 +1,11 @@
 import { saleAssignmentRepository } from 'auto-assign-utilities';
+import { lambdaProvider } from 'core';
 import { getEnv } from 'get-env';
 import { ConversationQueryParams } from './models/ConversationQueryParams';
 import { DDBUser } from './models/dynamodb/DDBUser';
 import { MailTemplate } from './models/MailTemplates';
 import { tenantRepository } from './repositories';
 import { NO_REPLY_DEFAULT_EMAIL } from './utils/constants';
-import invokeFunction from './utils/lambda';
 import logger from './utils/logger';
 import { CHAT_NEW_CONVERSATION_ASSIGNED } from './utils/notificationTypeConstants';
 import formatString from './utils/string';
@@ -47,11 +47,12 @@ const sendEmail = async (fromAddress: string, mailTemplate: MailTemplate) => {
       ...mailTemplate,
     },
   };
-  await invokeFunction({
+  await lambdaProvider.invokeFunction({
     FunctionName: getEnv('SEND_NOTIFICATION_SERVICE_NAME'),
     InvocationType: 'RequestResponse',
     LogType: 'Tail',
-    Payload: JSON.stringify(sendMailData),
+    Payload: Buffer.from(JSON.stringify(sendMailData))
+    ,
   });
 };
 
@@ -75,11 +76,11 @@ const notifyNewAssignedConversationViaAppSync = async (
       timestamp: Date.now(),
     },
   };
-  await invokeFunction({
+  await lambdaProvider.invokeFunction({
     FunctionName: getEnv('SEND_NOTIFICATION_SERVICE_NAME'),
     InvocationType: 'RequestResponse',
     LogType: 'Tail',
-    Payload: JSON.stringify(sendNotificationData),
+    Payload: Buffer.from(JSON.stringify(sendNotificationData)),
   });
 };
 

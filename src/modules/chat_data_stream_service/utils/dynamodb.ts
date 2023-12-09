@@ -10,6 +10,6 @@ export function isChatConversation(pk: string): boolean {
 }
 
 export function isChatSession(pk: string): boolean {
-  const regex = new RegExp(`^${TENANT_INDEX}#.*#${CHAT_SESSION_INDEX}$`);
+  const regex = new RegExp(`^${TENANT_INDEX}#.*#${CHAT_SESSION_INDEX}`);
   return regex.test(pk);
 }

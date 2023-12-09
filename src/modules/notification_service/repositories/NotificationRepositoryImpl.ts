@@ -1,4 +1,5 @@
-import { appSyncProvider, mailProvider, SESSendEmailRequest } from '../providers';
+import { SendEmailCommandInput } from '@aws-sdk/client-ses';
+import { appSyncProvider, mailProvider } from '../providers';
 import { MAIL_DEFAULT_CHARSET } from '../utils/constants';
 import { NotificationRepository } from './interfaces/NotificationRepository';
 
@@ -11,27 +12,25 @@ export default class NotificationRepositoryImpl implements NotificationRepositor
     text: string,
     subject: string,
   ) => {
-    const request: SESSendEmailRequest = {
-      FromEmailAddress: fromAddress,
+    const request: SendEmailCommandInput = {
+      Source: fromAddress,
       Destination: {
         ToAddresses: toAddresses,
         CcAddresses: ccAddresses,
       },
-      Content: {
-        Simple: {
-          Subject: {
+      Message: {
+        Subject: {
+          Charset: MAIL_DEFAULT_CHARSET,
+          Data: subject,
+        },
+        Body: {
+          Html: {
             Charset: MAIL_DEFAULT_CHARSET,
-            Data: subject,
+            Data: html,
           },
-          Body: {
-            Html: {
-              Charset: MAIL_DEFAULT_CHARSET,
-              Data: html,
-            },
-            Text: {
-              Charset: MAIL_DEFAULT_CHARSET,
-              Data: text,
-            },
+          Text: {
+            Charset: MAIL_DEFAULT_CHARSET,
+            Data: text,
           },
         },
       },
@@ -40,10 +39,10 @@ export default class NotificationRepositoryImpl implements NotificationRepositor
   };
 
   sendAppSyncNotification = async (
-    notificationtype: string,
-    data: string, // AWSJSON string
+    notificationType: string,
+    data: string, // AWS JSON string
     timestamp: number,
     tenant?: string,
     username?: string,
-  ) => appSyncProvider.executeSendNotification(notificationtype, data, timestamp, tenant, username);
+  ) => appSyncProvider.executeSendNotification(notificationType, data, timestamp, tenant, username);
 }

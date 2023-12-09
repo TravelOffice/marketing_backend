@@ -1,11 +1,9 @@
+import { dynamoProvider } from 'core';
 import { getAwsSecretValue } from 'get-env';
 import { NewConversationInfo } from '../models';
-import { dynamoProvider, sfnProvider, sqsProvider } from '../providers';
+import { sfnProvider, sqsProvider } from '../providers';
 import {
-  PAGE_INDEX,
-  SQS_ID_DELIMITER,
-  TASK_TOKEN_INDEX,
-  TENANT_INDEX,
+  PAGE_INDEX, SQS_ID_DELIMITER, TASK_TOKEN_INDEX, TENANT_INDEX,
 } from '../utils/constants';
 import logger from '../utils/logger';
 import stringToHash from '../utils/string';
@@ -124,6 +122,7 @@ export default class SaleAssignmentRepositoryImpl implements SaleAssignmentRepos
    * @param chatPlatform Chat platform
    * @param pageId Page id
    * @param conversationId Conversation id
+   * @param taskToken
    */
   storeSfnTaskToken = async (
     tenant: string,

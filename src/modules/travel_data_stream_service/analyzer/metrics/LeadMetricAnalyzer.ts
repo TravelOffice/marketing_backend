@@ -3,7 +3,11 @@ import { Lead } from '../../models/Lead';
 import { LeadStatistic } from '../../models/statistic/LeadStatistic';
 import { MetricName } from '../../models/statistic/analyzer';
 import { RequiredDynamoDBRecord } from '../../types/dynamodb';
-import { LEAD_STATISTIC_INDEX, TENANT_STATISTIC_INDEX } from '../../utils/constants';
+import {
+  LEAD_CREATE_FROM_CHAT_INDEX,
+  LEAD_STATISTIC_INDEX,
+  TENANT_STATISTIC_INDEX,
+} from '../../utils/constants';
 import AbstractMetricAnalyzer from './AbstractMetricAnalyzer';
 
 export default class LeadMetricAnalyzer extends AbstractMetricAnalyzer {
@@ -44,6 +48,10 @@ export default class LeadMetricAnalyzer extends AbstractMetricAnalyzer {
         lsi2: `${assigneeId}#${createdAt}`,
         lsi3: sourceId,
       };
+
+      if (lead.conversationId) {
+        this.output.lsi4 = `${LEAD_CREATE_FROM_CHAT_INDEX}#${createdAt}`;
+      }
     }
   }
 }

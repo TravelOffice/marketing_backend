@@ -1,7 +1,8 @@
 /* eslint-disable */
-import { DynamoDBStreamEvent } from 'aws-lambda';
 
-export const ddbStreamEvent: DynamoDBStreamEvent = {
+import {_Record} from "@aws-sdk/client-dynamodb-streams";
+
+export const ddbStreamEvent: { Records: _Record[] } = {
   Records: [
     // LEAD changes
     {
@@ -12,7 +13,7 @@ export const ddbStreamEvent: DynamoDBStreamEvent = {
       eventSource: 'aws:dynamodb',
       awsRegion: 'ap-southeast-1',
       dynamodb: {
-        ApproximateCreationDateTime: 1692348489,
+        ApproximateCreationDateTime: new Date(1692348489),
         SequenceNumber: '1',
         Keys: {
           pk: {
@@ -49,7 +50,7 @@ export const ddbStreamEvent: DynamoDBStreamEvent = {
       eventSource: 'aws:dynamodb',
       awsRegion: 'ap-southeast-1',
       dynamodb: {
-        ApproximateCreationDateTime: 1692348489,
+        ApproximateCreationDateTime: new Date(1692348489),
         SequenceNumber: '2',
         Keys: {
           pk: {
@@ -86,7 +87,7 @@ export const ddbStreamEvent: DynamoDBStreamEvent = {
       eventSource: 'aws:dynamodb',
       awsRegion: 'ap-southeast-1',
       dynamodb: {
-        ApproximateCreationDateTime: 1692348489,
+        ApproximateCreationDateTime: new Date(1692348489),
         SequenceNumber: '3',
         Keys: {
           pk: {
@@ -123,7 +124,7 @@ export const ddbStreamEvent: DynamoDBStreamEvent = {
       eventSource: 'aws:dynamodb',
       awsRegion: 'ap-southeast-1',
       dynamodb: {
-        ApproximateCreationDateTime: 1692348489,
+        ApproximateCreationDateTime: new Date(1692348489),
         SequenceNumber: '4',
         Keys: {
           pk: {
@@ -161,7 +162,7 @@ export const ddbStreamEvent: DynamoDBStreamEvent = {
       eventSource: 'aws:dynamodb',
       awsRegion: 'ap-southeast-1',
       dynamodb: {
-        ApproximateCreationDateTime: 1692348489,
+        ApproximateCreationDateTime: new Date(1692348489),
         SequenceNumber: '5',
         Keys: {
           pk: {
@@ -204,7 +205,7 @@ export const ddbStreamEvent: DynamoDBStreamEvent = {
       eventSource: 'aws:dynamodb',
       awsRegion: 'ap-southeast-1',
       dynamodb: {
-        ApproximateCreationDateTime: 1692348489,
+        ApproximateCreationDateTime: new Date(1692348489),
         SequenceNumber: '6',
         Keys: {
           pk: {
@@ -262,7 +263,7 @@ export const ddbStreamEvent: DynamoDBStreamEvent = {
       eventSource: 'aws:dynamodb',
       awsRegion: 'ap-southeast-1',
       dynamodb: {
-        ApproximateCreationDateTime: 1692348489,
+        ApproximateCreationDateTime: new Date(1692348489),
         SequenceNumber: '7',
         Keys: {
           pk: {

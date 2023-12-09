@@ -1,10 +1,10 @@
 import compression from 'compression';
+import { InvocationType, lambdaProvider, LogType } from 'core';
 import cors from 'cors';
 import { getMarketplaceUserInfo } from 'decode-token';
 import express, { NextFunction, Request, Response } from 'express';
 import { getEnv } from 'get-env';
 import { FAILED, SUCCESS } from './utils/constants';
-import invokeFunction from './utils/lambda';
 import logger from './utils/logger';
 import wrapResponse from './utils/wrapResponse';
 
@@ -36,15 +36,15 @@ app.get('/marketplace/available-leads', async (req: Request, res: Response) => {
     } = getMarketplaceUserInfo(req.headers.authorization!);
     const invokeParams = {
       FunctionName: getEnv('LEAD_SERVICE_NAME'),
-      InvocationType: 'RequestResponse',
-      LogType: 'Tail',
-      Payload: JSON.stringify({
+      InvocationType: 'RequestResponse' as InvocationType,
+      LogType: 'Tail' as LogType,
+      Payload: Buffer.from(JSON.stringify({
         organization,
         fromUser,
         paginationParams,
-      }),
+      })),
     };
-    const data = await invokeFunction(invokeParams);
+    const data = await lambdaProvider.invokeFunction(invokeParams);
     logger.log(`[GET] Get available leads Successfully ${data}`);
     res.json(wrapResponse(SUCCESS, data));
   } catch (error: any) {
@@ -62,15 +62,15 @@ app.get('/marketplace/available-tour-templates', async (req: Request, res: Respo
     } = getMarketplaceUserInfo(req.headers.authorization!);
     const invokeParams = {
       FunctionName: getEnv('TOUR_TEMPLATE_SERVICE_NAME'),
-      InvocationType: 'RequestResponse',
-      LogType: 'Tail',
-      Payload: JSON.stringify({
+      InvocationType: 'RequestResponse' as InvocationType,
+      LogType: 'Tai1' as LogType,
+      Payload: Buffer.from(JSON.stringify({
         organization,
         fromUser,
         paginationParams,
-      }),
+      })),
     };
-    const data = await invokeFunction(invokeParams);
+    const data = await lambdaProvider.invokeFunction(invokeParams);
     logger.log(`[GET] Get available tour templates Successfully ${data}`);
     res.json(wrapResponse(SUCCESS, data));
   } catch (error: any) {

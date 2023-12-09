@@ -10,6 +10,9 @@ export default class SaleDistributionProvider {
    * @returns User who will be assigned to new conversation
    */
   getAssignedUser = (sales: DDBUser[]): DDBUser => {
+    // TODO: Count number of assigned chats from statistic table
+    // For now, statistic table store all the conversations related to tenant or user
+    // We can find list of conversations by tenant and user, then count number of assigned chats
     const availableSales = new PriorityRoundRobin<DDBUser>(
       // Select next available server with lowest load
       (a: DDBUser, b: DDBUser) => a.nacs! - b.nacs!,

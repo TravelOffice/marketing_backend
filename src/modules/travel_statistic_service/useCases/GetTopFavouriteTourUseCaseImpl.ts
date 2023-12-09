@@ -1,4 +1,4 @@
-import { FilteringDuration } from '../models/FilteringDuration';
+import { FilteringTimeRange } from '../models/FilteringDuration';
 import { tenantStatisticRepository } from '../repositories';
 import { GetTopFavouriteTourUseCase } from './interfaces/GetTopFavouriteTourUseCase';
 import { BookingStatistic, FavouriteTour } from '../models/BookingStatistic';
@@ -7,7 +7,7 @@ import { DEFAULT_TOP_COUNT } from '../utils/constants';
 export default class GetTopFavouriteTourUseCaseImpl implements GetTopFavouriteTourUseCase {
   invoke = async (
     tenant: string,
-    filteringDuration?: FilteringDuration,
+    filteringDuration?: FilteringTimeRange,
     topCount?: number,
   ): Promise<FavouriteTour[]> => {
     const records = await tenantStatisticRepository.getBookingStatistic(

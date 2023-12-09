@@ -1,4 +1,4 @@
-import { Session } from '../../models/Session';
+import { ChatSession } from '../../models/ChatSession';
 import { CognitoUser } from '../../models/CognitoUser';
 
 export interface ActivateSessionUseCase {
@@ -6,5 +6,5 @@ export interface ActivateSessionUseCase {
     currentUser: CognitoUser,
     conversationId: string,
     sessionId: string,
-  ): Promise<Session>,
+  ): Promise<ChatSession>,
 }

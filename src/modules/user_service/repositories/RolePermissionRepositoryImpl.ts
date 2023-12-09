@@ -1,8 +1,6 @@
-import AWS from 'aws';
 import { getAwsSecretValue } from 'get-env';
+import { dynamoProvider } from 'core';
 import { Role } from '../models';
-import { dynamoProvider } from '../providers';
-import { QueryInput } from '../providers/DynamoProvider';
 import { PARTITION_KEY_DELIMITER, ROLE_INDEX, TENANT_INDEX } from '../utils/constants';
 import logger from '../utils/logger';
 import { RolePermissionRepository } from './interfaces/RolePermissionRepository';
@@ -16,21 +14,20 @@ export default class RolePermissionRepositoryImpl implements RolePermissionRepos
   listRoles = async (tenantId: string) => {
     logger.log(`Get list role infomation: Tenant ${tenantId}}`);
     const table = await getAwsSecretValue('DYNAMO_ROLE_PERMISSION_TABLE');
-    const query: QueryInput = {
+    const query = {
       TableName: table,
       KeyConditionExpression: 'pk = :pk_filter AND begins_with(sk, :sk_filter)',
       ExpressionAttributeValues: {
-        ':pk_filter': { S: `${TENANT_INDEX}#${tenantId}` },
-        ':sk_filter': { S: `${ROLE_INDEX}#` },
+        ':pk_filter': `${TENANT_INDEX}#${tenantId}`,
+        ':sk_filter': `${ROLE_INDEX}#`,
       },
     };
-    const { Items: items } = await dynamoProvider.rawQuery(query);
-    if (!items || items.length === 0) {
+    const items = await dynamoProvider.query(query);
+    if (items.length === 0) {
       return [];
     }
 
-    const roles = items.map((item) => {
-      const role = AWS.DynamoDB.Converter.unmarshall(item);
+    const roles = items.map((role) => {
       const {
         pk, sk, lsi1, lsi2, lsi3, lsi4, lsi5, ...rest
       } = role;
@@ -40,32 +37,31 @@ export default class RolePermissionRepositoryImpl implements RolePermissionRepos
         name: roleName,
       } as Role;
     });
-    logger.log(`Get list role infomation: Found ${roles.length} roles`);
+    logger.log(`Get list role information: Found ${roles.length} roles`);
     return roles;
   };
 
   /**
-* Get the list Default Role information
-* @returns Promise of list default Role
-*/
+   * Get the list Default Role information
+   * @returns Promise of list default Role
+   */
   listDefaultRoles = async () => {
     logger.log('Get list default roles infomation');
     const table = await getAwsSecretValue('DYNAMO_ROLE_PERMISSION_TABLE');
-    const query: QueryInput = {
+    const query = {
       TableName: table,
       KeyConditionExpression: 'pk = :pk_filter AND begins_with(sk, :sk_filter)',
       ExpressionAttributeValues: {
-        ':pk_filter': { S: `${ROLE_INDEX}` },
-        ':sk_filter': { S: `${ROLE_INDEX}#` },
+        ':pk_filter': `${ROLE_INDEX}`,
+        ':sk_filter': `${ROLE_INDEX}#`,
       },
     };
-    const { Items: items } = await dynamoProvider.rawQuery(query);
-    if (!items || items.length === 0) {
+    const items = await dynamoProvider.query(query);
+    if (items.length === 0) {
       return [];
     }
 
-    const roles = items.map((item) => {
-      const role = AWS.DynamoDB.Converter.unmarshall(item);
+    const roles = items.map((role) => {
       const {
         pk, sk, lsi1, lsi2, lsi3, lsi4, lsi5, ...rest
       } = role;

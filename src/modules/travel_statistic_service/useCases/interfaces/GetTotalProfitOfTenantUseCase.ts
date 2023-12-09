@@ -1,9 +1,9 @@
-import { FilteringDuration } from '../../models/FilteringDuration';
+import { FilteringTimeRange } from '../../models/FilteringDuration';
 import { TotalProfitMetricResponse } from '../../models/DepartureTourStatistic';
 
 export interface GetTotalProfitOfTenantUseCase {
   invoke(
     tenant: string,
-    filteringDuration?: FilteringDuration,
+    filteringDuration?: FilteringTimeRange,
   ): Promise<TotalProfitMetricResponse>;
 }

@@ -1,6 +1,7 @@
 import axios, { AxiosInstance } from 'axios';
 import {
-  File as TelegramFile, FileOptions,
+  File as TelegramFile,
+  FileOptions,
   SendAudioOptions,
   SendMessageOptions,
   SendPhotoOptions,
@@ -12,7 +13,7 @@ import * as fs from 'fs';
 import FormData from 'form-data';
 import { TelegramAttachmentContent } from '../models/send-message/SendMessageOptions';
 import logger from '../utils/logger';
-import { s3Provider } from '.';
+import { fileProvider } from './index';
 
 export default class TelegramPlatformProvider {
   // Fill telegram bot api endpoint here
@@ -23,34 +24,6 @@ export default class TelegramPlatformProvider {
 
   // Instance to call api
   private readonly axiosInstance: AxiosInstance;
-
-  private readonly get = async (url: string, params?: Object) => {
-    try {
-      const response = await this.axiosInstance.get(url, { params });
-      return response.data.result;
-    } catch (e: any) {
-      if (axios.isAxiosError(e)) {
-        logger.log(`[TelegramPlatformProvider.get] Error: ${JSON.stringify(e.toJSON)}`);
-        if (e.response) {
-          // The request was made and the server responded with a status code
-          // that falls out of the range of 2xx
-          logger.log(`[TelegramPlatformProvider.get] Server response an error with data ${e.response}`);
-        } else if (e.request) {
-          // The request was made but no response was received
-          // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-          // http.ClientRequest in node.js
-          logger.log(e.request);
-        } else {
-          // Something happened in setting up the request that triggered an Error
-          logger.log(`[TelegramPlatformProvider.get] Setting up request error ${e.message}`);
-        }
-        logger.log(e.config);
-        throw new Error(e.message);
-      } else {
-        throw e;
-      }
-    }
-  };
 
   /**
    * Constructor, init http client to communicate Telegram Message Platform APIs
@@ -243,7 +216,7 @@ export default class TelegramPlatformProvider {
     fileOptions?: FileOptions,
   ): Promise<TelegramMessage> => {
     // Download file from CDN url
-    const downloadedFilePath = await s3Provider.downloadFileFromCDN(document.toString());
+    const downloadedFilePath = await fileProvider.downloadFileFromCDN(document.toString());
 
     // Pass all params to form data
     const form = new FormData();
@@ -288,4 +261,32 @@ export default class TelegramPlatformProvider {
     accessToken: string,
     filePath: string,
   ): string => `${this.messagePlatformBaseUrl}/file/bot${accessToken}/${filePath}`;
+
+  private readonly get = async (url: string, params?: Object) => {
+    try {
+      const response = await this.axiosInstance.get(url, { params });
+      return response.data.result;
+    } catch (e: any) {
+      if (axios.isAxiosError(e)) {
+        logger.log(`[TelegramPlatformProvider.get] Error: ${JSON.stringify(e.toJSON)}`);
+        if (e.response) {
+          // The request was made and the server responded with a status code
+          // that falls out of the range of 2xx
+          logger.log(`[TelegramPlatformProvider.get] Server response an error with data ${e.response}`);
+        } else if (e.request) {
+          // The request was made but no response was received
+          // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+          // http.ClientRequest in node.js
+          logger.log(e.request);
+        } else {
+          // Something happened in setting up the request that triggered an Error
+          logger.log(`[TelegramPlatformProvider.get] Setting up request error ${e.message}`);
+        }
+        logger.log(e.config);
+        throw new Error(e.message);
+      } else {
+        throw e;
+      }
+    }
+  };
 }

@@ -50,7 +50,7 @@ export default class ReceiveTelegramWebhookUseCaseImpl implements ReceiveTelegra
     }
 
     // Save the chat message
-    await messageRepository.saveChatMessage(tenantId, platform, page, message);
+    const savedMessage = await messageRepository.saveChatMessage(tenantId, platform, page, message);
 
     // Save the last message to conversation
     const conversation = await messageRepository.saveConversation(
@@ -72,11 +72,15 @@ export default class ReceiveTelegramWebhookUseCaseImpl implements ReceiveTelegra
     if (assignee === UNKNOWN_USER) {
       logger.log(`Conversation ${conversation.info.id} is unassigned, continue process auto assignment`);
       // Send to SQS message to process auto assignment
+      const { createdAt: lastMessageSentAt = Date.now() } = savedMessage;
+      const expectedEndAtIfNotReplied = (lastMessageSentAt + 5 * 60 * 1000).toString();
       await saleAssignmentRepository.notifyNewIncomingConversation({
         tenant: page.tenantId,
         pageId: page.id.toString(),
         chatPlatform: page.platform,
         conversationId: conversation.info.id.toString(),
+        lastMessageSentAt: lastMessageSentAt.toString(),
+        expectedEndAtIfNotReplied,
       });
     } else {
       logger.log(`Conversation ${conversation.info.id} is assigned to ${conversation.assignee}, skip process auto assignment`);

@@ -15,8 +15,8 @@ export default class PageRepositoryImpl implements PageRepository {
       TableName: table,
       KeyConditionExpression: 'pk = :pk_tenant AND begins_with(sk, :sk_filter)',
       ExpressionAttributeValues: {
-        ':pk_tenant': { S: `${TENANT_INDEX}#${tenantId}` },
-        ':sk_filter': { S: `${PAGE_INDEX}` },
+        ':pk_tenant': `${TENANT_INDEX}#${tenantId}`,
+        ':sk_filter': `${PAGE_INDEX}`,
       },
     };
     const pageItems = await dynamoProvider.query(params);

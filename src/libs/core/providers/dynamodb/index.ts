@@ -21,4 +21,8 @@ export {
   DeleteItemInput,
   BatchGetItemInput,
   KeyList,
+  AttributeValues,
+  PaginationResponsePayload,
+  PaginationParams,
+  ReturnValue,
 } from './DynamoProvider';

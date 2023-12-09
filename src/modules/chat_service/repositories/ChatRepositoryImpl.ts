@@ -1,16 +1,15 @@
 import { NewConversationInfo } from 'auto-assign-utilities/models';
-import AWS from 'aws';
 import { DDBConversation } from 'common-models';
 import { getAwsSecretValue } from 'get-env';
+import { AttributeValues, dynamoProvider, QueryInput } from 'core';
 import { ConversationQueryParams } from '../models/ConversationQueryParams';
-import { dynamoProvider, AttributeValues } from '../providers';
-import { QueryInput } from '../providers/DynamoProvider';
 import { UNKNOWN_USER } from '../utils/constants';
 import {
   ASSIGNEE_INDEX,
   CONVERSATION_ASSSIGNEE_INDEX,
   CONVERSATION_INDEX,
-  PARTITION_KEY_DELIMITER, TENANT_INDEX,
+  PARTITION_KEY_DELIMITER,
+  TENANT_INDEX,
 } from '../utils/dynamodbConstants';
 import logger from '../utils/logger';
 import { ChatRepository } from './interfaces/ChatRepository';
@@ -44,18 +43,18 @@ export default class ChatRepositoryImpl implements ChatRepository {
         '#kn1': 'pk',
       },
       ExpressionAttributeValues: {
-        ':kv0': { S: `${ASSIGNEE_INDEX}#${UNKNOWN_USER}` },
-        ':kv1': { S: `${TENANT_INDEX}#${tenant}` },
+        ':kv0': `${ASSIGNEE_INDEX}#${UNKNOWN_USER}`,
+        ':kv1': `${TENANT_INDEX}#${tenant}`,
       },
       KeyConditionExpression: '#kn0 = :kv0 AND begins_with(#kn1, :kv1)',
     };
-    const { Items } = await dynamoProvider.rawQuery(query);
-    const unassignConversations = Items as Array<AttributeValues>;
+    const items = await dynamoProvider.query(query);
+    const unassignConversations = items as Array<AttributeValues>;
     if (!unassignConversations || unassignConversations.length === 0) {
       throw new Error(`Tenant [${tenant}]: Not found any unassign conversations!`);
     }
     return unassignConversations.map((element) => {
-      const conversation = AWS.DynamoDB.Converter.unmarshall(element) as DDBConversation;
+      const conversation = dynamoProvider.unmarshall(element) as DDBConversation;
       const [, , , chatPlatform, pageId] = conversation.pk.split(PARTITION_KEY_DELIMITER);
       const [, conversationId] = conversation.sk.split(PARTITION_KEY_DELIMITER);
       return {
@@ -81,18 +80,18 @@ export default class ChatRepositoryImpl implements ChatRepository {
         '#kn1': 'pk',
       },
       ExpressionAttributeValues: {
-        ':kv0': { S: `${ASSIGNEE_INDEX}#${UNKNOWN_USER}` },
-        ':kv1': { S: `${TENANT_INDEX}#` },
+        ':kv0': `${ASSIGNEE_INDEX}#${UNKNOWN_USER}`,
+        ':kv1': `${TENANT_INDEX}#`,
       },
       KeyConditionExpression: '#kn0 = :kv0 AND begins_with(#kn1, :kv1)',
     };
-    const { Items } = await dynamoProvider.rawQuery(query);
-    const unassignConversations = Items as Array<AttributeValues>;
+    const items = await dynamoProvider.query(query);
+    const unassignConversations = items as Array<AttributeValues>;
     if (!unassignConversations || unassignConversations.length === 0) {
       throw new Error('Not found any unassign conversations!');
     }
     const tenants = unassignConversations.map((element) => {
-      const conversation = AWS.DynamoDB.Converter.unmarshall(element) as DDBConversation;
+      const conversation = dynamoProvider.unmarshall(element) as DDBConversation;
       const [, tenant] = conversation.pk.split(PARTITION_KEY_DELIMITER);
       return tenant as string;
     });
@@ -123,5 +122,8 @@ export default class ChatRepositoryImpl implements ChatRepository {
       },
     );
     logger.log(`Conversation has been updated, new data is ${updatedConversation}`);
+  };
+
+  createChatSession = async () => {
   };
 }

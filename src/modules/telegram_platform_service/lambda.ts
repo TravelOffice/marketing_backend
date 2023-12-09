@@ -3,8 +3,8 @@ import {
   getFileInfoUseCase,
   getTelegramConversationsUseCase,
   getTelegramMessagesUseCase,
-  sendMessageUseCase,
   getTelegramUserProfileUseCase,
+  sendMessageUseCase,
 } from './usecases';
 import logger from './utils/logger';
 
@@ -111,7 +111,7 @@ const handleAppSyncEvent = async (event: AppSyncEvent) => {
 };
 
 /**
- * Handler for invocation from AppSync resolver lambda
+ * Handler for invocation from AppSync resolver cognito
  * This function handle the event forwarded from AppSync and return data from Telegram platform
  * @param event Invocation event
  * @param context Invocation context

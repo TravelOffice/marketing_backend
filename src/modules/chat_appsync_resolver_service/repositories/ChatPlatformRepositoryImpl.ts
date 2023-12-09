@@ -1,21 +1,16 @@
-import {
-  ChatPlatform,
-} from 'common-models';
+import { ChatPlatform } from 'common-models';
 import { getAwsSecretValue } from 'get-env';
-import { dynamoProvider } from '../providers';
-import {
-  CONVERSATION_INDEX,
-  PARTITION_KEY_DELIMITER,
-  TENANT_INDEX,
-} from '../utils/constants';
+import { dynamoProvider } from 'core';
+import { CONVERSATION_INDEX, PARTITION_KEY_DELIMITER, TENANT_INDEX } from '../utils/constants';
 import { ChatPlatformRepository } from './interfaces/ChatPlatformRepository';
 
 export default class ChatPlatformRepositoryImpl implements ChatPlatformRepository {
   /**
    * Method to get chat (aka conversation) information
    * @param tenantId The id of the Tenant which the user should belong to
-   * @param page The id of page
+   * @param pageId The id of page
    * @param conversationId The id of the conversation
+   * @param chatPlatform The platform of chat
    * @returns Promise<TelegramConversationWithAssignee> The conversation information with assigneeId
    */
   getConversationsAssignee = async (
@@ -26,7 +21,7 @@ export default class ChatPlatformRepositoryImpl implements ChatPlatformRepositor
   ) => {
     const table = await getAwsSecretValue('DYNAMO_CHAT_TABLE');
 
-    const item = await dynamoProvider.get(
+    const item = await dynamoProvider.getItem(
       table,
       `${TENANT_INDEX}#${tenantId}#${CONVERSATION_INDEX}#${chatPlatform.toUpperCase()}#${pageId}`,
       `${CONVERSATION_INDEX}#${conversationId}`,

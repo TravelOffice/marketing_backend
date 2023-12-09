@@ -191,7 +191,7 @@ export default class BookingRepositoryImpl implements BookingRepository {
       };
 
       // Update the booking in the DynamoDB table and retrieve the updated attributes
-      const rs = await dynamoProvider.rawUpdateItem(updateParams);
+      const rs = await dynamoProvider.updateItemWithPrebuiltExpression(updateParams);
 
       // Log the success of the cancellation process
       logger.log('Cancellation process completed successfully.');

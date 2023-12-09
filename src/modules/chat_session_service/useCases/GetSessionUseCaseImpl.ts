@@ -1,8 +1,8 @@
 import { helper } from 'core';
 import { GetSessionUseCase } from './interfaces/GetSessionUseCase';
-import { Session } from '../models/Session';
+import { ChatSession } from '../models/ChatSession';
 import { CognitoUser } from '../models/CognitoUser';
-import { sessionRepository } from '../repositories';
+import { chatSessionRepository } from '../repositories';
 
 export default class GetSessionUseCaseImpl implements GetSessionUseCase {
   /**
@@ -17,9 +17,9 @@ export default class GetSessionUseCaseImpl implements GetSessionUseCase {
     currentUser: CognitoUser,
     conversationId: string,
     sessionId: string,
-  ): Promise<Session | undefined> {
-    const source = await sessionRepository.get(currentUser.tenant, conversationId, sessionId);
+  ): Promise<ChatSession | undefined> {
+    const source = await chatSessionRepository.get(currentUser.tenant, conversationId, sessionId);
     if (!source) return undefined;
-    return helper.excludeDataFromObject(source) as Session;
+    return helper.excludeDataFromObject(source) as ChatSession;
   }
 }

@@ -1,19 +1,41 @@
-import AWS from 'aws';
+import { AttributeValue, DynamoDBClient, ReturnValue } from '@aws-sdk/client-dynamodb';
+
+import {
+  BatchGetCommand,
+  BatchGetCommandInput,
+  BatchWriteCommand,
+  BatchWriteCommandInput,
+  DeleteCommand,
+  DeleteCommandInput,
+  DynamoDBDocumentClient,
+  GetCommand,
+  GetCommandInput,
+  PutCommand,
+  PutCommandInput,
+  QueryCommand,
+  QueryCommandInput,
+  UpdateCommand,
+  UpdateCommandInput,
+} from '@aws-sdk/lib-dynamodb';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { marshall, NativeAttributeValue, unmarshall } from '@aws-sdk/util-dynamodb';
 import { getAwsSecretValue, getEnv } from 'get-env';
 import { helper } from '../../utils';
 
-export type PutItemInput = AWS.DynamoDB.DocumentClient.PutItemInput;
-export type GetItemInput = AWS.DynamoDB.DocumentClient.GetItemInput;
-export type UpdateItemInput = AWS.DynamoDB.DocumentClient.UpdateItemInput;
-export type QueryInput = AWS.DynamoDB.DocumentClient.QueryInput;
-export type DeleteItemInput = AWS.DynamoDB.DocumentClient.DeleteItemInput;
-export type BatchGetItemInput = AWS.DynamoDB.DocumentClient.BatchGetItemInput;
-export type BatchWriteItemInput = AWS.DynamoDB.DocumentClient.BatchWriteItemInput;
-export type WriteRequest = AWS.DynamoDB.DocumentClient.WriteRequest;
-export type KeyList = AWS.DynamoDB.DocumentClient.KeyList;
-export type AttributeValues = AWS.DynamoDB.AttributeMap;
+export type QueryInput = QueryCommandInput;
+export type PutItemInput = PutCommandInput;
+export type GetItemInput = GetCommandInput;
+export type UpdateItemInput = UpdateCommandInput;
+export type DeleteItemInput = DeleteCommandInput;
+export type BatchGetItemInput = BatchGetCommandInput;
+export type BatchWriteItemInput = BatchWriteCommandInput;
+export type KeyList = Record<string, NativeAttributeValue>[];
+export type AttributeValues = Record<string, AttributeValue>;
 
-const dynamoDB: AWS.DynamoDB.DocumentClient = new AWS.DynamoDB.DocumentClient({ region: getEnv('AWS_REGION') });
+export { ReturnValue } from '@aws-sdk/client-dynamodb';
+
+const client = new DynamoDBClient({ region: getEnv('AWS_REGION') });
+const docClient = DynamoDBDocumentClient.from(client);
 
 export type PaginationResponsePayload<T extends Object = any> = {
   data: T[];
@@ -40,11 +62,12 @@ export default class DynamoProvider {
    * @param data The data to be inserted.
    */
   putItem = async (table: string, pk: string, sk: string, data: any) => {
-    const params: PutItemInput = {
+    const input: PutCommandInput = {
       TableName: table,
       Item: { pk, sk, ...data },
     };
-    return dynamoDB.put(params).promise();
+    const command = new PutCommand(input);
+    return docClient.send(command);
   };
 
   /**
@@ -54,12 +77,13 @@ export default class DynamoProvider {
    * @param sk The sort key.
    * @returns The retrieved item if found, undefined otherwise.
    */
-  getItem = async <T = any>(table: string, pk: string, sk: string): Promise<T | undefined> => {
-    const params: GetItemInput = {
+  getItem = async <T = any>(table: string, pk: string, sk: string) => {
+    const input: GetCommandInput = {
       TableName: table,
       Key: { pk, sk },
     };
-    const { Item } = await dynamoDB.get(params).promise();
+    const command = new GetCommand(input);
+    const { Item } = await docClient.send(command);
     if (!Item) {
       return undefined;
     }
@@ -70,14 +94,14 @@ export default class DynamoProvider {
    * Perform a paginated query on DynamoDB.
    *
    * @template T - The type of items in the query result.
-   * @param {QueryInput} queryParams - The query parameters for DynamoDB.
+   * @param input
    * @param {PaginationParams} paginationParams - The pagination parameters.
    * @param {Array<keyof T>} [excludeKeys] - Optional keys to exclude from the response data.
    * @returns {Promise<PaginationResponsePayload<T> | undefined>}
    * - A promise that resolves to the paginated query result or undefined if no data is found.
    */
   queryPagination = async <T extends object = any>(
-    queryParams: QueryInput,
+    input: QueryCommandInput,
     paginationParams: PaginationParams,
     excludeKeys?: (keyof T)[],
   ): Promise<PaginationResponsePayload<T> | undefined> => {
@@ -90,13 +114,14 @@ export default class DynamoProvider {
     // Determine the pagination limit
     const paginationLimit = limit || defaultPaginationLimit;
 
-    // Perform the DynamoDB query
-    const { Items, LastEvaluatedKey } = await dynamoDB.query({
-      ...queryParams,
+    const command = new QueryCommand({
+      ...input,
       ScanIndexForward: sortType === 'ASC', // Default, sort record DESC
-      Limit: paginationLimit,
+      Limit: Number(paginationLimit),
       ExclusiveStartKey: nextToken ? JSON.parse(nextToken) : undefined,
-    }).promise();
+    });
+    // Perform the DynamoDB query
+    const { Items, LastEvaluatedKey } = await client.send(command);
 
     // Process the query result
     if (Items) {
@@ -118,11 +143,12 @@ export default class DynamoProvider {
 
   /**
    * Perform a query on the DynamoDB table.
-   * @param params The query parameters.
    * @returns An array of items matching the query.
+   * @param input
    */
-  query = async <T = any>(params: QueryInput): Promise<T[]> => {
-    const { Items } = await dynamoDB.query(params).promise();
+  query = async <T = any>(input: QueryCommandInput): Promise<T[]> => {
+    const command = new QueryCommand(input);
+    const { Items } = await docClient.send(command);
     if (Items) {
       return Items as T[];
     }
@@ -144,10 +170,14 @@ export default class DynamoProvider {
     pk: string,
     sk: string,
     updateExpression: string,
-    expressionAttributeValues: { [key: string]: any },
-    expressionAttributeNames?: AWS.DynamoDB.DocumentClient.ExpressionAttributeNameMap,
+    expressionAttributeValues: {
+      [key: string]: any
+    },
+    expressionAttributeNames?: {
+      [key: string]: string
+    },
   ) => {
-    const params: AWS.DynamoDB.DocumentClient.UpdateItemInput = {
+    const input: UpdateCommandInput = {
       TableName: table,
       Key: { pk, sk },
       UpdateExpression: updateExpression,
@@ -155,21 +185,24 @@ export default class DynamoProvider {
       ExpressionAttributeNames: expressionAttributeNames,
       ReturnValues: 'ALL_NEW',
     };
-    return dynamoDB.update(params).promise();
+    const command = new UpdateCommand(input);
+    return docClient.send(command);
   };
 
   updateItemWithSetExpression = async (
     table: string,
     pk: string,
     sk: string,
-    values: { [key: string]: any },
+    values: {
+      [key: string]: any
+    },
   ) => {
     // Build expression dynamically
     const updateExpression = helper.generateUpdateExpression(values);
     const expressionNamesAndValues = helper.generateUpdateExpressionNamesAndValues(values);
 
     // Update item
-    const params: UpdateItemInput = {
+    const input: UpdateCommandInput = {
       TableName: table,
       Key: { pk, sk },
       UpdateExpression: updateExpression,
@@ -177,12 +210,14 @@ export default class DynamoProvider {
       ExpressionAttributeValues: expressionNamesAndValues.values,
       ReturnValues: 'ALL_NEW',
     };
-    return dynamoDB.update(params).promise();
+
+    const command = new UpdateCommand(input);
+    return docClient.send(command);
   };
 
   updateItemWithPrebuiltExpression = async (
-    itemInput: UpdateItemInput,
-  ) => dynamoDB.update(itemInput).promise();
+    input: UpdateCommandInput,
+  ) => docClient.send(new UpdateCommand(input));
 
   /**
    * Delete an item from the DynamoDB table.
@@ -191,29 +226,25 @@ export default class DynamoProvider {
    * @param sk The sort key.
    */
   deleteItem = async (table: string, pk: string, sk: string) => {
-    const params: DeleteItemInput = {
+    const input: DeleteCommandInput = {
       TableName: table,
       Key: { pk, sk },
     };
-    await dynamoDB.delete(params).promise();
-  };
+    const command = new DeleteCommand(input);
 
-  /**
-   * Raw update item to DynamoDB
-   * @param input Update item input
-   * @returns Item
-   */
-  rawUpdateItem = async (input: UpdateItemInput) => dynamoDB.update(input).promise();
+    await docClient.send(command);
+  };
 
   /**
    * Batch get items from DynamoDB
    * @param batchGetInput Batch get input
    * @returns BynamoDB items
    */
-  batchGetItems = async (batchGetInput: BatchGetItemInput) => {
+  batchGetItems = async (batchGetInput: BatchGetCommandInput) => {
     // TODO: See docs https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_BatchGetItem.html for limitations
-    const { Responses: tableItems = [] } = await dynamoDB.batchGet(batchGetInput).promise();
-    return tableItems as AWS.DynamoDB.DocumentClient.BatchGetResponseMap;
+    const command = new BatchGetCommand(batchGetInput);
+    const { Responses: tableItems = [] } = await docClient.send(command);
+    return tableItems as Record<string, Record<string, any>[]>;
   };
 
   /**
@@ -221,12 +252,12 @@ export default class DynamoProvider {
    * @param batchWriteInput Batch write input
    */
   batchWriteItem = async (
-    batchWriteInput: BatchWriteItemInput,
-  ) => dynamoDB.batchWrite(batchWriteInput).promise();
+    batchWriteInput: BatchWriteCommandInput,
+  ) => docClient.send(new BatchWriteCommand(batchWriteInput));
 
-  marshall = (data: any) => AWS.DynamoDB.Converter.marshall(data);
+  marshall = (data: any) => marshall(data);
 
-  unmarshall = (obj: AttributeValues) => AWS.DynamoDB.Converter.unmarshall(obj);
+  unmarshall = (obj: AttributeValues) => unmarshall(obj);
 
   /**
    * Function used to get user object from userId

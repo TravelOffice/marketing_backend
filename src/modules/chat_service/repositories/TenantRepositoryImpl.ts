@@ -1,7 +1,7 @@
 import { getAwsSecretValue } from 'get-env';
+import { dynamoProvider } from 'core';
 import { DDBMailTemplates } from '../models/dynamodb/DDBMailTemplates';
 import { MailKey } from '../models/MailTemplates';
-import { dynamoProvider } from '../providers';
 import { EMAIL_TEMPLATE_INDEX, TENANT_INDEX } from '../utils/dynamodbConstants';
 import { TenantRepository } from './interfaces/TenantRepository';
 

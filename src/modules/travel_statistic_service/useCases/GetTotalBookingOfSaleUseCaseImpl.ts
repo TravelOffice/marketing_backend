@@ -1,5 +1,5 @@
 import { saleStatisticRepository } from '../repositories';
-import { FilteringDuration } from '../models/FilteringDuration';
+import { FilteringTimeRange } from '../models/FilteringDuration';
 import { GetTotalBookingOfSaleUseCase } from './interfaces/GetTotalBookingOfSaleUseCase';
 import { TotalBookingMetricResponse } from '../models/BookingStatistic';
 
@@ -7,7 +7,7 @@ export default class GetTotalBookingOfSaleUseCaseImpl implements GetTotalBooking
   invoke = async (
     tenant: string,
     saleId: string,
-    filteringDuration?: FilteringDuration,
+    filteringDuration?: FilteringTimeRange,
   ): Promise<TotalBookingMetricResponse> => {
     const records = await saleStatisticRepository.getBookingStatistic(
       tenant,

@@ -1,5 +1,5 @@
+import { lambdaProvider } from 'core';
 import { getEnv } from 'get-env';
-import invokeFunction from './lambda';
 import { MailTemplate } from '../models/MailTemplate';
 
 /**
@@ -16,11 +16,11 @@ const sendEmail = async (fromAddress: string, mailTemplate: MailTemplate) => {
       ...mailTemplate,
     },
   };
-  await invokeFunction({
+  await lambdaProvider.invokeFunction({
     FunctionName: getEnv('SEND_NOTIFICATION_SERVICE_NAME'),
     InvocationType: 'RequestResponse',
     LogType: 'Tail',
-    Payload: JSON.stringify(sendMailData),
+    Payload: Buffer.from(JSON.stringify(sendMailData)),
   });
 };
 

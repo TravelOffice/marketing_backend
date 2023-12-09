@@ -124,7 +124,7 @@ implements MarketplaceUserRepository {
     const expressionNamesAndValues = helper.generateUpdateExpressionNamesAndValues(user);
 
     // Perform raw update using DynamoDB provider
-    const result = await dynamoProvider.rawUpdateItem({
+    const result = await dynamoProvider.updateItemWithPrebuiltExpression({
       TableName: await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE'),
       Key: {
         pk: USER_INDEX,

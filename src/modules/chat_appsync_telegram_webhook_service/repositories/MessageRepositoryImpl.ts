@@ -1,11 +1,17 @@
 import {
-  ChatPlatform, DDBConversation, DDBMessage, MessageEntity, ReceiveMessageCommandArgs,
-  TelegramBot, TelegramMessageContent,
+  ChatPlatform,
+  DDBConversation,
+  DDBMessage,
+  MessageEntity,
+  ReceiveMessageCommandArgs,
+  TelegramBot,
+  TelegramMessageContent,
 } from 'common-models';
 import { getAwsSecretValue } from 'get-env';
+import { dynamoProvider } from 'core';
 import { MessageGroupType } from '../models/Message';
 import { RestrictedTelegramConversation, TelegramConversationWithAssignee } from '../models/RestrictedTelegramModels';
-import { appSyncProvider, dynamoProvider } from '../providers';
+import { appSyncProvider } from '../providers';
 import {
   ASSIGNEE_INDEX,
   CONVERSATION_INDEX,
@@ -20,25 +26,6 @@ import logger from '../utils/logger';
 import { MessageRepository } from './interfaces/MessageRepository';
 
 export default class MessageRepositoryImpl implements MessageRepository {
-  private readonly getMessageType = (message: TelegramMessageContent): MessageGroupType => {
-    if (message.text) {
-      const messageEntities = message.entities;
-      if (messageEntities
-        && messageEntities.length > 0
-        && messageEntities.some((entity: MessageEntity) => entity.type === 'url')) {
-        return MessageGroupType.LINK;
-      }
-      return MessageGroupType.TEXT;
-    }
-    if (message.audio || message.video || message.voice || message.photo) {
-      return MessageGroupType.MEDIA;
-    }
-    if (message.document) {
-      return MessageGroupType.FILE;
-    }
-    return MessageGroupType.OTHER;
-  };
-
   /**
    * Send received message command to AppSync
    * @param tenantId Tenant ID
@@ -109,6 +96,7 @@ export default class MessageRepositoryImpl implements MessageRepository {
     logger.log(`[MessageRepository.saveChatMessage] saved message: ${JSON.stringify({
       pk, sk, lsi1, lsi2, content: message,
     }, null, 2)}`);
+    return conversationMessage;
   };
 
   /**
@@ -174,5 +162,24 @@ export default class MessageRepositoryImpl implements MessageRepository {
       ...newConversation,
       assignee: UNKNOWN_USER,
     } as TelegramConversationWithAssignee;
+  };
+
+  private readonly getMessageType = (message: TelegramMessageContent): MessageGroupType => {
+    if (message.text) {
+      const messageEntities = message.entities;
+      if (messageEntities
+        && messageEntities.length > 0
+        && messageEntities.some((entity: MessageEntity) => entity.type === 'url')) {
+        return MessageGroupType.LINK;
+      }
+      return MessageGroupType.TEXT;
+    }
+    if (message.audio || message.video || message.voice || message.photo) {
+      return MessageGroupType.MEDIA;
+    }
+    if (message.document) {
+      return MessageGroupType.FILE;
+    }
+    return MessageGroupType.OTHER;
   };
 }

@@ -15,7 +15,6 @@
   "dependencies": {
     "@vendia/serverless-express": "^4.5.2",
     "auto-assign-utilities": "link:../../libs/auto-assign-utilities",
-    "aws": "link:../../libs/aws-sdk",
     "common-models": "link:../../libs/common-models",
     "core": "link:../../libs/core",
     "compression": "^1.7.4",

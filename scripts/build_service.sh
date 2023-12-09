@@ -53,6 +53,8 @@ fi
 rm -rf ${SERVICE_DIR}/node_modules
 echo "Install production dependencies"
 yarn install --production --ignore-optional
+npx node-prune
+
 
 echo "Clean dependencies resource"
 cd ${CUR_DIR}
@@ -68,10 +70,6 @@ ln -sf ../../../modules/${SERVICENAME}/node_modules .
 echo "Link layer successfully"
 cd $CUR_DIR
 
-# Clean aws-sdk
-cd ${CUR_DIR}/src/libs/aws-sdk
-rm -rf node_modules
-yarn install --production
 
 echo "Zipping function and layer..."
 mkdir -p ${CUR_DIR}/temp

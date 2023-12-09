@@ -115,7 +115,7 @@ export default class PostRatingRepositoryImpl implements PostRatingRepository {
     rating: Partial<PostRating>,
   ): Promise<PostRating> {
     const expressionNamesAndValues = helper.generateUpdateExpressionNamesAndValues(rating);
-    const result = await dynamoProvider.rawUpdateItem({
+    const result = await dynamoProvider.updateItemWithPrebuiltExpression({
       TableName: await getAwsSecretValue('DYNAMO_MARKETPLACE_TABLE'),
       Key: {
         pk: `${ORGANIZATION_INDEX}#${organization}#${RATING_INDEX}`,

@@ -1,12 +1,7 @@
+import { dynamoProvider } from 'core';
 import { getAwsSecretValue } from 'get-env';
-import {
-  DDBRole,
-} from '../models';
-import { dynamoProvider } from '../providers';
-import {
-  DEFAULT_ROLES,
-  ROLE_INDEX, TENANT_INDEX,
-} from '../utils/constants';
+import { DDBRole } from '../models';
+import { DEFAULT_ROLES, ROLE_INDEX, TENANT_INDEX } from '../utils/constants';
 import logger from '../utils/logger';
 import { RolePermissionRepository } from './interfaces/RolePermissionRepository';
 
@@ -29,7 +24,7 @@ export default class RolePermissionRepositoryImpl implements RolePermissionRepos
     return new Promise<boolean>((resolve) => {
       const promises = roles.map(async (role: string) => {
         const pk = DEFAULT_ROLES.includes(role) ? ROLE_INDEX : `${TENANT_INDEX}#${tenantId}`;
-        const item = await dynamoProvider.get<DDBRole>(
+        const item = await dynamoProvider.getItem<DDBRole>(
           table,
           pk,
           `${ROLE_INDEX}#${role}`,

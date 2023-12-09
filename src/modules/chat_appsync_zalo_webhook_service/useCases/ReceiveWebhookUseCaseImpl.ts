@@ -47,7 +47,7 @@ export default class ReceiveWebhookUseCaseImpl implements ReceiveWebhookUseCase 
     }
 
     // Save the chat message
-    await messageRepository.saveChatMessage(
+    const savedMessage = await messageRepository.saveChatMessage(
       page.tenantId,
       chatPlatform,
       page,
@@ -96,12 +96,15 @@ export default class ReceiveWebhookUseCaseImpl implements ReceiveWebhookUseCase 
     if (assignee === UNKNOWN_USER) {
       logger.log(`Conversation ${conversation.info.id} is unassigned, continue process auto assignment`);
       // Send to SQS message to process auto assignment
-      // Send to SQS message to process auto assignment
+      const { createdAt: lastMessageSentAt = Date.now() } = savedMessage;
+      const expectedEndAtIfNotReplied = (lastMessageSentAt + 5 * 60 * 1000).toString();
       await saleAssignmentRepository.notifyNewIncomingConversation({
         tenant: page.tenantId,
         pageId: page.id,
         chatPlatform,
         conversationId: customerId,
+        lastMessageSentAt: lastMessageSentAt.toString(),
+        expectedEndAtIfNotReplied,
       });
     }
   };

@@ -13,14 +13,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "aws": "link:../../libs/aws-sdk",
     "axios": "^0.26.0",
     "common-models": "link:../../libs/common-models",
     "get-env": "link:../../libs/get-env",
     "object-assign": "^4.1.1",
     "reflect-metadata": "^0.1.13",
     "auto-assign-utilities": "link:../../libs/auto-assign-utilities",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.21",
+    "core": "link:../../libs/core"
   },
   "devDependencies": {
     "@types/compression": "^1.7.2",

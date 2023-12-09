@@ -1,6 +1,9 @@
 import { Request } from 'express';
-import { body, ValidationError, validationResult } from 'express-validator';
-import { VALIDATE_NON_EMPTY_STRING_MSG, VALIDATE_STRING_MSG } from './constants';
+import {
+  body, query, ValidationError, validationResult,
+} from 'express-validator';
+import { ChatPlatform } from 'common-models';
+import { ChatSessionStatus } from '../models/ChatSession';
 
 export default function validate(req: Request) {
   const errors = validationResult(req);
@@ -20,20 +23,18 @@ export default function validate(req: Request) {
 
 export function createSessionValidator() {
   return [
-    body('conversationId', VALIDATE_NON_EMPTY_STRING_MSG)
+    body('platform')
       .notEmpty()
-      .isString(),
+      .isIn(Object.values(ChatPlatform))
+      .withMessage(`platform must be one of ${Object.values(ChatPlatform).join(', ')}`),
   ];
 }
 
-export function updateSessionValidator() {
+export function getListOfSessionByConversationIdValidator() {
   return [
-    body('latestMessage').optional().isString().withMessage(VALIDATE_STRING_MSG),
-  ];
-}
-
-export function closeSessionValidator() {
-  return [
-    body('latestMessage').notEmpty().isString().withMessage(VALIDATE_STRING_MSG),
+    query('status')
+      .optional()
+      .isIn(Object.values(ChatSessionStatus))
+      .withMessage(`status in query must be one of ${Object.values(ChatSessionStatus).join(', ')}`),
   ];
 }

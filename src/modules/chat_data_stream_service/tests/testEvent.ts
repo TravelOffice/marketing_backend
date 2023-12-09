@@ -1,7 +1,7 @@
 /* eslint-disable */
-import { DynamoDBStreamEvent } from 'aws-lambda';
+import {_Record} from "@aws-sdk/client-dynamodb-streams";
 
-export const ddbStreamEvent: DynamoDBStreamEvent = {
+export const ddbStreamEvent: { Records: _Record[]; } = {
   Records: [
     {
       eventID: 'f98fab80db2c9bfd5c509e6738175501',
@@ -10,7 +10,7 @@ export const ddbStreamEvent: DynamoDBStreamEvent = {
       eventSource: 'aws:dynamodb',
       awsRegion: 'ap-southeast-1',
       dynamodb: {
-        ApproximateCreationDateTime: 1692348489,
+        ApproximateCreationDateTime: new Date(1692348489),
         SequenceNumber: '1',
         Keys: {
           sk: {
@@ -29,7 +29,7 @@ export const ddbStreamEvent: DynamoDBStreamEvent = {
       eventSource: 'aws:dynamodb',
       awsRegion: 'ap-southeast-1',
       dynamodb: {
-        ApproximateCreationDateTime: 1692348489,
+        ApproximateCreationDateTime: new Date(1692348489),
         SequenceNumber: '2',
         Keys: {
           sk: {
@@ -48,14 +48,14 @@ export const ddbStreamEvent: DynamoDBStreamEvent = {
       eventSource: 'aws:dynamodb',
       awsRegion: 'ap-southeast-1',
       dynamodb: {
-        ApproximateCreationDateTime: 1692348489,
+        ApproximateCreationDateTime: new Date(1692348489),
         SequenceNumber: '3',
         Keys: {
           sk: {
             S: '2497293378443431012#1',
           },
           pk: {
-            S: 'TENANT#pys#SESSION',
+            S: 'TENANT#pys#CSESSION',
           },
         },
         OldImage: {

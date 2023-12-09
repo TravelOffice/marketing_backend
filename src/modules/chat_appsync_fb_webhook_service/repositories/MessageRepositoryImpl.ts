@@ -1,13 +1,18 @@
 import {
   ChatPlatform,
-  DDBConversation, DDBMessage, FacebookConversation, FacebookMessage,
-  FacebookPage, ReceiveMessageCommandArgs,
+  DDBConversation,
+  DDBMessage,
+  FacebookConversation,
+  FacebookMessage,
+  FacebookPage,
+  ReceiveMessageCommandArgs,
   ReceiveMessageCommandResponse,
 } from 'common-models';
 import { getAwsSecretValue } from 'get-env';
+import { dynamoProvider } from 'core';
 import { MessageGroupType } from '../models/Facebook';
 import { FacebookConversationWithAssignee, RestrictedFacebookConversation } from '../models/RestrictedFacebookModels';
-import { appSyncProvider, dynamoProvider, fbMessagePlatformProvider } from '../providers';
+import { appSyncProvider, fbMessagePlatformProvider } from '../providers';
 import {
   ASSIGNEE_INDEX,
   CONVERSATION_INDEX,
@@ -23,27 +28,6 @@ import { MessageRepository } from './interfaces/MessageRepository';
 
 export default class MessageRepositoryImpl implements MessageRepository {
   /**
-   * Get facebook message type
-   * @param message The message was received from Facebook Graph API
-   * @returns MessageGroupType
-   */
-  private readonly getMessageType = (message: FacebookMessage): MessageGroupType => {
-    if ('text' in message) {
-      return MessageGroupType.TEXT;
-    }
-    if ('attachments' in message && message.attachments?.data.length) {
-      const messageType = message.attachments.data[0].mime_type;
-      if (messageType.startsWith('file')) {
-        return MessageGroupType.FILE;
-      }
-      if (messageType.startsWith('audio') || messageType.startsWith('video') || messageType.startsWith('image')) {
-        return MessageGroupType.MEDIA;
-      }
-    }
-    return MessageGroupType.OTHER;
-  };
-
-  /**
    * Send received message command to AppSync
    * @param arg The receive message command arguments
    */
@@ -52,13 +36,13 @@ export default class MessageRepositoryImpl implements MessageRepository {
   ): Promise<ReceiveMessageCommandResponse> => appSyncProvider.sendReceivedMessageCommand(arg);
 
   /**
-     * Save the chat message to DynamoDB
-     * @param tenantId Tenant ID
-     * @param platform chat platform
-     * @param page the page information
-     * @param fbConversationId the conversation id
-     * @param message the message which received from webhook
-=     */
+   * Save the chat message to DynamoDB
+   * @param tenantId Tenant ID
+   * @param platform chat platform
+   * @param page the page information
+   * @param fbConversationId the conversation id
+   * @param message the message which received from webhook
+   =     */
   saveChatMessage = async (
     tenantId: string,
     platform: ChatPlatform,
@@ -91,6 +75,7 @@ export default class MessageRepositoryImpl implements MessageRepository {
     logger.log(`[MessageRepository.saveChatMessage] saved message: ${JSON.stringify({
       pk, sk, lsi1, lsi2, content: message,
     }, null, 2)}`);
+    return conversationMessage;
   };
 
   getConversationInfo = async (
@@ -194,5 +179,26 @@ export default class MessageRepositoryImpl implements MessageRepository {
       throw new Error(`Could not found the message with the ID: ${messageId}`);
     }
     return fbMessage;
+  };
+
+  /**
+   * Get facebook message type
+   * @param message The message was received from Facebook Graph API
+   * @returns MessageGroupType
+   */
+  private readonly getMessageType = (message: FacebookMessage): MessageGroupType => {
+    if ('text' in message) {
+      return MessageGroupType.TEXT;
+    }
+    if ('attachments' in message && message.attachments?.data.length) {
+      const messageType = message.attachments.data[0].mime_type;
+      if (messageType.startsWith('file')) {
+        return MessageGroupType.FILE;
+      }
+      if (messageType.startsWith('audio') || messageType.startsWith('video') || messageType.startsWith('image')) {
+        return MessageGroupType.MEDIA;
+      }
+    }
+    return MessageGroupType.OTHER;
   };
 }

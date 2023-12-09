@@ -1,11 +1,15 @@
-import AWS from 'aws';
+import { dynamoProvider, helper } from 'core';
 import { getAwsSecretValue } from 'get-env';
 import { Role, User, UserWithPermission } from '../models';
-import { authProvider, dynamoProvider } from '../providers';
-import { QueryInput } from '../providers/DynamoProvider';
+import { authProvider } from '../providers';
 import {
   DEFAULT_ROLES,
-  EMPLOYEE_INDEX, ENABLED, ROLE_INDEX, ROLE_STRING_DELIMITER, TENANT_INDEX, USERNAME_DELIMITER,
+  EMPLOYEE_INDEX,
+  ENABLED,
+  ROLE_INDEX,
+  ROLE_STRING_DELIMITER,
+  TENANT_INDEX,
+  USERNAME_DELIMITER,
 } from '../utils/constants';
 import logger from '../utils/logger';
 import { UserRepository } from './interfaces/UserRepository';
@@ -34,26 +38,20 @@ export default class UserRepositoryImpl implements UserRepository {
   list = async (tenantId: string) => {
     logger.log(`Tenant: ${tenantId}`);
     const table = await getAwsSecretValue('DYNAMO_TRAVEL_TABLE');
-    const query: QueryInput = {
+    const query = {
       TableName: table,
       KeyConditionExpression: 'pk = :pk_filter AND begins_with(sk, :sk_filter)',
       ExpressionAttributeValues: {
-        ':pk_filter': { S: `${TENANT_INDEX}#${tenantId}` },
-        ':sk_filter': { S: `${EMPLOYEE_INDEX}#` },
+        ':pk_filter': `${TENANT_INDEX}#${tenantId}`,
+        ':sk_filter': `${EMPLOYEE_INDEX}#`,
       },
     };
-    const { Items: items } = await dynamoProvider.rawQuery(query);
-    if (!items || items.length === 0) {
+    const items = await dynamoProvider.query(query);
+    if (items.length === 0) {
       return [];
     }
 
-    const users = items.map((item) => {
-      const user = AWS.DynamoDB.Converter.unmarshall(item);
-      const {
-        pk, sk, lsi1, lsi2, lsi3, lsi4, lsi5, ...rest
-      } = user;
-      return rest as User;
-    });
+    const users = items.map((user) => helper.excludeDataFromObject(user) as User);
     logger.log(`Found ${users.length} users`);
     return users;
   };
@@ -89,9 +87,9 @@ export default class UserRepositoryImpl implements UserRepository {
   getWithPermission = async (tenantId: string, userId: string) => {
     logger.log(`Tenant: ${tenantId}, User: ${userId}`);
     const table = await getAwsSecretValue('DYNAMO_ROLE_PERMISSION_TABLE');
-    const user : User = await this.get(tenantId, userId);
+    const user: User = await this.get(tenantId, userId);
     const { roles } = user;
-    let permissions : Array<string> = [];
+    let permissions: Array<string> = [];
     await Promise.all(roles.map(async (role) => {
       const pk = DEFAULT_ROLES.includes(role) ? ROLE_INDEX : `${TENANT_INDEX}#${tenantId}`;
       const item = await dynamoProvider.getItem<Role>(
@@ -99,7 +97,9 @@ export default class UserRepositoryImpl implements UserRepository {
         pk,
         `${ROLE_INDEX}#${role}`,
       );
-      if (!item) { throw new Error(`Role [${role}] not found`); }
+      if (!item) {
+        throw new Error(`Role [${role}] not found`);
+      }
       item.permissions.forEach((permission) => {
         permissions.push(permission.name);
       });

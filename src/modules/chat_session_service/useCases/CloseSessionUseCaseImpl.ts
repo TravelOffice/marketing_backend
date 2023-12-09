@@ -1,7 +1,7 @@
 import { helper, logger } from 'core';
-import { ChatSessionStatus, Session } from '../models/Session';
+import { ChatSession, ChatSessionStatus } from '../models/ChatSession';
 import { CognitoUser } from '../models/CognitoUser';
-import { sessionRepository } from '../repositories';
+import { chatRepository, chatSessionRepository } from '../repositories';
 import { CloseSessionUseCase } from './interfaces/CloseSessionUseCase';
 
 export default class CloseSessionUseCaseImpl implements CloseSessionUseCase {
@@ -11,7 +11,6 @@ export default class CloseSessionUseCaseImpl implements CloseSessionUseCase {
    * @param currentUser - The current user invoking the use case.
    * @param conversationId - The conversation ID of the session.
    * @param sessionId - The ID of the session to close.
-   * @param latestMessage - The latest message of the session.
    * @returns A Promise that resolves to the updated session.
    * @throws Error if the session with the specified ID is not found.
    */
@@ -19,11 +18,10 @@ export default class CloseSessionUseCaseImpl implements CloseSessionUseCase {
     currentUser: CognitoUser,
     conversationId: string,
     sessionId: string,
-    latestMessage: string,
-  ): Promise<Session> {
+  ): Promise<ChatSession> {
     logger.log(`Close session ${sessionId} of conversation ${conversationId} for tenant ${currentUser.tenant}`);
 
-    const currentSession = await sessionRepository.get(
+    const currentSession = await chatSessionRepository.get(
       currentUser.tenant,
       conversationId,
       sessionId,
@@ -41,23 +39,36 @@ export default class CloseSessionUseCaseImpl implements CloseSessionUseCase {
 
     const now = Date.now();
     const duration = (now - currentSession.startTime) / 1000; // convert milliseconds to seconds
-    const dataToUpdate: Partial<Session> = {
+    const dataToUpdate: Partial<ChatSession> = {
       status: ChatSessionStatus.CLOSED,
       updatedAt: now,
       endTime: now,
       duration,
-      latestMessage,
       lsi1: now.toString(), // createdAt
       lsi2: duration.toString(), // duration
       lsi3: `${currentUser.username}#${ChatSessionStatus.CLOSED}`, // assigneeId#status
       lsi4: ChatSessionStatus.CLOSED, // status
     };
-    const updatedSession = await sessionRepository.update(
+    const updatedSession = await chatSessionRepository.update(
       currentUser.tenant,
       conversationId,
       sessionId,
       dataToUpdate,
     );
-    return helper.excludeDataFromObject(updatedSession) as Session;
+
+    // Remove conversation assignee
+    // User can't see the conversation at the web app
+    // until another assignee is assigned
+    const conversation = await chatRepository.getConversationByReverseIndex({
+      tenant: currentUser.tenant,
+      chatPlatform: updatedSession.platform,
+      conversationId,
+    });
+    if (conversation) {
+      await chatRepository.closeConversation(conversation);
+    }
+
+    // Return chat session data
+    return helper.excludeDataFromObject(updatedSession) as ChatSession;
   }
 }
